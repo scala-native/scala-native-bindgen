@@ -19,7 +19,9 @@ using namespace llvm;
 
 
 static llvm::cl::OptionCategory Category("Binding Generator");
-
+static llvm::cl::extrahelp CommonHelp(CommonOptionsParser::HelpMessage);
+static llvm::cl::extrahelp MoreHelp("\nProduce Bindings for scala native. Please specify lib name wit parameter name");
+static llvm::cl::opt<std::string> LibName("name", cl::cat(Category));
 
 class ExampleVisitor : public RecursiveASTVisitor<ExampleVisitor> {
 private:
@@ -30,7 +32,7 @@ public:
 
     virtual bool VisitFunctionDecl(FunctionDecl *func) {
         std::string funcName = func->getNameInfo().getName().getAsString();
-        std::cout << "\tvoid " << funcName << "()" << std::endl;
+        llvm::outs() << "\tvoid " << funcName << "()\n";
         return true;
     }
 
@@ -71,10 +73,16 @@ public:
 int main(int argc, const char **argv) {
     CommonOptionsParser op(argc, argv, Category);        
     ClangTool Tool(op.getCompilations(), op.getSourcePathList());
-       	
-    std::cout << "@native.extern\nobject " << "example" << " {" << std::endl;
+
+    auto lib = LibName.getValue();
+    if(lib == ""){
+    	llvm::errs() << "Error: Please specify the lib name using -name paramter\n";
+    	return -1;
+    }
+
+    llvm::outs() << "@native.extern\nobject " << lib<< " {\n";
     int result = Tool.run(newFrontendActionFactory<ExampleFrontendAction>().get());
-    std::cout << "}" << std::endl;
+    llvm::outs() << "}\n";
 
     return result;
 }
