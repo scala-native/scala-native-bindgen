@@ -76,9 +76,9 @@ public:
 
     	for (const auto *parm : func->parameters()){
     		//Handle default values
-    		params += TranslateType(parm->getType().getAsString());
-    		params += " ";
     		params += parm->getNameAsString();
+    		params += ": ";
+    		params += TranslateType(parm->getType().getAsString());
     		params += ", ";
     	}
 
@@ -87,15 +87,28 @@ public:
     		params = params.substr(0, params.size()-2);
     	}
       	
-        llvm::outs() << "\t" << retType << " " << funcName << "(" << params << ")\n";
+        llvm::outs() << "\tdef " << funcName << "(" << params << ") : " + retType + "\n";
         return true;
     }
 
-	virtual bool VisitTypedefDecl (TypedefDecl *tpdef){    	
+	virtual bool VisitTypedefDecl(TypedefDecl *tpdef){    	
 		//TODO: Understand difference between typedef and typedef-name
 		std::string name = tpdef->getName();
 		std::string tpe = TranslateType(tpdef->getUnderlyingType().getAsString());
     	llvm::outs() << "\ttype " << name << " = " << tpe << "\n";
+    	return true;
+    }
+
+    virtual bool VisitEnumDecl(EnumDecl *enumdecl){
+    	std::string enumName = enumdecl->getNameAsString();
+    	llvm::outs() << "\ttype " << enumName << " = navtive.CInt\n";
+
+    	int i = 0;
+    	for (const EnumConstantDecl* en : enumdecl->enumerators()){
+    		llvm::outs() << "\tval " << en->getNameAsString() << "__" << enumName << " = " << i++ << "\n"; 
+    	}
+
+
     	return true;
     }
 
