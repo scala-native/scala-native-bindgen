@@ -23,15 +23,16 @@ static llvm::cl::extrahelp CommonHelp(CommonOptionsParser::HelpMessage);
 static llvm::cl::extrahelp MoreHelp("\nProduce Bindings for scala native. Please specify lib name wit parameter name");
 static llvm::cl::opt<std::string> LibName("name", cl::cat(Category));
 
-class ExampleVisitor : public RecursiveASTVisitor<ExampleVisitor> {
+class TreeVisitor : public RecursiveASTVisitor<TreeVisitor> {
 private:
     ASTContext *astContext;
 
 public:
-    explicit ExampleVisitor(CompilerInstance *CI) : astContext(&(CI->getASTContext())) {}
+    explicit TreeVisitor(CompilerInstance *CI) : astContext(&(CI->getASTContext())) {}
 
     virtual bool VisitFunctionDecl(FunctionDecl *func) {
         std::string funcName = func->getNameInfo().getName().getAsString();
+        QualType retTye = func->getReturnType();
         llvm::outs() << "\tvoid " << funcName << "()\n";
         return true;
     }
@@ -40,14 +41,14 @@ public:
 
 
 
-class ExampleASTConsumer : public clang::ASTConsumer {
+class TreeConsumer : public clang::ASTConsumer {
 private:
-    ExampleVisitor *visitor;
+    TreeVisitor *visitor;
 
 public:
-    explicit ExampleASTConsumer(CompilerInstance *CI) : visitor(new ExampleVisitor(CI)) {}
+    explicit TreeConsumer(CompilerInstance *CI) : visitor(new TreeVisitor(CI)) {}
 
-    // override this to call our ExampleVisitor on each top-level Decl
+    // override this to call our TreeVisitor on each top-level Decl
     virtual bool HandleTopLevelDecl(DeclGroupRef DG) {
         // a DeclGroupRef may have multiple Decls, so we iterate through each one
         for (DeclGroupRef::iterator i = DG.begin(), e = DG.end(); i != e; i++) {
@@ -64,7 +65,7 @@ public:
 class ExampleFrontendAction : public clang::ASTFrontendAction {
 public:
     virtual std::unique_ptr<ASTConsumer> CreateASTConsumer(CompilerInstance &CI, StringRef file) {
-        return std::unique_ptr<clang::ASTConsumer>(new ExampleASTConsumer(&CI)); // pass CI pointer to ASTConsumer
+        return std::unique_ptr<clang::ASTConsumer>(new TreeConsumer(&CI)); // pass CI pointer to ASTConsumer
     }
 };
 
