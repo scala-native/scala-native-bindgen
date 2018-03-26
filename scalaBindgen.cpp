@@ -54,7 +54,7 @@ std::map<std::string, std::string> nativeTypes = {
 std::string TranslateType(std::string type){
 	auto native = nativeTypes.find(type);
 	if(native != nativeTypes.end()){
-		return nativeTypes[type];
+		return native -> second;
 	} else {
 		//TODO: Properly handle non-default types
 		return type;
@@ -72,8 +72,22 @@ public:
     virtual bool VisitFunctionDecl(FunctionDecl *func) {
         std::string funcName = func->getNameInfo().getName().getAsString();
         std::string retType = TranslateType(func->getReturnType().getAsString());
+        std::string params = "";
 
-        llvm::outs() << "\t" << retType << " " << funcName << "()\n";
+    	for (const auto *parm : func->parameters()){
+    		//Handle default values
+    		params += TranslateType(parm->getType().getAsString());
+    		params += " ";
+    		params += parm->getNameAsString();
+    		params += ", ";
+    	}
+
+    	//remove last ,
+    	if(params != ""){
+    		params = params.substr(0, params.size()-2);
+    	}
+      	
+        llvm::outs() << "\t" << retType << " " << funcName << "(" << params << ")\n";
         return true;
     }
 
