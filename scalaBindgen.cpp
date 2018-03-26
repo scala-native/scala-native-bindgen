@@ -38,6 +38,7 @@ public:
         return true;
     }
 
+/*
     virtual bool VisitStmt(Stmt *st) {
         if (ReturnStmt *ret = llvm::dyn_cast<ReturnStmt>(st)) {
             //rewriter.ReplaceText(ret->getRetValue()->getLocStart(), 6, "val");
@@ -50,7 +51,7 @@ public:
         return true;
     }
 
-/*
+
     virtual bool VisitReturnStmt(ReturnStmt *ret) {
         rewriter.ReplaceText(ret->getRetValue()->getLocStart(), 6, "val");
         errs() << "** Rewrote ReturnStmt\n";
@@ -72,17 +73,8 @@ private:
     ExampleVisitor *visitor;
 
 public:
-    // override the constructor in order to pass CI
     explicit ExampleASTConsumer(CompilerInstance *CI) : visitor(new ExampleVisitor(CI)) {}
 
-    // override this to call our ExampleVisitor on the entire source file
-    virtual void HandleTranslationUnit(ASTContext &Context) {
-        /* we can use ASTContext to get the TranslationUnitDecl, which is
-             a single Decl that collectively represents the entire source file */
-        visitor->TraverseDecl(Context.getTranslationUnitDecl());
-    }
-
-/*
     // override this to call our ExampleVisitor on each top-level Decl
     virtual bool HandleTopLevelDecl(DeclGroupRef DG) {
         // a DeclGroupRef may have multiple Decls, so we iterate through each one
@@ -92,7 +84,7 @@ public:
         }
         return true;
     }
-*/
+
 };
 
 
