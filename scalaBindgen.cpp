@@ -23,6 +23,45 @@ static llvm::cl::extrahelp CommonHelp(CommonOptionsParser::HelpMessage);
 static llvm::cl::extrahelp MoreHelp("\nProduce Bindings for scala native. Please specify lib name wit parameter name");
 static llvm::cl::opt<std::string> LibName("name", cl::cat(Category));
 
+std::map<std::string, std::string> nativeTypes = {
+	{"void", "Unit"},
+	{"bool", "native.CBool"},
+	{"char", "native.CChar"},
+	{"signed char", "native.CSignedChar"},
+	{"unsigned char", "native.CUnsignedChar[1]"},
+	{"short", "native.CShort"},
+	{"unsigned short", "native.CUnsignedShort[1]"},
+	{"int", "native.CInt"},
+	{"long int", "native.CLongInt"},
+	{"unsigned int", "native.CUnsignedInt[1]"},
+	{"unsigned long int", "native.CUnsignedLongInt[1]"},
+	{"long", "native.CLong"},
+	{"unsigned long", "native.CUnsignedLong[1]"},
+	{"long long", "native.CLongLong"},
+	{"unsigned long long", "native.CUnsignedLongLong[1]"},
+	{"size_t", "native.CSize"},
+	{"ptrdiff_t", "native.CPtrDiff[2]"},
+	{"wchar_t", "native.CWideChar"},
+	{"char16_t", "native.CChar16"},
+	{"char32_t", "native.CChar32"},
+	{"float", "native.CFloat"},
+	{"double", "native.CDouble"},
+	{"void*", "native.Ptr[Byte][2]"},
+	{"int*", "native.Ptr[native.CInt][2]"},
+	{"char*", "native.CString[2][3]"}
+};
+
+std::string TranslateType(std::string type){
+	auto native = nativeTypes.find(type);
+	if(native != nativeTypes.end()){
+		return nativeTypes[type];
+	} else {
+		//TODO: Properly handle non-default types
+		return type;
+	}
+}
+
+
 class TreeVisitor : public RecursiveASTVisitor<TreeVisitor> {
 private:
     ASTContext *astContext;
@@ -32,8 +71,9 @@ public:
 
     virtual bool VisitFunctionDecl(FunctionDecl *func) {
         std::string funcName = func->getNameInfo().getName().getAsString();
-        QualType retTye = func->getReturnType();
-        llvm::outs() << "\tvoid " << funcName << "()\n";
+        std::string retType = TranslateType(func->getReturnType().getAsString());
+
+        llvm::outs() << "\t" << retType << " " << funcName << "()\n";
         return true;
     }
 
