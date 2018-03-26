@@ -91,6 +91,14 @@ public:
         return true;
     }
 
+	virtual bool VisitTypedefDecl (TypedefDecl *tpdef){    	
+		//TODO: Understand difference between typedef and typedef-name
+		std::string name = tpdef->getName();
+		std::string tpe = tpdef->getUnderlyingType().getAsString();
+    	llvm::outs() << "\ttype " << name << " = " << tpe << "\n";
+    	return true;
+    }
+
 };
 
 
