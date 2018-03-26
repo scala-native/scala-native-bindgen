@@ -10,6 +10,7 @@
 #include "clang/Tooling/Tooling.h"
 #include "llvm/Support/CommandLine.h"
 
+#include <iostream>
 
 using namespace clang;
 using namespace clang::driver;
@@ -17,7 +18,6 @@ using namespace clang::tooling;
 using namespace llvm;
 
 
-int numFunctions = 0;
 static llvm::cl::OptionCategory Category("Binding Generator");
 
 
@@ -29,41 +29,11 @@ public:
     explicit ExampleVisitor(CompilerInstance *CI) : astContext(&(CI->getASTContext())) {}
 
     virtual bool VisitFunctionDecl(FunctionDecl *func) {
-        numFunctions++;
         std::string funcName = func->getNameInfo().getName().getAsString();
-        if (funcName == "do_math") {
-            //rewriter.ReplaceText(func->getLocation(), funcName.length(), "add5");
-            errs() << "** Rewrote function def: " << funcName << "\n";
-        }    
+        std::cout << "\tvoid " << funcName << "()" << std::endl;
         return true;
     }
 
-/*
-    virtual bool VisitStmt(Stmt *st) {
-        if (ReturnStmt *ret = llvm::dyn_cast<ReturnStmt>(st)) {
-            //rewriter.ReplaceText(ret->getRetValue()->getLocStart(), 6, "val");
-            errs() << "** Rewrote ReturnStmt\n";
-        }        
-        if (CallExpr *call = llvm::dyn_cast<CallExpr>(st)) {
-            //rewriter.ReplaceText(call->getLocStart(), 7, "add5");
-            errs() << "** Rewrote function call\n";
-        }
-        return true;
-    }
-
-
-    virtual bool VisitReturnStmt(ReturnStmt *ret) {
-        rewriter.ReplaceText(ret->getRetValue()->getLocStart(), 6, "val");
-        errs() << "** Rewrote ReturnStmt\n";
-        return true;
-    }
-
-    virtual bool VisitCallExpr(CallExpr *call) {
-        rewriter.ReplaceText(call->getLocStart(), 7, "add5");
-        errs() << "** Rewrote function call\n";
-        return true;
-    }
-*/
 };
 
 
@@ -100,12 +70,11 @@ public:
 
 int main(int argc, const char **argv) {
     CommonOptionsParser op(argc, argv, Category);        
-
     ClangTool Tool(op.getCompilations(), op.getSourcePathList());
-
+       	
+    std::cout << "@native.extern\nobject " << "example" << " {" << std::endl;
     int result = Tool.run(newFrontendActionFactory<ExampleFrontendAction>().get());
-
-    errs() << "\nFound " << numFunctions << " functions.\n\n";
+    std::cout << "}" << std::endl;
 
     return result;
 }
