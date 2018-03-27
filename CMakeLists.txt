@@ -1,8 +1,9 @@
 set(LLVM_LINK_COMPONENTS support)
 
 add_clang_executable(scalaBindgen
-  scalaBindgen.cpp
-  # tests.cpp
+  ScalaBindgen.cpp
+  TypeTranslator.h
+  TypeTranslator.cpp
   )
 
 target_link_libraries(scalaBindgen

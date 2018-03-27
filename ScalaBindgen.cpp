@@ -1,3 +1,5 @@
+#include "TypeTranslator.h"
+
 #include "clang/Driver/Options.h"
 #include "clang/AST/AST.h"
 #include "clang/AST/ASTContext.h"
@@ -23,62 +25,25 @@ static llvm::cl::extrahelp CommonHelp(CommonOptionsParser::HelpMessage);
 static llvm::cl::extrahelp MoreHelp("\nProduce Bindings for scala native. Please specify lib name wit parameter name");
 static llvm::cl::opt<std::string> LibName("name", cl::cat(Category));
 
-std::map<std::string, std::string> typesTranslation = {
-	{"void", "Unit"},
-	{"bool", "native.CBool"},
-	{"char", "native.CChar"},
-	{"signed char", "native.CSignedChar"},
-	{"unsigned char", "native.CUnsignedChar"},
-	{"short", "native.CShort"},
-	{"unsigned short", "native.CUnsignedShort"},
-	{"int", "native.CInt"},
-	{"long int", "native.CLongInt"},
-	{"unsigned int", "native.CUnsignedInt"},
-	{"unsigned long int", "native.CUnsignedLongInt"},
-	{"long", "native.CLong"},
-	{"unsigned long", "native.CUnsignedLong"},
-	{"long long", "native.CLongLong"},
-	{"unsigned long long", "native.CUnsignedLongLong"},
-	{"size_t", "native.CSize"},
-	{"ptrdiff_t", "native.CPtrDiff"},
-	{"wchar_t", "native.CWideChar"},
-	{"char16_t", "native.CChar16"},
-	{"char32_t", "native.CChar32"},
-	{"float", "native.CFloat"},
-	{"double", "native.CDouble"},
-	{"void*", "native.Ptr[Byte]"},
-	{"int*", "native.Ptr[native.CInt]"},
-	{"char*", "native.CString"}
-};
-
-std::string TranslateType(std::string type){
-	auto found = typesTranslation.find(type);
-	if(found != typesTranslation.end()){
-		return found->second;
-	} else {
-		//TODO: Properly handle non-default types
-		return type;
-	}
-}
-
 
 class TreeVisitor : public RecursiveASTVisitor<TreeVisitor> {
 private:
-    ASTContext *astContext;
+    ASTContext* astContext;
+    TypeTranslator typeTranslator;
 
 public:
-    explicit TreeVisitor(CompilerInstance *CI) : astContext(&(CI->getASTContext())) {}
+    explicit TreeVisitor(CompilerInstance *CI) : astContext(&(CI->getASTContext())), typeTranslator(astContext) {}
 
     virtual bool VisitFunctionDecl(FunctionDecl *func) {
         std::string funcName = func->getNameInfo().getName().getAsString();
-        std::string retType = TranslateType(func->getReturnType().getAsString());
+        std::string retType = typeTranslator.Translate(func->getReturnType());
         std::string params = "";
 
     	for (const auto *parm : func->parameters()){
     		//Handle default values
     		params += parm->getNameAsString();
     		params += ": ";
-    		params += TranslateType(parm->getType().getAsString());
+    		params += typeTranslator.Translate(parm->getType());
     		params += ", ";
     	}
 
@@ -94,7 +59,7 @@ public:
 	virtual bool VisitTypedefDecl(TypedefDecl *tpdef){    	
 		//TODO: Understand difference between typedef and typedef-name
 		std::string name = tpdef->getName();
-		std::string tpe = TranslateType(tpdef->getUnderlyingType().getAsString());
+		std::string tpe = typeTranslator.Translate(tpdef->getUnderlyingType());
     	llvm::outs() << "\ttype " << name << " = " << tpe << "\n";
     	return true;
     }
@@ -103,7 +68,7 @@ public:
     	std::string enumName = enumdecl->getNameAsString();
 
 		//Replace "enum x" with enum_x in scala
-		typesTranslation["enum " + enumName] = "enum_" + enumName;
+		typeTranslator.AddTranslation("enum " + enumName, "enum_" + enumName);
 
     	llvm::outs() << "\ttype enum_" << enumName << " = navtive.CInt\n";
 
@@ -121,8 +86,8 @@ public:
     		std::string unionName = record->getNameAsString();
 
     		//Replace "union x" with union_x in scala
-    		typesTranslation["union " + unionName] = "union"+unionName;
-
+    		typeTranslator.AddTranslation("union " + unionName, "union" + unionName);
+    	
     		uint64_t maxSize = 0;
 
     		for(const FieldDecl* field : record->fields()){
@@ -136,13 +101,13 @@ public:
     		std::string structName = record->getNameAsString();
 
     		//Replace "struct x" with struct_x in scala
-    		typesTranslation["struct " + structName] = "struct_"+structName;
+    		typeTranslator.AddTranslation("struct " + structName, "struct_"+structName);
 
     		int counter = 0;
     		std::string fields = "";
 
     		for(const FieldDecl* field : record->fields()){
-    			fields += TranslateType(field->getType().getAsString()) + ";";
+    			fields += typeTranslator.Translate(field->getType()) + ",";
     			counter++;
     		}
 
