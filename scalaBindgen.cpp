@@ -23,7 +23,7 @@ static llvm::cl::extrahelp CommonHelp(CommonOptionsParser::HelpMessage);
 static llvm::cl::extrahelp MoreHelp("\nProduce Bindings for scala native. Please specify lib name wit parameter name");
 static llvm::cl::opt<std::string> LibName("name", cl::cat(Category));
 
-std::map<std::string, std::string> nativeTypes = {
+std::map<std::string, std::string> typesTranslation = {
 	{"void", "Unit"},
 	{"bool", "native.CBool"},
 	{"char", "native.CChar"},
@@ -52,9 +52,9 @@ std::map<std::string, std::string> nativeTypes = {
 };
 
 std::string TranslateType(std::string type){
-	auto native = nativeTypes.find(type);
-	if(native != nativeTypes.end()){
-		return native -> second;
+	auto found = typesTranslation.find(type);
+	if(found != typesTranslation.end()){
+		return found->second;
 	} else {
 		//TODO: Properly handle non-default types
 		return type;
@@ -101,13 +101,16 @@ public:
 
     virtual bool VisitEnumDecl(EnumDecl *enumdecl){
     	std::string enumName = enumdecl->getNameAsString();
-    	llvm::outs() << "\ttype " << enumName << " = navtive.CInt\n";
+
+		//Replace "enum x" with enum_x in scala
+		typesTranslation["enum " + enumName] = "enum_" + enumName;
+
+    	llvm::outs() << "\ttype enum_" << enumName << " = navtive.CInt\n";
 
     	int i = 0;
     	for (const EnumConstantDecl* en : enumdecl->enumerators()){
-    		llvm::outs() << "\tval " << en->getNameAsString() << "__" << enumName << " = " << i++ << "\n"; 
+    		llvm::outs() << "\tval enum_" << enumName << "_" << en->getNameAsString() << " = " << i++ << "\n"; 
     	}
-
 
     	return true;
     }
@@ -119,8 +122,9 @@ public:
       		return true;
     	} else if (record->isStruct()){
     		std::string structName = record->getNameAsString();
-    		
-    		llvm::outs() << "\ttype " << structName << " = " << "native.CStruct";
+
+    		//Replace "struct x" with struct_x in scala
+    		typesTranslation["struct " + structName] = "struct_"+structName;
 
     		int counter = 0;
     		std::string fields = "";
@@ -134,8 +138,9 @@ public:
 	    	if(fields != ""){
 	    		fields = fields.substr(0, fields.size()-1);
 	    	}
-	      	
-    		llvm::outs() << counter << "[" << fields << "]\n";
+
+
+    		llvm::outs() << "\ttype struct_" << structName << " = " << "native.CStruct" << counter << "[" << fields << "]\n";
 
 	    	return true;
     	}
