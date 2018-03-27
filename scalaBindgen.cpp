@@ -118,6 +118,18 @@ public:
     virtual bool VisitRecordDecl (RecordDecl *record){
     	if(record->isUnion()){
 
+    		std::string unionName = record->getNameAsString();
+
+    		//Replace "union x" with union_x in scala
+    		typesTranslation["union " + unionName] = "union"+unionName;
+
+    		uint64_t maxSize = 0;
+
+    		for(const FieldDecl* field : record->fields()){
+    			maxSize = std::max(maxSize, astContext->getTypeSize(field->getType()));
+    		}
+
+    		llvm::outs() << "\ttype union_" << unionName << " = native.CArray[native.Byte, " << maxSize << "]\n"; 
 
       		return true;
     	} else if (record->isStruct()){
