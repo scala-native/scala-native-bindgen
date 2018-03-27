@@ -112,6 +112,36 @@ public:
     	return true;
     }
 
+    virtual bool VisitRecordDecl (RecordDecl *record){
+    	if(record->isUnion()){
+
+
+      		return true;
+    	} else if (record->isStruct()){
+    		std::string structName = record->getNameAsString();
+    		
+    		llvm::outs() << "\ttype " << structName << " = " << "native.CStruct";
+
+    		int counter = 0;
+    		std::string fields = "";
+
+    		for(const FieldDecl* field : record->fields()){
+    			fields += TranslateType(field->getType().getAsString()) + ";";
+    			counter++;
+    		}
+
+	    	//remove last ,
+	    	if(fields != ""){
+	    		fields = fields.substr(0, fields.size()-1);
+	    	}
+	      	
+    		llvm::outs() << counter << "[" << fields << "]\n";
+
+	    	return true;
+    	}
+    	return false;
+    }
+
 };
 
 
