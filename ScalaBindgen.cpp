@@ -26,15 +26,15 @@ static llvm::cl::extrahelp MoreHelp("\nProduce Bindings for scala native. Please
 static llvm::cl::opt<std::string> LibName("name", cl::cat(Category));
 
 
-class TreeVisitor : public RecursiveASTVisitor<TreeVisitor> {
+class TreeVisitor : public clang::RecursiveASTVisitor<TreeVisitor> {
 private:
-    ASTContext* astContext;
+    clang::ASTContext* astContext;
     TypeTranslator typeTranslator;
 
 public:
-    explicit TreeVisitor(CompilerInstance *CI) : astContext(&(CI->getASTContext())), typeTranslator(astContext) {}
+    explicit TreeVisitor(clang::CompilerInstance *CI) : astContext(&(CI->getASTContext())), typeTranslator(astContext) {}
 
-    virtual bool VisitFunctionDecl(FunctionDecl *func) {
+    virtual bool VisitFunctionDecl(clang::FunctionDecl *func) {
         std::string funcName = func->getNameInfo().getName().getAsString();
         std::string retType = typeTranslator.Translate(func->getReturnType());
         std::string params = "";
@@ -52,11 +52,11 @@ public:
     		params = params.substr(0, params.size()-2);
     	}
       	
-        llvm::outs() << "\tdef " << funcName << "(" << params << ") : " + retType + "\n";
+        llvm::outs() << "\tdef " << funcName << "(" << params << ") :" + retType + "\n";
         return true;
     }
 
-	virtual bool VisitTypedefDecl(TypedefDecl *tpdef){    	
+    virtual bool VisitTypedefDecl(clang::TypedefDecl *tpdef){
 		//TODO: Understand difference between typedef and typedef-name
 		std::string name = tpdef->getName();
         std::string tpe = typeTranslator.Translate(tpdef->getUnderlyingType());
@@ -64,7 +64,7 @@ public:
     	return true;
     }
 
-    virtual bool VisitEnumDecl(EnumDecl *enumdecl){
+    virtual bool VisitEnumDecl(clang::EnumDecl *enumdecl){
     	std::string enumName = enumdecl->getNameAsString();
 
 		//Replace "enum x" with enum_x in scala
@@ -80,7 +80,7 @@ public:
     	return true;
     }
 
-    virtual bool VisitRecordDecl (RecordDecl *record){
+    virtual bool VisitRecordDecl(clang::RecordDecl *record){
         std::string name = record->getNameAsString();
 
         if(record->isUnion() && !record->isAnonymousStructOrUnion() /*&& name != ""*/){

@@ -26,9 +26,7 @@ TypeTranslator::TypeTranslator(clang::ASTContext* ctx_) : ctx(ctx_), typeMap() {
 	typeMap["float"] = "native.CFloat";
 	typeMap["double"] = "native.CDouble";
 	typeMap["void*"] = "native.Ptr[Byte]";
-	typeMap["int*"] = "native.Ptr[native.CInt]";
-	typeMap["char*"] = "native.CString";
-
+    typeMap["void *"] = "native.Ptr[Byte]";
 }
 
 std::string TypeTranslator::Translate(const clang::QualType& qtpe){
