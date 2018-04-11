@@ -31,14 +31,41 @@ TypeTranslator::TypeTranslator(clang::ASTContext* ctx_) : ctx(ctx_), typeMap() {
 
 }
 
-std::string TypeTranslator::Translate(const clang::QualType& tpe){
-	auto found = typeMap.find(tpe.getAsString());
-	if(found != typeMap.end()){
-		return found->second;
-	} else {
-		//TODO: Properly handle non-default types
-		return tpe.getAsString();
-	} 
+std::string TypeTranslator::Translate(const clang::QualType& qtpe){
+
+    //Warning / Sanity checks
+    clang::Qualifiers quals = qtpe.getQualifiers();
+
+    if(quals.hasConst() || (ctx && qtpe.isConstant(*ctx))){
+        llvm::errs() << "Warning: Const qualifier not supported\n";
+    }
+    if(quals.hasVolatile()){
+        llvm::errs() << "Warning: Volatile qualifier not supported\n";
+    }
+    if(quals.hasRestrict()){
+        llvm::errs() << "Warning: Restrict qualifier not supported\n";
+    }
+
+    const clang::Type* tpe = qtpe.getTypePtr();
+
+    if(tpe->isPointerType()){
+        //Is it a pointer
+
+        const clang::PointerType* ptr = tpe->getAs<clang::PointerType>();
+        return std::string("native.Ptr[") + Translate(ptr->getPointeeType()) + std::string("]");
+    } else {
+
+        auto found = typeMap.find(qtpe.getAsString());
+        if(found != typeMap.end()){
+            return found->second;
+        } else {
+            //TODO: Properly handle non-default types
+            return qtpe.getAsString();
+        }
+    }
+
+
+
 }
 
 void TypeTranslator::AddTranslation(std::string from, std::string to){

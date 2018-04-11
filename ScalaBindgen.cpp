@@ -39,9 +39,9 @@ public:
         std::string retType = typeTranslator.Translate(func->getReturnType());
         std::string params = "";
 
-    	for (const auto *parm : func->parameters()){
+        for (const clang::ParmVarDecl* parm : func->parameters()){
     		//Handle default values
-    		params += parm->getNameAsString();
+            params += parm->getNameAsString();
     		params += ": ";
     		params += typeTranslator.Translate(parm->getType());
     		params += ", ";
