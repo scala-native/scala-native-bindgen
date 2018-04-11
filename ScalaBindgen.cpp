@@ -59,7 +59,7 @@ public:
 	virtual bool VisitTypedefDecl(TypedefDecl *tpdef){    	
 		//TODO: Understand difference between typedef and typedef-name
 		std::string name = tpdef->getName();
-		std::string tpe = typeTranslator.Translate(tpdef->getUnderlyingType());
+        std::string tpe = typeTranslator.Translate(tpdef->getUnderlyingType());
     	llvm::outs() << "\ttype " << name << " = " << tpe << "\n";
     	return true;
     }
@@ -74,19 +74,19 @@ public:
 
     	int i = 0;
     	for (const EnumConstantDecl* en : enumdecl->enumerators()){
-    		llvm::outs() << "\tval enum_" << enumName << "_" << en->getNameAsString() << " = " << i++ << "\n"; 
+            llvm::outs() << "\tval enum_" << enumName << "_" << en->getNameAsString() << " = " << i++ << "\n";
     	}
 
     	return true;
     }
 
     virtual bool VisitRecordDecl (RecordDecl *record){
-    	if(record->isUnion()){
+        std::string name = record->getNameAsString();
 
-    		std::string unionName = record->getNameAsString();
+        if(record->isUnion() && !record->isAnonymousStructOrUnion() /*&& name != ""*/){
 
     		//Replace "union x" with union_x in scala
-    		typeTranslator.AddTranslation("union " + unionName, "union" + unionName);
+    		typeTranslator.AddTranslation("union " + name, "union" + name);
     	
     		uint64_t maxSize = 0;
 
@@ -94,14 +94,13 @@ public:
     			maxSize = std::max(maxSize, astContext->getTypeSize(field->getType()));
     		}
 
-    		llvm::outs() << "\ttype union_" << unionName << " = native.CArray[native.Byte, " << maxSize << "]\n"; 
+    		llvm::outs() << "\ttype union_" << name << " = native.CArray[native.Byte, " << maxSize << "]\n"; 
 
       		return true;
-    	} else if (record->isStruct()){
-    		std::string structName = record->getNameAsString();
+        } else if (record->isStruct() && !record->isAnonymousStructOrUnion() && name != ""){
 
     		//Replace "struct x" with struct_x in scala
-    		typeTranslator.AddTranslation("struct " + structName, "struct_"+structName);
+    		typeTranslator.AddTranslation("struct " + name, "struct_"+name);
 
     		int counter = 0;
     		std::string fields = "";
@@ -117,7 +116,7 @@ public:
 	    	}
 
 
-    		llvm::outs() << "\ttype struct_" << structName << " = " << "native.CStruct" << counter << "[" << fields << "]\n";
+    		llvm::outs() << "\ttype struct_" << name << " = " << "native.CStruct" << counter << "[" << fields << "]\n";
 
 	    	return true;
     	}
