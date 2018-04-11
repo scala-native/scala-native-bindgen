@@ -1,6 +1,7 @@
 #include "TypeTranslator.h"
 
 #include "clang/Driver/Options.h"
+#include "clang/Basic/LangOptions.h"
 #include "clang/AST/AST.h"
 #include "clang/AST/ASTContext.h"
 #include "clang/AST/ASTConsumer.h"
@@ -60,6 +61,8 @@ public:
 		//TODO: Understand difference between typedef and typedef-name
 		std::string name = tpdef->getName();
         std::string tpe = typeTranslator.Translate(tpdef->getUnderlyingType());
+        //clang::QualType type = tpdef->getUnderlyingType();
+        //llvm::errs() << type.isAtLeastAsQualifiedAs( << "\n";
     	llvm::outs() << "\ttype " << name << " = " << tpe << "\n";
     	return true;
     }
@@ -83,7 +86,14 @@ public:
     virtual bool VisitRecordDecl(clang::RecordDecl *record){
         std::string name = record->getNameAsString();
 
-        if(record->isUnion() && !record->isAnonymousStructOrUnion() /*&& name != ""*/){
+        //Handle typedef struct {} x; by getting the name from the type
+        if((record->isStruct() || record->isUnion()) && name == ""){
+            const clang::RecordType* rec = record->getTypeForDecl()->getAsStructureType();
+            clang::Qualifiers q{};
+            name =  QualType::getAsString(rec, q,clang::LangOptions());
+        }
+
+        if(record->isUnion() && !record->isAnonymousStructOrUnion() && name != ""){
 
     		//Replace "union x" with union_x in scala
     		typeTranslator.AddTranslation("union " + name, "union" + name);
