@@ -34,15 +34,14 @@ TypeTranslator::TypeTranslator(clang::ASTContext* ctx_) : ctx(ctx_), typeMap() {
 std::string TypeTranslator::Translate(const clang::QualType& qtpe){
 
     //Warning / Sanity checks
-    clang::Qualifiers quals = qtpe.getQualifiers();
 
-    if(quals.hasConst() || (ctx && qtpe.isConstant(*ctx))){
+    if(qtpe.isConstQualified() || (ctx && qtpe.isConstant(*ctx))){
         llvm::errs() << "Warning: Const qualifier not supported\n";
     }
-    if(quals.hasVolatile()){
+    if(qtpe.isVolatileQualified()){
         llvm::errs() << "Warning: Volatile qualifier not supported\n";
     }
-    if(quals.hasRestrict()){
+    if(qtpe.isRestrictQualified()){
         llvm::errs() << "Warning: Restrict qualifier not supported\n";
     }
 
@@ -50,12 +49,11 @@ std::string TypeTranslator::Translate(const clang::QualType& qtpe){
 
     if(tpe->isPointerType()){
         //Is it a pointer
-
         const clang::PointerType* ptr = tpe->getAs<clang::PointerType>();
         return std::string("native.Ptr[") + Translate(ptr->getPointeeType()) + std::string("]");
     } else {
 
-        auto found = typeMap.find(tpe->getLocallyUnqualifiedSingleStepDesugaredType().getAsString());
+        auto found = typeMap.find(qtpe.getUnqualifiedType().getAsString());
         if(found != typeMap.end()){
             return found->second;
         } else {
