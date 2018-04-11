@@ -55,7 +55,7 @@ std::string TypeTranslator::Translate(const clang::QualType& qtpe){
         return std::string("native.Ptr[") + Translate(ptr->getPointeeType()) + std::string("]");
     } else {
 
-        auto found = typeMap.find(qtpe.getAsString());
+        auto found = typeMap.find(tpe->getLocallyUnqualifiedSingleStepDesugaredType().getAsString());
         if(found != typeMap.end()){
             return found->second;
         } else {
