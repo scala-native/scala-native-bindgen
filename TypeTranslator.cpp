@@ -49,6 +49,13 @@ std::string TypeTranslator::Translate(const clang::QualType& qtpe){
         //Is it a pointer
         const clang::PointerType* ptr = tpe->getAs<clang::PointerType>();
         return std::string("native.Ptr[") + Translate(ptr->getPointeeType()) + std::string("]");
+    } else if(qtpe->isStructureType()){
+        std::string name = qtpe.getAsString();
+        size_t f = name.find(" ");
+        if(f != std::string::npos){
+            return name.replace(f, std::string(" ").length(), "_");
+        }
+        return name;
     } else {
 
         auto found = typeMap.find(qtpe.getUnqualifiedType().getAsString());
