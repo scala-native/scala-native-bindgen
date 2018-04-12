@@ -53,7 +53,7 @@ public:
     		params = params.substr(0, params.size()-2);
     	}
       	
-        llvm::outs() << "\tdef " << funcName << "(" << params << ") :" + retType + "\n";
+        llvm::outs() << "\tdef " << funcName << "(" << params << "): " + retType + " = native.extern\n";
         return true;
     }
 
