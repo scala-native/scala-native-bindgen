@@ -73,7 +73,7 @@ public:
 		//Replace "enum x" with enum_x in scala
 		typeTranslator.AddTranslation("enum " + enumName, "enum_" + enumName);
 
-    	llvm::outs() << "\ttype enum_" << enumName << " = navtive.CInt\n";
+        llvm::outs() << "\ttype enum_" << enumName << " = native.CInt\n";
 
     	int i = 0;
     	for (const EnumConstantDecl* en : enumdecl->enumerators()){
