@@ -68,16 +68,23 @@ public:
     }
 
     virtual bool VisitEnumDecl(clang::EnumDecl *enumdecl){
-    	std::string enumName = enumdecl->getNameAsString();
+        std::string name = enumdecl->getNameAsString();
+
+        //Handle typedef enum {} x; by getting the name from the type
+        if(name == ""){
+            const clang::EnumType* rec = enumdecl->getTypeForDecl()->getAs<clang::EnumType>();
+            clang::Qualifiers q{};
+            name =  QualType::getAsString(rec, q,clang::LangOptions());
+        }
 
 		//Replace "enum x" with enum_x in scala
-		typeTranslator.AddTranslation("enum " + enumName, "enum_" + enumName);
+        typeTranslator.AddTranslation("enum " + name, "enum_" + name);
 
-        llvm::outs() << "\ttype enum_" << enumName << " = native.CInt\n";
+        llvm::outs() << "\ttype enum_" << name << " = native.CInt\n";
 
     	int i = 0;
     	for (const EnumConstantDecl* en : enumdecl->enumerators()){
-            llvm::outs() << "\tval enum_" << enumName << "_" << en->getNameAsString() << " = " << i++ << "\n";
+            llvm::outs() << "\tval enum_" << name << "_" << en->getNameAsString() << " = " << i++ << "\n";
     	}
 
     	return true;
@@ -87,8 +94,15 @@ public:
         std::string name = record->getNameAsString();
 
         //Handle typedef struct {} x; by getting the name from the type
-        if((record->isStruct() || record->isUnion()) && name == ""){
+        if((record->isStruct()) && name == ""){
             const clang::RecordType* rec = record->getTypeForDecl()->getAsStructureType();
+            clang::Qualifiers q{};
+            name =  QualType::getAsString(rec, q,clang::LangOptions());
+        }
+
+        //Handle typedef enum {} x; by getting the name from the type
+        if((record->isEnum()) && name == ""){
+            const clang::EnumType* rec = record->getTypeForDecl()->getAs<clang::EnumType>();
             clang::Qualifiers q{};
             name =  QualType::getAsString(rec, q,clang::LangOptions());
         }
