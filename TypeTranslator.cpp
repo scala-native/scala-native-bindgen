@@ -1,4 +1,5 @@
 #include "TypeTranslator.h"
+#include <error.h>
 
 TypeTranslator::TypeTranslator(clang::ASTContext* ctx_) : ctx(ctx_), typeMap() {
 
@@ -45,8 +46,36 @@ std::string TypeTranslator::Translate(const clang::QualType& qtpe){
 
     const clang::Type* tpe = qtpe.getTypePtr();
 
-    if(tpe->isPointerType()){
-        //Is it a pointer
+    if(tpe->isFunctionPointerType()){
+        const clang::PointerType* ptr = tpe->getAs<clang::PointerType>();
+        const clang::QualType& inner = ptr->getPointeeType();
+
+        if(inner->isFunctionProtoType()) {
+            const clang::FunctionProtoType* fc = inner->getAs<clang::FunctionProtoType>();
+            std::string ret = Translate(fc->getReturnType());
+            std::string params = "";
+            int counter = 0;
+
+            for(const clang::QualType& param: fc->param_types()){
+                params += Translate(param);
+                params += ",";
+                counter++;
+            }
+
+            if(params != ""){
+                //remove last ,
+                params = params.substr(0, params.size()-1);
+
+                return std::string("native.CFunctionPtr") + std::to_string(counter) + "[" + ret + "," + params + "]";
+            } else{
+                return std::string("native.CFunctionPtr") + std::to_string(counter) + "[" + ret + "]";
+            }
+        } else {
+            llvm::errs() << "Unsupported function pointer type: " << qtpe.getAsString() << "\n";
+            exit(-1);
+        }
+
+    } else if(tpe->isPointerType()){
         const clang::PointerType* ptr = tpe->getAs<clang::PointerType>();
         return std::string("native.Ptr[") + Translate(ptr->getPointeeType()) + std::string("]");
     } else if(qtpe->isStructureType()){
@@ -66,8 +95,6 @@ std::string TypeTranslator::Translate(const clang::QualType& qtpe){
             return qtpe.getAsString();
         }
     }
-
-
 
 }
 
