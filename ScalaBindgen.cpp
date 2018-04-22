@@ -15,16 +15,11 @@
 
 #include <iostream>
 
-using namespace clang;
-using namespace clang::driver;
-using namespace clang::tooling;
-using namespace llvm;
-
 
 static llvm::cl::OptionCategory Category("Binding Generator");
-static llvm::cl::extrahelp CommonHelp(CommonOptionsParser::HelpMessage);
+static llvm::cl::extrahelp CommonHelp(clang::tooling::CommonOptionsParser::HelpMessage);
 static llvm::cl::extrahelp MoreHelp("\nProduce Bindings for scala native. Please specify lib name wit parameter name");
-static llvm::cl::opt<std::string> LibName("name", cl::cat(Category));
+static llvm::cl::opt<std::string> LibName("name", llvm::cl::cat(Category));
 
 
 class TreeVisitor : public clang::RecursiveASTVisitor<TreeVisitor> {
@@ -42,7 +37,11 @@ public:
 
         for (const clang::ParmVarDecl* parm : func->parameters()){
     		//Handle default values
-            params += parm->getNameAsString();
+            std::string pname = parm->getNameAsString();
+            if(pname == ""){
+                pname = "anonymous";
+            }
+            params += pname;
     		params += ": ";
     		params += typeTranslator.Translate(parm->getType());
     		params += ", ";
@@ -74,7 +73,7 @@ public:
         if(name == ""){
             const clang::EnumType* rec = enumdecl->getTypeForDecl()->getAs<clang::EnumType>();
             clang::Qualifiers q{};
-            name =  QualType::getAsString(rec, q,clang::LangOptions());
+            name = clang::QualType::getAsString(rec, q,clang::LangOptions());
         }
 
 		//Replace "enum x" with enum_x in scala
@@ -83,7 +82,7 @@ public:
         llvm::outs() << "\ttype enum_" << name << " = native.CInt\n";
 
     	int i = 0;
-    	for (const EnumConstantDecl* en : enumdecl->enumerators()){
+        for (const clang::EnumConstantDecl* en : enumdecl->enumerators()){
             llvm::outs() << "\tval enum_" << name << "_" << en->getNameAsString() << " = " << i++ << "\n";
     	}
 
@@ -97,14 +96,14 @@ public:
         if((record->isStruct()) && name == ""){
             const clang::RecordType* rec = record->getTypeForDecl()->getAsStructureType();
             clang::Qualifiers q{};
-            name =  QualType::getAsString(rec, q,clang::LangOptions());
+            name = clang::QualType::getAsString(rec, q,clang::LangOptions());
         }
 
         //Handle typedef enum {} x; by getting the name from the type
         if((record->isEnum()) && name == ""){
             const clang::EnumType* rec = record->getTypeForDecl()->getAs<clang::EnumType>();
             clang::Qualifiers q{};
-            name =  QualType::getAsString(rec, q,clang::LangOptions());
+            name = clang::QualType::getAsString(rec, q,clang::LangOptions());
         }
 
         if(record->isUnion() && !record->isAnonymousStructOrUnion() && name != ""){
@@ -114,7 +113,7 @@ public:
     	
     		uint64_t maxSize = 0;
 
-    		for(const FieldDecl* field : record->fields()){
+            for(const clang::FieldDecl* field : record->fields()){
     			maxSize = std::max(maxSize, astContext->getTypeSize(field->getType()));
     		}
 
@@ -129,7 +128,7 @@ public:
     		int counter = 0;
     		std::string fields = "";
 
-    		for(const FieldDecl* field : record->fields()){
+            for(const clang::FieldDecl* field : record->fields()){
     			fields += typeTranslator.Translate(field->getType()) + ",";
     			counter++;
     		}
@@ -156,13 +155,13 @@ private:
     TreeVisitor *visitor;
 
 public:
-    explicit TreeConsumer(CompilerInstance *CI) : visitor(new TreeVisitor(CI)) {}
+    explicit TreeConsumer(clang::CompilerInstance *CI) : visitor(new TreeVisitor(CI)) {}
 
     // override this to call our TreeVisitor on each top-level Decl
-    virtual bool HandleTopLevelDecl(DeclGroupRef DG) {
+    virtual bool HandleTopLevelDecl(clang::DeclGroupRef DG) {
         // a DeclGroupRef may have multiple Decls, so we iterate through each one
-        for (DeclGroupRef::iterator i = DG.begin(), e = DG.end(); i != e; i++) {
-            Decl *D = *i;    
+        for (clang::DeclGroupRef::iterator i = DG.begin(), e = DG.end(); i != e; i++) {
+            clang::Decl *D = *i;
             visitor->TraverseDecl(D); // recursively visit each AST node in Decl "D"
         }
         return true;
@@ -174,7 +173,7 @@ public:
 
 class ExampleFrontendAction : public clang::ASTFrontendAction {
 public:
-    virtual std::unique_ptr<ASTConsumer> CreateASTConsumer(CompilerInstance &CI, StringRef file) {
+    virtual std::unique_ptr<clang::ASTConsumer> CreateASTConsumer(clang::CompilerInstance &CI, clang::StringRef file) {
         return std::unique_ptr<clang::ASTConsumer>(new TreeConsumer(&CI)); // pass CI pointer to ASTConsumer
     }
 };
@@ -182,8 +181,8 @@ public:
 
 
 int main(int argc, const char **argv) {
-    CommonOptionsParser op(argc, argv, Category);        
-    ClangTool Tool(op.getCompilations(), op.getSourcePathList());
+    clang::tooling::CommonOptionsParser op(argc, argv, Category);
+    clang::tooling::ClangTool Tool(op.getCompilations(), op.getSourcePathList());
 
     auto lib = LibName.getValue();
     if(lib == ""){
@@ -192,7 +191,7 @@ int main(int argc, const char **argv) {
     }
 
     llvm::outs() << "@native.extern\nobject " << lib<< " {\n";
-    int result = Tool.run(newFrontendActionFactory<ExampleFrontendAction>().get());
+    int result = Tool.run(clang::tooling::newFrontendActionFactory<ExampleFrontendAction>().get());
     llvm::outs() << "}\n";
 
     return result;
