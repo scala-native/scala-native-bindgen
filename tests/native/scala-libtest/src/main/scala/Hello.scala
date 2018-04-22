@@ -1,7 +1,7 @@
 import scala.scalanative._
 
-@native.extern
 @native.link("scbintest")
+@native.extern
 object scbintest {
   type struct_Point = native.CStruct2[native.CInt,native.CInt]
   type Point = struct_Point
