@@ -77,7 +77,18 @@ std::string TypeTranslator::Translate(const clang::QualType& qtpe){
 
     } else if(tpe->isPointerType()){
         const clang::PointerType* ptr = tpe->getAs<clang::PointerType>();
-        return std::string("native.Ptr[") + Translate(ptr->getPointeeType()) + std::string("]");
+        const clang::QualType& pte = ptr->getPointeeType();
+
+        //Take care of void*
+        if(pte->isBuiltinType()){
+            const clang::BuiltinType* as = pte->getAs<clang::BuiltinType>();
+            if(as->getKind() == clang::BuiltinType::Void){
+               return "native.Ptr[Byte]";
+            }
+         }
+
+        return std::string("native.Ptr[") + Translate(pte) + std::string("]");
+
     } else if(qtpe->isStructureType()){
         std::string name = qtpe.getAsString();
         size_t f = name.find(" ");
