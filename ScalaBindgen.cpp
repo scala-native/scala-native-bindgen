@@ -205,7 +205,6 @@ public:
             clang::Decl *D = *i;
             std::string fpath = smanager.getFilename(D->getLocation()).str();
             if(std::find(stdheaders.begin(), stdheaders.end(), basename(fpath)) == stdheaders.end()){
-                //llvm::errs() << "DEBUG:" << basename(fpath) << "\n";
                 visitor->TraverseDecl(D); // recursively visit each AST node in Decl "D"
             }
         }
@@ -230,7 +229,6 @@ public:
         return std::unique_ptr<clang::ASTConsumer>(new TreeConsumer(&CI)); // pass CI pointer to ASTConsumer
     }
 };
-
 
 
 int main(int argc, const char **argv) {

@@ -89,7 +89,7 @@ std::string TypeTranslator::Translate(const clang::QualType& qtpe){
         return std::string("native.Ptr[") + Translate(pte) + std::string("]");
 
     } else if(qtpe->isStructureType()){
-        std::string name = qtpe.getAsString();
+        std::string name = qtpe.getUnqualifiedType().getAsString();
         size_t f = name.find(" ");
         if(f != std::string::npos){
             return name.replace(f, std::string(" ").length(), "_");
@@ -102,7 +102,7 @@ std::string TypeTranslator::Translate(const clang::QualType& qtpe){
             return found->second;
         } else {
             //TODO: Properly handle non-default types
-            return qtpe.getAsString();
+            return qtpe.getUnqualifiedType().getAsString();
         }
     }
 
