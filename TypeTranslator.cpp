@@ -95,6 +95,12 @@ std::string TypeTranslator::Translate(const clang::QualType& qtpe){
             return name.replace(f, std::string(" ").length(), "_");
         }
         return name;
+
+    } else if(qtpe->isConstantArrayType()){
+        const clang::ConstantArrayType* ar = ctx->getAsConstantArrayType(qtpe);;
+        const llvm::APInt& size =  ar->getSize();
+        return "native.CArray[" + Translate(ar->getElementType()) + ", _" + std::to_string((int)size.roundToDouble()) + "]";
+
     } else {
 
         auto found = typeMap.find(qtpe.getUnqualifiedType().getAsString());
