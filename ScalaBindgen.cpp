@@ -241,6 +241,9 @@ int main(int argc, const char **argv) {
     	return -1;
     }
 
+    llvm::outs() << "import scala.scalanative._\n";
+    llvm::outs() << "import scala.scalanative.native.Nat._\n\n";
+    llvm::outs() << "@native.link(" << lib << ")\n";
     llvm::outs() << "@native.extern\nobject " << lib<< " {\n";
     int result = Tool.run(clang::tooling::newFrontendActionFactory<ExampleFrontendAction>().get());
     llvm::outs() << "}\n";
