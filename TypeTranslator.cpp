@@ -1,4 +1,6 @@
 #include "TypeTranslator.h"
+#include "Utils.h"
+
 #include <error.h>
 
 TypeTranslator::TypeTranslator(clang::ASTContext* ctx_) : ctx(ctx_), typeMap() {
@@ -99,7 +101,7 @@ std::string TypeTranslator::Translate(const clang::QualType& qtpe){
     } else if(qtpe->isConstantArrayType()){
         const clang::ConstantArrayType* ar = ctx->getAsConstantArrayType(qtpe);;
         const llvm::APInt& size =  ar->getSize();
-        return "native.CArray[" + Translate(ar->getElementType()) + ", _" + std::to_string((int)size.roundToDouble()) + "]";
+        return "native.CArray[" + Translate(ar->getElementType()) + ", " + intToScalaNat((int)size.roundToDouble()) + "]";
 
     } else {
 

@@ -1,4 +1,5 @@
 #include "TypeTranslator.h"
+#include "Utils.h"
 
 #include "clang/Driver/Options.h"
 #include "clang/Basic/LangOptions.h"
@@ -116,7 +117,7 @@ public:
     			maxSize = std::max(maxSize, astContext->getTypeSize(field->getType()));
     		}
 
-    		llvm::outs() << "\ttype union_" << name << " = native.CArray[native.Byte, " << maxSize << "]\n"; 
+            llvm::outs() << "\ttype union_" << name << " = native.CArray[Byte, " << intToScalaNat(maxSize) << "]\n";
 
       		return true;
         } else if (record->isStruct() && record->isThisDeclarationADefinition() && !record->isAnonymousStructOrUnion() && name != ""){
