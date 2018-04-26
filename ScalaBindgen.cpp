@@ -92,6 +92,7 @@ public:
     virtual bool VisitRecordDecl(clang::RecordDecl *record){
         std::string name = record->getNameAsString();
 
+
         //Handle typedef struct {} x; by getting the name from the type
         if((record->isStruct()) && name == ""){
             const clang::RecordType* rec = record->getTypeForDecl()->getAsStructureType();
@@ -99,12 +100,13 @@ public:
             name = clang::QualType::getAsString(rec, q,clang::LangOptions());
         }
 
-        //Handle typedef enum {} x; by getting the name from the type
-        if((record->isEnum()) && name == ""){
-            const clang::EnumType* rec = record->getTypeForDecl()->getAs<clang::EnumType>();
+        //Handle typedef union {} x; by getting the name from the type
+        if((record->isUnion()) && name == ""){
+            const clang::RecordType* rec = record->getTypeForDecl()->getAsUnionType();
             clang::Qualifiers q{};
             name = clang::QualType::getAsString(rec, q,clang::LangOptions());
         }
+
 
         if(record->isUnion() && !record->isAnonymousStructOrUnion() && name != ""){
 
@@ -244,7 +246,7 @@ int main(int argc, const char **argv) {
 
     llvm::outs() << "import scala.scalanative._\n";
     llvm::outs() << "import scala.scalanative.native.Nat._\n\n";
-    llvm::outs() << "@native.link(" << lib << ")\n";
+    llvm::outs() << "@native.link(\"" << lib << "\")\n";
     llvm::outs() << "@native.extern\nobject " << lib<< " {\n";
     int result = Tool.run(clang::tooling::newFrontendActionFactory<ExampleFrontendAction>().get());
     llvm::outs() << "}\n";
