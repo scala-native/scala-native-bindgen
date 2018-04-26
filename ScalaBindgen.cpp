@@ -92,12 +92,17 @@ public:
     virtual bool VisitRecordDecl(clang::RecordDecl *record){
         std::string name = record->getNameAsString();
 
-
         //Handle typedef struct {} x; by getting the name from the type
         if((record->isStruct()) && name == ""){
             const clang::RecordType* rec = record->getTypeForDecl()->getAsStructureType();
             clang::Qualifiers q{};
             name = clang::QualType::getAsString(rec, q,clang::LangOptions());
+
+            //TODO find a better way
+            size_t f = name.find("anonymous at");
+            if(f != std::string::npos){
+                return true;
+            }
         }
 
         //Handle typedef union {} x; by getting the name from the type
@@ -105,6 +110,12 @@ public:
             const clang::RecordType* rec = record->getTypeForDecl()->getAsUnionType();
             clang::Qualifiers q{};
             name = clang::QualType::getAsString(rec, q,clang::LangOptions());
+
+            //TODO find a better way
+            size_t f = name.find("anonymous at");
+            if(f != std::string::npos){
+                return true;
+            }
         }
 
 
@@ -216,7 +227,7 @@ public:
 
     // this replaces "HandleTopLevelDecl"
     // override this to call our ExampleVisitor on the entire source file
-    /*virtual void HandleTranslationUnit(ASTContext &Context) {
+    /*virtual void HandleTranslationUnit(clang::ASTContext &Context) {
         //we can use ASTContext to get the TranslationUnitDecl, which is
         //a single Decl that collectively represents the entire source file
         visitor->TraverseDecl(Context.getTranslationUnitDecl());
