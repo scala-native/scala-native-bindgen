@@ -90,7 +90,7 @@ std::string TypeTranslator::Translate(const clang::QualType& qtpe){
 
         return std::string("native.Ptr[") + Translate(pte) + std::string("]");
 
-    } else if(qtpe->isStructureType()){
+    } else if(qtpe->isStructureType() || qtpe->isUnionType()){
         std::string name = qtpe.getUnqualifiedType().getAsString();
         size_t f = name.find(" ");
         if(f != std::string::npos){
