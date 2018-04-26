@@ -70,20 +70,26 @@ public:
         std::string name = enumdecl->getNameAsString();
 
         //Handle typedef enum {} x; by getting the name from the type
-        if(name == ""){
+        /*if(name == ""){
             const clang::EnumType* rec = enumdecl->getTypeForDecl()->getAs<clang::EnumType>();
             clang::Qualifiers q{};
             name = clang::QualType::getAsString(rec, q,clang::LangOptions());
-        }
+        }*/
 
 		//Replace "enum x" with enum_x in scala
         typeTranslator.AddTranslation("enum " + name, "enum_" + name);
 
-        llvm::outs() << "\ttype enum_" << name << " = native.CInt\n";
+        if(name != ""){
+            llvm::outs() << "\ttype enum_" << name << " = native.CInt\n";
+        }
 
     	int i = 0;
         for (const clang::EnumConstantDecl* en : enumdecl->enumerators()){
-            llvm::outs() << "\tval enum_" << name << "_" << en->getNameAsString() << " = " << i++ << "\n";
+            if(name != ""){
+                llvm::outs() << "\tval enum_" << name << "_" << en->getNameAsString() << " = " << i++ << "\n";
+            } else {
+                llvm::outs() << "\tval enum_" << en->getNameAsString() << " = " << i++ << "\n";
+            }
     	}
 
     	return true;
@@ -218,9 +224,9 @@ public:
         for (clang::DeclGroupRef::iterator i = DG.begin(), e = DG.end(); i != e; i++) {
             clang::Decl *D = *i;
             std::string fpath = smanager.getFilename(D->getLocation()).str();
-            if(std::find(stdheaders.begin(), stdheaders.end(), basename(fpath)) == stdheaders.end()){
+            //if(std::find(stdheaders.begin(), stdheaders.end(), basename(fpath)) == stdheaders.end()){
                 visitor->TraverseDecl(D); // recursively visit each AST node in Decl "D"
-            }
+            //}
         }
         return true;
     }

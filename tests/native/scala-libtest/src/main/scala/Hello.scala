@@ -1,4 +1,5 @@
 import scala.scalanative._
+import scala.scalanative.native.Nat._
 
 @native.link("scbintest")
 @native.extern
@@ -11,6 +12,7 @@ object scbintest {
   def sumd(a: native.CDouble, b: native.CDouble): native.CDouble = native.extern
   def doublePoint(p: native.Ptr[Point]): Unit = native.extern
 }
+
 
 
 object Hello extends App {
