@@ -1,4 +1,5 @@
 #include "TypeTranslator.h"
+#include "HeaderManager.h"
 #include "Utils.h"
 
 #include "clang/Driver/Options.h"
@@ -20,6 +21,8 @@ static llvm::cl::OptionCategory Category("Binding Generator");
 static llvm::cl::extrahelp CommonHelp(clang::tooling::CommonOptionsParser::HelpMessage);
 static llvm::cl::extrahelp MoreHelp("\nProduce Bindings for scala native. Please specify lib name wit parameter name\n");
 static llvm::cl::opt<std::string> LibName("name", llvm::cl::cat(Category));
+
+HeaderManager headerMan;
 
 
 class TreeVisitor : public clang::RecursiveASTVisitor<TreeVisitor> {
@@ -224,9 +227,9 @@ public:
         for (clang::DeclGroupRef::iterator i = DG.begin(), e = DG.end(); i != e; i++) {
             clang::Decl *D = *i;
             std::string fpath = smanager.getFilename(D->getLocation()).str();
-            //if(std::find(stdheaders.begin(), stdheaders.end(), basename(fpath)) == stdheaders.end()){
+            if(std::find(stdheaders.begin(), stdheaders.end(), basename(fpath)) == stdheaders.end()){
                 visitor->TraverseDecl(D); // recursively visit each AST node in Decl "D"
-            //}
+            }
         }
         return true;
     }
@@ -260,6 +263,8 @@ int main(int argc, const char **argv) {
     	llvm::errs() << "Error: Please specify the lib name using -name paramter\n";
     	return -1;
     }
+
+    headerMan.LoadConfig(std::string("../llvm/tools/clang/tools/extra/scala-bindgen/nativeHeaders.txt"));
 
     llvm::outs() << "import scala.scalanative._\n";
     llvm::outs() << "import scala.scalanative.native.Nat._\n\n";

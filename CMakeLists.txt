@@ -4,6 +4,8 @@ add_clang_executable(scalaBindgen
   ScalaBindgen.cpp
   TypeTranslator.h
   TypeTranslator.cpp
+  HeaderManager.h
+  HeaderManager.cpp
   Utils.h
   )
 
