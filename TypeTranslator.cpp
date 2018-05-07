@@ -91,11 +91,17 @@ std::string TypeTranslator::Translate(const clang::QualType& qtpe){
         return std::string("native.Ptr[") + Translate(pte) + std::string("]");
 
     } else if(qtpe->isStructureType() || qtpe->isUnionType()){
+        if(qtpe->hasUnnamedOrLocalType()){
+            //TODO: Verify that the local part is not a problem
+            uint64_t size = ctx->getTypeSize(qtpe);
+            return "native.CArray[Byte, " + uint64ToScalaNat(size) + "]";
+        }
+
         std::string name = qtpe.getUnqualifiedType().getAsString();
         size_t f = name.find(" ");
         if(f != std::string::npos){
             return name.replace(f, std::string(" ").length(), "_");
-        }
+        }       
         return name;
 
     } else if(qtpe->isConstantArrayType()){

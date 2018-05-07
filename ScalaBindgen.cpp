@@ -94,6 +94,7 @@ public:
         //Handle typedef struct {} x; by getting the name from the type
         if((record->isStruct()) && name == ""){
             const clang::RecordType* rec = record->getTypeForDecl()->getAsStructureType();
+
             clang::Qualifiers q{};
             name = clang::QualType::getAsString(rec, q,clang::LangOptions());
 
@@ -126,7 +127,7 @@ public:
     		uint64_t maxSize = 0;
 
             for(const clang::FieldDecl* field : record->fields()){
-    			maxSize = std::max(maxSize, astContext->getTypeSize(field->getType()));
+                maxSize = std::max(maxSize, astContext->getTypeSize(field->getType()));
     		}
 
             llvm::outs() << "\ttype union_" << name << " = native.CArray[Byte, " << intToScalaNat(maxSize) << "]\n";
