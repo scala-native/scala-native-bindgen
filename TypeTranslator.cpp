@@ -31,6 +31,87 @@ TypeTranslator::TypeTranslator(clang::ASTContext* ctx_) : ctx(ctx_), typeMap() {
 	typeMap["void*"] = "native.Ptr[Byte]";
 }
 
+
+std::string TypeTranslator::TranslateFunctionPointer(const clang::QualType& qtpe){
+    const clang::PointerType* ptr = qtpe.getTypePtr()->getAs<clang::PointerType>();
+    const clang::QualType& inner = ptr->getPointeeType();
+
+    if(inner->isFunctionProtoType()) {
+        const clang::FunctionProtoType* fc = inner->getAs<clang::FunctionProtoType>();
+        std::string ret = Translate(fc->getReturnType());
+        std::string params = "";
+        int counter = 0;
+
+        for(const clang::QualType& param: fc->param_types()){
+            params += Translate(param);
+            params += ",";
+            counter++;
+        }
+
+        if(params != ""){
+            //remove last ,
+            params = params.substr(0, params.size()-1);
+
+            return std::string("native.CFunctionPtr") + std::to_string(counter) + "[" + ret + "," + params + "]";
+        } else{
+            return std::string("native.CFunctionPtr") + std::to_string(counter) + "[" + ret + "]";
+        }
+    } else {
+        llvm::errs() << "Unsupported function pointer type: " << qtpe.getAsString() << "\n";
+        exit(-1);
+    }
+}
+
+std::string TypeTranslator::TranslatePointer(const clang::PointerType* ptr){
+    const clang::QualType& pte = ptr->getPointeeType();
+
+    //Take care of void*
+    if(pte->isBuiltinType()){
+        const clang::BuiltinType* as = pte->getAs<clang::BuiltinType>();
+        if(as->getKind() == clang::BuiltinType::Void){
+           return "native.Ptr[Byte]";
+        }
+     }
+
+    return std::string("native.Ptr[") + Translate(pte) + std::string("]");
+}
+
+std::string TypeTranslator::TranslateStructOrUnion(const clang::QualType& qtpe){
+    if(qtpe->hasUnnamedOrLocalType()){
+        //TODO: Verify that the local part is not a problem
+        uint64_t size = ctx->getTypeSize(qtpe);
+        return "native.CArray[Byte, " + uint64ToScalaNat(size) + "]";
+    }
+
+    std::string name = qtpe.getUnqualifiedType().getAsString();
+
+    //TODO: do it properly
+    size_t f = name.find(std::string("struct __dirstream"));
+    if(f != std::string::npos){
+        return std::string("native.CArray[Byte, Digit[_3, Digit[_2, _0]]]");
+    }
+
+    f = name.find(" ");
+    if(f != std::string::npos){
+        return name.replace(f, std::string(" ").length(), "_");
+    }
+    return name;
+}
+
+std::string TypeTranslator::TranslateEnum(const clang::QualType& qtpe){
+    std::string name = qtpe.getUnqualifiedType().getAsString();
+    size_t f = name.find(" ");
+    if(f != std::string::npos){
+        return name.replace(f, std::string(" ").length(), "_");
+    }
+    return name;
+}
+
+std::string TypeTranslator::TranslateConstantArray(const clang::ConstantArrayType* ar){
+    const llvm::APInt& size =  ar->getSize();
+    return "native.CArray[" + Translate(ar->getElementType()) + ", " + intToScalaNat((int)size.roundToDouble()) + "]";
+}
+
 std::string TypeTranslator::Translate(const clang::QualType& qtpe){
 
     //Warning / Sanity checks
@@ -48,81 +129,19 @@ std::string TypeTranslator::Translate(const clang::QualType& qtpe){
     const clang::Type* tpe = qtpe.getTypePtr();
 
     if(tpe->isFunctionPointerType()){
-        const clang::PointerType* ptr = tpe->getAs<clang::PointerType>();
-        const clang::QualType& inner = ptr->getPointeeType();
-
-        if(inner->isFunctionProtoType()) {
-            const clang::FunctionProtoType* fc = inner->getAs<clang::FunctionProtoType>();
-            std::string ret = Translate(fc->getReturnType());
-            std::string params = "";
-            int counter = 0;
-
-            for(const clang::QualType& param: fc->param_types()){
-                params += Translate(param);
-                params += ",";
-                counter++;
-            }
-
-            if(params != ""){
-                //remove last ,
-                params = params.substr(0, params.size()-1);
-
-                return std::string("native.CFunctionPtr") + std::to_string(counter) + "[" + ret + "," + params + "]";
-            } else{
-                return std::string("native.CFunctionPtr") + std::to_string(counter) + "[" + ret + "]";
-            }
-        } else {
-            llvm::errs() << "Unsupported function pointer type: " << qtpe.getAsString() << "\n";
-            exit(-1);
-        }
+        return TranslateFunctionPointer(qtpe);
 
     } else if(tpe->isPointerType()){
-        const clang::PointerType* ptr = tpe->getAs<clang::PointerType>();
-        const clang::QualType& pte = ptr->getPointeeType();
-
-        //Take care of void*
-        if(pte->isBuiltinType()){
-            const clang::BuiltinType* as = pte->getAs<clang::BuiltinType>();
-            if(as->getKind() == clang::BuiltinType::Void){
-               return "native.Ptr[Byte]";
-            }
-         }
-
-        return std::string("native.Ptr[") + Translate(pte) + std::string("]");
+        return TranslatePointer(tpe->getAs<clang::PointerType>());
 
     } else if(qtpe->isStructureType() || qtpe->isUnionType()){
-        if(qtpe->hasUnnamedOrLocalType()){
-            //TODO: Verify that the local part is not a problem
-            uint64_t size = ctx->getTypeSize(qtpe);
-            return "native.CArray[Byte, " + uint64ToScalaNat(size) + "]";
-        }
-
-        std::string name = qtpe.getUnqualifiedType().getAsString();
-
-        //TODO: do it properly
-        size_t f = name.find(std::string("struct __dirstream"));
-        if(f != std::string::npos){
-            return std::string("native.CArray[Byte, Digit[_3, Digit[_2, _0]]]");
-        }
-
-        f = name.find(" ");
-        if(f != std::string::npos){
-            return name.replace(f, std::string(" ").length(), "_");
-        }       
-        return name;
+        return TranslateStructOrUnion(qtpe);
 
     } else if(qtpe->isEnumeralType()){
-        std::string name = qtpe.getUnqualifiedType().getAsString();
-        size_t f = name.find(" ");
-        if(f != std::string::npos){
-            return name.replace(f, std::string(" ").length(), "_");
-        }
-        return name;
+        return TranslateEnum(qtpe);
 
     } else if(qtpe->isConstantArrayType()){
-        const clang::ConstantArrayType* ar = ctx->getAsConstantArrayType(qtpe);;
-        const llvm::APInt& size =  ar->getSize();
-        return "native.CArray[" + Translate(ar->getElementType()) + ", " + intToScalaNat((int)size.roundToDouble()) + "]";
+        return TranslateConstantArray(ctx->getAsConstantArrayType(qtpe));
 
     } else {
 

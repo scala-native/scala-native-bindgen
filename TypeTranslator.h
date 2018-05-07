@@ -11,6 +11,12 @@ private:
 
 public:
 	explicit TypeTranslator(clang::ASTContext* ctx);
-	std::string Translate(const clang::QualType& tpe);
 	void AddTranslation(std::string from, std::string to);
+
+    std::string Translate(const clang::QualType& tpe);
+    std::string TranslateFunctionPointer(const clang::QualType& qtpe);
+    std::string TranslatePointer(const clang::PointerType* ptr);
+    std::string TranslateStructOrUnion(const clang::QualType& qtpe);
+    std::string TranslateEnum(const clang::QualType& qtpe);
+    std::string TranslateConstantArray(const clang::ConstantArrayType* ar);
 };
