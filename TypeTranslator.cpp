@@ -104,6 +104,14 @@ std::string TypeTranslator::Translate(const clang::QualType& qtpe){
         }       
         return name;
 
+    } else if(qtpe->isEnumeralType()){
+        std::string name = qtpe.getUnqualifiedType().getAsString();
+        size_t f = name.find(" ");
+        if(f != std::string::npos){
+            return name.replace(f, std::string(" ").length(), "_");
+        }
+        return name;
+
     } else if(qtpe->isConstantArrayType()){
         const clang::ConstantArrayType* ar = ctx->getAsConstantArrayType(qtpe);;
         const llvm::APInt& size =  ar->getSize();

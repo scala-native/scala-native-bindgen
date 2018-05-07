@@ -17,6 +17,8 @@
 
 #include <iostream>
 
+#define SCALA_NATIVE_MAX_STRUCT_FIELDS 22
+
 static llvm::cl::OptionCategory Category("Binding Generator");
 static llvm::cl::extrahelp CommonHelp(clang::tooling::CommonOptionsParser::HelpMessage);
 static llvm::cl::extrahelp MoreHelp("\nProduce Bindings for scala native. Please specify lib name wit parameter name\n");
@@ -72,8 +74,15 @@ public:
 		//Replace "enum x" with enum_x in scala
         typeTranslator.AddTranslation("enum " + name, "enum_" + name);
 
+        //Handle typedef enum {} x; by getting the name from the type
+         if(name == ""){
+          const clang::EnumType* rec = enumdecl->getTypeForDecl()->getAs<clang::EnumType>();
+          clang::Qualifiers q{};
+          name = clang::QualType::getAsString(rec, q,clang::LangOptions());
+        }
+
         if(name != ""){
-            llvm::outs() << "\ttype enum_" << name << " = native.CInt\n";
+         llvm::outs() << "\ttype enum_" << name << " = native.CInt\n";
         }
 
     	int i = 0;
@@ -151,8 +160,14 @@ public:
 	    		fields = fields.substr(0, fields.size()-1);
 	    	}
 
-
-    		llvm::outs() << "\ttype struct_" << name << " = " << "native.CStruct" << counter << "[" << fields << "]\n";
+            if(counter < SCALA_NATIVE_MAX_STRUCT_FIELDS){
+                llvm::outs() << "\ttype struct_" << name << " = " << "native.CStruct" << counter << "[" << fields << "]\n";
+            } else {
+                //There is no easy way to represent it as a struct in scala native, have to represent it as an array and then
+                //Add helpers to help with it's manipulation
+                uint64_t size = astContext->getTypeSize(record->getTypeForDecl());
+                llvm::outs() <<  "\ttype struct_" << name << " = " << "native.CArray[Byte, " << uint64ToScalaNat(size) << "]\n";
+            }
 
 	    	return true;
     	}
