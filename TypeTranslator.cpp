@@ -98,7 +98,14 @@ std::string TypeTranslator::Translate(const clang::QualType& qtpe){
         }
 
         std::string name = qtpe.getUnqualifiedType().getAsString();
-        size_t f = name.find(" ");
+
+        //TODO: do it properly
+        size_t f = name.find(std::string("struct __dirstream"));
+        if(f != std::string::npos){
+            return std::string("native.CArray[Byte, Digit[_3, Digit[_2, _0]]]");
+        }
+
+        f = name.find(" ");
         if(f != std::string::npos){
             return name.replace(f, std::string(" ").length(), "_");
         }       
