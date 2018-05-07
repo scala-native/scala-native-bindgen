@@ -44,7 +44,7 @@ object in {
   val enum_MSG_FASTOPEN = 17
   val enum_MSG_CMSG_CLOEXEC = 18
   type struct_msghdr = native.CStruct7[native.Ptr[Byte],socklen_t,native.Ptr[struct_iovec],native.CSize,native.Ptr[Byte],native.CSize,native.CInt]
-  type struct_cmsghdr = native.CStruct4[native.CSize,native.CInt,native.CInt,unsigned char []]
+  type struct_cmsghdr = native.CStruct4[native.CSize,native.CInt,native.CInt, native.Ptr[native.CChar]]
   def __cmsg_nxthdr(__mhdr: native.Ptr[struct_msghdr], __cmsg: native.Ptr[struct_cmsghdr]): native.Ptr[struct_cmsghdr] = native.extern
   val enum_SCM_RIGHTS = 0
   type struct_linger = native.CStruct2[native.CInt,native.CInt]
@@ -136,7 +136,7 @@ object in {
   val enum_IPPORT_ROUTESERVER = 23
   val enum_IPPORT_RESERVED = 24
   val enum_IPPORT_USERRESERVED = 25
-  type struct_in6_addr = native.CStruct1[union_(anonymous union at /usr/include/netinet/in.h:213:5)]
+  type struct_in6_addr = native.CStruct1[native.CArray[Byte, Digit[_1, Digit[_2, _8]]]]
   type struct_sockaddr_in = native.CStruct4[sa_family_t,in_port_t,struct_in_addr,native.CArray[native.CUnsignedChar, _8]]
   type struct_sockaddr_in6 = native.CStruct5[sa_family_t,in_port_t,uint32_t,struct_in6_addr,uint32_t]
   type struct_ip_mreq = native.CStruct2[struct_in_addr,struct_in_addr]
