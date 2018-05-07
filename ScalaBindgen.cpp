@@ -60,24 +60,14 @@ public:
     }
 
     virtual bool VisitTypedefDecl(clang::TypedefDecl *tpdef){
-		//TODO: Understand difference between typedef and typedef-name
 		std::string name = tpdef->getName();
         std::string tpe = typeTranslator.Translate(tpdef->getUnderlyingType());
-        //clang::QualType type = tpdef->getUnderlyingType();
-        //llvm::errs() << type.isAtLeastAsQualifiedAs( << "\n";
     	llvm::outs() << "\ttype " << name << " = " << tpe << "\n";
     	return true;
     }
 
     virtual bool VisitEnumDecl(clang::EnumDecl *enumdecl){
         std::string name = enumdecl->getNameAsString();
-
-        //Handle typedef enum {} x; by getting the name from the type
-        /*if(name == ""){
-            const clang::EnumType* rec = enumdecl->getTypeForDecl()->getAs<clang::EnumType>();
-            clang::Qualifiers q{};
-            name = clang::QualType::getAsString(rec, q,clang::LangOptions());
-        }*/
 
 		//Replace "enum x" with enum_x in scala
         typeTranslator.AddTranslation("enum " + name, "enum_" + name);
