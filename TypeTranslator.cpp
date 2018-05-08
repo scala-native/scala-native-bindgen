@@ -32,18 +32,18 @@ TypeTranslator::TypeTranslator(clang::ASTContext* ctx_) : ctx(ctx_), typeMap() {
 }
 
 
-std::string TypeTranslator::TranslateFunctionPointer(const clang::QualType& qtpe){
+std::string TypeTranslator::TranslateFunctionPointer(const clang::QualType& qtpe, const std::string* avoid){
     const clang::PointerType* ptr = qtpe.getTypePtr()->getAs<clang::PointerType>();
     const clang::QualType& inner = ptr->getPointeeType();
 
     if(inner->isFunctionProtoType()) {
         const clang::FunctionProtoType* fc = inner->getAs<clang::FunctionProtoType>();
-        std::string ret = Translate(fc->getReturnType());
+        std::string ret = Translate(fc->getReturnType(), avoid);
         std::string params = "";
         int counter = 0;
 
         for(const clang::QualType& param: fc->param_types()){
-            params += Translate(param);
+            params += Translate(param, avoid);
             params += ",";
             counter++;
         }
@@ -62,7 +62,7 @@ std::string TypeTranslator::TranslateFunctionPointer(const clang::QualType& qtpe
     }
 }
 
-std::string TypeTranslator::TranslatePointer(const clang::PointerType* ptr){
+std::string TypeTranslator::TranslatePointer(const clang::PointerType* ptr, const std::string* avoid){
     const clang::QualType& pte = ptr->getPointeeType();
 
     //Take care of void*
@@ -73,7 +73,7 @@ std::string TypeTranslator::TranslatePointer(const clang::PointerType* ptr){
         }
      }
 
-    return std::string("native.Ptr[") + Translate(pte) + std::string("]");
+    return std::string("native.Ptr[") + Translate(pte, avoid) + std::string("]");
 }
 
 std::string TypeTranslator::TranslateStructOrUnion(const clang::QualType& qtpe){
@@ -107,12 +107,12 @@ std::string TypeTranslator::TranslateEnum(const clang::QualType& qtpe){
     return name;
 }
 
-std::string TypeTranslator::TranslateConstantArray(const clang::ConstantArrayType* ar){
+std::string TypeTranslator::TranslateConstantArray(const clang::ConstantArrayType* ar, const std::string* avoid){
     const llvm::APInt& size =  ar->getSize();
-    return "native.CArray[" + Translate(ar->getElementType()) + ", " + intToScalaNat((int)size.roundToDouble()) + "]";
+    return "native.CArray[" + Translate(ar->getElementType(), avoid) + ", " + intToScalaNat((int)size.roundToDouble()) + "]";
 }
 
-std::string TypeTranslator::Translate(const clang::QualType& qtpe){
+std::string TypeTranslator::Translate(const clang::QualType& qtpe, const std::string* avoid){
 
     //Warning / Sanity checks
 
@@ -128,11 +128,18 @@ std::string TypeTranslator::Translate(const clang::QualType& qtpe){
 
     const clang::Type* tpe = qtpe.getTypePtr();
 
+    if(typeEquals(tpe, avoid)){
+        //This is a type that we want to avoid the usage.
+        //Êxample: A struct that has a pointer to itself
+        uint64_t size = ctx->getTypeSize(tpe);
+        return "native.CArray[Byte, " + uint64ToScalaNat(size) + "]";
+    }
+
     if(tpe->isFunctionPointerType()){
-        return TranslateFunctionPointer(qtpe);
+        return TranslateFunctionPointer(qtpe, avoid);
 
     } else if(tpe->isPointerType()){
-        return TranslatePointer(tpe->getAs<clang::PointerType>());
+        return TranslatePointer(tpe->getAs<clang::PointerType>(), avoid);
 
     } else if(qtpe->isStructureType() || qtpe->isUnionType()){
         return TranslateStructOrUnion(qtpe);
@@ -141,7 +148,7 @@ std::string TypeTranslator::Translate(const clang::QualType& qtpe){
         return TranslateEnum(qtpe);
 
     } else if(qtpe->isConstantArrayType()){
-        return TranslateConstantArray(ctx->getAsConstantArrayType(qtpe));
+        return TranslateConstantArray(ctx->getAsConstantArrayType(qtpe), avoid);
 
     } else {
 

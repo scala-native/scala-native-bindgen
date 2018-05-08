@@ -1,6 +1,8 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#include "clang/AST/AST.h"
+
 #include <string>
 #include <cinttypes>
 
@@ -34,6 +36,21 @@ inline std::string uint64ToScalaNat(uint64_t v, std::string accumulator = ""){
     } else{
         return accumulator;
     }
+}
+
+
+inline bool typeEquals(const clang::Type* tpe1, const std::string* tpe2){
+    if(tpe1 == nullptr && tpe2 == nullptr){
+        return true;
+    }
+    if(tpe1 == nullptr || tpe2 == nullptr){
+        return false;
+    }
+    //TODO: What is the proper way ?
+    if(tpe1->getAsTagDecl() && tpe2){
+        return tpe1->getAsTagDecl()->getNameAsString() == *tpe2;
+    }
+    return false;
 }
 
 #endif // UTILS_H

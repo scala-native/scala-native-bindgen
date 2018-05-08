@@ -116,6 +116,7 @@ public:
             llvm::outs() << "\ttype union_" << name << " = native.CArray[Byte, " << intToScalaNat(maxSize) << "]\n";
 
       		return true;
+
         } else if (record->isStruct() && record->isThisDeclarationADefinition() && !record->isAnonymousStructOrUnion() && name != ""){
 
     		//Replace "struct x" with struct_x in scala
@@ -125,8 +126,8 @@ public:
     		std::string fields = "";
 
             for(const clang::FieldDecl* field : record->fields()){
-    			fields += typeTranslator.Translate(field->getType()) + ",";
-    			counter++;
+                fields += typeTranslator.Translate(field->getType(), &name) + ",";
+                counter++;
     		}
 
 	    	//remove last ,
