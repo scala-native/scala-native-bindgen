@@ -74,11 +74,8 @@ public:
 		//Replace "enum x" with enum_x in scala
         typeTranslator.AddTranslation("enum " + name, "enum_" + name);
 
-        //Handle typedef enum {} x; by getting the name from the type
-         if(name == ""){
-          const clang::EnumType* rec = enumdecl->getTypeForDecl()->getAs<clang::EnumType>();
-          clang::Qualifiers q{};
-          name = clang::QualType::getAsString(rec, q,clang::LangOptions());
+        if(name == "" && enumdecl->getTypedefNameForAnonDecl()){
+            name = enumdecl->getTypedefNameForAnonDecl()->getNameAsString();
         }
 
         if(name != ""){
@@ -88,9 +85,9 @@ public:
     	int i = 0;
         for (const clang::EnumConstantDecl* en : enumdecl->enumerators()){
             if(name != ""){
-                llvm::outs() << "\tval enum_" << name << "_" << en->getNameAsString() << " = " << i++ << "\n";
+                llvm::outs() << "\tfinal val enum_" << name << "_" << en->getNameAsString() << " = " << i++ << "\n";
             } else {
-                llvm::outs() << "\tval enum_" << en->getNameAsString() << " = " << i++ << "\n";
+                llvm::outs() << "\tfinal val enum_" << en->getNameAsString() << " = " << i++ << "\n";
             }
     	}
 
@@ -100,33 +97,10 @@ public:
     virtual bool VisitRecordDecl(clang::RecordDecl *record){
         std::string name = record->getNameAsString();
 
-        //Handle typedef struct {} x; by getting the name from the type
-        if((record->isStruct()) && name == ""){
-            const clang::RecordType* rec = record->getTypeForDecl()->getAsStructureType();
-
-            clang::Qualifiers q{};
-            name = clang::QualType::getAsString(rec, q,clang::LangOptions());
-
-            //TODO find a better way
-            size_t f = name.find("anonymous at");
-            if(f != std::string::npos){
-                return true;
-            }
+        //Handle typedef struct {} x; and typedef union {} y; by getting the name from the typedef
+        if((record->isStruct() || record->isUnion()) && name == "" && record->getTypedefNameForAnonDecl()){
+            name = record->getTypedefNameForAnonDecl()->getNameAsString();
         }
-
-        //Handle typedef union {} x; by getting the name from the type
-        if((record->isUnion()) && name == ""){
-            const clang::RecordType* rec = record->getTypeForDecl()->getAsUnionType();
-            clang::Qualifiers q{};
-            name = clang::QualType::getAsString(rec, q,clang::LangOptions());
-
-            //TODO find a better way
-            size_t f = name.find("anonymous at");
-            if(f != std::string::npos){
-                return true;
-            }
-        }
-
 
         if(record->isUnion() && !record->isAnonymousStructOrUnion() && name != ""){
 
