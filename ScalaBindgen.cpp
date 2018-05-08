@@ -87,9 +87,9 @@ public:
     	int i = 0;
         for (const clang::EnumConstantDecl* en : enumdecl->enumerators()){
             if(name != ""){
-                declarations += "\tfinal val enum_" + name + "_" + en->getNameAsString() + " = " + std::to_string(i++) + "\n";
+                enums += "\tfinal val enum_" + name + "_" + en->getNameAsString() + " = " + std::to_string(i++) + "\n";
             } else {
-                declarations += "\tfinal val enum_" + en->getNameAsString() + " = " + std::to_string(i++) + "\n";
+                enums += "\tfinal val enum_" + en->getNameAsString() + " = " + std::to_string(i++) + "\n";
             }
     	}
 
@@ -255,12 +255,22 @@ int main(int argc, const char **argv) {
 
     int result = Tool.run(clang::tooling::newFrontendActionFactory<ExampleFrontendAction>().get());
 
-    llvm::outs() << "import scala.scalanative._\n";
-    llvm::outs() << "import scala.scalanative.native.Nat._\n\n";
-    llvm::outs() << "@native.link(\"" << lib << "\")\n";
-    llvm::outs() << "@native.extern\nobject " << lib<< " {\n";
-    llvm::outs() << declarations;
-    llvm::outs() << "}\n";
+    llvm::outs() << "import scala.scalanative._\n"
+                 << "import scala.scalanative.native.Nat._\n\n";
+
+    if(declarations != ""){
+        llvm::outs() << "@native.link(\"" << lib << "\")\n"
+                     << "@native.extern\n"
+                     << "object " << lib << " {\n"
+                     << declarations
+                     << "}\n\n";
+    }
+
+    if(enums != ""){
+        llvm::outs() << "object " << lib << "Enums {\n"
+                     << enums
+                     << "}\n";
+    }
 
     return result;
 }
