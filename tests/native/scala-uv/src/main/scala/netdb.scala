@@ -71,10 +71,9 @@ object netdb {
   def iruserok_af(__raddr: native.Ptr[Byte], __suser: native.CInt, __remuser: native.Ptr[native.CChar], __locuser: native.Ptr[native.CChar], __af: sa_family_t): native.CInt = native.extern
   def rresvport(__alport: native.Ptr[native.CInt]): native.CInt = native.extern
   def rresvport_af(__alport: native.Ptr[native.CInt], __af: sa_family_t): native.CInt = native.extern
-  type struct_addrinfo = native.CStruct8[native.CInt,native.CInt,native.CInt,native.CInt,socklen_t,native.Ptr[struct_sockaddr],native.Ptr[native.CChar],native.Ptr[struct_addrinfo]]
+  type struct_addrinfo = native.CStruct8[native.CInt,native.CInt,native.CInt,native.CInt,socklen_t,native.Ptr[struct_sockaddr],native.Ptr[native.CChar],native.Ptr[native.CArray[Byte, Digit[_3, Digit[_8, _4]]]]]
   def getaddrinfo(__name: native.Ptr[native.CChar], __service: native.Ptr[native.CChar], __req: native.Ptr[struct_addrinfo], __pai: native.Ptr[native.Ptr[struct_addrinfo]]): native.CInt = native.extern
   def freeaddrinfo(__ai: native.Ptr[struct_addrinfo]): Unit = native.extern
   def gai_strerror(__ecode: native.CInt): native.Ptr[native.CChar] = native.extern
   def getnameinfo(__sa: native.Ptr[struct_sockaddr], __salen: socklen_t, __host: native.Ptr[native.CChar], __hostlen: socklen_t, __serv: native.Ptr[native.CChar], __servlen: socklen_t, __flags: native.CInt): native.CInt = native.extern
 }
-

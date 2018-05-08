@@ -1,6 +1,7 @@
 import scala.scalanative._
 import scala.scalanative.native.Nat._
 
+@native.link("types")
 @native.extern
 object types {
   type __u_char = native.CUnsignedChar
@@ -117,7 +118,7 @@ object types {
   type pthread_t = native.CUnsignedLong
   type union_pthread_attr_t = native.CArray[Byte, Digit[_4, Digit[_4, _8]]]
   type pthread_attr_t = union_pthread_attr_t
-  type struct___pthread_internal_list = native.CStruct2[native.Ptr[struct___pthread_internal_list],native.Ptr[struct___pthread_internal_list]]
+  type struct___pthread_internal_list = native.CStruct2[native.Ptr[native.CArray[Byte, Digit[_1, Digit[_2, _8]]]], native.Ptr[native.CArray[Byte, Digit[_1, Digit[_2, _8]]]]]
   type __pthread_list_t = struct___pthread_internal_list
   type union_pthread_mutex_t = native.CArray[Byte, Digit[_3, Digit[_2, _0]]]
   type struct___pthread_mutex_s = native.CStruct8[native.CInt,native.CUnsignedInt,native.CInt,native.CUnsignedInt,native.CInt,native.CShort,native.CShort,__pthread_list_t]
