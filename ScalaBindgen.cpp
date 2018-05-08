@@ -26,6 +26,8 @@ static llvm::cl::opt<std::string> LibName("name", llvm::cl::cat(Category));
 
 HeaderManager headerMan;
 
+std::string declarations;
+std::string enums;
 
 class TreeVisitor : public clang::RecursiveASTVisitor<TreeVisitor> {
 private:
@@ -57,15 +59,15 @@ public:
     		params = params.substr(0, params.size()-2);
     	}
       	
-        llvm::outs() << "\tdef " << funcName << "(" << params << "): " + retType + " = native.extern\n";
+        declarations += "\tdef " + funcName + "(" + params + "): " + retType + " = native.extern\n";
         return true;
     }
 
     virtual bool VisitTypedefDecl(clang::TypedefDecl *tpdef){
 		std::string name = tpdef->getName();
         std::string tpe = typeTranslator.Translate(tpdef->getUnderlyingType());
-    	llvm::outs() << "\ttype " << name << " = " << tpe << "\n";
-    	return true;
+        declarations += "\ttype " + name + " = " + tpe + "\n";
+        return true;
     }
 
     virtual bool VisitEnumDecl(clang::EnumDecl *enumdecl){
@@ -79,15 +81,15 @@ public:
         }
 
         if(name != ""){
-         llvm::outs() << "\ttype enum_" << name << " = native.CInt\n";
+         declarations += "\ttype enum_" + name + " = native.CInt\n";
         }
 
     	int i = 0;
         for (const clang::EnumConstantDecl* en : enumdecl->enumerators()){
             if(name != ""){
-                llvm::outs() << "\tfinal val enum_" << name << "_" << en->getNameAsString() << " = " << i++ << "\n";
+                declarations += "\tfinal val enum_" + name + "_" + en->getNameAsString() + " = " + std::to_string(i++) + "\n";
             } else {
-                llvm::outs() << "\tfinal val enum_" << en->getNameAsString() << " = " << i++ << "\n";
+                declarations += "\tfinal val enum_" + en->getNameAsString() + " = " + std::to_string(i++) + "\n";
             }
     	}
 
@@ -113,7 +115,7 @@ public:
                 maxSize = std::max(maxSize, astContext->getTypeSize(field->getType()));
     		}
 
-            llvm::outs() << "\ttype union_" << name << " = native.CArray[Byte, " << intToScalaNat(maxSize) << "]\n";
+            declarations += "\ttype union_" + name + " = native.CArray[Byte, " + intToScalaNat(maxSize) + "]\n";
 
       		return true;
 
@@ -136,12 +138,12 @@ public:
 	    	}
 
             if(counter < SCALA_NATIVE_MAX_STRUCT_FIELDS){
-                llvm::outs() << "\ttype struct_" << name << " = " << "native.CStruct" << counter << "[" << fields << "]\n";
+                declarations += "\ttype struct_" + name + " = " + "native.CStruct" + std::to_string(counter) + "[" + fields + "]\n";
             } else {
                 //There is no easy way to represent it as a struct in scala native, have to represent it as an array and then
                 //Add helpers to help with it's manipulation
                 uint64_t size = astContext->getTypeSize(record->getTypeForDecl());
-                llvm::outs() <<  "\ttype struct_" << name << " = " << "native.CArray[Byte, " << uint64ToScalaNat(size) << "]\n";
+                declarations += "\ttype struct_" + name + " = " + "native.CArray[Byte, " + uint64ToScalaNat(size) + "]\n";
             }
 
 	    	return true;
@@ -245,13 +247,19 @@ int main(int argc, const char **argv) {
     	return -1;
     }
 
+    declarations = "";
+    enums = "";
+
     headerMan.LoadConfig(std::string("../llvm/tools/clang/tools/extra/scala-bindgen/nativeHeaders.txt"));
+
+
+    int result = Tool.run(clang::tooling::newFrontendActionFactory<ExampleFrontendAction>().get());
 
     llvm::outs() << "import scala.scalanative._\n";
     llvm::outs() << "import scala.scalanative.native.Nat._\n\n";
     llvm::outs() << "@native.link(\"" << lib << "\")\n";
     llvm::outs() << "@native.extern\nobject " << lib<< " {\n";
-    int result = Tool.run(clang::tooling::newFrontendActionFactory<ExampleFrontendAction>().get());
+    llvm::outs() << declarations;
     llvm::outs() << "}\n";
 
     return result;
