@@ -52,7 +52,7 @@ std::string TypeTranslator::TranslateFunctionPointer(const clang::QualType& qtpe
             //remove last ,
             params = params.substr(0, params.size()-1);
 
-            return std::string("native.CFunctionPtr") + std::to_string(counter) + "[" + ret + "," + params + "]";
+            return std::string("native.CFunctionPtr") + std::to_string(counter) + "[" + params + "," + ret + "]";
         } else{
             return std::string("native.CFunctionPtr") + std::to_string(counter) + "[" + ret + "]";
         }
