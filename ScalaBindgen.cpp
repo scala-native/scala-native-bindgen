@@ -1,21 +1,4 @@
-#include "TypeTranslator.h"
-#include "HeaderManager.h"
-#include "Utils.h"
-
-#include "clang/Driver/Options.h"
-#include "clang/Basic/LangOptions.h"
-#include "clang/AST/AST.h"
-#include "clang/AST/ASTContext.h"
-#include "clang/AST/ASTConsumer.h"
-#include "clang/AST/RecursiveASTVisitor.h"
-#include "clang/Frontend/ASTConsumers.h"
-#include "clang/Frontend/FrontendActions.h"
-#include "clang/Frontend/CompilerInstance.h"
-#include "clang/Tooling/CommonOptionsParser.h"
-#include "clang/Tooling/Tooling.h"
-#include "llvm/Support/CommandLine.h"
-
-#include <iostream>
+#include "ScalaBindgen.h"
 
 #define SCALA_NATIVE_MAX_STRUCT_FIELDS 22
 
@@ -23,218 +6,128 @@ static llvm::cl::OptionCategory Category("Binding Generator");
 static llvm::cl::extrahelp CommonHelp(clang::tooling::CommonOptionsParser::HelpMessage);
 static llvm::cl::extrahelp MoreHelp("\nProduce Bindings for scala native. Please specify lib name wit parameter name\n");
 static llvm::cl::opt<std::string> LibName("name", llvm::cl::cat(Category));
+static llvm::cl::opt<std::string> StdHeaders("stdHeaders", llvm::cl::cat(Category));
+
 
 HeaderManager headerMan;
 
 std::string declarations;
 std::string enums;
 
-class TreeVisitor : public clang::RecursiveASTVisitor<TreeVisitor> {
-private:
-    clang::ASTContext* astContext;
-    TypeTranslator typeTranslator;
+bool TreeVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
+    std::string funcName = func->getNameInfo().getName().getAsString();
+    std::string retType = typeTranslator.Translate(func->getReturnType());
+    std::string params = "";
 
-public:
-    explicit TreeVisitor(clang::CompilerInstance *CI) : astContext(&(CI->getASTContext())), typeTranslator(astContext) {}
-
-    virtual bool VisitFunctionDecl(clang::FunctionDecl *func) {
-        std::string funcName = func->getNameInfo().getName().getAsString();
-        std::string retType = typeTranslator.Translate(func->getReturnType());
-        std::string params = "";
-
-        for (const clang::ParmVarDecl* parm : func->parameters()){
-    		//Handle default values
-            std::string pname = parm->getNameAsString();
-            if(pname == ""){
-                pname = "anonymous";
-            }
-            params += pname;
-    		params += ": ";
-    		params += typeTranslator.Translate(parm->getType());
-    		params += ", ";
-    	}
-
-    	//remove last ,
-    	if(params != ""){
-    		params = params.substr(0, params.size()-2);
-    	}
-      	
-        declarations += "\tdef " + funcName + "(" + params + "): " + retType + " = native.extern\n";
-        return true;
-    }
-
-    virtual bool VisitTypedefDecl(clang::TypedefDecl *tpdef){
-		std::string name = tpdef->getName();
-        std::string tpe = typeTranslator.Translate(tpdef->getUnderlyingType());
-        declarations += "\ttype " + name + " = " + tpe + "\n";
-        return true;
-    }
-
-    virtual bool VisitEnumDecl(clang::EnumDecl *enumdecl){
-        std::string name = enumdecl->getNameAsString();
-
-		//Replace "enum x" with enum_x in scala
-        typeTranslator.AddTranslation("enum " + name, "enum_" + name);
-
-        if(name == "" && enumdecl->getTypedefNameForAnonDecl()){
-            name = enumdecl->getTypedefNameForAnonDecl()->getNameAsString();
+    for (const clang::ParmVarDecl* parm : func->parameters()){
+        //Handle default values
+        std::string pname = parm->getNameAsString();
+        if(pname == ""){
+            pname = "anonymous";
         }
+        params += pname;
+        params += ": ";
+        params += typeTranslator.Translate(parm->getType());
+        params += ", ";
+    }
 
+    //remove last ,
+    if(params != ""){
+        params = params.substr(0, params.size()-2);
+    }
+
+    declarations += "\tdef " + funcName + "(" + params + "): " + retType + " = native.extern\n";
+    return true;
+}
+
+bool TreeVisitor::VisitTypedefDecl(clang::TypedefDecl *tpdef){
+    std::string name = tpdef->getName();
+    std::string tpe = typeTranslator.Translate(tpdef->getUnderlyingType());
+    declarations += "\ttype " + name + " = " + tpe + "\n";
+    return true;
+}
+
+bool TreeVisitor::VisitEnumDecl(clang::EnumDecl *enumdecl){
+    std::string name = enumdecl->getNameAsString();
+
+    //Replace "enum x" with enum_x in scala
+    typeTranslator.AddTranslation("enum " + name, "enum_" + name);
+
+    if(name == "" && enumdecl->getTypedefNameForAnonDecl()){
+        name = enumdecl->getTypedefNameForAnonDecl()->getNameAsString();
+    }
+
+    if(name != ""){
+     declarations += "\ttype enum_" + name + " = native.CInt\n";
+    }
+
+    int i = 0;
+    for (const clang::EnumConstantDecl* en : enumdecl->enumerators()){
         if(name != ""){
-         declarations += "\ttype enum_" + name + " = native.CInt\n";
+            enums += "\tfinal val enum_" + name + "_" + en->getNameAsString() + " = " + std::to_string(i++) + "\n";
+        } else {
+            enums += "\tfinal val enum_" + en->getNameAsString() + " = " + std::to_string(i++) + "\n";
         }
-
-    	int i = 0;
-        for (const clang::EnumConstantDecl* en : enumdecl->enumerators()){
-            if(name != ""){
-                enums += "\tfinal val enum_" + name + "_" + en->getNameAsString() + " = " + std::to_string(i++) + "\n";
-            } else {
-                enums += "\tfinal val enum_" + en->getNameAsString() + " = " + std::to_string(i++) + "\n";
-            }
-    	}
-
-    	return true;
     }
 
-    virtual bool VisitRecordDecl(clang::RecordDecl *record){
-        std::string name = record->getNameAsString();
+    return true;
+}
 
-        //Handle typedef struct {} x; and typedef union {} y; by getting the name from the typedef
-        if((record->isStruct() || record->isUnion()) && name == "" && record->getTypedefNameForAnonDecl()){
-            name = record->getTypedefNameForAnonDecl()->getNameAsString();
-        }
+bool TreeVisitor::VisitRecordDecl(clang::RecordDecl *record){
+    std::string name = record->getNameAsString();
 
-        if(record->isUnion() && !record->isAnonymousStructOrUnion() && name != ""){
-
-    		//Replace "union x" with union_x in scala
-    		typeTranslator.AddTranslation("union " + name, "union" + name);
-    	
-    		uint64_t maxSize = 0;
-
-            for(const clang::FieldDecl* field : record->fields()){
-                maxSize = std::max(maxSize, astContext->getTypeSize(field->getType()));
-    		}
-
-            declarations += "\ttype union_" + name + " = native.CArray[Byte, " + intToScalaNat(maxSize) + "]\n";
-
-      		return true;
-
-        } else if (record->isStruct() && record->isThisDeclarationADefinition() && !record->isAnonymousStructOrUnion() && name != ""){
-
-    		//Replace "struct x" with struct_x in scala
-    		typeTranslator.AddTranslation("struct " + name, "struct_"+name);
-
-    		int counter = 0;
-    		std::string fields = "";
-
-            for(const clang::FieldDecl* field : record->fields()){
-                fields += typeTranslator.Translate(field->getType(), &name) + ",";
-                counter++;
-    		}
-
-	    	//remove last ,
-	    	if(fields != ""){
-	    		fields = fields.substr(0, fields.size()-1);
-	    	}
-
-            if(counter < SCALA_NATIVE_MAX_STRUCT_FIELDS){
-                declarations += "\ttype struct_" + name + " = " + "native.CStruct" + std::to_string(counter) + "[" + fields + "]\n";
-            } else {
-                //There is no easy way to represent it as a struct in scala native, have to represent it as an array and then
-                //Add helpers to help with it's manipulation
-                uint64_t size = astContext->getTypeSize(record->getTypeForDecl());
-                declarations += "\ttype struct_" + name + " = " + "native.CArray[Byte, " + uint64ToScalaNat(size) + "]\n";
-            }
-
-	    	return true;
-    	}
-    	return false;
+    //Handle typedef struct {} x; and typedef union {} y; by getting the name from the typedef
+    if((record->isStruct() || record->isUnion()) && name == "" && record->getTypedefNameForAnonDecl()){
+        name = record->getTypedefNameForAnonDecl()->getNameAsString();
     }
 
-};
+    if(record->isUnion() && !record->isAnonymousStructOrUnion() && name != ""){
 
+        //Replace "union x" with union_x in scala
+        typeTranslator.AddTranslation("union " + name, "union" + name);
 
+        uint64_t maxSize = 0;
 
-class TreeConsumer : public clang::ASTConsumer {
-private:
-    TreeVisitor *visitor;
-    clang::SourceManager& smanager;
-
-public:
-
-    std::vector<std::string> stdheaders{"assert.h","complex.h","ctype.h","errno.h","fenv.h","float.h","inttypes.h","iso646.h","limits.h",
-                                        "locale.h","math.h","setjmp.h","signal.h","stdalign.h","stdarg.h","stdatomic.h","stdbool.h","stddef.h",
-                                        "stdint.h","stdio.h","stdlib.h","stdnoreturn.h","string.h","tgmath.h","threads.h","time.h","uchar.h",
-                                        "wchar.h","wctype.h","aio.h","inet.h","assert.h","complex.h","cpio.h","ctype.h","dirent.h","dlfcn.h",
-                                        "errno.h","fcntl.h","fenv.h","float.h","fmtmsg.h","fnmatch.h","ftw.h","glob.h","grp.h","iconv.h",
-                                        "inttypes.h","iso646.h","langinfo.h","libgen.h","limits.h","locale.h","math.h","monetary.h","mqueue.h",
-                                        "ndbm.h","if.h","netdb.h","in.h","tcp.h","nl_types.h","poll.h","pthread.h","pwd.h",
-                                        "regex.h","sched.h","search.h","semaphore.h","setjmp.h","signal.h","spawn.h","stdarg.h","stdbool.h",
-                                        "stddef.h","stdint.h","stdio.h","stdlib.h","string.h","strings.h","stropts.h","ipc.h","mman.h",
-                                        "msg.h","resource.h","select.h","sem.h","shm.h","socket.h","stat.h",
-                                        "statvfs.h","time.h","times.h","types.h","uio.h","un.h","utsname.h",
-                                        "wait.h","syslog.h","tar.h","termios.h","tgmath.h","time.h","trace.h","ulimit.h","unistd.h",
-                                        "utime.h","utmpx.h","wchar.h","wctype.h","wordexp.h",
-
-                                        "siginfo.h", "sigset.h", "sigaction.h", "sigcontext.h", "sigthread.h", "ucontext.h",
-                                        "pthreadtypes.h", "libio.h", "__stddef_max_align_t.h", "_G_config.h", "sys_errlist.h",
-                                        "sysmacros.h", "xlocale.h", "socket_type.h", "sockaddr.h", "sigstack.h"
-                                       };
-
-    /* with folders
-    std::vector<std::string> stdheaders{"assert.h","complex.h","ctype.h","errno.h","fenv.h","float.h","inttypes.h","iso646.h","limits.h",
-                                        "locale.h","math.h","setjmp.h","signal.h","stdalign.h","stdarg.h","stdatomic.h","stdbool.h","stddef.h",
-                                        "stdint.h","stdio.h","stdlib.h","stdnoreturn.h","string.h","tgmath.h","threads.h","time.h","uchar.h",
-                                        "wchar.h","wctype.h","aio.h","arpa/inet.h","assert.h","complex.h","cpio.h","ctype.h","dirent.h","dlfcn.h",
-                                        "errno.h","fcntl.h","fenv.h","float.h","fmtmsg.h","fnmatch.h","ftw.h","glob.h","grp.h","iconv.h",
-                                        "inttypes.h","iso646.h","langinfo.h","libgen.h","limits.h","locale.h","math.h","monetary.h","mqueue.h",
-                                        "ndbm.h","net/if.h","netdb.h","netinet/in.h","netinet/tcp.h","nl_types.h","poll.h","pthread.h","pwd.h",
-                                        "regex.h","sched.h","search.h","semaphore.h","setjmp.h","signal.h","spawn.h","stdarg.h","stdbool.h",
-                                        "stddef.h","stdint.h","stdio.h","stdlib.h","string.h","strings.h","stropts.h","sys/ipc.h","sys/mman.h",
-                                        "sys/msg.h","sys/resource.h","sys/select.h","sys/sem.h","sys/shm.h","sys/socket.h","sys/stat.h",
-                                        "sys/statvfs.h","sys/time.h","sys/times.h","sys/types.h","sys/uio.h","sys/un.h","sys/utsname.h",
-                                        "sys/wait.h","syslog.h","tar.h","termios.h","tgmath.h","time.h","trace.h","ulimit.h","unistd.h",
-                                        "utime.h","utmpx.h","wchar.h","wctype.h","wordexp.h"};
-     */
-
-    explicit TreeConsumer(clang::CompilerInstance *CI) : visitor(new TreeVisitor(CI)), smanager(CI->getASTContext().getSourceManager()) {}
-
-    std::string basename(const std::string& pathname) {
-        return {std::find_if(pathname.rbegin(), pathname.rend(),
-                             [](char c) { return c == '/'; }).base(),
-                pathname.end()};
-    }
-
-    virtual bool HandleTopLevelDecl(clang::DeclGroupRef DG) {
-        // a DeclGroupRef may have multiple Decls, so we iterate through each one
-        for (clang::DeclGroupRef::iterator i = DG.begin(), e = DG.end(); i != e; i++) {
-            clang::Decl *D = *i;
-            std::string fpath = smanager.getFilename(D->getLocation()).str();
-            if(std::find(stdheaders.begin(), stdheaders.end(), basename(fpath)) == stdheaders.end()){
-                visitor->TraverseDecl(D); // recursively visit each AST node in Decl "D"
-            }
+        for(const clang::FieldDecl* field : record->fields()){
+            maxSize = std::max(maxSize, astContext->getTypeSize(field->getType()));
         }
+
+        declarations += "\ttype union_" + name + " = native.CArray[Byte, " + intToScalaNat(maxSize) + "]\n";
+
+        return true;
+
+    } else if (record->isStruct() && record->isThisDeclarationADefinition() && !record->isAnonymousStructOrUnion() && name != ""){
+
+        //Replace "struct x" with struct_x in scala
+        typeTranslator.AddTranslation("struct " + name, "struct_"+name);
+
+        int counter = 0;
+        std::string fields = "";
+
+        for(const clang::FieldDecl* field : record->fields()){
+            fields += typeTranslator.Translate(field->getType(), &name) + ",";
+            counter++;
+        }
+
+        //remove last ,
+        if(fields != ""){
+            fields = fields.substr(0, fields.size()-1);
+        }
+
+        if(counter < SCALA_NATIVE_MAX_STRUCT_FIELDS){
+            declarations += "\ttype struct_" + name + " = " + "native.CStruct" + std::to_string(counter) + "[" + fields + "]\n";
+        } else {
+            //There is no easy way to represent it as a struct in scala native, have to represent it as an array and then
+            //Add helpers to help with it's manipulation
+            uint64_t size = astContext->getTypeSize(record->getTypeForDecl());
+            declarations += "\ttype struct_" + name + " = " + "native.CArray[Byte, " + uint64ToScalaNat(size) + "]\n";
+        }
+
         return true;
     }
+    return false;
+}
 
-    // this replaces "HandleTopLevelDecl"
-    // override this to call our ExampleVisitor on the entire source file
-    /*virtual void HandleTranslationUnit(clang::ASTContext &Context) {
-        //we can use ASTContext to get the TranslationUnitDecl, which is
-        //a single Decl that collectively represents the entire source file
-        visitor->TraverseDecl(Context.getTranslationUnitDecl());
-    }*/
-
-};
-
-
-
-class ExampleFrontendAction : public clang::ASTFrontendAction {
-public:
-    virtual std::unique_ptr<clang::ASTConsumer> CreateASTConsumer(clang::CompilerInstance &CI, clang::StringRef file) {
-        return std::unique_ptr<clang::ASTConsumer>(new TreeConsumer(&CI)); // pass CI pointer to ASTConsumer
-    }
-};
 
 
 int main(int argc, const char **argv) {
@@ -247,10 +140,13 @@ int main(int argc, const char **argv) {
     	return -1;
     }
 
+    auto stdhead = StdHeaders.getValue();
+    if(stdhead != ""){
+        headerMan.LoadConfig(stdhead);
+    }
+
     declarations = "";
     enums = "";
-
-    headerMan.LoadConfig(std::string("../llvm/tools/clang/tools/extra/scala-bindgen/nativeHeaders.txt"));
 
 
     int result = Tool.run(clang::tooling::newFrontendActionFactory<ExampleFrontendAction>().get());

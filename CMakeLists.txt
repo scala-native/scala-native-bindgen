@@ -2,6 +2,7 @@ set(LLVM_LINK_COMPONENTS support)
 
 add_clang_executable(scalaBindgen
   ScalaBindgen.cpp
+  ScalaBindgen.h
   TypeTranslator.h
   TypeTranslator.cpp
   HeaderManager.h

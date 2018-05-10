@@ -6,6 +6,12 @@
 #include <string>
 #include <cinttypes>
 
+inline std::string basename(const std::string& pathname) {
+    return {std::find_if(pathname.rbegin(), pathname.rend(),
+                         [](char c) { return c == '/'; }).base(),
+            pathname.end()};
+}
+
 inline std::string intToScalaNat(int v, std::string accumulator = ""){
 
     if(v > 0){
