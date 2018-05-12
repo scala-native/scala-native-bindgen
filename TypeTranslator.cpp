@@ -44,15 +44,15 @@ std::string TypeTranslator::TranslateFunctionPointer(const clang::QualType& qtpe
 
         for(const clang::QualType& param: fc->param_types()){
             params += Translate(param, avoid);
-            params += ",";
+            params += ", ";
             counter++;
         }
 
         if(params != ""){
             //remove last ,
-            params = params.substr(0, params.size()-1);
+            params = params.substr(0, params.size()-2);
 
-            return std::string("native.CFunctionPtr") + std::to_string(counter) + "[" + params + "," + ret + "]";
+            return std::string("native.CFunctionPtr") + std::to_string(counter) + "[" + params + ", " + ret + "]";
         } else{
             return std::string("native.CFunctionPtr") + std::to_string(counter) + "[" + ret + "]";
         }

@@ -2,7 +2,6 @@
 #include "TypeTranslator.h"
 #include "HeaderManager.h"
 
-
 #include "clang/Driver/Options.h"
 #include "clang/Basic/LangOptions.h"
 #include "clang/AST/AST.h"
@@ -16,7 +15,8 @@
 #include "clang/Tooling/Tooling.h"
 #include "llvm/Support/CommandLine.h"
 
-
+extern std::string declarations;
+extern std::string enums;
 
 class TreeVisitor : public clang::RecursiveASTVisitor<TreeVisitor> {
 private:

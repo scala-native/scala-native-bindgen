@@ -1,5 +1,7 @@
 set(LLVM_LINK_COMPONENTS support)
 
+add_compile_options(-fexceptions)
+
 add_clang_executable(scalaBindgen
   ScalaBindgen.cpp
   ScalaBindgen.h
@@ -8,6 +10,8 @@ add_clang_executable(scalaBindgen
   HeaderManager.h
   HeaderManager.cpp
   Utils.h
+  catch/catch.hpp
+  SimpleTypeTests.cpp
   )
 
 target_link_libraries(scalaBindgen
