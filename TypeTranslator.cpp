@@ -8,7 +8,8 @@ TypeTranslator::TypeTranslator(clang::ASTContext* ctx_) : ctx(ctx_), typeMap() {
 	//Native Types
 	typeMap["void"] = "Unit";
 	typeMap["bool"] = "native.CBool";
-	typeMap["char"] = "native.CChar";
+    typeMap["_Bool"] = "native.CBool";
+    typeMap["char"] = "native.CChar";
 	typeMap["signed char"] = "native.CSignedChar";
 	typeMap["unsigned char"] = "native.CUnsignedChar";
 	typeMap["short"] = "native.CShort";

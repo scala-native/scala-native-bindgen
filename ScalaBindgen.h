@@ -83,7 +83,8 @@ public:
         for (clang::DeclGroupRef::iterator i = DG.begin(), e = DG.end(); i != e; i++) {
             clang::Decl *D = *i;
             std::string fpath = smanager.getFilename(D->getLocation()).str();
-            if(std::find(stdheaders.begin(), stdheaders.end(), basename(fpath)) == stdheaders.end()){
+            //llvm::errs() << "DEBUG: " << fpath << "\n";
+            if(std::find(stdheaders.begin(), stdheaders.end(), basename(fpath)) == stdheaders.end() && fpath != ""){
                 visitor->TraverseDecl(D); // recursively visit each AST node in Decl "D"
             }
         }

@@ -10,7 +10,7 @@ std::string Translate(std::string code){
     declarations = "";
     enums = "";
     auto* action = new ExampleFrontendAction;
-    clang::tooling::runToolOnCode(action, code);
+    clang::tooling::runToolOnCode(action, code, "input.h");
     return declarations;
 }
 
@@ -18,7 +18,6 @@ TEST_CASE("native types", "[Type]" ) {
 
     std::map<std::string, std::string> types = {
         {"void", "Unit"},
-        //{"bool", "native.CBool"},
         {"char", "native.CChar"},
         {"signed char", "native.CSignedChar"},
         {"unsigned char", "native.CUnsignedChar"},
@@ -32,8 +31,8 @@ TEST_CASE("native types", "[Type]" ) {
         {"unsigned long", "native.CUnsignedLong"},
         {"long long", "native.CLongLong"},
         {"unsigned long long", "native.CUnsignedLongLong"},
-        //{"size_t", "native.CSize"},
-        //{"ptrdiff_t", "native.CPtrDiff"},
+        {"size_t", "native.CSize"},
+        {"ptrdiff_t", "native.CPtrDiff"},
         {"wchar_t", "native.CWideChar"},
         {"char16_t", "native.CChar16"},
         {"char32_t", "native.CChar32"},
@@ -47,10 +46,9 @@ TEST_CASE("native types", "[Type]" ) {
     };
 
     for(const auto& kv: types){
-        std::string code = "typedef " + kv.first + " a;\n";
+        std::string code = "#include<uchar.h>\n#include<stddef.h>\ntypedef " + kv.first + " a;\n";
         std::string answer = "\ttype a = " + kv.second + "\n";
 
         REQUIRE(answer == Translate(code));
     }
-
-}
+ }
