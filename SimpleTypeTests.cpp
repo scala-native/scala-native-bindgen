@@ -24,11 +24,11 @@ TEST_CASE("native types", "[Type]" ) {
         {"short", "native.CShort"},
         {"unsigned short", "native.CUnsignedShort"},
         {"int", "native.CInt"},
-        //{"long int", "native.CLongInt"},
-        {"unsigned int", "native.CUnsignedInt"},
-        //{"unsigned long int", "native.CUnsignedLongInt"},
         {"long", "native.CLong"},
+        //{"long int", "native.CLongInt"}, <- similar to a long, why is it different ?
+        {"unsigned int", "native.CUnsignedInt"},
         {"unsigned long", "native.CUnsignedLong"},
+        //{"unsigned long int", "native.CUnsignedLongInt"}, <- similar to an unsigned long why is it different ?
         {"long long", "native.CLongLong"},
         {"unsigned long long", "native.CUnsignedLongLong"},
         {"size_t", "native.CSize"},
@@ -40,9 +40,7 @@ TEST_CASE("native types", "[Type]" ) {
         {"double", "native.CDouble"},
         {"void*", "native.Ptr[Byte]"},
         {"int*", "native.Ptr[native.CInt]"},
-        //{"char*", "native.CString"},
-        //{"int (*a)(int)", "native.CFunctionPtr1[native.CInt, native.CInt]"},
-        //{"struct { int x, y; }*", "native.Ptr[native.CStruct2[native.CInt, native.CInt]]"}
+        {"char*", "native.CString"},
     };
 
     for(const auto& kv: types){
@@ -52,3 +50,10 @@ TEST_CASE("native types", "[Type]" ) {
         REQUIRE(answer == Translate(code));
     }
  }
+
+TEST_CASE("native types function pointer", "[Type]"){
+    std::string code = "typedef int (*a)(int);";
+    std::string answ = "\ttype a = native.CFunctionPtr1[native.CInt, native.CInt]\n";
+    REQUIRE(answ == Translate(code));
+}
+

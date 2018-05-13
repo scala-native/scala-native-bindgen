@@ -66,13 +66,21 @@ std::string TypeTranslator::TranslateFunctionPointer(const clang::QualType& qtpe
 std::string TypeTranslator::TranslatePointer(const clang::PointerType* ptr, const std::string* avoid){
     const clang::QualType& pte = ptr->getPointeeType();
 
-    //Take care of void*
     if(pte->isBuiltinType()){
         const clang::BuiltinType* as = pte->getAs<clang::BuiltinType>();
+
+        //Take care of void*
         if(as->getKind() == clang::BuiltinType::Void){
            return "native.Ptr[Byte]";
         }
+
+        //Take care of char*
+        if(as->getKind() == clang::BuiltinType::Char_S || as->getKind() == clang::BuiltinType::SChar){
+            return "native.CString";
+        }
      }
+
+
 
     return std::string("native.Ptr[") + Translate(pte, avoid) + std::string("]");
 }
