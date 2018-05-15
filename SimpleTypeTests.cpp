@@ -9,6 +9,7 @@
 std::string Translate(std::string code){
     declarations = "";
     enums = "";
+    helpers = "";
     auto* action = new ExampleFrontendAction;
     clang::tooling::runToolOnCode(action, code, "input.h");
     return declarations;

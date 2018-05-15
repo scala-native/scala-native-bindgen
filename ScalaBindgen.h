@@ -17,6 +17,7 @@
 
 extern std::string declarations;
 extern std::string enums;
+extern std::string helpers;
 
 class TreeVisitor : public clang::RecursiveASTVisitor<TreeVisitor> {
 private:

@@ -18,6 +18,7 @@ HeaderManager headerMan;
 
 std::string declarations;
 std::string enums;
+std::string helpers;
 
 bool TreeVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
     std::string funcName = func->getNameInfo().getName().getAsString();
@@ -106,12 +107,20 @@ bool TreeVisitor::VisitRecordDecl(clang::RecordDecl *record){
         //Replace "struct x" with struct_x in scala
         typeTranslator.AddTranslation("struct " + name, "struct_"+name);
 
-        int counter = 0;
+        int fieldCnt = 0;
         std::string fields = "";
+        std::string helpersFunc = "";
 
         for(const clang::FieldDecl* field : record->fields()){
-            fields += typeTranslator.Translate(field->getType(), &name) + ", ";
-            counter++;
+            std::string fname = field->getNameAsString();
+            std::string ftype = typeTranslator.Translate(field->getType(), &name);
+
+            fields += ftype + ", ";
+            if(name != ""){
+                helpersFunc += "\t\tdef " + fname + ": " + ftype + " = !p._" + std::to_string(fieldCnt + 1) + "\n";
+                helpersFunc += "\t\tdef " + fname +"_=(value: " + ftype + "):Unit = !p._" + std::to_string(fieldCnt + 1) + " = value\n";
+            }
+            fieldCnt++;
         }
 
         //remove last ,
@@ -119,13 +128,20 @@ bool TreeVisitor::VisitRecordDecl(clang::RecordDecl *record){
             fields = fields.substr(0, fields.size()-2);
         }
 
-        if(counter < SCALA_NATIVE_MAX_STRUCT_FIELDS){
-            declarations += "\ttype struct_" + name + " = " + "native.CStruct" + std::to_string(counter) + "[" + fields + "]\n";
+        if(fieldCnt < SCALA_NATIVE_MAX_STRUCT_FIELDS){
+            declarations += "\ttype struct_" + name + " = " + "native.CStruct" + std::to_string(fieldCnt) + "[" + fields + "]\n";
         } else {
             //There is no easy way to represent it as a struct in scala native, have to represent it as an array and then
             //Add helpers to help with it's manipulation
             uint64_t size = astContext->getTypeSize(record->getTypeForDecl());
             declarations += "\ttype struct_" + name + " = " + "native.CArray[Byte, " + uint64ToScalaNat(size) + "]\n";
+        }
+
+        //Create helpers in an implicit class
+        if(fieldCnt > 0 && fieldCnt < SCALA_NATIVE_MAX_STRUCT_FIELDS){
+            helpers += "\timplicit class struct_" + name + "_ops(val p: native.Ptr[struct_" + name + "]) extends AnyVal {\n";
+            helpers += helpersFunc;
+            helpers += "\t}\n\n";
         }
 
         return true;
@@ -158,7 +174,7 @@ int main(int argc, char *argv[]) {
 
         declarations = "";
         enums = "";
-
+        helpers = "";
 
         int result = Tool.run(clang::tooling::newFrontendActionFactory<ExampleFrontendAction>().get());
 
@@ -170,13 +186,20 @@ int main(int argc, char *argv[]) {
                          << "@native.extern\n"
                          << "object " << lib << " {\n"
                          << declarations
-                         << "}\n\n";
+                         << "}\n\n"
+                         << "import " + lib + "._\n\n";
         }
 
         if(enums != ""){
             llvm::outs() << "object " << lib << "Enums {\n"
                          << enums
-                         << "}\n";
+                         << "}\n\n";
+        }
+
+        if(helpers != ""){
+            llvm::outs() << "object " << lib << "Helpers {\n"
+                         << helpers
+                         << "}\n\n";
         }
 
         return result;
