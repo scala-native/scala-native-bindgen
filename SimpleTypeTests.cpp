@@ -65,3 +65,40 @@ TEST_CASE("struct pointer", "[Type]"){
     REQUIRE(answ == Translate(code));
 }
 
+TEST_CASE("func no args", "[Func]"){
+    std::string code = "int foo();";
+    std::string answ = "\tdef foo(): native.CInt = native.extern\n";
+    REQUIRE(answ == Translate(code));
+}
+
+TEST_CASE("func void args", "[Func]"){
+    std::string code = "int foo(void);";
+    std::string answ = "\tdef foo(): native.CInt = native.extern\n";
+    REQUIRE(answ == Translate(code));
+}
+
+TEST_CASE("func 1 arg", "[Func]"){
+    std::string code = "void foo(int a);";
+    std::string answ = "\tdef foo(a: native.CInt): Unit = native.extern\n";
+    REQUIRE(answ == Translate(code));
+}
+
+TEST_CASE("func 2 args", "[Func]"){
+    std::string code = "void foo(float a, int b);";
+    std::string answ = "\tdef foo(a: native.CFloat, b: native.CInt): Unit = native.extern\n";
+    REQUIRE(answ == Translate(code));
+}
+
+TEST_CASE("func anonymous args", "[Func]"){
+    std::string code = "void foo(float, int);";
+    std::string answ = "\tdef foo(anonymous0: native.CFloat, anonymous1: native.CInt): Unit = native.extern\n";
+    REQUIRE(answ == Translate(code));
+}
+
+TEST_CASE("func variadic args", "[Func]"){
+    std::string code = "double foo(double a, void* b, ...);";
+    std::string answ = "\tdef foo(a: native.CDouble, b: native.Ptr[Byte], varArgs: native.CVararg*): native.CDouble = native.extern\n";
+    REQUIRE(answ == Translate(code));
+}
+
+
