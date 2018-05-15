@@ -3,8 +3,11 @@ set(LLVM_LINK_COMPONENTS support)
 add_compile_options(-fexceptions)
 
 add_clang_executable(scalaBindgen
-  ScalaBindgen.cpp
-  ScalaBindgen.h
+  Main.cpp
+  ScalaFrontend.h
+  TreeVisitor.h
+  TreeVisitor.cpp
+  TreeConsumer.h
   TypeTranslator.h
   TypeTranslator.cpp
   HeaderManager.h

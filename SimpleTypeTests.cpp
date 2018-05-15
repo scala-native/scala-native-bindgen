@@ -1,5 +1,4 @@
-#include "ScalaBindgen.h"
-
+#include "ScalaFrontend.h"
 
 #include "clang/Tooling/Tooling.h"
 #include "catch/catch.hpp"
@@ -10,7 +9,7 @@ std::string Translate(std::string code){
     declarations = "";
     enums = "";
     helpers = "";
-    auto* action = new ExampleFrontendAction;
+    auto* action = new ScalaFrontendAction;
     clang::tooling::runToolOnCode(action, code, "input.h");
     return declarations;
 }
