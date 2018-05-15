@@ -59,4 +59,19 @@ inline bool typeEquals(const clang::Type* tpe1, const std::string* tpe2){
     return false;
 }
 
+static std::array<std::string, 39> reserved_words = {"abstract", "case", "catch", "class", "def", "do", "else", "extends",
+                                      "false", "final", "finally", "for", "forSome", "if", "implicit", "import",
+                                      "lazy", "match", "new", "null", "object", "override", "package", "private",
+                                      "protected", "return", "sealed", "super", "this", "throw", "trait", "try",
+                                      "true", "type", "val", "var", "while", "with", "yield"};
+
+inline std::string handleReservedWords(std::string name){
+    auto found = std::find(reserved_words.begin(), reserved_words.end(), name);
+    if(found != reserved_words.end()){
+        return "`" + name + "`";
+    } else{
+        return name;
+    }
+}
+
 #endif // UTILS_H

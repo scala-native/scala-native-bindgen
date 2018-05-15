@@ -16,10 +16,11 @@ bool TreeVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
 
     for (const clang::ParmVarDecl* parm : func->parameters()){
         //Handle default values
-        std::string pname = parm->getNameAsString();
+        std::string pname = handleReservedWords(parm->getNameAsString());
         if(pname == ""){
             pname = "anonymous";
         }
+
         params += pname;
         params += ": ";
         params += typeTranslator.Translate(parm->getType());
@@ -58,10 +59,12 @@ bool TreeVisitor::VisitEnumDecl(clang::EnumDecl *enumdecl){
 
     int i = 0;
     for (const clang::EnumConstantDecl* en : enumdecl->enumerators()){
+        std::string ename = handleReservedWords(en->getNameAsString());
+
         if(name != ""){
-            enums += "\tfinal val enum_" + name + "_" + en->getNameAsString() + " = " + std::to_string(i++) + "\n";
+            enums += "\tfinal val enum_" + name + "_" + ename + " = " + std::to_string(i++) + "\n";
         } else {
-            enums += "\tfinal val enum_" + en->getNameAsString() + " = " + std::to_string(i++) + "\n";
+            enums += "\tfinal val enum_" + ename + " = " + std::to_string(i++) + "\n";
         }
     }
 
@@ -103,7 +106,7 @@ bool TreeVisitor::VisitRecordDecl(clang::RecordDecl *record){
         std::string helpersFunc = "";
 
         for(const clang::FieldDecl* field : record->fields()){
-            std::string fname = field->getNameAsString();
+            std::string fname = handleReservedWords(field->getNameAsString());
             std::string ftype = typeTranslator.Translate(field->getType(), &name);
 
             fields += ftype + ", ";
