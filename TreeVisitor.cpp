@@ -14,11 +14,14 @@ bool TreeVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
     std::string retType = typeTranslator.Translate(func->getReturnType());
     std::string params = "";
 
+    int anonCounter = 0;
+
     for (const clang::ParmVarDecl* parm : func->parameters()){
         //Handle default values
         std::string pname = handleReservedWords(parm->getNameAsString());
+
         if(pname == ""){
-            pname = "anonymous";
+            pname = "anonymous" + std::to_string(anonCounter++);
         }
 
         params += pname;
