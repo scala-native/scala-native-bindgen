@@ -110,13 +110,13 @@ bool TreeVisitor::VisitRecordDecl(clang::RecordDecl *record){
         std::string fields = "";
 
         for(const clang::FieldDecl* field : record->fields()){
-            fields += typeTranslator.Translate(field->getType(), &name) + ",";
+            fields += typeTranslator.Translate(field->getType(), &name) + ", ";
             counter++;
         }
 
         //remove last ,
         if(fields != ""){
-            fields = fields.substr(0, fields.size()-1);
+            fields = fields.substr(0, fields.size()-2);
         }
 
         if(counter < SCALA_NATIVE_MAX_STRUCT_FIELDS){

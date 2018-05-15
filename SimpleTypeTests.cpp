@@ -57,3 +57,11 @@ TEST_CASE("native types function pointer", "[Type]"){
     REQUIRE(answ == Translate(code));
 }
 
+TEST_CASE("struct pointer", "[Type]"){
+    std::string code = "struct asd { int x, y; };"
+                       "typedef struct asd* ptre;";
+    std::string answ = "\ttype struct_asd = native.CStruct2[native.CInt, native.CInt]\n"
+                       "\ttype ptre = native.Ptr[struct_asd]\n";
+    REQUIRE(answ == Translate(code));
+}
+
