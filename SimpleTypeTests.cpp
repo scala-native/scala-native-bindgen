@@ -9,6 +9,7 @@ std::string Translate(std::string code){
     declarations = "";
     enums = "";
     helpers = "";
+    locations.clear();
     auto* action = new ScalaFrontendAction;
     clang::tooling::runToolOnCode(action, code, "input.h");
     return declarations;

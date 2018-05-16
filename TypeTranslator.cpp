@@ -49,14 +49,10 @@ std::string TypeTranslator::TranslateFunctionPointer(const clang::QualType& qtpe
             counter++;
         }
 
-        if(params != ""){
-            //remove last ,
-            params = params.substr(0, params.size()-2);
+        std::string variad = fc->isVariadic() ? "varArgs: native.CVararg*, " : "";
 
-            return std::string("native.CFunctionPtr") + std::to_string(counter) + "[" + params + ", " + ret + "]";
-        } else{
-            return std::string("native.CFunctionPtr") + std::to_string(counter) + "[" + ret + "]";
-        }
+        return std::string("native.CFunctionPtr") + std::to_string(counter) + "[" + params + variad + ret + "]";
+
     } else {
         llvm::errs() << "Unsupported function pointer type: " << qtpe.getAsString() << "\n";
         exit(-1);

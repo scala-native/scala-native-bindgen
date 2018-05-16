@@ -8,6 +8,7 @@ HeaderManager headerMan;
 std::string declarations;
 std::string enums;
 std::string helpers;
+std::set<std::string> locations;
 
 bool TreeVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
     std::string funcName = func->getNameInfo().getName().getAsString();

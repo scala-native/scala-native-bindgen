@@ -23,7 +23,7 @@ void HeaderManager::LoadConfig(const std::string& path){
 }
 
 bool HeaderManager::IsStandard(const std::string& path){
-    return false;
+    return !!headers.count(path);
 }
 
 

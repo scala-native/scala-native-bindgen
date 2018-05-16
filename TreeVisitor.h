@@ -17,6 +17,7 @@ extern HeaderManager headerMan;
 extern std::string declarations;
 extern std::string enums;
 extern std::string helpers;
+extern std::set<std::string> locations;
 
 class TreeVisitor : public clang::RecursiveASTVisitor<TreeVisitor> {
 private:
