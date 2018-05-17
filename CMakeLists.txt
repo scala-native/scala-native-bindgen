@@ -12,6 +12,7 @@ add_clang_executable(scalaBindgen
   TypeTranslator.cpp
   HeaderManager.h
   HeaderManager.cpp
+  CycleDetection.h
   Utils.h
   catch/catch.hpp
   SimpleTypeTests.cpp

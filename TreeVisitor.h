@@ -1,6 +1,7 @@
 #pragma once
 
 #include "HeaderManager.h"
+#include "CycleDetection.h"
 #include "TypeTranslator.h"
 
 #include "clang/Driver/Options.h"
@@ -23,9 +24,11 @@ class TreeVisitor : public clang::RecursiveASTVisitor<TreeVisitor> {
 private:
     clang::ASTContext* astContext;
     TypeTranslator typeTranslator;
+    CycleDetection cycleDetection;
+
 
 public:
-    explicit TreeVisitor(clang::CompilerInstance *CI) : astContext(&(CI->getASTContext())), typeTranslator(astContext) {}
+    explicit TreeVisitor(clang::CompilerInstance *CI) : astContext(&(CI->getASTContext())), typeTranslator(astContext), cycleDetection(typeTranslator) {}
 
     virtual bool VisitFunctionDecl(clang::FunctionDecl *func);
     virtual bool VisitTypedefDecl(clang::TypedefDecl *tpdef);

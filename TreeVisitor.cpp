@@ -128,12 +128,15 @@ bool TreeVisitor::VisitRecordDecl(clang::RecordDecl *record){
         for(const clang::FieldDecl* field : record->fields()){
             std::string fname = handleReservedWords(field->getNameAsString());
             std::string ftype = typeTranslator.Translate(field->getType(), &name);
-
             fields += ftype + ", ";
-            if(name != ""){
+
+            if(fname != ""){
                 helpersFunc += "\t\tdef " + fname + ": " + ftype + " = !p._" + std::to_string(fieldCnt + 1) + "\n";
                 helpersFunc += "\t\tdef " + fname + "_=(value: " + ftype + "):Unit = !p._" + std::to_string(fieldCnt + 1) + " = value\n";
             }
+
+            cycleDetection.AddDependcy(newName, field->getType());
+
             fieldCnt++;
         }
 
@@ -141,6 +144,12 @@ bool TreeVisitor::VisitRecordDecl(clang::RecordDecl *record){
         if(fields != ""){
             fields = fields.substr(0, fields.size()-2);
         }
+
+        //llvm::errs() << newName << "\n";
+        //for(auto& s : cycleDetection.dependencies[newName]){
+        //    llvm::errs() << "\t" << s << "\n";
+        //}
+        //llvm::errs() << cycleDetection.isCyclic(newName) << "\n";
 
         if(fieldCnt < SCALA_NATIVE_MAX_STRUCT_FIELDS){
             declarations += "\ttype " + newName + " = " + "native.CStruct" + std::to_string(fieldCnt) + "[" + fields + "]\n";
