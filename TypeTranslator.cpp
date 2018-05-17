@@ -49,7 +49,12 @@ std::string TypeTranslator::TranslateFunctionPointer(const clang::QualType& qtpe
             counter++;
         }
 
-        std::string variad = fc->isVariadic() ? "varArgs: native.CVararg*, " : "";
+        std::string variad = "";
+
+        if(fc->isVariadic()){
+            counter ++;
+            variad =  "native.CVararg, ";
+        }
 
         return std::string("native.CFunctionPtr") + std::to_string(counter) + "[" + params + variad + ret + "]";
 

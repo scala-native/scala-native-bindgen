@@ -1,14 +1,17 @@
 #include "HeaderManager.h"
+#include "Utils.h"
 
 #include "clang/Tooling/Tooling.h"
 
+#include <iostream>
 #include <fstream>
 
 HeaderManager::HeaderManager(): headers() {
 
 }
 
-void HeaderManager::LoadConfig(const std::string& path){
+void HeaderManager::LoadConfig(std::string path){
+    trim(path);
     std::ifstream input(path);
 
     for(std::string line; getline( input, line );){
@@ -22,7 +25,8 @@ void HeaderManager::LoadConfig(const std::string& path){
 
 }
 
-bool HeaderManager::IsStandard(const std::string& path){
+bool HeaderManager::IsStandard(std::string path){
+    trim(path);
     return !!headers.count(path);
 }
 

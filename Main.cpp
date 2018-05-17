@@ -4,6 +4,8 @@
 #define CATCH_CONFIG_RUNNER
 #include "catch/catch.hpp"
 
+#include <sys/types.h>
+
 static llvm::cl::OptionCategory Category("Binding Generator");
 static llvm::cl::extrahelp CommonHelp(clang::tooling::CommonOptionsParser::HelpMessage);
 static llvm::cl::extrahelp MoreHelp("\nProduce Bindings for scala native. Please specify lib name wit parameter name\n");

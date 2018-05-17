@@ -24,9 +24,9 @@ public:
         for (clang::DeclGroupRef::iterator i = DG.begin(), e = DG.end(); i != e; i++) {
             clang::Decl *D = *i;
             std::string fpath = smanager.getFilename(D->getLocation()).str();
-            locations.insert(basename(fpath) + "\n");
 
             if(!headerMan.IsStandard(basename(fpath)) && fpath != ""){
+                locations.insert(basename(fpath) + "\n");
                 visitor->TraverseDecl(D);
             }
 

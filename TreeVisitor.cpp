@@ -37,7 +37,7 @@ bool TreeVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
     }
 
     //Note the C Iso require at least one argument in a variadic function, so the comma is fine
-    std::string variad = func->isVariadic() ? ", varArgs: native.CVararg*" : "";
+    std::string variad = func->isVariadic() ? ", varArgs: native.CVararg" : "";
 
     declarations += "\tdef " + funcName + "(" + params + variad + "): " + retType + " = native.extern\n";
     return true;
@@ -89,17 +89,30 @@ bool TreeVisitor::VisitRecordDecl(clang::RecordDecl *record){
     if(record->isUnion() && !record->isAnonymousStructOrUnion() && name != ""){
 
         //Replace "union x" with union_x in scala
-        typeTranslator.AddTranslation("union " + name, "union" + name);
+        typeTranslator.AddTranslation("union " + name, "union_" + name);
 
         uint64_t maxSize = 0;
+        std::string helpersFunc = "";
 
         for(const clang::FieldDecl* field : record->fields()){
             maxSize = std::max(maxSize, astContext->getTypeSize(field->getType()));
+            std::string fname = handleReservedWords(field->getNameAsString());
+            std::string ftype = typeTranslator.Translate(field->getType(), &name);
+
+            if(fname != ""){
+                helpersFunc += "\t\tdef " + fname + ": native.Ptr[" + ftype + "] = p.cast[native.Ptr[" + ftype + "]]\n";
+                helpersFunc += "\t\tdef " + fname + "_=(value: " + ftype + "): Unit = !(p.cast[native.Ptr[" + ftype + "]]) = value\n";
+            }
         }
 
-        declarations += "\ttype union_" + name + " = native.CArray[Byte, " + intToScalaNat(maxSize) + "]\n";
+        auto usize = intToScalaNat(maxSize);
+        declarations += "\ttype union_" + name + " = native.CArray[Byte, " + usize + "]\n";
 
-        return true;
+        helpers += "\timplicit class union_" + name +"_pos(val p: native.Ptr[native.CArray[Byte, " + usize + "]]) extends AnyVal {\n";
+        helpers += helpersFunc;
+        helpers += "\t}\n\n";
+
+        return true;        
 
     } else if (record->isStruct() && record->isThisDeclarationADefinition() && !record->isAnonymousStructOrUnion() && name != ""){
 
@@ -119,7 +132,7 @@ bool TreeVisitor::VisitRecordDecl(clang::RecordDecl *record){
             fields += ftype + ", ";
             if(name != ""){
                 helpersFunc += "\t\tdef " + fname + ": " + ftype + " = !p._" + std::to_string(fieldCnt + 1) + "\n";
-                helpersFunc += "\t\tdef " + fname +"_=(value: " + ftype + "):Unit = !p._" + std::to_string(fieldCnt + 1) + " = value\n";
+                helpersFunc += "\t\tdef " + fname + "_=(value: " + ftype + "):Unit = !p._" + std::to_string(fieldCnt + 1) + " = value\n";
             }
             fieldCnt++;
         }

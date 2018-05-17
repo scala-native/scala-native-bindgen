@@ -9,8 +9,8 @@ private:
 
 public:
     HeaderManager();
-    void LoadConfig(const std::string& path);
-    bool IsStandard(const std::string& path);
+    void LoadConfig(std::string path);
+    bool IsStandard(std::string path);
     std::string* GetImport(const std::string& include);
 
 };
