@@ -14,11 +14,15 @@ Running the previous command wild also yield warnings along with the translation
 
 ## Building
 
-Building this tool require building LLVM and Clang. This can take hours. Please consider using pre-built binaries.
+Building this tool requires LLVM and Clang. Ensure that `llvm-config` is in your path.
 
-* Follow the [building instructions](http://clang.llvm.org/docs/LibASTMatchersTutorial.html#step-0-obtaining-clang) for Clang (Only step 0)
-* Go to `llvm/tools/clang/tools/extra`
-* Clone this repository `git clone https://github.com/mrRosset/scala-native-bindgen scala-bindgen`
-* Add `add_subdirectory(scala-bindgen)` to the CMakeLists.txt in the extra folder
-* Re-run the llvm/clang compilation
+```sh
+# Validate LLVM installation
+llvm-config --version --cmakedir --cxxflags --ldflags
 
+mkdir -p target
+cd target
+cmake ..
+make
+./scalaBindgen /usr/include/ctype.h -name ctype
+```

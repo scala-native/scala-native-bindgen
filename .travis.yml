@@ -1,0 +1,10 @@
+language: cpp
+sudo: false
+compiler: clang
+
+script:
+ - mkdir -p target
+ - cd target
+ - cmake ..
+ - make
+ - ./scalaBindgen /usr/include/ctype.h -name ctype
