@@ -1,8 +1,6 @@
 #include "TypeTranslator.h"
 #include "Utils.h"
 
-#include <error.h>
-
 TypeTranslator::TypeTranslator(clang::ASTContext* ctx_) : ctx(ctx_), typeMap() {
 
 	//Native Types
