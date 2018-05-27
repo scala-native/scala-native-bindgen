@@ -123,7 +123,7 @@ bool TreeVisitor::VisitRecordDecl(clang::RecordDecl *record){
         helpers += helpersFunc;
         helpers += "\t}\n\n";
 
-        return true;        
+        return true;
 
     } else if (record->isStruct() && record->isThisDeclarationADefinition() && !record->isAnonymousStructOrUnion() && name != ""){
 
@@ -181,6 +181,8 @@ bool TreeVisitor::VisitRecordDecl(clang::RecordDecl *record){
             helpers += "\timplicit class " + newName + "_ops(val p: native.Ptr[struct_" + name + "]) extends AnyVal {\n";
             helpers += helpersFunc;
             helpers += "\t}\n\n";
+
+            helpers += "\tdef " + newName + "()(implicit z: native.Zone): native.Ptr[" + newName + "] = native.alloc[" + newName + "]\n\n";
         }
 
         return true;
