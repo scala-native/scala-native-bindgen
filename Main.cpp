@@ -54,6 +54,7 @@ int main(int argc, char *argv[]) {
         } else {
             if(declarations != "" || enums != "")
             llvm::outs() << "import scala.scalanative._\n"
+                         << "import scala.scalanative.native._\n"
                          << "import scala.scalanative.native.Nat._\n\n";
 
             if(declarations != ""){
