@@ -11,8 +11,8 @@ add_definitions(${LLVM_DEFINITIONS})
 
 add_compile_options(-fexceptions -std=c++11)
 
-add_executable(scalaBindgen
-  Main.cpp
+add_library(scalaNativeBindgen
+  STATIC
   ScalaFrontend.h
   TreeVisitor.h
   TreeVisitor.cpp
@@ -23,12 +23,27 @@ add_executable(scalaBindgen
   HeaderManager.cpp
   CycleDetection.h
   Utils.h
-  catch/catch.hpp
-  SimpleTypeTests.cpp
+  )
+
+add_executable(scalaBindgen
+  Main.cpp
   )
 
 target_link_libraries(scalaBindgen
   PRIVATE
+  scalaNativeBindgen
+  clangFrontend
+  clangTooling
+  )
+
+add_executable(scalaBindgenTest
+  SimpleTypeTests.cpp
+  catch/catch.hpp
+  )
+
+target_link_libraries(scalaBindgenTest
+  PRIVATE
+  scalaNativeBindgen
   clangFrontend
   clangTooling
   )
