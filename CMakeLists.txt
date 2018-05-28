@@ -3,22 +3,13 @@ project(scala-native-bindgen)
 
 # Locate $LLVM_PATH/lib/cmake/clang/ClangConfig.cmake
 find_package(Clang REQUIRED CONFIG)
+message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
+message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
 
-# Read and set CXXFLAGS and LDFLAGS
-execute_process(COMMAND llvm-config --cxxflags
-  OUTPUT_VARIABLE LLVM_CXX_FLAGS
-  OUTPUT_STRIP_TRAILING_WHITESPACE
-  )
+include_directories(${LLVM_INCLUDE_DIRS})
+add_definitions(${LLVM_DEFINITIONS})
 
-execute_process(COMMAND llvm-config --ldflags
-  OUTPUT_VARIABLE LLVM_LINKER_FLAGS
-  OUTPUT_STRIP_TRAILING_WHITESPACE
-  )
-
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${LLVM_CXX_FLAGS}")
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${LLVM_LINKER_FLAGS}")
-
-add_compile_options(-fexceptions)
+add_compile_options(-fexceptions -std=c++11)
 
 add_executable(scalaBindgen
   Main.cpp

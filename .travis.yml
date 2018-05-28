@@ -1,10 +1,14 @@
 language: cpp
-sudo: false
-compiler: clang
+sudo: required
+compiler: gcc
 
 script:
- - mkdir -p target
- - cd target
- - cmake ..
- - make
- - ./scalaBindgen /usr/include/ctype.h -name ctype
+ - docker-compose build ubuntu-16.04-llvm-$LLVM_VERSION
+ - docker run --rm -ti scala-native-bindgen:ubuntu-16.04-llvm-$LLVM_VERSION /usr/include/ctype.h -name ctype --
+ - docker run --rm -ti scala-native-bindgen:ubuntu-16.04-llvm-$LLVM_VERSION
+
+matrix:
+  include:
+  - env: LLVM_VERSION=dev
+  - env: LLVM_VERSION=6.0
+  - env: LLVM_VERSION=5.0

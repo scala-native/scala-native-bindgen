@@ -37,7 +37,7 @@ bool TreeVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
     }
 
     //Note the C Iso require at least one argument in a variadic function, so the comma is fine
-    std::string variad = func->isVariadic() ? ", varArgs: native.CVararg" : "";
+    std::string variad = func->isVariadic() ? ", varArgs: native.CVararg*" : "";
 
     declarations += "\tdef " + funcName + "(" + params + variad + "): " + retType + " = native.extern\n";
     return true;
