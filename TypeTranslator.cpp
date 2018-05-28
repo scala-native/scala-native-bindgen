@@ -62,8 +62,7 @@ std::string TypeTranslator::TranslateFunctionPointer(const clang::QualType& qtpe
     }
 }
 
-std::string TypeTranslator::TranslatePointer(const clang::PointerType* ptr, const std::string* avoid){
-    const clang::QualType& pte = ptr->getPointeeType();
+std::string TypeTranslator::TranslatePointer(const clang::QualType& pte, const std::string* avoid){
 
     if(pte->isBuiltinType()){
         const clang::BuiltinType* as = pte->getAs<clang::BuiltinType>();
@@ -147,7 +146,7 @@ std::string TypeTranslator::Translate(const clang::QualType& qtpe, const std::st
         return TranslateFunctionPointer(qtpe, avoid);
 
     } else if(tpe->isPointerType()){
-        return TranslatePointer(tpe->getAs<clang::PointerType>(), avoid);
+        return TranslatePointer(tpe->getAs<clang::PointerType>()->getPointeeType(), avoid);
 
     } else if(qtpe->isStructureType() || qtpe->isUnionType()){
         return TranslateStructOrUnion(qtpe);
@@ -157,7 +156,8 @@ std::string TypeTranslator::Translate(const clang::QualType& qtpe, const std::st
 
     } else if(qtpe->isConstantArrayType()){
         return TranslateConstantArray(ctx->getAsConstantArrayType(qtpe), avoid);
-
+    } else if(qtpe->isArrayType()){
+        return TranslatePointer(ctx->getAsArrayType(qtpe)->getElementType(), avoid);
     } else {
 
         auto found = typeMap.find(qtpe.getUnqualifiedType().getAsString());
