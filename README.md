@@ -16,17 +16,30 @@ Running the previous command wild also yield warnings along with the translation
 
 ## Building
 
-Building this tool requires LLVM and Clang. Ensure that `llvm-config` is in your path.
+Building this tool requires [CMake], [LLVM] and [Clang]. See the [Scala
+Native setup guide] for instructions on installing the dependencies.
 
 ```sh
-# Validate LLVM installation
-llvm-config --version --cmakedir --cxxflags --ldflags
-
 mkdir -p target
 cd target
 cmake ..
 make
-./scalaBindgen /usr/include/ctype.h -name ctype
+./scalaBindgen /usr/include/ctype.h -name ctype --
+```
+
+ [CMake]: https://cmake.org/
+ [LLVM]: https://llvm.org/
+ [Clang]: https://clang.llvm.org/
+ [Scala Native setup guide]: http://www.scala-native.org/en/latest/user/setup.html
+
+## Testing
+
+The tests assumes that the above instructions for building has been
+followed.
+
+```sh
+cd tests
+sbt test
 ```
 
 ## License

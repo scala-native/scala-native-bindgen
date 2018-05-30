@@ -3,12 +3,12 @@ sudo: required
 compiler: gcc
 
 script:
- - docker-compose build ubuntu-16.04-llvm-$LLVM_VERSION
- - docker run --rm -ti scala-native-bindgen:ubuntu-16.04-llvm-$LLVM_VERSION /usr/include/ctype.h -name ctype --
- - docker run --rm -ti --entrypoint /src/target/scalaBindgenTest scala-native-bindgen:ubuntu-16.04-llvm-$LLVM_VERSION
+ - docker-compose build $TEST_ENV
+ - docker run --rm -ti scala-native-bindgen:$TEST_ENV /usr/include/ctype.h -name ctype --
+ - docker-compose run --rm sbt-test
 
 matrix:
   include:
-  - env: LLVM_VERSION=dev
-  - env: LLVM_VERSION=6.0
-  - env: LLVM_VERSION=5.0
+  - env: TEST_ENV=ubuntu-16.04-llvm-dev
+  - env: TEST_ENV=ubuntu-16.04-llvm-6.0
+  - env: TEST_ENV=ubuntu-16.04-llvm-5.0

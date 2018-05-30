@@ -26,3 +26,14 @@ services:
         - UBUNTU_VERSION=16.04
         - LLVM_VERSION=5.0
 
+  sbt-test:
+    image: scala-native-bindgen:${TEST_ENV}
+    entrypoint: 
+    - sh
+    - -c
+    - |
+      cd /src/tests
+      sbt compile test
+    volumes:
+      - ${HOME}/.ivy2:/root/.ivy2
+      - ${HOME}/.sbt:/root/.sbt
