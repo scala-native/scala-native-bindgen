@@ -1,6 +1,8 @@
 # Scala Native Binding generator
 
-This tool generate Scala Native bindings from C headers. It's build upon clang and Libtooling and thus respect the conventions of clang-tools.
+[![Build Status](https://travis-ci.com/kornilova-l/scala-native-bindgen.svg?branch=master)](https://travis-ci.com/kornilova-l/scala-native-bindgen)
+
+This tool generate Scala Native bindings from C headers. It's built upon clang and Libtooling and thus respect the conventions of clang-tools.
 
 ## Usage
 
@@ -26,3 +28,8 @@ cmake ..
 make
 ./scalaBindgen /usr/include/ctype.h -name ctype
 ```
+
+## License
+
+This project is distributed under the Scala license.
+[See LICENSE.txt for details](LICENSE.txt)
