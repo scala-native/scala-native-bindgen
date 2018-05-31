@@ -1,9 +1,16 @@
 #include "ScalaFrontend.h"
 
 #include "clang/Tooling/Tooling.h"
+
+#define CATCH_CONFIG_RUNNER
 #include "catch/catch.hpp"
 
 #include <iostream>
+
+int main(int argc, char *argv[]) {
+    int result = Catch::Session().run( argc, argv );
+    return result;
+}
 
 std::string Translate(std::string code){
     declarations = "";
