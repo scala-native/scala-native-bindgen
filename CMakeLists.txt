@@ -13,16 +13,31 @@ add_compile_options(-fexceptions -std=c++11)
 
 add_library(scalaNativeBindgen
   STATIC
-  ScalaFrontend.h
-  TreeVisitor.h
-  TreeVisitor.cpp
-  TreeConsumer.h
+  visitor/ScalaFrontendAction.h
+  visitor/ScalaFrontendAction.cpp
+  visitor/ScalaFrontendActionFactory.h
+  visitor/ScalaFrontendActionFactory.cpp
+  visitor/TreeVisitor.h
+  visitor/TreeVisitor.cpp
+  visitor/TreeConsumer.h
   TypeTranslator.h
   TypeTranslator.cpp
   HeaderManager.h
   HeaderManager.cpp
   CycleDetection.h
   Utils.h
+  ir/IR.h
+  ir/IR.cpp
+  ir/Struct.cpp
+  ir/Struct.h
+  ir/Function.cpp
+  ir/Function.h
+  ir/TypeDef.cpp
+  ir/TypeDef.h
+  ir/Enum.cpp
+  ir/Enum.h
+  ir/TypeAndName.cpp
+  ir/TypeAndName.h
   )
 
 add_executable(scalaBindgen

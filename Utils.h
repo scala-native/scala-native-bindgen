@@ -1,7 +1,7 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-#include "clang/AST/AST.h"
+#include <clang/AST/AST.h>
 
 #include <string>
 #include <cinttypes>

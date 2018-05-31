@@ -1,7 +1,7 @@
 #include "HeaderManager.h"
 #include "Utils.h"
 
-#include "clang/Tooling/Tooling.h"
+#include <clang/Tooling/Tooling.h>
 
 #include <iostream>
 #include <fstream>

@@ -1,0 +1,151 @@
+#include <set>
+#include "TreeVisitor.h"
+#include "../Utils.h"
+#include "../HeaderManager.h"
+
+HeaderManager headerMan;
+
+std::set<std::string> locations;
+
+bool TreeVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
+    std::string funcName = func->getNameInfo().getName().getAsString();
+    std::string retType = typeTranslator.Translate(func->getReturnType());
+    std::vector<Parameter> parameters;
+
+    int anonCounter = 0;
+
+    for (const clang::ParmVarDecl *parm : func->parameters()) {
+        //Handle default values
+        std::string pname = handleReservedWords(parm->getNameAsString());
+
+        if (pname.empty()) {
+            pname = "anonymous" + std::to_string(anonCounter++);
+        }
+
+        parameters.push_back(Parameter(pname, typeTranslator.Translate(parm->getType())));
+    }
+
+    ir->addFunction(funcName, parameters, retType, func->isVariadic());
+
+    return true;
+}
+
+bool TreeVisitor::VisitTypedefDecl(clang::TypedefDecl *tpdef){
+    std::string name = tpdef->getName();
+
+    cycleDetection.AddDependcy(name, tpdef->getUnderlyingType());
+    if(cycleDetection.isCyclic(name)){
+        llvm::errs() << "Error: " << name << " ic cyclic\n";
+        llvm::errs() << name << "\n";
+        for(auto& s : cycleDetection.dependencies[name]){
+            llvm::errs() << "\t" << s << "\n";
+        }
+        llvm::errs() << cycleDetection.isCyclic(name) << "\n";
+    }
+
+    std::string type = typeTranslator.Translate(tpdef->getUnderlyingType());
+    ir->addTypeDef(name, type);
+    return true;
+}
+
+bool TreeVisitor::VisitEnumDecl(clang::EnumDecl *enumdecl) {
+    std::string name = enumdecl->getNameAsString();
+
+    if (name.empty() && enumdecl->getTypedefNameForAnonDecl()) {
+        name = enumdecl->getTypedefNameForAnonDecl()->getNameAsString();
+    }
+
+    if (!name.empty()) {
+        // Replace "enum x" with enum_x in scala
+        typeTranslator.AddTranslation("enum " + name, "enum_" + name);
+    }
+
+    std::vector<Enumerator> enumerators;
+
+    int i = 0;
+    for (const clang::EnumConstantDecl *en : enumdecl->enumerators()) {
+        enumerators.push_back(Enumerator(en->getNameAsString(), static_cast<uint64_t>(i++)));
+    }
+
+    ir->addEnum(name, enumerators);
+
+    return true;
+}
+
+bool TreeVisitor::VisitRecordDecl(clang::RecordDecl *record) {
+    std::string name = record->getNameAsString();
+
+    //Handle typedef struct {} x; and typedef union {} y; by getting the name from the typedef
+    if ((record->isStruct() || record->isUnion()) && name.empty() && record->getTypedefNameForAnonDecl()) {
+        name = record->getTypedefNameForAnonDecl()->getNameAsString();
+    }
+
+    if (record->isUnion() && !record->isAnonymousStructOrUnion() && !name.empty()) {
+        handleUnion(record, name);
+        return true;
+
+    } else if (record->isStruct() && record->isThisDeclarationADefinition() &&
+               !record->isAnonymousStructOrUnion() && !name.empty()) {
+        handleStruct(record, name);
+        return true;
+
+    }
+    return false;
+}
+
+void TreeVisitor::handleUnion(clang::RecordDecl *record, std::string name) {
+    // Replace "union x" with union_x in scala
+    typeTranslator.AddTranslation("union " + name, "union_" + name);
+
+    uint64_t maxSize = 0;
+
+    std::vector<Field> fields;
+
+    for (const clang::FieldDecl *field : record->fields()) {
+        maxSize = std::max(maxSize, astContext->getTypeSize(field->getType()));
+        std::string fname = handleReservedWords(field->getNameAsString());
+        std::string ftype = typeTranslator.Translate(field->getType(), &name);
+
+        fields.push_back(Field(fname, ftype));
+    }
+
+    auto usize = intToScalaNat(static_cast<int>(maxSize));
+
+    ir->addUnion(name, fields, maxSize);
+}
+
+void TreeVisitor::handleStruct(clang::RecordDecl *record, std::string name) {
+    std::string newName = "struct_" + name;
+
+    // Replace "struct x" with struct_x in scala
+    typeTranslator.AddTranslation("struct " + name, newName);
+
+    int fieldCnt = 0;
+    std::vector<Field> fields;
+
+    for (const clang::FieldDecl *field : record->fields()) {
+        std::string ftype = typeTranslator.Translate(field->getType(), &name);
+        fields.push_back(Field(field->getNameAsString(), ftype));
+
+        cycleDetection.AddDependcy(newName, field->getType());
+
+        fieldCnt++;
+    }
+
+    if(cycleDetection.isCyclic(newName)){
+        llvm::errs() << "Error: " << newName << " ic cyclic\n";
+        llvm::errs() << newName << "\n";
+        for(auto& s : cycleDetection.dependencies[newName]){
+            llvm::errs() << "\t" << s << "\n";
+        }
+        llvm::errs() << cycleDetection.isCyclic(newName) << "\n";
+    }
+
+    //llvm::errs() << newName << "\n";
+    //for(auto& s : cycleDetection.dependencies[newName]){
+    //    llvm::errs() << "\t" << s << "\n";
+    //}
+    //llvm::errs() << cycleDetection.isCyclic(newName) << "\n";
+
+    ir->addStruct(name, fields, astContext->getTypeSize(record->getTypeForDecl()));
+}

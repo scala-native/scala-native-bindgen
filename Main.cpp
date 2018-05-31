@@ -1,5 +1,8 @@
-#include "ScalaFrontend.h"
+#include "visitor/ScalaFrontendAction.h"
+#include <sstream>
 #include "Utils.h"
+#include "visitor/ScalaFrontendActionFactory.h"
+#include <clang/Tooling/CommonOptionsParser.h>
 
 
 static llvm::cl::OptionCategory Category("Binding Generator");
@@ -14,60 +17,36 @@ int main(int argc, char *argv[]) {
     clang::tooling::CommonOptionsParser op(argc, (const char**)argv, Category);
     clang::tooling::ClangTool Tool(op.getCompilations(), op.getSourcePathList());
 
-    auto lib = LibName.getValue();
-    if(lib == ""){
-        llvm::errs() << "Error: Please specify the lib name using -name paramter\n";
+    auto libName = LibName.getValue();
+    if(libName.empty()){
+        llvm::errs() << "Error: Please specify the lib name using -name parameter\n";
         return -1;
     }
 
     auto stdhead = StdHeaders.getValue();
-    if(stdhead != ""){
+    if(!stdhead.empty()){
         headerMan.LoadConfig(stdhead);
     }
 
-    declarations = "";
-    enums = "";
-    helpers = "";
     locations.clear();
 
-    int result = Tool.run(clang::tooling::newFrontendActionFactory<ScalaFrontendAction>().get());
+    ScalaFrontendActionFactory actionFactory(libName);
+
+    int result = Tool.run(&actionFactory);
+
+    IR ir = actionFactory.getIntermediateRepresentation();
 
     auto printLoc = PrintHeadersLocation.getValue();
 
+    std::ostringstream s;
+
     if(printLoc){
-        for(const auto& location: locations){
-            llvm::outs() << location;
+        for(const auto& location: locations) {
+            s << location.c_str();
         }
-
     } else {
-        if(declarations != "" || enums != "")
-        llvm::outs() << "import scala.scalanative._\n"
-                     << "import scala.scalanative.native._\n"
-                     << "import scala.scalanative.native.Nat._\n\n";
-
-        if(declarations != ""){
-            llvm::outs() << "@native.link(\"" << lib << "\")\n"
-                         << "@native.extern\n"
-                         << "object " << lib << " {\n"
-                         << declarations
-                         << "}\n\n";
-        }
-
-        if(enums != "" || helpers != ""){
-            llvm::outs() << "import " + lib + "._\n\n";
-        }
-
-        if(enums != ""){
-            llvm::outs() << "object " << lib << "Enums {\n"
-                         << enums
-                         << "}\n\n";
-        }
-
-        if(helpers != ""){
-            llvm::outs() << "object " << lib << "Helpers {\n"
-                         << helpers
-                         << "}\n\n";
-        }
+        s << ir.generate();
     }
+    std::cout << s.str();
     return result;
 }

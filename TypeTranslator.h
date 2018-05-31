@@ -1,8 +1,8 @@
 #pragma once
 
-#include "clang/AST/AST.h"
-#include "clang/AST/ASTContext.h"
-#include "clang/Tooling/Tooling.h"
+#include <clang/AST/AST.h>
+#include <clang/AST/ASTContext.h>
+#include <clang/Tooling/Tooling.h>
 
 class TypeTranslator {
 private:
