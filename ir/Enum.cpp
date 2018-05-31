@@ -11,11 +11,11 @@ std::string Enumerator::getName() {
 Enum::Enum(std::string name, std::vector<Enumerator> enumerators)
         : name(std::move(name)), enumerators(std::move(enumerators)) {}
 
-bool Enum::isAnonymous() {
+bool Enum::isAnonymous() const {
     return name.empty();
 }
 
-TypeDef Enum::generateTypeDef() {
+TypeDef Enum::generateTypeDef() const {
     assert (!name.empty()); // called after isAnonymous()
     return TypeDef("enum_" + name, "native.CInt");
 }

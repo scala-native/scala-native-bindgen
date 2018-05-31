@@ -77,7 +77,7 @@ std::string IR::generate() {
         s << "}\n\n";
     }
 
-    if (!unions.empty() || !structs.empty()) {
+    if (hasHelperMethods()) {
         s << "object " << libName << "Helpers {\n";
 
         for (const auto &st : structs) {
@@ -97,15 +97,15 @@ std::string IR::generate() {
 }
 
 void IR::generateTypeDefs() {
-    for (auto e : enums) {
+    for (const auto &e : enums) {
         if (!e.isAnonymous()) { // enum might be anon
             typeDefs.push_back(e.generateTypeDef());
         }
     }
-    for (auto s : structs) {
+    for (const auto &s : structs) {
         typeDefs.push_back(s.generateTypeDef());
     }
-    for (auto u : unions) {
+    for (const auto &u : unions) {
         typeDefs.push_back(u.generateTypeDef());
     }
 }
@@ -115,4 +115,18 @@ void IR::generateDecl() {
         generateTypeDefs();
         generated = true;
     }
+}
+
+bool IR::hasHelperMethods() const {
+    if (!unions.empty()) {
+        /* all unions have helper methods */
+        return true;
+    }
+
+    for (const auto &s : structs) {
+        if (s.hasHelperMethods()) {
+            return true;
+        }
+    }
+    return false;
 }

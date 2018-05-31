@@ -43,6 +43,11 @@ private:
 
     void generateDecl();
 
+    /**
+     * @return true if helper methods will be generated for this library
+     */
+    bool hasHelperMethods() const;
+
     std::string libName;
     std::vector<Function> functions;
     std::vector<TypeDef> typeDefs;

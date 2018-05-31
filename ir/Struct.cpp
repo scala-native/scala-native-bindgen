@@ -12,7 +12,7 @@ StructOrUnion::StructOrUnion(std::string name, std::vector<Field> fields)
 Struct::Struct(std::string name, std::vector<Field> fields, uint64_t typeSize)
         : StructOrUnion(std::move(name), std::move(fields)), typeSize(typeSize) {}
 
-TypeDef Struct::generateTypeDef() {
+TypeDef Struct::generateTypeDef() const {
     if (fields.size() < SCALA_NATIVE_MAX_STRUCT_FIELDS) {
         return TypeDef("struct_" + name,
                        "native.CStruct" + std::to_string(fields.size()) + "[" + getFieldsTypes() + "]");
@@ -23,7 +23,7 @@ TypeDef Struct::generateTypeDef() {
     }
 }
 
-std::string Struct::getFieldsTypes() {
+std::string Struct::getFieldsTypes() const {
     std::stringstream s;
     auto fieldsCount = static_cast<int>(fields.size());
     for (int i = 0; i < fieldsCount; i++) {
@@ -36,8 +36,8 @@ std::string Struct::getFieldsTypes() {
 }
 
 std::string Struct::generateHelperClass() const {
-    if (fields.empty() || fields.size() >= SCALA_NATIVE_MAX_STRUCT_FIELDS) {
-        /* struct is represented as an array */
+    if (!hasHelperMethods()) {
+        /* struct is empty or represented as an array */
         return "";
     }
     std::stringstream s;
@@ -62,11 +62,15 @@ std::string Struct::generateHelperClass() const {
     return s.str();
 }
 
+bool Struct::hasHelperMethods() const {
+    return !fields.empty() && fields.size() < SCALA_NATIVE_MAX_STRUCT_FIELDS;
+}
+
 Union::Union(std::string name,
              std::vector<Field> members, uint64_t maxSize)
         : StructOrUnion(std::move(name), std::move(members)), maxSize(maxSize) {}
 
-TypeDef Union::generateTypeDef() {
+TypeDef Union::generateTypeDef() const {
     return TypeDef("union_" + name, "native.CArray[Byte, " + uint64ToScalaNat(maxSize) + "]");
 }
 

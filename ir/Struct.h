@@ -17,7 +17,7 @@ class StructOrUnion {
 public:
     StructOrUnion(std::string name, std::vector<Field> fields);
 
-    virtual TypeDef generateTypeDef() = 0;
+    virtual TypeDef generateTypeDef() const = 0;
 
     virtual std::string generateHelperClass() const = 0;
 
@@ -30,12 +30,17 @@ class Struct : StructOrUnion {
 public:
     Struct(std::string name, std::vector<Field> fields, uint64_t typeSize);
 
-    TypeDef generateTypeDef() override;
+    TypeDef generateTypeDef() const override;
 
     std::string generateHelperClass() const override;
 
+    /**
+     * @return true if helper methods will be generated for this struct
+     */
+    bool hasHelperMethods() const;
+
 private:
-    std::string getFieldsTypes();
+    std::string getFieldsTypes() const;
 
     /* type size is needed if number of fields is bigger than 22 */
     uint64_t typeSize;
@@ -45,7 +50,7 @@ class Union : StructOrUnion {
 public:
     Union(std::string name, std::vector<Field> members, uint64_t maxSize);
 
-    TypeDef generateTypeDef() override;
+    TypeDef generateTypeDef() const override;
 
     std::string generateHelperClass() const override;
 

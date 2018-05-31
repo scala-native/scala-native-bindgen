@@ -23,9 +23,9 @@ class Enum {
 public:
     Enum(std::string name, std::vector<Enumerator> enumerators);
 
-    bool isAnonymous();
+    bool isAnonymous() const;
 
-    TypeDef generateTypeDef();
+    TypeDef generateTypeDef() const;
 
     friend std::ostream &operator<<(std::ostream &s, const Enum &e);
 
