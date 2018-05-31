@@ -1,7 +1,6 @@
 #include "ScalaFrontend.h"
 #include "Utils.h"
 
-#include <sys/types.h>
 
 static llvm::cl::OptionCategory Category("Binding Generator");
 static llvm::cl::extrahelp CommonHelp(clang::tooling::CommonOptionsParser::HelpMessage);
@@ -43,6 +42,7 @@ int main(int argc, char *argv[]) {
     } else {
         if(declarations != "" || enums != "")
         llvm::outs() << "import scala.scalanative._\n"
+                     << "import scala.scalanative.native._\n"
                      << "import scala.scalanative.native.Nat._\n\n";
 
         if(declarations != ""){
@@ -50,8 +50,11 @@ int main(int argc, char *argv[]) {
                          << "@native.extern\n"
                          << "object " << lib << " {\n"
                          << declarations
-                         << "}\n\n"
-                         << "import " + lib + "._\n\n";
+                         << "}\n\n";
+        }
+
+        if(enums != "" || helpers != ""){
+            llvm::outs() << "import " + lib + "._\n\n";
         }
 
         if(enums != ""){

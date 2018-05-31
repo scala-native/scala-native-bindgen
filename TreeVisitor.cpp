@@ -47,6 +47,17 @@ bool TreeVisitor::VisitTypedefDecl(clang::TypedefDecl *tpdef){
     std::string name = tpdef->getName();
     std::string tpe = typeTranslator.Translate(tpdef->getUnderlyingType());
     declarations += "\ttype " + name + " = " + tpe + "\n";
+
+    cycleDetection.AddDependcy(name, tpdef->getUnderlyingType());
+    if(cycleDetection.isCyclic(name)){
+        llvm::errs() << "Error: " << name << " ic cyclic\n";
+        llvm::errs() << name << "\n";
+        for(auto& s : cycleDetection.dependencies[name]){
+            llvm::errs() << "\t" << s << "\n";
+        }
+        llvm::errs() << cycleDetection.isCyclic(name) << "\n";
+    }
+
     return true;
 }
 
@@ -112,7 +123,7 @@ bool TreeVisitor::VisitRecordDecl(clang::RecordDecl *record){
         helpers += helpersFunc;
         helpers += "\t}\n\n";
 
-        return true;        
+        return true;
 
     } else if (record->isStruct() && record->isThisDeclarationADefinition() && !record->isAnonymousStructOrUnion() && name != ""){
 
@@ -145,11 +156,16 @@ bool TreeVisitor::VisitRecordDecl(clang::RecordDecl *record){
             fields = fields.substr(0, fields.size()-2);
         }
 
-        //llvm::errs() << newName << "\n";
-        //for(auto& s : cycleDetection.dependencies[newName]){
-        //    llvm::errs() << "\t" << s << "\n";
-        //}
-        //llvm::errs() << cycleDetection.isCyclic(newName) << "\n";
+
+
+        if(cycleDetection.isCyclic(newName)){
+            llvm::errs() << "Error: " << newName << " ic cyclic\n";
+            llvm::errs() << newName << "\n";
+            for(auto& s : cycleDetection.dependencies[newName]){
+                llvm::errs() << "\t" << s << "\n";
+            }
+            llvm::errs() << cycleDetection.isCyclic(newName) << "\n";
+        }
 
         if(fieldCnt < SCALA_NATIVE_MAX_STRUCT_FIELDS){
             declarations += "\ttype " + newName + " = " + "native.CStruct" + std::to_string(fieldCnt) + "[" + fields + "]\n";
@@ -165,6 +181,8 @@ bool TreeVisitor::VisitRecordDecl(clang::RecordDecl *record){
             helpers += "\timplicit class " + newName + "_ops(val p: native.Ptr[struct_" + name + "]) extends AnyVal {\n";
             helpers += helpersFunc;
             helpers += "\t}\n\n";
+
+            helpers += "\tdef " + newName + "()(implicit z: native.Zone): native.Ptr[" + newName + "] = native.alloc[" + newName + "]\n\n";
         }
 
         return true;

@@ -78,6 +78,19 @@ TEST_CASE("struct pointer", "[Type]"){
     REQUIRE(answ == Translate(code));
 }
 
+TEST_CASE("struct helper methods") {
+    std::string code = "struct listing { int a; int b; };";
+    Translate(code);
+    std::string answ = "\timplicit class struct_listing_ops(val p: native.Ptr[struct_listing]) extends AnyVal {\n"
+                       "\t\tdef a: native.CInt = !p._1\n"
+                       "\t\tdef a_=(value: native.CInt):Unit = !p._1 = value\n"
+                       "\t\tdef b: native.CInt = !p._2\n"
+                       "\t\tdef b_=(value: native.CInt):Unit = !p._2 = value\n"
+                       "\t}\n\n"
+                       "\tdef struct_listing()(implicit z: native.Zone): native.Ptr[struct_listing] = native.alloc[struct_listing]\n\n";
+    REQUIRE(answ == helpers);
+}
+
 TEST_CASE("func no args", "[Func]"){
     std::string code = "int foo();";
     std::string answ = "\tdef foo(): native.CInt = native.extern\n";
