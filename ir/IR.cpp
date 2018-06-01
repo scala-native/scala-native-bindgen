@@ -64,9 +64,11 @@ std::string IR::generate() {
         s << "}\n\n";
     }
 
-    if (!enums.empty()) {
-        llvm::outs() << "import " + libObjName + "._\n\n";
+    if (!enums.empty() || hasHelperMethods()) {
+        s << "import " << libObjName << "._\n\n";
+    }
 
+    if (!enums.empty()) {
         s << "object " << libName << "Enums {\n";
 
         for (const auto &e : enums) {
