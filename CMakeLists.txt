@@ -35,15 +35,3 @@ target_link_libraries(scalaBindgen
   clangFrontend
   clangTooling
   )
-
-add_executable(scalaBindgenTest
-  SimpleTypeTests.cpp
-  catch/catch.hpp
-  )
-
-target_link_libraries(scalaBindgenTest
-  PRIVATE
-  scalaNativeBindgen
-  clangFrontend
-  clangTooling
-  )
