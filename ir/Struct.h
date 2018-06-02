@@ -21,18 +21,29 @@ public:
 
     virtual std::string generateHelperClass() const = 0;
 
+    std::string getName() const;
+
+    virtual std::string getType() const = 0;
+
+    /**
+     * @return true if at leas one field has given type
+     */
+    bool usesType(const std::string &type) const;
+
 protected:
     std::string name; // names of structs and unions are not empty
     std::vector<Field> fields;
 };
 
-class Struct : StructOrUnion {
+class Struct : public StructOrUnion {
 public:
     Struct(std::string name, std::vector<Field> fields, uint64_t typeSize);
 
     TypeDef generateTypeDef() const override;
 
     std::string generateHelperClass() const override;
+
+    std::string getType() const override;
 
     /**
      * @return true if helper methods will be generated for this struct
@@ -46,13 +57,15 @@ private:
     uint64_t typeSize;
 };
 
-class Union : StructOrUnion {
+class Union : public StructOrUnion {
 public:
     Union(std::string name, std::vector<Field> members, uint64_t maxSize);
 
     TypeDef generateTypeDef() const override;
 
     std::string generateHelperClass() const override;
+
+    std::string getType() const override;
 
 private:
     uint64_t maxSize;

@@ -113,8 +113,9 @@ void IR::generateTypeDefs() {
     }
 }
 
-void IR::generate() {
+void IR::generate(const std::string &excludePrefix) {
     if (!generated) {
+        filterDeclarations(excludePrefix);
         generateTypeDefs();
         generated = true;
     }
@@ -136,4 +137,63 @@ bool IR::hasHelperMethods() const {
 
 bool IR::hasEnums() const {
     return !enums.empty();
+}
+
+void IR::filterDeclarations(const std::string &excludePrefix) {
+    if (excludePrefix.empty()) {
+        return;
+    }
+
+    filterTypeDefs(excludePrefix);
+
+    filterFunctions(excludePrefix);
+}
+
+void IR::filterTypeDefs(const std::string &excludePrefix) {
+    for (auto it = typeDefs.begin(); it != typeDefs.end();) {
+        TypeDef &typeDef = *it;
+        if (startsWith(typeDef.getName(), excludePrefix) &&
+            typeIsUsedOnlyInTypeDefs(typeDef.getName())) {
+            /* remove this typedef and replace aliases with actual type */
+            replaceTypeInTypeDefs(typeDef.getName(), typeDef.getType());
+            it = typeDefs.erase(it);
+        } else {
+            ++it;
+        }
+    }
+}
+
+void IR::replaceTypeInTypeDefs(const std::string &oldType, const std::string &newType) {
+    for (auto &typeDef : typeDefs) {
+        if (typeDef.getType() == oldType) {
+            typeDef.setType(newType);
+        }
+    }
+}
+
+void IR::filterFunctions(const std::string &excludePrefix) {
+    for (auto it = functions.begin(); it != functions.end();) {
+        Function &function = *it;
+        if (startsWith(function.getName(), excludePrefix)) {
+            it = functions.erase(it);
+        } else {
+            it++;
+        }
+    }
+}
+
+template<typename T>
+bool IR::isTypeUsed(const std::vector<T> &declarations, const std::string &type) {
+    for (const auto &decl : declarations) {
+        if (decl.usesType(type)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool IR::typeIsUsedOnlyInTypeDefs(std::string type) {
+    return !(isTypeUsed(functions, type) ||
+             isTypeUsed(structs, type) ||
+             isTypeUsed(unions, type));
 }

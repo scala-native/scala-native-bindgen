@@ -2,15 +2,16 @@
 #include <clang/Tooling/CommonOptionsParser.h>
 
 
-static llvm::cl::OptionCategory Category("Binding Generator");
-static llvm::cl::extrahelp CommonHelp(clang::tooling::CommonOptionsParser::HelpMessage);
-static llvm::cl::extrahelp MoreHelp("\nProduce Bindings for scala native. Please specify lib name wit parameter name\n");
-static llvm::cl::opt<std::string> LibName("name", llvm::cl::cat(Category));
-static llvm::cl::opt<std::string> StdHeaders("stdHeaders", llvm::cl::cat(Category));
-static llvm::cl::opt<bool> PrintHeadersLocation ("location", llvm::cl::cat(Category));
-
-
 int main(int argc, char *argv[]) {
+    llvm::cl::OptionCategory Category("Binding Generator");
+    llvm::cl::extrahelp CommonHelp(clang::tooling::CommonOptionsParser::HelpMessage);
+    llvm::cl::extrahelp MoreHelp("\nProduce Bindings for scala native. Please specify lib name with parameter name\n");
+
+    llvm::cl::opt<std::string> LibName("name", llvm::cl::cat(Category));
+    llvm::cl::opt<std::string> StdHeaders("std-headers", llvm::cl::cat(Category));
+    llvm::cl::opt<bool> PrintHeadersLocation("location", llvm::cl::cat(Category));
+    llvm::cl::opt<std::string> ExcludePrefix("exclude-prefix", llvm::cl::cat(Category));
+    
     clang::tooling::CommonOptionsParser op(argc, (const char**)argv, Category);
     clang::tooling::ClangTool Tool(op.getCompilations(), op.getSourcePathList());
 
@@ -40,7 +41,7 @@ int main(int argc, char *argv[]) {
             llvm::outs() << location.c_str();
         }
     } else {
-        ir.generate();
+        ir.generate(ExcludePrefix.getValue());
         llvm::outs() << ir;
     }
     llvm::outs().flush();

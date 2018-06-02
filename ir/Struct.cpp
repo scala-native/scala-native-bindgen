@@ -8,6 +8,19 @@ Field::Field(std::string name, std::string type)
 StructOrUnion::StructOrUnion(std::string name, std::vector<Field> fields)
         : name(std::move(name)), fields(std::move(fields)) {}
 
+std::string StructOrUnion::getName() const {
+    return name;
+}
+
+bool StructOrUnion::usesType(const std::string &type) const {
+    for (const auto &field : fields) {
+        if (typeUsesOtherType(field.getType(), type)) {
+            return true;
+        }
+    }
+    return false;
+}
+
 Struct::Struct(std::string name, std::vector<Field> fields, uint64_t typeSize)
         : StructOrUnion(std::move(name), std::move(fields)), typeSize(typeSize) {}
 
@@ -38,8 +51,8 @@ std::string Struct::generateHelperClass() const {
         return "";
     }
     std::stringstream s;
-    std::string newName = "struct_" + name;
-    s << "  implicit class " << newName << "_ops(val p: native.Ptr[struct_" << name << "])"
+    std::string type = getType();
+    s << "  implicit class " << type << "_ops(val p: native.Ptr[" << type << "])"
       << " extends AnyVal {\n";
     int fieldIndex = 0;
     for (const auto &field : fields) {
@@ -56,8 +69,8 @@ std::string Struct::generateHelperClass() const {
     s << "  }\n\n";
 
     /* makes struct instantiation easier */
-    s << "  def " << newName + "()(implicit z: native.Zone): native.Ptr[" + newName + "]"
-      << " = native.alloc[" + newName + "]\n";
+    s << "  def " << type + "()(implicit z: native.Zone): native.Ptr[" + type + "]"
+      << " = native.alloc[" + type + "]\n";
 
     return s.str();
 }
@@ -66,18 +79,23 @@ bool Struct::hasHelperMethods() const {
     return !fields.empty() && fields.size() < SCALA_NATIVE_MAX_STRUCT_FIELDS;
 }
 
+std::string Struct::getType() const {
+    return "struct_" + name;
+}
+
 Union::Union(std::string name,
              std::vector<Field> members, uint64_t maxSize)
         : StructOrUnion(std::move(name), std::move(members)), maxSize(maxSize) {}
 
 TypeDef Union::generateTypeDef() const {
-    return TypeDef("union_" + name, "native.CArray[Byte, " + uint64ToScalaNat(maxSize) + "]");
+    return TypeDef(getType(), "native.CArray[Byte, " + uint64ToScalaNat(maxSize) + "]");
 }
 
 std::string Union::generateHelperClass() const {
     std::stringstream s;
-    s << "  implicit class union_" << name << "_pos"
-      << "(val p: native.Ptr[union_" << name << "]) extends AnyVal {\n";
+    std::string type = getType();
+    s << "  implicit class " << type << "_pos"
+      << "(val p: native.Ptr[" << type << "]) extends AnyVal {\n";
     for (const auto &field : fields) {
         if (!field.getName().empty()) {
             std::string getter = handleReservedWords(field.getName());
@@ -92,4 +110,8 @@ std::string Union::generateHelperClass() const {
     }
     s << "  }\n";
     return s.str();
+}
+
+std::string Union::getType() const {
+    return "union_" + name;
 }

@@ -79,5 +79,23 @@ static inline void trim(std::string &s) {
     rtrim(s);
 }
 
+/**
+ * @return true if str starts with given prefix
+ */
+static inline bool startsWith(const std::string &str, const std::string &prefix) {
+    return str.substr(0, prefix.size()) == prefix;
+}
+
+/**
+ * @return true if checkedType uses type
+ *         example: checkedType = native.Ptr[struct_A], type = struct_A
+ */
+static inline bool typeUsesOtherType(const std::string &checkedType, const std::string &type) {
+    // TODO: find better way to check it
+    return checkedType == type ||
+           checkedType == "native.Ptr[" + type + "]" ||
+           startsWith(checkedType, "native.CArray[" + type + ", ");
+}
+
 
 #endif // UTILS_H

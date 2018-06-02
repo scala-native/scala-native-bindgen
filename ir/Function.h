@@ -19,6 +19,10 @@ public:
 
     friend llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const Function &func);
 
+    bool usesType(const std::string &type) const;
+
+    std::string getName() const;
+
 private:
     std::string name;
     std::vector<Parameter> parameters;

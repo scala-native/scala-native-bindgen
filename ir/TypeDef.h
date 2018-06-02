@@ -7,11 +7,13 @@
 #include <llvm/Support/raw_ostream.h>
 
 
-class TypeDef : TypeAndName {
+class TypeDef : public TypeAndName {
 public:
     TypeDef(std::string name, std::string type);
 
     friend llvm::raw_ostream &operator <<(llvm::raw_ostream &s, const TypeDef &type);
+
+    bool usesType(const std::string &type) const;
 };
 
 
