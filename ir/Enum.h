@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include "TypeDef.h"
+#include <llvm/Support/raw_ostream.h>
 
 class Enumerator {
 public:
@@ -26,7 +27,7 @@ public:
 
     TypeDef generateTypeDef() const;
 
-    friend std::ostream &operator<<(std::ostream &s, const Enum &e);
+    friend llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const Enum &e);
 
 private:
     std::string name; // might be empty

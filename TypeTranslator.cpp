@@ -58,6 +58,7 @@ std::string TypeTranslator::TranslateFunctionPointer(const clang::QualType& qtpe
 
     } else {
         llvm::errs() << "Unsupported function pointer type: " << qtpe.getAsString() << "\n";
+        llvm::errs().flush();
         exit(-1);
     }
 }
@@ -125,12 +126,15 @@ std::string TypeTranslator::Translate(const clang::QualType& qtpe, const std::st
 
     if(qtpe.isConstQualified() || (ctx && qtpe.isConstant(*ctx))){
         llvm::errs() << "Warning: Const qualifier not supported\n";
+        llvm::errs().flush();
     }
     if(qtpe.isVolatileQualified()){
         llvm::errs() << "Warning: Volatile qualifier not supported\n";
+        llvm::errs().flush();
     }
     if(qtpe.isRestrictQualified()){
         llvm::errs() << "Warning: Restrict qualifier not supported\n";
+        llvm::errs().flush();
     }
 
     const clang::Type* tpe = qtpe.getTypePtr();

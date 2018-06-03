@@ -7,7 +7,8 @@ ScalaFrontendActionFactory::ScalaFrontendActionFactory(std::string libName)
 
 clang::FrontendAction *ScalaFrontendActionFactory::create() {
     if (!ir.libObjEmpty() || ir.hasEnums()) {
-        std::cerr << "IR is not empty. Please use new instance of ScalaFrontendActionFactory." << std::endl;
+        llvm::errs() << "IR is not empty. Please use new instance of ScalaFrontendActionFactory.\n";
+        llvm::errs().flush();
     }
     return new ScalaFrontendAction(&ir); // instance will be deleted by LibTooling
 }

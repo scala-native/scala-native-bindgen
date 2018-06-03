@@ -1,4 +1,3 @@
-#include <sstream>
 #include "IR.h"
 #include "../Utils.h"
 
@@ -35,65 +34,65 @@ bool IR::libObjEmpty() const {
            structs.empty() && unions.empty();
 }
 
-std::string IR::generate() {
-    generateDecl();
-    std::stringstream s;
-    if (!libObjEmpty() || !enums.empty()) {
-        s << "import scala.scalanative._" << std::endl
-          << "import scala.scalanative.native._" << std::endl
-          << "import scala.scalanative.native.Nat._" << std::endl << std::endl;
+llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir) {
+    assert(ir.generated); // typedefs were generated
+
+    if (!ir.libObjEmpty() || !ir.enums.empty()) {
+        s << "import scala.scalanative._\n"
+          << "import scala.scalanative.native._\n"
+          << "import scala.scalanative.native.Nat._\n\n";
     }
 
-    std::string libObjName = handleReservedWords(libName);
+    std::string libObjName = handleReservedWords(ir.libName);
 
-    if (!libObjEmpty()) {
-        s << "@native.link(\"" << libName << "\")" << std::endl
-          << "@native.extern" << std::endl
-          << "object " << libObjName << " {" << std::endl;
+    if (!ir.libObjEmpty()) {
+        s << "@native.link(\"" << ir.libName << "\")\n"
+          << "@native.extern\n"
+          << "object " << libObjName << " {\n";
 
-        for (const auto &typeDef : typeDefs) {
+        for (const auto &typeDef : ir.typeDefs) {
             s << typeDef;
         }
 
-        for (const auto &func : functions) {
+        for (const auto &func : ir.functions) {
             s << func;
         }
 
-        s << "}" << std::endl << std::endl;
+        s << "}\n\n";
     }
 
-    if (!enums.empty() || hasHelperMethods()) {
-        s << "import " << libObjName << "._" << std::endl << std::endl;
+    if (!ir.enums.empty() || ir.hasHelperMethods()) {
+        s << "import " << libObjName << "._\n\n";
     }
 
-    if (!enums.empty()) {
-        s << "object " << libName << "Enums {" << std::endl;
+    if (!ir.enums.empty()) {
+        s << "object " << ir.libName << "Enums {\n";
 
-        for (const auto &e : enums) {
+        for (const auto &e : ir.enums) {
             s << e
-              << std::endl; // space between groups of enums
+              << "\n"; // space between groups of enums
         }
 
-        s << "}" << std::endl << std::endl;
+        s << "}\n\n";
     }
 
-    if (hasHelperMethods()) {
-        s << "object " << libName << "Helpers {" << std::endl;
+    if (ir.hasHelperMethods()) {
+        s << "object " << ir.libName << "Helpers {\n";
 
-        for (const auto &st : structs) {
-            s << std::endl
+        for (const auto &st : ir.structs) {
+            s << "\n"
               << st.generateHelperClass();
         }
 
-        for (const auto &u : unions) {
-            s << std::endl
+        for (const auto &u : ir.unions) {
+            s << "\n"
               << u.generateHelperClass();
         }
 
-        s << "}" << std::endl << std::endl;
+        s << "}\n\n";
     }
 
-    return s.str();
+    return s;
 }
 
 void IR::generateTypeDefs() {
@@ -110,7 +109,7 @@ void IR::generateTypeDefs() {
     }
 }
 
-void IR::generateDecl() {
+void IR::generate() {
     if (!generated) {
         generateTypeDefs();
         generated = true;
@@ -132,5 +131,5 @@ bool IR::hasHelperMethods() const {
 }
 
 bool IR::hasEnums() const {
-    return enums.size() != 0;
+    return !enums.empty();
 }

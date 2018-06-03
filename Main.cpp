@@ -1,6 +1,3 @@
-#include "visitor/ScalaFrontendAction.h"
-#include <sstream>
-#include "Utils.h"
 #include "visitor/ScalaFrontendActionFactory.h"
 #include <clang/Tooling/CommonOptionsParser.h>
 
@@ -20,6 +17,7 @@ int main(int argc, char *argv[]) {
     auto libName = LibName.getValue();
     if(libName.empty()){
         llvm::errs() << "Error: Please specify the lib name using -name parameter\n";
+        llvm::errs().flush();
         return -1;
     }
 
@@ -37,16 +35,14 @@ int main(int argc, char *argv[]) {
     IR ir = actionFactory.getIntermediateRepresentation();
 
     auto printLoc = PrintHeadersLocation.getValue();
-
-    std::ostringstream s;
-
-    if(printLoc){
-        for(const auto& location: locations) {
-            s << location.c_str();
+    if (printLoc) {
+        for (const auto &location: locations) {
+            llvm::outs() << location.c_str();
         }
     } else {
-        s << ir.generate();
+        ir.generate();
+        llvm::outs() << ir;
     }
-    std::cout << s.str();
+    llvm::outs().flush();
     return result;
 }
