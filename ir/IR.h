@@ -32,6 +32,8 @@ public:
      */
     bool libObjEmpty() const;
 
+    bool hasEnums() const;
+
     std::string generate();
 
 private:
@@ -54,7 +56,7 @@ private:
     std::vector<Struct> structs;
     std::vector<Union> unions;
     std::vector<Enum> enums;
-    bool generated = false; // generate type defs only ones
+    bool generated = false; // generate type defs only once
 };
 
 

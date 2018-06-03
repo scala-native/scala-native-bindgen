@@ -3,7 +3,6 @@
 
 
 #include <string>
-#include <clang/AST/Type.h>
 
 /**
  * Base class for function parameters, struct fields

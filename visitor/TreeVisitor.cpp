@@ -1,7 +1,5 @@
-#include <set>
 #include "TreeVisitor.h"
 #include "../Utils.h"
-#include "../HeaderManager.h"
 
 HeaderManager headerMan;
 
@@ -9,20 +7,21 @@ std::set<std::string> locations;
 
 bool TreeVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
     std::string funcName = func->getNameInfo().getName().getAsString();
-    std::string retType = typeTranslator.Translate(func->getReturnType());
+    std::string retType = handleReservedWords(typeTranslator.Translate(func->getReturnType()));
     std::vector<Parameter> parameters;
 
     int anonCounter = 0;
 
     for (const clang::ParmVarDecl *parm : func->parameters()) {
         //Handle default values
-        std::string pname = handleReservedWords(parm->getNameAsString());
+        std::string pname = parm->getNameAsString();
 
         if (pname.empty()) {
             pname = "anonymous" + std::to_string(anonCounter++);
         }
 
-        parameters.push_back(Parameter(pname, typeTranslator.Translate(parm->getType())));
+        std::string ptype = handleReservedWords(typeTranslator.Translate(parm->getType()));
+        parameters.push_back(Parameter(pname, ptype));
     }
 
     ir->addFunction(funcName, parameters, retType, func->isVariadic());
@@ -30,20 +29,20 @@ bool TreeVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
     return true;
 }
 
-bool TreeVisitor::VisitTypedefDecl(clang::TypedefDecl *tpdef){
+bool TreeVisitor::VisitTypedefDecl(clang::TypedefDecl *tpdef) {
     std::string name = tpdef->getName();
 
     cycleDetection.AddDependcy(name, tpdef->getUnderlyingType());
-    if(cycleDetection.isCyclic(name)){
-        llvm::errs() << "Error: " << name << " ic cyclic\n";
+    if (cycleDetection.isCyclic(name)) {
+        llvm::errs() << "Error: " << name << " is cyclic\n";
         llvm::errs() << name << "\n";
-        for(auto& s : cycleDetection.dependencies[name]){
+        for (auto &s : cycleDetection.dependencies[name]) {
             llvm::errs() << "\t" << s << "\n";
         }
         llvm::errs() << cycleDetection.isCyclic(name) << "\n";
     }
 
-    std::string type = typeTranslator.Translate(tpdef->getUnderlyingType());
+    std::string type = handleReservedWords(typeTranslator.Translate(tpdef->getUnderlyingType()));
     ir->addTypeDef(name, type);
     return true;
 }
@@ -103,8 +102,8 @@ void TreeVisitor::handleUnion(clang::RecordDecl *record, std::string name) {
 
     for (const clang::FieldDecl *field : record->fields()) {
         maxSize = std::max(maxSize, astContext->getTypeSize(field->getType()));
-        std::string fname = handleReservedWords(field->getNameAsString());
-        std::string ftype = typeTranslator.Translate(field->getType(), &name);
+        std::string fname = field->getNameAsString();
+        std::string ftype = handleReservedWords(typeTranslator.Translate(field->getType(), &name));
 
         fields.push_back(Field(fname, ftype));
     }
@@ -124,7 +123,7 @@ void TreeVisitor::handleStruct(clang::RecordDecl *record, std::string name) {
     std::vector<Field> fields;
 
     for (const clang::FieldDecl *field : record->fields()) {
-        std::string ftype = typeTranslator.Translate(field->getType(), &name);
+        std::string ftype = handleReservedWords(typeTranslator.Translate(field->getType(), &name));
         fields.push_back(Field(field->getNameAsString(), ftype));
 
         cycleDetection.AddDependcy(newName, field->getType());
@@ -132,10 +131,10 @@ void TreeVisitor::handleStruct(clang::RecordDecl *record, std::string name) {
         fieldCnt++;
     }
 
-    if(cycleDetection.isCyclic(newName)){
-        llvm::errs() << "Error: " << newName << " ic cyclic\n";
+    if (cycleDetection.isCyclic(newName)) {
+        llvm::errs() << "Error: " << newName << " is cyclic\n";
         llvm::errs() << newName << "\n";
-        for(auto& s : cycleDetection.dependencies[newName]){
+        for (auto &s : cycleDetection.dependencies[newName]) {
             llvm::errs() << "\t" << s << "\n";
         }
         llvm::errs() << cycleDetection.isCyclic(newName) << "\n";

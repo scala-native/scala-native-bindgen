@@ -4,7 +4,6 @@
 
 #include <string>
 #include <vector>
-#include <clang/AST/Type.h>
 #include "TypeAndName.h"
 
 class Parameter : public TypeAndName {

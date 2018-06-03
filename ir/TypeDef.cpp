@@ -1,6 +1,5 @@
 #include "TypeDef.h"
 #include "../Utils.h"
-#include <utility>
 
 TypeDef::TypeDef(std::string name, std::string type)
         : TypeAndName(std::move(name), std::move(type)) {}

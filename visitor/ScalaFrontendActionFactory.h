@@ -23,12 +23,6 @@ private:
     std::string libName;
 
     IR ir;
-
-    /**
-     * Helps to make sure that action is executed only ones
-     * (otherwise `ir` will contain undefined results)
-     */
-    bool actionExecuted = false;
 };
 
 

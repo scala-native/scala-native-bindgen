@@ -3,8 +3,7 @@
 
 
 #include <string>
-#include <clang/AST/Type.h>
-#include <stdint-gcc.h>
+#include <vector>
 #include "TypeDef.h"
 
 class Enumerator {

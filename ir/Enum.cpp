@@ -1,5 +1,6 @@
 #include "Enum.h"
-#include <utility>
+#include <sstream>
+#include <cassert>
 
 Enumerator::Enumerator(std::string name, uint64_t value)
         : name(std::move(name)), value(value) {}
@@ -16,7 +17,7 @@ bool Enum::isAnonymous() const {
 }
 
 TypeDef Enum::generateTypeDef() const {
-    assert (!name.empty()); // called after isAnonymous()
+    assert (!isAnonymous());
     return TypeDef("enum_" + name, "native.CInt");
 }
 
@@ -29,7 +30,7 @@ std::ostream &operator<<(std::ostream &s, const Enum &e) {
         } else {
             enumeratorName = "enum_" + enumerator.getName();
         }
-        s << "  final val " << enumeratorName << " = " << std::to_string(i++) + "\n";
+        s << "  final val " << enumeratorName << " = " << std::to_string(i++) << std::endl;
     }
     return s;
 }
