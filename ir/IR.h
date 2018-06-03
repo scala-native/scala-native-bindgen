@@ -1,7 +1,6 @@
 #ifndef SCALA_NATIVE_BINDGEN_INTERMEDIATEREPRESENTATION_H
 #define SCALA_NATIVE_BINDGEN_INTERMEDIATEREPRESENTATION_H
 
-#include <iostream>
 #include "Function.h"
 #include "Struct.h"
 #include "TypeDef.h"
@@ -34,7 +33,9 @@ public:
 
     bool hasEnums() const;
 
-    std::string generate();
+    friend llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir);
+
+    void generate();
 
 private:
 
@@ -42,8 +43,6 @@ private:
      * Generates type defs for enums, structs and unions
      */
     void generateTypeDefs();
-
-    void generateDecl();
 
     /**
      * @return true if helper methods will be generated for this library

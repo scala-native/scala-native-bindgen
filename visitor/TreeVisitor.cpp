@@ -40,6 +40,7 @@ bool TreeVisitor::VisitTypedefDecl(clang::TypedefDecl *tpdef) {
             llvm::errs() << "\t" << s << "\n";
         }
         llvm::errs() << cycleDetection.isCyclic(name) << "\n";
+        llvm::errs().flush();
     }
 
     std::string type = handleReservedWords(typeTranslator.Translate(tpdef->getUnderlyingType()));
@@ -138,6 +139,7 @@ void TreeVisitor::handleStruct(clang::RecordDecl *record, std::string name) {
             llvm::errs() << "\t" << s << "\n";
         }
         llvm::errs() << cycleDetection.isCyclic(newName) << "\n";
+        llvm::errs().flush();
     }
 
     //llvm::errs() << newName << "\n";

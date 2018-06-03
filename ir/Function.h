@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include "TypeAndName.h"
+#include <llvm/Support/raw_ostream.h>
 
 class Parameter : public TypeAndName {
 public:
@@ -16,7 +17,7 @@ public:
     Function(std::string name, std::vector<Parameter> parameters,
              std::string retType, bool isVariadic);
 
-    friend std::ostream &operator<<(std::ostream &s, const Function &func);
+    friend llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const Function &func);
 
 private:
     std::string name;

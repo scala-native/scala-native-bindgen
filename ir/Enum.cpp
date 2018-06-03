@@ -21,7 +21,7 @@ TypeDef Enum::generateTypeDef() const {
     return TypeDef("enum_" + name, "native.CInt");
 }
 
-std::ostream &operator<<(std::ostream &s, const Enum &e) {
+llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const Enum &e) {
     int i = 0;
     for (auto enumerator : e.enumerators) {
         std::string enumeratorName;
@@ -30,7 +30,7 @@ std::ostream &operator<<(std::ostream &s, const Enum &e) {
         } else {
             enumeratorName = "enum_" + enumerator.getName();
         }
-        s << "  final val " << enumeratorName << " = " << std::to_string(i++) << std::endl;
+        s << "  final val " << enumeratorName << " = " << std::to_string(i++) << "\n";
     }
     return s;
 }

@@ -10,7 +10,7 @@ Function::Function(std::string name, std::vector<Parameter> parameters,
         : name(std::move(name)), parameters(std::move(parameters)),
           retType(std::move(retType)), isVariadic(isVariadic) {}
 
-std::ostream &operator<<(std::ostream &s, const Function &func) {
+llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const Function &func) {
     s << "  def " << handleReservedWords(func.name)
       << "(";
     auto paramsCount = static_cast<int>(func.parameters.size());

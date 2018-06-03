@@ -42,23 +42,23 @@ std::string Struct::generateHelperClass() const {
     std::stringstream s;
     std::string newName = "struct_" + name;
     s << "  implicit class " << newName << "_ops(val p: native.Ptr[struct_" << name << "])"
-      << " extends AnyVal {" << std::endl;
+      << " extends AnyVal {\n";
     int fieldIndex = 0;
     for (const auto &field : fields) {
         if (!field.getName().empty()) {
             std::string fname = handleReservedWords(field.getName());
             std::string ftype = field.getType();
-            s << "    def " << fname << ": " << ftype << " = !p._" << std::to_string(fieldIndex + 1) << std::endl
+            s << "    def " << fname << ": " << ftype << " = !p._" << std::to_string(fieldIndex + 1) << "\n"
               << "    def " << fname << "_=(value: " + ftype + "):Unit = !p._" << std::to_string(fieldIndex + 1)
-              << " = value" << std::endl;
+              << " = value\n";
         }
         fieldIndex++;
     }
-    s << "  }" << std::endl << std::endl;
+    s << "  }\n\n";
 
     /* makes struct instantiation easier */
     s << "  def " << newName + "()(implicit z: native.Zone): native.Ptr[" + newName + "]"
-      << " = native.alloc[" + newName + "]" << std::endl;
+      << " = native.alloc[" + newName + "]\n";
 
     return s.str();
 }
@@ -78,18 +78,18 @@ TypeDef Union::generateTypeDef() const {
 std::string Union::generateHelperClass() const {
     std::stringstream s;
     s << "  implicit class union_" << name << "_pos"
-      << "(val p: native.Ptr[union_" << name << "]) extends AnyVal {" << std::endl;
+      << "(val p: native.Ptr[union_" << name << "]) extends AnyVal {\n";
     for (const auto &field : fields) {
         if (!field.getName().empty()) {
             std::string fname = handleReservedWords(field.getName());
             std::string ftype = field.getType();
             s << "    def " << fname
-              << ": native.Ptr[" << ftype << "] = p.cast[native.Ptr[" << ftype << "]]" << std::endl;
+              << ": native.Ptr[" << ftype << "] = p.cast[native.Ptr[" << ftype << "]]\n";
 
             s << "    def " << fname
-              << "_=(value: " << ftype << "): Unit = !p.cast[native.Ptr[" << ftype << "]] = value" << std::endl;
+              << "_=(value: " << ftype << "): Unit = !p.cast[native.Ptr[" << ftype << "]] = value\n";
         }
     }
-    s << "  }" << std::endl;
+    s << "  }\n";
     return s.str();
 }
