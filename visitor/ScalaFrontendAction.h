@@ -1,7 +1,6 @@
 #ifndef SCALA_NATIVE_BINDGEN_SCALAFRONTENDACTION_H
 #define SCALA_NATIVE_BINDGEN_SCALAFRONTENDACTION_H
 
-#include <iostream>
 #include "TreeConsumer.h"
 
 #include <clang/Frontend/FrontendActions.h>
