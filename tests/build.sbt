@@ -14,6 +14,7 @@ inThisBuild(
 
 val `scala-native-bindgen-tests` = project
   .in(file("."))
+  .aggregate(samples)
   .settings(
     fork in Test := true,
     javaOptions in Test += "-Dbindgen.path=" + file("../target/scalaBindgen"),
@@ -25,5 +26,6 @@ val `scala-native-bindgen-tests` = project
     libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % Test
   )
 
-val samples = project
+lazy val samples = project
   .enablePlugins(ScalaNativePlugin)
+  .settings(test := (compile in Compile).value)
