@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.com/kornilova-l/scala-native-bindgen.svg?branch=master)](https://travis-ci.com/kornilova-l/scala-native-bindgen)
 
-This tool generate Scala Native bindings from C headers. It's built upon clang and Libtooling and thus respect the conventions of clang-tools.
+This tool generates Scala Native bindings from C headers. It's built upon clang and Libtooling and thus respects the conventions of clang-tools.
 
 ## Usage
 
@@ -34,7 +34,7 @@ make
 
 ## Testing
 
-The tests assumes that the above instructions for building has been
+The tests assume that the above instructions for building has been
 followed.
 
 ```sh

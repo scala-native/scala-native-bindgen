@@ -7,7 +7,7 @@
 #include "ScalaFrontendAction.h"
 
 /**
- * Stores instance of IntermediateRepresentation and passes it
+ * Stores instance of IR and passes it
  * to a new instance of ScalaFrontendAction when create method
  * is executed.
  */
