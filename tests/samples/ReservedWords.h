@@ -1,4 +1,5 @@
 typedef int match;
+typedef match var[5];
 
 struct object {
   match yield;
@@ -19,7 +20,7 @@ union lazy {
 
 typedef union lazy lazy;
 
-type with(match sealed, int implicit, lazy forSome);
+type with(match sealed, var implicit, lazy forSome);
 
 typedef match def;
 typedef struct { def val; lazy finally; } finally;

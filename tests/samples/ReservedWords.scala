@@ -6,6 +6,7 @@ import scala.scalanative.native.Nat._
 @native.extern
 object ReservedWords {
   type `match` = native.CInt
+  type `var` = native.CArray[`match`, _5]
   type `object` = struct_object
   type `type` = struct_object
   type `lazy` = union_lazy
@@ -14,7 +15,7 @@ object ReservedWords {
   type struct_object = native.CStruct2[`match`, native.CInt]
   type struct_finally = native.CStruct2[`def`, `lazy`]
   type union_lazy = native.CArray[Byte, Digit[_1, Digit[_2, _8]]]
-  def `with`(`sealed`: `match`, `implicit`: native.CInt, `forSome`: `lazy`): `type` = native.extern
+  def `with`(`sealed`: `match`, `implicit`: native.Ptr[`match`], `forSome`: `lazy`): `type` = native.extern
   def `implicit`(`type`: native.Ptr[`finally`]): `match` = native.extern
 }
 
