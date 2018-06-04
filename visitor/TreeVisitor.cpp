@@ -109,8 +109,6 @@ void TreeVisitor::handleUnion(clang::RecordDecl *record, std::string name) {
         fields.push_back(Field(fname, ftype));
     }
 
-    auto usize = intToScalaNat(static_cast<int>(maxSize));
-
     ir->addUnion(name, fields, maxSize);
 }
 
