@@ -81,7 +81,7 @@ std::string TypeTranslator::TranslatePointer(const clang::QualType& pte, const s
 
 
 
-    return std::string("native.Ptr[") + Translate(pte, avoid) + std::string("]");
+    return std::string("native.Ptr[") + handleReservedWords(Translate(pte, avoid)) + std::string("]");
 }
 
 std::string TypeTranslator::TranslateStructOrUnion(const clang::QualType& qtpe){

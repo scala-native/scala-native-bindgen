@@ -46,10 +46,11 @@ std::string Struct::generateHelperClass() const {
     int fieldIndex = 0;
     for (const auto &field : fields) {
         if (!field.getName().empty()) {
-            std::string fname = handleReservedWords(field.getName());
+            std::string getter = handleReservedWords(field.getName());
+            std::string setter = handleReservedWords(field.getName(), "_=");
             std::string ftype = field.getType();
-            s << "    def " << fname << ": " << ftype << " = !p._" << std::to_string(fieldIndex + 1) << "\n"
-              << "    def " << fname << "_=(value: " + ftype + "):Unit = !p._" << std::to_string(fieldIndex + 1)
+            s << "    def " << getter << ": " << ftype << " = !p._" << std::to_string(fieldIndex + 1) << "\n"
+              << "    def " << setter << "(value: " + ftype + "):Unit = !p._" << std::to_string(fieldIndex + 1)
               << " = value\n";
         }
         fieldIndex++;
@@ -81,13 +82,14 @@ std::string Union::generateHelperClass() const {
       << "(val p: native.Ptr[union_" << name << "]) extends AnyVal {\n";
     for (const auto &field : fields) {
         if (!field.getName().empty()) {
-            std::string fname = handleReservedWords(field.getName());
+            std::string getter = handleReservedWords(field.getName());
+            std::string setter = handleReservedWords(field.getName(), "_=");
             std::string ftype = field.getType();
-            s << "    def " << fname
+            s << "    def " << getter
               << ": native.Ptr[" << ftype << "] = p.cast[native.Ptr[" << ftype << "]]\n";
 
-            s << "    def " << fname
-              << "_=(value: " << ftype << "): Unit = !p.cast[native.Ptr[" << ftype << "]] = value\n";
+            s << "    def " << setter
+              << "(value: " << ftype << "): Unit = !p.cast[native.Ptr[" << ftype << "]] = value\n";
         }
     }
     s << "  }\n";
