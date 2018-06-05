@@ -9,6 +9,6 @@ script:
 
 matrix:
   include:
-  - env: TEST_ENV=ubuntu-16.04-llvm-dev
-  - env: TEST_ENV=ubuntu-16.04-llvm-6.0
-  - env: TEST_ENV=ubuntu-16.04-llvm-5.0
+  - env: TEST_ENV=ubuntu-18.04-llvm-dev
+  - env: TEST_ENV=ubuntu-18.04-llvm-6.0
+  - env: TEST_ENV=ubuntu-18.04-llvm-5.0
