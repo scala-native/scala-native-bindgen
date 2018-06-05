@@ -1,34 +1,33 @@
 #ifndef SCALA_NATIVE_BINDGEN_FUNCTION_H
 #define SCALA_NATIVE_BINDGEN_FUNCTION_H
 
-
-#include <string>
-#include <vector>
 #include "TypeAndName.h"
 #include <llvm/Support/raw_ostream.h>
+#include <string>
+#include <vector>
 
 class Parameter : public TypeAndName {
-public:
+  public:
     Parameter(std::string name, std::string type);
 };
 
 class Function {
-public:
+  public:
     Function(std::string name, std::vector<Parameter> parameters,
              std::string retType, bool isVariadic);
 
-    friend llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const Function &func);
+    friend llvm::raw_ostream &operator<<(llvm::raw_ostream &s,
+                                         const Function &func);
 
     bool usesType(const std::string &type) const;
 
     std::string getName() const;
 
-private:
+  private:
     std::string name;
     std::vector<Parameter> parameters;
     std::string retType;
     bool isVariadic;
 };
 
-
-#endif //SCALA_NATIVE_BINDGEN_FUNCTION_H
+#endif // SCALA_NATIVE_BINDGEN_FUNCTION_H

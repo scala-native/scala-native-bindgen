@@ -26,9 +26,9 @@ typedef long long long_long_type;
 typedef unsigned long long unsigned_long_long_type;
 typedef float float_type;
 typedef double double_type;
-typedef void * ptr_byte_type;
-typedef int * ptr_int_type;
-typedef char * cstring_type;
+typedef void *ptr_byte_type;
+typedef int *ptr_int_type;
+typedef char *cstring_type;
 
 typedef size_t size_t_type;
 typedef ptrdiff_t ptrdiff_t_type;

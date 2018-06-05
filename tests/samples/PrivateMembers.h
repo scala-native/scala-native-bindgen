@@ -21,17 +21,11 @@ struct normalStruct {
     int a;
 };
 
-enum __privateEnum {
-    A, B
-}; // will not be removed
+enum __privateEnum { A, B }; // will not be removed
 
-enum enumWithPrivateMembers {
-    __C, D
-}; // will not be removed
+enum enumWithPrivateMembers { __C, D }; // will not be removed
 
-enum {
-    __E, F
-}; // will not be removed
+enum { __E, F }; // will not be removed
 
 typedef struct {
     __private_type *a;

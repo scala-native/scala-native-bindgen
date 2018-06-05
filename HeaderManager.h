@@ -1,16 +1,15 @@
 #pragma once
 
-#include <string>
 #include <map>
+#include <string>
 
 class HeaderManager {
-private:
+  private:
     std::map<std::string, std::string> headers;
 
-public:
+  public:
     HeaderManager();
     void LoadConfig(std::string path);
     bool IsStandard(std::string path);
-    std::string* GetImport(const std::string& include);
-
+    std::string *GetImport(const std::string &include);
 };

@@ -1,13 +1,9 @@
 #include "IR.h"
 #include "../Utils.h"
 
+IR::IR(std::string libName) : libName(std::move(libName)) {}
 
-IR::IR(std::string libName) :
-        libName(std::move(libName)) {}
-
-
-void IR::addFunction(std::string name,
-                     std::vector<Parameter> parameters,
+void IR::addFunction(std::string name, std::vector<Parameter> parameters,
                      std::string retType, bool isVariadic) {
     functions.push_back(Function(std::move(name), std::move(parameters),
                                  std::move(retType), isVariadic));
@@ -17,21 +13,25 @@ void IR::addTypeDef(std::string name, std::string type) {
     typeDefs.push_back(TypeDef(std::move(name), std::move(type)));
 }
 
-void IR::addEnum(std::string name, std::string type, std::vector<Enumerator> enumerators) {
-    enums.push_back(Enum(std::move(name), std::move(type), std::move(enumerators)));
+void IR::addEnum(std::string name, std::string type,
+                 std::vector<Enumerator> enumerators) {
+    enums.push_back(
+        Enum(std::move(name), std::move(type), std::move(enumerators)));
 }
 
-void IR::addStruct(std::string name, std::vector<Field> fields, uint64_t typeSize) {
+void IR::addStruct(std::string name, std::vector<Field> fields,
+                   uint64_t typeSize) {
     structs.push_back(Struct(std::move(name), std::move(fields), typeSize));
 }
 
-void IR::addUnion(std::string name, std::vector<Field> fields, uint64_t maxSize) {
+void IR::addUnion(std::string name, std::vector<Field> fields,
+                  uint64_t maxSize) {
     unions.push_back(Union(std::move(name), std::move(fields), maxSize));
 }
 
 bool IR::libObjEmpty() const {
-    return functions.empty() && typeDefs.empty() &&
-           structs.empty() && unions.empty();
+    return functions.empty() && typeDefs.empty() && structs.empty() &&
+           unions.empty();
 }
 
 llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir) {
@@ -84,13 +84,11 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir) {
         s << "object " << ir.libName << "Helpers {\n";
 
         for (const auto &st : ir.structs) {
-            s << "\n"
-              << st.generateHelperClass();
+            s << "\n" << st.generateHelperClass();
         }
 
         for (const auto &u : ir.unions) {
-            s << "\n"
-              << u.generateHelperClass();
+            s << "\n" << u.generateHelperClass();
         }
 
         s << "}\n\n";
@@ -135,9 +133,7 @@ bool IR::hasHelperMethods() const {
     return false;
 }
 
-bool IR::hasEnums() const {
-    return !enums.empty();
-}
+bool IR::hasEnums() const { return !enums.empty(); }
 
 void IR::filterDeclarations(const std::string &excludePrefix) {
     if (excludePrefix.empty()) {
@@ -163,7 +159,8 @@ void IR::filterTypeDefs(const std::string &excludePrefix) {
     }
 }
 
-void IR::replaceTypeInTypeDefs(const std::string &oldType, const std::string &newType) {
+void IR::replaceTypeInTypeDefs(const std::string &oldType,
+                               const std::string &newType) {
     for (auto &typeDef : typeDefs) {
         if (typeDef.getType() == oldType) {
             typeDef.setType(newType);
@@ -182,8 +179,9 @@ void IR::filterFunctions(const std::string &excludePrefix) {
     }
 }
 
-template<typename T>
-bool IR::isTypeUsed(const std::vector<T> &declarations, const std::string &type) {
+template <typename T>
+bool IR::isTypeUsed(const std::vector<T> &declarations,
+                    const std::string &type) {
     for (const auto &decl : declarations) {
         if (decl.usesType(type)) {
             return true;
@@ -193,7 +191,6 @@ bool IR::isTypeUsed(const std::vector<T> &declarations, const std::string &type)
 }
 
 bool IR::typeIsUsedOnlyInTypeDefs(std::string type) {
-    return !(isTypeUsed(functions, type) ||
-             isTypeUsed(structs, type) ||
+    return !(isTypeUsed(functions, type) || isTypeUsed(structs, type) ||
              isTypeUsed(unions, type));
 }
