@@ -33,4 +33,4 @@ WORKDIR /src/target
 COPY . /src
 RUN cmake .. && make VERBOSE=1
 
-ENTRYPOINT ["/src/target/scalaBindgen"]
+ENTRYPOINT ["/src/target/scala-native-bindgen"]

@@ -11,8 +11,8 @@ add_definitions(${LLVM_DEFINITIONS})
 
 add_compile_options(-fexceptions -std=c++11)
 
-add_library(scalaNativeBindgen
-  STATIC
+add_executable(bindgen
+  Main.cpp
   visitor/ScalaFrontendAction.h
   visitor/ScalaFrontendAction.cpp
   visitor/ScalaFrontendActionFactory.h
@@ -38,15 +38,15 @@ add_library(scalaNativeBindgen
   ir/Enum.h
   ir/TypeAndName.cpp
   ir/TypeAndName.h
-  )
+)
 
-add_executable(scalaBindgen
-  Main.cpp
-  )
+set_target_properties(bindgen
+  PROPERTIES
+  OUTPUT_NAME scala-native-bindgen
+)
 
-target_link_libraries(scalaBindgen
+target_link_libraries(bindgen
   PRIVATE
-  scalaNativeBindgen
   clangFrontend
   clangTooling
-  )
+)
