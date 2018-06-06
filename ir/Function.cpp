@@ -13,13 +13,12 @@ Function::Function(std::string name, std::vector<Parameter> parameters,
 llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const Function &func) {
     s << "  def " << handleReservedWords(func.name)
       << "(";
-    auto paramsCount = static_cast<int>(func.parameters.size());
-    for (int i = 0; i < paramsCount; ++i) {
+    for (std::vector<Parameter>::size_type i = 0; i < func.parameters.size(); i++) {
         const Parameter &param = func.parameters[i];
         s << handleReservedWords(param.getName())
           << ": "
           << param.getType();
-        if (i < paramsCount - 1) {
+        if (i + 1 != func.parameters.size()) {
             s << ", ";
         }
     }

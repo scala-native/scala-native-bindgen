@@ -17,15 +17,11 @@ private:
 
     clang::SourceManager &smanager;
 
-    /* pointer to ir that is stored in ScalaFrontendActionFactory */
-    IR *ir;
-
 public:
 
     explicit TreeConsumer(clang::CompilerInstance *CI, IR *ir)
             : visitor(CI, ir),
-              smanager(CI->getASTContext().getSourceManager()),
-              ir(ir) {}
+              smanager(CI->getASTContext().getSourceManager()) {}
 
     bool HandleTopLevelDecl(clang::DeclGroupRef DG) override {
         // a DeclGroupRef may have multiple Decls, so we iterate through each one

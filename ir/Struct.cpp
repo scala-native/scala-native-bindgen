@@ -24,10 +24,9 @@ TypeDef Struct::generateTypeDef() const {
 
 std::string Struct::getFieldsTypes() const {
     std::stringstream s;
-    auto fieldsCount = static_cast<int>(fields.size());
-    for (int i = 0; i < fieldsCount; i++) {
+    for (std::vector<Field>::size_type i = 0; i < fields.size(); i++) {
         s << fields[i].getType();
-        if (i < fieldsCount - 1) {
+        if (i + 1 != fields.size()) {
             s << ", ";
         }
     }

@@ -19,8 +19,8 @@ inline std::string uint64ToScalaNat(uint64_t v, std::string accumulator = "") {
     if (v == 0)
         return accumulator;
 
-    int last_digit = v % 10;
-    int rest = v / 10;
+    auto last_digit = v % 10;
+    auto rest = v / 10;
 
     if (accumulator.empty()) {
         return uint64ToScalaNat(rest, "_" + std::to_string(last_digit));
@@ -44,11 +44,11 @@ inline bool typeEquals(const clang::Type* tpe1, const std::string* tpe2){
     return false;
 }
 
-static std::array<std::string, 39> reserved_words = {"abstract", "case", "catch", "class", "def", "do", "else", "extends",
+static std::array<std::string, 39> reserved_words = {{"abstract", "case", "catch", "class", "def", "do", "else", "extends",
                                       "false", "final", "finally", "for", "forSome", "if", "implicit", "import",
                                       "lazy", "match", "new", "null", "object", "override", "package", "private",
                                       "protected", "return", "sealed", "super", "this", "throw", "trait", "try",
-                                      "true", "type", "val", "var", "while", "with", "yield"};
+                                      "true", "type", "val", "var", "while", "with", "yield"}};
 
 inline std::string handleReservedWords(std::string name, std::string suffix = "") {
     auto found = std::find(reserved_words.begin(), reserved_words.end(), name);

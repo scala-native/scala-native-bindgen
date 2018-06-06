@@ -10,8 +10,9 @@ if [[ ! -e target/.llvm-version ]] || [[ "$(<target/.llvm-version)" != "${LLVM_V
   mkdir -p target
   echo "${LLVM_VERSION:-}" > target/.llvm-version
   (cd target && cmake ..)
-  make -C target
 fi
+
+make -C target
 
 cd tests
 sbt "${@:-test}"
