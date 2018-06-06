@@ -1,39 +1,42 @@
 version: '3'
 
 services:
-  ubuntu-16.04-llvm-dev:
-    image: scala-native-bindgen:ubuntu-16.04-llvm-dev
+  ubuntu-18.04-llvm-dev:
+    image: scalabindgen/scala-native-bindgen:ubuntu-18.04-llvm-dev
     build:
       context: .
       args:
-        - UBUNTU_VERSION=16.04
+        - UBUNTU_VERSION=18.04
         - LLVM_VERSION=7
         - LLVM_DEB_COMPONENT=
-
-  ubuntu-16.04-llvm-6.0:
-    image: scala-native-bindgen:ubuntu-16.04-llvm-6.0
-    build:
-      context: .
-      args:
-        - UBUNTU_VERSION=16.04
-        - LLVM_VERSION=6.0
-
-  ubuntu-16.04-llvm-5.0:
-    image: scala-native-bindgen:ubuntu-16.04-llvm-5.0
-    build:
-      context: .
-      args:
-        - UBUNTU_VERSION=16.04
-        - LLVM_VERSION=5.0
-
-  sbt-test:
-    image: scala-native-bindgen:${TEST_ENV}
-    entrypoint: 
-    - sh
-    - -c
-    - |
-      cd /src/tests
-      sbt compile test
+    command: scripts/test.sh
     volumes:
+      - .:/src
+      - ${HOME}/.ivy2:/root/.ivy2
+      - ${HOME}/.sbt:/root/.sbt
+
+  ubuntu-18.04-llvm-6.0:
+    image: scalabindgen/scala-native-bindgen:ubuntu-18.04-llvm-6.0
+    build:
+      context: .
+      args:
+        - UBUNTU_VERSION=18.04
+        - LLVM_VERSION=6.0
+    command: scripts/test.sh
+    volumes:
+      - .:/src
+      - ${HOME}/.ivy2:/root/.ivy2
+      - ${HOME}/.sbt:/root/.sbt
+
+  ubuntu-18.04-llvm-5.0:
+    image: scalabindgen/scala-native-bindgen:ubuntu-18.04-llvm-5.0
+    build:
+      context: .
+      args:
+        - UBUNTU_VERSION=18.04
+        - LLVM_VERSION=5.0
+    command: scripts/test.sh
+    volumes:
+      - .:/src
       - ${HOME}/.ivy2:/root/.ivy2
       - ${HOME}/.sbt:/root/.sbt

@@ -27,10 +27,22 @@ make
 ./scala-native-bindgen /usr/include/ctype.h -name ctype --
 ```
 
+Alternatively, you can use [docker-compose] to build and test the program:
+
+```sh
+# Build the docker image with LLVM version 6.0.
+docker-compose build ubuntu-18.04-llvm-6.0
+# Build the bindgen tool and run the tests.
+docker-compose run --rm ubuntu-18.04-llvm-6.0
+# Run the bindgen tool inside the container.
+docker-compose run --rm ubuntu-18.04-llvm-6.0 target/scalaBindgen -name union tests/samples/Union.h --
+```
+
  [CMake]: https://cmake.org/
  [LLVM]: https://llvm.org/
  [Clang]: https://clang.llvm.org/
  [Scala Native setup guide]: http://www.scala-native.org/en/latest/user/setup.html
+ [docker-compose]: https://docs.docker.com/compose/
 
 ## Testing
 

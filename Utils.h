@@ -68,12 +68,12 @@ static std::array<std::string, 39> reserved_words = {"abstract", "case", "catch"
                                       "protected", "return", "sealed", "super", "this", "throw", "trait", "try",
                                       "true", "type", "val", "var", "while", "with", "yield"};
 
-inline std::string handleReservedWords(std::string name){
+inline std::string handleReservedWords(std::string name, std::string suffix = "") {
     auto found = std::find(reserved_words.begin(), reserved_words.end(), name);
-    if(found != reserved_words.end()){
-        return "`" + name + "`";
-    } else{
-        return name;
+    if (found != reserved_words.end()) {
+        return "`" + name + suffix + "`";
+    } else {
+        return name + suffix;
     }
 }
 
