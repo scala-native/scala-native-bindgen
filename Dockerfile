@@ -11,6 +11,7 @@ RUN set -x \
  && rm -rf /var/lib/apt/lists/*
 
 ARG LLVM_VERSION=6.0
+ENV LLVM_VERSION=$LLVM_VERSION
 # LLVM dev versions do not have a "-x.y" version suffix.
 ARG LLVM_DEB_COMPONENT=-$LLVM_VERSION
 RUN set -x \
@@ -21,8 +22,4 @@ RUN set -x \
  && apt install -y clang-$LLVM_VERSION libclang-$LLVM_VERSION-dev \
  && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /src/target
-COPY . /src
-RUN cmake .. && make VERBOSE=1
-
-ENTRYPOINT ["/src/target/scalaBindgen"]
+WORKDIR /src

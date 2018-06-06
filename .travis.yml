@@ -4,8 +4,7 @@ compiler: gcc
 
 script:
  - docker-compose build $TEST_ENV
- - docker run --rm -ti scala-native-bindgen:$TEST_ENV /usr/include/ctype.h -name ctype --
- - docker-compose run --rm sbt-test
+ - docker-compose run $TEST_ENV
 
 matrix:
   include:
