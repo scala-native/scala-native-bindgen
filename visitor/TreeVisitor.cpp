@@ -62,9 +62,9 @@ bool TreeVisitor::VisitEnumDecl(clang::EnumDecl *enumdecl) {
 
     std::vector<Enumerator> enumerators;
 
-    int i = 0;
     for (const clang::EnumConstantDecl *en : enumdecl->enumerators()) {
-        enumerators.push_back(Enumerator(en->getNameAsString(), static_cast<uint64_t>(i++)));
+        uint64_t value = en->getInitVal().getLimitedValue();
+        enumerators.push_back(Enumerator(en->getNameAsString(), value));
     }
 
     ir->addEnum(name, enumerators);
