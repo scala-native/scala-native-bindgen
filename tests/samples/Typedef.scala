@@ -26,5 +26,4 @@ object TypedefEnums {
 
   final val enum_toggle_e_OFF = 0
   final val enum_toggle_e_ON = 1
-
 }

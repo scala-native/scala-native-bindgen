@@ -68,9 +68,13 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir) {
     if (!ir.enums.empty()) {
         s << "object " << ir.libName << "Enums {\n";
 
-        for (const auto &e : ir.enums) {
-            s << e
-              << "\n"; // space between groups of enums
+        unsigned long enumeratorsCount = ir.enums.size();
+        for (unsigned long i = 0; i < enumeratorsCount; i++) {
+            auto &e = ir.enums[i];
+            s << e;
+            if (i < enumeratorsCount - 1) {
+                s << "\n"; // space between groups of enums
+            }
         }
 
         s << "}\n\n";

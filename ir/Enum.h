@@ -13,6 +13,8 @@ public:
 
     std::string getName();
 
+    uint64_t getValue();
+
 private:
     std::string name;
     uint64_t value;

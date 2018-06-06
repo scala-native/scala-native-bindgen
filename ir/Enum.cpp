@@ -9,6 +9,10 @@ std::string Enumerator::getName() {
     return name;
 }
 
+uint64_t Enumerator::getValue() {
+    return value;
+}
+
 Enum::Enum(std::string name, std::vector<Enumerator> enumerators)
         : name(std::move(name)), enumerators(std::move(enumerators)) {}
 
@@ -22,7 +26,6 @@ TypeDef Enum::generateTypeDef() const {
 }
 
 llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const Enum &e) {
-    int i = 0;
     for (auto enumerator : e.enumerators) {
         std::string enumeratorName;
         if (!e.name.empty()) {
@@ -30,7 +33,7 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const Enum &e) {
         } else {
             enumeratorName = "enum_" + enumerator.getName();
         }
-        s << "  final val " << enumeratorName << " = " << std::to_string(i++) << "\n";
+        s << "  final val " << enumeratorName << " = " << std::to_string(enumerator.getValue()) << "\n";
     }
     return s;
 }
