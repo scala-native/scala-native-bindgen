@@ -8,11 +8,11 @@ This tool generates Scala Native bindings from C headers. It's built upon clang 
 
 Calling the tool is pretty easy, you need to specify the file(s) and the name of the created bindings.
 
-`./scalaBindgen /usr/include/uv.h -name uv --`
+`./scala-native-bindgen /usr/include/uv.h -name uv --`
 
 Running the previous command wild also yield warnings along with the translation. To keep only the bindings please redirect the output to a file like this:
 
-`./scalaBindgen /usr/include/uv.h -name uv -- > uv.scala`
+`./scala-native-bindgen /usr/include/uv.h -name uv -- > uv.scala`
 
 ## Building
 
@@ -24,7 +24,7 @@ mkdir -p target
 cd target
 cmake ..
 make
-./scalaBindgen /usr/include/ctype.h -name ctype --
+./scala-native-bindgen /usr/include/ctype.h -name ctype --
 ```
 
 Alternatively, you can use [docker-compose] to build and test the program:
