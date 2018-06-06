@@ -1,6 +1,5 @@
 #include "Enum.h"
 #include <sstream>
-#include <cassert>
 
 Enumerator::Enumerator(std::string name, uint64_t value)
         : name(std::move(name)), value(value) {}
@@ -22,18 +21,40 @@ bool Enum::isAnonymous() const {
 
 TypeDef Enum::generateTypeDef() const {
     assert (!isAnonymous());
-    return TypeDef("enum_" + name, type);
+    return TypeDef(getTypeName(), type);
 }
 
 llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const Enum &e) {
     for (auto enumerator : e.enumerators) {
         std::string enumeratorName;
         if (!e.name.empty()) {
-            enumeratorName = "enum_" + e.name + "_" + enumerator.getName();
+            enumeratorName = e.getTypeName() + "_" + enumerator.getName();
         } else {
             enumeratorName = "enum_" + enumerator.getName();
         }
-        s << "  final val " << enumeratorName << " = " << std::to_string(enumerator.getValue()) << "\n";
+        s << "  final val " << enumeratorName;
+        std::string type;
+        if (e.isAnonymous()) {
+            type = e.type;
+        } else {
+            type = e.getTypeName();
+        }
+        s << ": " << type
+          << " = " << std::to_string(enumerator.getValue());
+
+        if (e.type == "native.CUnsignedInt") {
+            s << ".toUInt" << "\n";
+        } else if (e.type == "native.CUnsignedLong") {
+            s << "L.toULong" << "\n";
+        } else {
+            llvm::errs() << "Enum type is unsupported: " << e.type << "\n";
+            llvm::errs().flush();
+        }
     }
     return s;
+}
+
+std::string Enum::getTypeName() const {
+    assert(!isAnonymous());
+    return "enum_" + name;
 }

@@ -29,6 +29,8 @@ public:
 
     TypeDef generateTypeDef() const;
 
+    std::string getTypeName() const;
+
     friend llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const Enum &e);
 
 private:
