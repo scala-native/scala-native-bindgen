@@ -153,7 +153,7 @@ std::string TypeTranslator::Translate(const clang::QualType& qtpe, const std::st
         return TranslatePointer(tpe->getAs<clang::PointerType>()->getPointeeType(), avoid);
 
     } else if(qtpe->isStructureType() || qtpe->isUnionType()){
-        return TranslateStructOrUnion(qtpe);
+        return handleReservedWords(TranslateStructOrUnion(qtpe));
 
     } else if(qtpe->isEnumeralType()){
         return TranslateEnum(qtpe);
@@ -166,10 +166,10 @@ std::string TypeTranslator::Translate(const clang::QualType& qtpe, const std::st
 
         auto found = typeMap.find(qtpe.getUnqualifiedType().getAsString());
         if(found != typeMap.end()){
-            return found->second;
+            return handleReservedWords(found->second);
         } else {
             //TODO: Properly handle non-default types
-            return qtpe.getUnqualifiedType().getAsString();
+            return handleReservedWords(qtpe.getUnqualifiedType().getAsString());
         }
     }
 
