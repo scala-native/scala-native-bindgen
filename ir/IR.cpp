@@ -17,8 +17,8 @@ void IR::addTypeDef(std::string name, std::string type) {
     typeDefs.push_back(TypeDef(std::move(name), std::move(type)));
 }
 
-void IR::addEnum(std::string name, std::vector<Enumerator> enumerators) {
-    enums.push_back(Enum(std::move(name), std::move(enumerators)));
+void IR::addEnum(std::string name, std::string type, std::vector<Enumerator> enumerators) {
+    enums.push_back(Enum(std::move(name), std::move(type), std::move(enumerators)));
 }
 
 void IR::addStruct(std::string name, std::vector<Field> fields, uint64_t typeSize) {

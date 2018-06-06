@@ -23,7 +23,7 @@ private:
 
 class Enum {
 public:
-    Enum(std::string name, std::vector<Enumerator> enumerators);
+    Enum(std::string name, std::string type, std::vector<Enumerator> enumerators);
 
     bool isAnonymous() const;
 
@@ -33,6 +33,7 @@ public:
 
 private:
     std::string name; // might be empty
+    std::string type;
     std::vector<Enumerator> enumerators;
 };
 

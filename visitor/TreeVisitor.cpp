@@ -67,7 +67,7 @@ bool TreeVisitor::VisitEnumDecl(clang::EnumDecl *enumdecl) {
         enumerators.push_back(Enumerator(en->getNameAsString(), value));
     }
 
-    ir->addEnum(name, enumerators);
+    ir->addEnum(name, typeTranslator.Translate(enumdecl->getIntegerType()), enumerators);
 
     return true;
 }

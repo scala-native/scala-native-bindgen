@@ -13,8 +13,8 @@ uint64_t Enumerator::getValue() {
     return value;
 }
 
-Enum::Enum(std::string name, std::vector<Enumerator> enumerators)
-        : name(std::move(name)), enumerators(std::move(enumerators)) {}
+Enum::Enum(std::string name, std::string type, std::vector<Enumerator> enumerators)
+        : name(std::move(name)), type(std::move(type)), enumerators(std::move(enumerators)) {}
 
 bool Enum::isAnonymous() const {
     return name.empty();
@@ -22,7 +22,7 @@ bool Enum::isAnonymous() const {
 
 TypeDef Enum::generateTypeDef() const {
     assert (!isAnonymous());
-    return TypeDef("enum_" + name, "native.CInt");
+    return TypeDef("enum_" + name, type);
 }
 
 llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const Enum &e) {

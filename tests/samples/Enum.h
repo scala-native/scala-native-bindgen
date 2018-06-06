@@ -7,3 +7,8 @@ enum days {
     SATURDAY = 3,
     SUNDAY // = 4
 };
+
+enum bigValues {
+    A = 10000000000, // does not fit into int
+    B // 10000000001
+};
