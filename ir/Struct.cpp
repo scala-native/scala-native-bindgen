@@ -24,11 +24,10 @@ TypeDef Struct::generateTypeDef() const {
 
 std::string Struct::getFieldsTypes() const {
     std::stringstream s;
-    for (std::vector<Field>::size_type i = 0; i < fields.size(); i++) {
-        s << fields[i].getType();
-        if (i + 1 != fields.size()) {
-            s << ", ";
-        }
+    std::string sep = "";
+    for (const auto &field : fields) {
+        s << sep << field.getType();
+        sep = ", ";
     }
     return s.str();
 }
