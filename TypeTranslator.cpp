@@ -116,8 +116,9 @@ std::string TypeTranslator::TranslateEnum(const clang::QualType& qtpe){
 }
 
 std::string TypeTranslator::TranslateConstantArray(const clang::ConstantArrayType* ar, const std::string* avoid){
-    const llvm::APInt& size =  ar->getSize();
-    return "native.CArray[" + Translate(ar->getElementType(), avoid) + ", " + intToScalaNat((int)size.roundToDouble()) + "]";
+    const uint64_t size = ar->getSize().getZExtValue();
+    const std::string nat = uint64ToScalaNat(size);
+    return "native.CArray[" + Translate(ar->getElementType(), avoid) + ", " + nat + "]";
 }
 
 std::string TypeTranslator::Translate(const clang::QualType& qtpe, const std::string* avoid){

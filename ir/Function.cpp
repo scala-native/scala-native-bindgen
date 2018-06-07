@@ -13,15 +13,13 @@ Function::Function(std::string name, std::vector<Parameter> parameters,
 llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const Function &func) {
     s << "  def " << handleReservedWords(func.name)
       << "(";
-    auto paramsCount = static_cast<int>(func.parameters.size());
-    for (int i = 0; i < paramsCount; ++i) {
-        const Parameter &param = func.parameters[i];
-        s << handleReservedWords(param.getName())
+    std::string sep = "";
+    for (const auto &param : func.parameters) {
+        s << sep
+          << handleReservedWords(param.getName())
           << ": "
           << param.getType();
-        if (i < paramsCount - 1) {
-            s << ", ";
-        }
+        sep = ", ";
     }
     if (func.isVariadic) {
         /* the C Iso require at least one argument in a variadic function, so the comma is fine */
