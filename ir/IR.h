@@ -19,7 +19,7 @@ public:
 
     void addTypeDef(std::string name, std::string type);
 
-    void addEnum(std::string name, std::vector<Enumerator> enumerators);
+    void addEnum(std::string name, std::string type, std::vector<Enumerator> enumerators);
 
     void addStruct(std::string name, std::vector<Field> fields, uint64_t typeSize);
 

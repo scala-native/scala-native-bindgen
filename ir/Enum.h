@@ -9,30 +9,33 @@
 
 class Enumerator {
 public:
-    Enumerator(std::string name, uint64_t value);
+    Enumerator(std::string name, int64_t value);
 
     std::string getName();
 
-    uint64_t getValue();
+    int64_t getValue();
 
 private:
     std::string name;
-    uint64_t value;
+    int64_t value;
 };
 
 
 class Enum {
 public:
-    Enum(std::string name, std::vector<Enumerator> enumerators);
+    Enum(std::string name, std::string type, std::vector<Enumerator> enumerators);
 
     bool isAnonymous() const;
 
     TypeDef generateTypeDef() const;
 
+    std::string getTypeName() const;
+
     friend llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const Enum &e);
 
 private:
     std::string name; // might be empty
+    std::string type;
     std::vector<Enumerator> enumerators;
 };
 
