@@ -19,7 +19,7 @@ private:
 
 public:
 
-    explicit TreeConsumer(clang::CompilerInstance *CI, IR *ir)
+    TreeConsumer(clang::CompilerInstance *CI, IR *ir)
             : visitor(CI, ir),
               smanager(CI->getASTContext().getSourceManager()) {}
 

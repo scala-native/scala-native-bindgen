@@ -14,6 +14,8 @@ public:
 
     std::string getType() const;
 
+    void setType(std::string name);
+
     std::string getName() const;
 
 protected:

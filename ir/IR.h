@@ -35,7 +35,7 @@ public:
 
     friend llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir);
 
-    void generate();
+    void generate(const std::string &excludePrefix);
 
 private:
 
@@ -48,6 +48,53 @@ private:
      * @return true if helper methods will be generated for this library
      */
     bool hasHelperMethods() const;
+
+    /**
+     * Remove functions that start with given prefix.
+     *
+     * Replace typedef by underlying type if it starts with given prefix
+     * and it is used only in other typedefs.
+     *
+     * Example:
+     * @code
+     * type __int32_t = native.CInt
+	 * type __darwin_pid_t = __int32_t
+	 * type pid_t = __darwin_pid_t
+     * @endcode
+     *
+     * Becomes:
+     * @code
+     * type pid_t = native.CInt
+     * @endcode
+     *
+     */
+    void filterDeclarations(const std::string &excludePrefix);
+
+    /**
+     * Remove all typedefs that start with given prefix.
+     */
+    void filterTypeDefs(const std::string &excludePrefix);
+
+    /**
+     * Find all typedefs that use oldType and replace it with newType.
+     */
+    void replaceTypeInTypeDefs(const std::string &oldType, const std::string &newType);
+
+    /**
+     * Remove functions with names that start with excludePrefix.
+     */
+    void filterFunctions(const std::string &excludePrefix);
+
+    /**
+     * @return true if given type is used only in typedefs.
+     */
+    bool typeIsUsedOnlyInTypeDefs(std::string type);
+
+    /**
+     * @return true if type is used in one of given declarations.
+     */
+    template<typename T>
+    bool isTypeUsed(const std::vector<T> &declarations, const std::string &type);
 
     std::string libName;
     std::vector<Function> functions;

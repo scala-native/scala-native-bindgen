@@ -30,3 +30,19 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const Function &func) {
       << " = native.extern\n";
     return s;
 }
+
+bool Function::usesType(const std::string &type) const {
+    if (typeUsesOtherType(retType, type)) {
+        return true;
+    }
+    for (const auto &parameter : parameters) {
+        if (typeUsesOtherType(parameter.getType(), type)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+std::string Function::getName() const {
+    return name;
+}

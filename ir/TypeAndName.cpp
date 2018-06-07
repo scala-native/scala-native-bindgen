@@ -10,3 +10,7 @@ std::string TypeAndName::getType() const {
 std::string TypeAndName::getName() const {
     return name;
 }
+
+void TypeAndName::setType(std::string type) {
+    this->type = std::move(type);
+}

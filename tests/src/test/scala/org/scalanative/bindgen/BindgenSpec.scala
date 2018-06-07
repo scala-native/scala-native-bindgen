@@ -22,8 +22,9 @@ class BindgenSpec extends FunSpec {
       val cmd = Seq(
         bindgenPath,
         inputFile.getAbsolutePath,
-        "-name",
+        "--name",
         name,
+        "--exclude-prefix=__",
         "--"
       )
       val output = Process(cmd).lineStream.mkString("\n")
