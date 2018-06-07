@@ -8,7 +8,13 @@ scala:
   - "2.11.12"
 
 before_script:
- - docker-compose build $TEST_ENV
+ - image="$HOME/.builder/$TEST_ENV/$(shasum < Dockerfile < docker-compose.yml | cut -f 1 -d ' ').tgz"
+ - if [ -r "$image" ]; then
+     gunzip < "$image" | docker image load;
+   fi
+ - docker image ls
+ - docker-compose build $TEST_ENV;
+ - docker image ls
 
 script:
  - docker-compose run $TEST_ENV
@@ -35,9 +41,16 @@ before_cache:
   # Tricks to avoid unnecessary cache updates
   - find $HOME/.sbt -name "*.lock" | xargs sudo rm
   - find $HOME/.ivy2 -name "ivydata-*.properties" | xargs sudo rm
+  - image="$HOME/.builder/$TEST_ENV/$(shasum < Dockerfile < docker-compose.yml | cut -f 1 -d ' ').tgz"
+  - if [ ! -r "$image" ]; then
+      rm -rf $HOME/.builder/$TEST_ENV;
+      mkdir -p $HOME/.builder/$TEST_ENV;
+      docker image save scalabindgen/scala-native-bindgen-builder:$TEST_ENV | gzip > "$image";
+    fi
 
 cache:
   directories:
    - "$HOME/.ivy2/cache"
    - "$HOME/.sbt/boot/scala-*"
    - "$HOME/.coursier"
+   - "$HOME/.builder/$TEST_ENV"
