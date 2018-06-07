@@ -1,14 +1,14 @@
 #include "Enum.h"
 #include <sstream>
 
-Enumerator::Enumerator(std::string name, uint64_t value)
+Enumerator::Enumerator(std::string name, int64_t value)
         : name(std::move(name)), value(value) {}
 
 std::string Enumerator::getName() {
     return name;
 }
 
-uint64_t Enumerator::getValue() {
+int64_t Enumerator::getValue() {
     return value;
 }
 
@@ -42,14 +42,14 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const Enum &e) {
         s << ": " << type
           << " = " << std::to_string(enumerator.getValue());
 
-        if (e.type == "native.CUnsignedInt") {
-            s << ".toUInt" << "\n";
+        if (e.type == "native.CLong") {
+            s << "L";
+        } else if (e.type == "native.CUnsignedInt") {
+            s << ".toUInt";
         } else if (e.type == "native.CUnsignedLong") {
-            s << "L.toULong" << "\n";
-        } else {
-            llvm::errs() << "Enum type is unsupported: " << e.type << "\n";
-            llvm::errs().flush();
+            s << "L.toULong";
         }
+        s << "\n";
     }
     return s;
 }

@@ -9,15 +9,15 @@
 
 class Enumerator {
 public:
-    Enumerator(std::string name, uint64_t value);
+    Enumerator(std::string name, int64_t value);
 
     std::string getName();
 
-    uint64_t getValue();
+    int64_t getValue();
 
 private:
     std::string name;
-    uint64_t value;
+    int64_t value;
 };
 
 
