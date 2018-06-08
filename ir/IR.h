@@ -1,29 +1,31 @@
 #ifndef SCALA_NATIVE_BINDGEN_INTERMEDIATEREPRESENTATION_H
 #define SCALA_NATIVE_BINDGEN_INTERMEDIATEREPRESENTATION_H
 
+#include "Enum.h"
 #include "Function.h"
 #include "Struct.h"
 #include "TypeDef.h"
-#include "Enum.h"
 
 /**
  * Intermediate representation
  */
 class IR {
-public:
+  public:
     explicit IR(std::string libName);
 
-    void addFunction(std::string name,
-                     std::vector<Parameter> parameters,
+    void addFunction(std::string name, std::vector<Parameter> parameters,
                      std::string, bool isVariadic);
 
     void addTypeDef(std::string name, std::string type);
 
-    void addEnum(std::string name, std::string type, std::vector<Enumerator> enumerators);
+    void addEnum(std::string name, std::string type,
+                 std::vector<Enumerator> enumerators);
 
-    void addStruct(std::string name, std::vector<Field> fields, uint64_t typeSize);
+    void addStruct(std::string name, std::vector<Field> fields,
+                   uint64_t typeSize);
 
-    void addUnion(std::string name, std::vector<Field> fields, uint64_t maxSize);
+    void addUnion(std::string name, std::vector<Field> fields,
+                  uint64_t maxSize);
 
     /**
      * @return true if there are no functions, types,
@@ -37,8 +39,7 @@ public:
 
     void generate(const std::string &excludePrefix);
 
-private:
-
+  private:
     /**
      * Generates type defs for enums, structs and unions
      */
@@ -58,8 +59,8 @@ private:
      * Example:
      * @code
      * type __int32_t = native.CInt
-	 * type __darwin_pid_t = __int32_t
-	 * type pid_t = __darwin_pid_t
+     * type __darwin_pid_t = __int32_t
+     * type pid_t = __darwin_pid_t
      * @endcode
      *
      * Becomes:
@@ -78,7 +79,8 @@ private:
     /**
      * Find all typedefs that use oldType and replace it with newType.
      */
-    void replaceTypeInTypeDefs(const std::string &oldType, const std::string &newType);
+    void replaceTypeInTypeDefs(const std::string &oldType,
+                               const std::string &newType);
 
     /**
      * Remove functions with names that start with excludePrefix.
@@ -93,8 +95,9 @@ private:
     /**
      * @return true if type is used in one of given declarations.
      */
-    template<typename T>
-    bool isTypeUsed(const std::vector<T> &declarations, const std::string &type);
+    template <typename T>
+    bool isTypeUsed(const std::vector<T> &declarations,
+                    const std::string &type);
 
     std::string libName;
     std::vector<Function> functions;
@@ -105,5 +108,4 @@ private:
     bool generated = false; // generate type defs only once
 };
 
-
-#endif //SCALA_NATIVE_BINDGEN_INTERMEDIATEREPRESENTATION_H
+#endif // SCALA_NATIVE_BINDGEN_INTERMEDIATEREPRESENTATION_H

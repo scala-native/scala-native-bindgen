@@ -2,25 +2,21 @@
 #include <sstream>
 
 Enumerator::Enumerator(std::string name, int64_t value)
-        : name(std::move(name)), value(value) {}
+    : name(std::move(name)), value(value) {}
 
-std::string Enumerator::getName() {
-    return name;
-}
+std::string Enumerator::getName() { return name; }
 
-int64_t Enumerator::getValue() {
-    return value;
-}
+int64_t Enumerator::getValue() { return value; }
 
-Enum::Enum(std::string name, std::string type, std::vector<Enumerator> enumerators)
-        : name(std::move(name)), type(std::move(type)), enumerators(std::move(enumerators)) {}
+Enum::Enum(std::string name, std::string type,
+           std::vector<Enumerator> enumerators)
+    : name(std::move(name)), type(std::move(type)),
+      enumerators(std::move(enumerators)) {}
 
-bool Enum::isAnonymous() const {
-    return name.empty();
-}
+bool Enum::isAnonymous() const { return name.empty(); }
 
 TypeDef Enum::generateTypeDef() const {
-    assert (!isAnonymous());
+    assert(!isAnonymous());
     return TypeDef(getTypeName(), type);
 }
 
@@ -39,8 +35,7 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const Enum &e) {
         } else {
             type = e.getTypeName();
         }
-        s << ": " << type
-          << " = " << std::to_string(enumerator.getValue());
+        s << ": " << type << " = " << std::to_string(enumerator.getValue());
 
         if (e.type == "native.CLong") {
             s << "L";

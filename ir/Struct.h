@@ -1,20 +1,20 @@
 #ifndef SCALA_NATIVE_BINDGEN_STRUCT_H
 #define SCALA_NATIVE_BINDGEN_STRUCT_H
 
-#include <string>
-#include <vector>
 #include "TypeAndName.h"
 #include "TypeDef.h"
+#include <string>
+#include <vector>
 
 #define SCALA_NATIVE_MAX_STRUCT_FIELDS 22
 
 class Field : public TypeAndName {
-public:
+  public:
     Field(std::string name, std::string type);
 };
 
 class StructOrUnion {
-public:
+  public:
     StructOrUnion(std::string name, std::vector<Field> fields);
 
     virtual TypeDef generateTypeDef() const = 0;
@@ -30,13 +30,13 @@ public:
      */
     bool usesType(const std::string &type) const;
 
-protected:
+  protected:
     std::string name; // names of structs and unions are not empty
     std::vector<Field> fields;
 };
 
 class Struct : public StructOrUnion {
-public:
+  public:
     Struct(std::string name, std::vector<Field> fields, uint64_t typeSize);
 
     TypeDef generateTypeDef() const override;
@@ -50,7 +50,7 @@ public:
      */
     bool hasHelperMethods() const;
 
-private:
+  private:
     std::string getFieldsTypes() const;
 
     /* type size is needed if number of fields is bigger than 22 */
@@ -58,7 +58,7 @@ private:
 };
 
 class Union : public StructOrUnion {
-public:
+  public:
     Union(std::string name, std::vector<Field> members, uint64_t maxSize);
 
     TypeDef generateTypeDef() const override;
@@ -67,9 +67,8 @@ public:
 
     std::string getType() const override;
 
-private:
+  private:
     uint64_t maxSize;
 };
 
-
-#endif //SCALA_NATIVE_BINDGEN_STRUCT_H
+#endif // SCALA_NATIVE_BINDGEN_STRUCT_H

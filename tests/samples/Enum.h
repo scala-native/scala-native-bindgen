@@ -14,15 +14,10 @@ enum bigValues {
 };
 
 enum { // anonymous enum
-    ANON_A, ANON_B
+    ANON_A,
+    ANON_B
 };
 
-enum negativeValues {
-    NEG_A = -1,
-    NEG_B = -2
-};
+enum negativeValues { NEG_A = -1, NEG_B = -2 };
 
-enum bigNegativeValues {
-    BIG_NEG_A = -10000000000,
-    BIG_NEG_B = -1
-};
+enum bigNegativeValues { BIG_NEG_A = -10000000000, BIG_NEG_B = -1 };
