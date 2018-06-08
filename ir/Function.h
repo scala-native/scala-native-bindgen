@@ -24,11 +24,10 @@ class Function {
     std::string getName() const;
 
   private:
-  
     std::string getVarargsParameterName() const;
 
     bool existParameterWithName(const std::string &parameterName) const;
-  
+
     std::string name;
     std::vector<Parameter> parameters;
     std::string retType;
