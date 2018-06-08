@@ -23,7 +23,7 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const Function &func) {
     }
     if (func.isVariadic) {
         /* the C Iso require at least one argument in a variadic function, so the comma is fine */
-        s << ", varArgs: native.CVararg*";
+        s << ", " << func.getVarargsParameterName() << ": native.CVararg*";
     }
     s << "): "
       << func.retType
@@ -45,4 +45,22 @@ bool Function::usesType(const std::string &type) const {
 
 std::string Function::getName() const {
     return name;
+}
+
+std::string Function::getVarargsParameterName() const {
+    std::string parameterName = "varArgs";
+    int i = 0;
+    while (existParameterWithName(parameterName)) {
+        parameterName = "varArgs" + std::to_string(i++);
+    }
+    return parameterName;
+}
+
+bool Function::existParameterWithName(const std::string &parameterName) const {
+    for (const auto &parameter : parameters) {
+        if (parameter.getName() == parameterName) {
+            return true;
+        }
+    }
+    return false;
 }
