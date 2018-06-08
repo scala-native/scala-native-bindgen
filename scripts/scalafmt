@@ -17,4 +17,4 @@ if [ ! -f $SCALAFMT ]; then
   chmod +x $SCALAFMT
 fi
 
-$SCALAFMT "$@"
+exit $($SCALAFMT "$@" >/dev/null)

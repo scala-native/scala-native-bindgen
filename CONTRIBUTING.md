@@ -37,15 +37,15 @@ Make sure that all of your contributions are properly formatted before
 suggesting any changes. You can check the formatting using either:
 
 ```sh
-script/scalafmt --test
-script/clangfmt --test
+scripts/scalafmt --test
+scripts/clangfmt --test
 ```
 
 or:
 
 ```sh
-docker-compose run --rm ubuntu-18.04-llvm-6.0 script/scalafmt --test
-docker-compose run --rm ubuntu-18.04-llvm-6.0 script/clangfmt --test
+docker-compose run --rm ubuntu-18.04-llvm-6.0 scripts/scalafmt --test
+docker-compose run --rm ubuntu-18.04-llvm-6.0 scripts/clangfmt --test
 ```
 
 The C++ tool is built on Clang and Libtooling and should respect the conventions of
