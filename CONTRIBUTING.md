@@ -14,13 +14,13 @@ Important to note is that all contributors must have signed the [Scala CLA].
 Build the `scalaBindgen` tool:
 
 ```sh
-mkdir target
-cd target
+mkdir bindgen/target
+cd bindgen/target
 cmake ..
 make
 
 # Alternatively rerun on change
-watchman-make -p '*.cpp' '*.h' --run 'make -C target'
+watchman-make -p '*.cpp' '*.h' --run 'make -C bindgen/target'
 ```
 
 In another terminal, run the test suite:

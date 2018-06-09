@@ -18,7 +18,7 @@ val `scala-native-bindgen-tests` = project
   .settings(
     fork in Test := true,
     javaOptions in Test += "-Dbindgen.path=" + file(
-      "../target/scala-native-bindgen"),
+      "../bindgen/target/scala-native-bindgen"),
     watchSources += WatchSource(
       baseDirectory.value / "samples",
       "*.h" || "*.scala",

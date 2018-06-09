@@ -20,8 +20,8 @@ Building this tool requires [CMake], [LLVM] and [Clang]. See the [Scala
 Native setup guide] for instructions on installing the dependencies.
 
 ```sh
-mkdir -p target
-cd target
+mkdir -p bindgen/target
+cd bindgen/target
 cmake ..
 make
 ./scala-native-bindgen /usr/include/ctype.h -name ctype --
@@ -35,7 +35,7 @@ docker-compose build ubuntu-18.04-llvm-6.0
 # Build the bindgen tool and run the tests.
 docker-compose run --rm ubuntu-18.04-llvm-6.0
 # Run the bindgen tool inside the container.
-docker-compose run --rm ubuntu-18.04-llvm-6.0 target/scala-native-bindgen -name union tests/samples/Union.h --
+docker-compose run --rm ubuntu-18.04-llvm-6.0 bindgen/target/scala-native-bindgen -name union tests/samples/Union.h --
 ```
 
  [CMake]: https://cmake.org/
