@@ -15,7 +15,10 @@ int main(int argc, char *argv[]) {
                                              llvm::cl::cat(Category));
     llvm::cl::opt<std::string> ExcludePrefix("exclude-prefix",
                                              llvm::cl::cat(Category));
-
+    llvm::cl::opt<std::string> Package(
+        "package", llvm::cl::cat(Category),
+        llvm::cl::value_desc("package-name"),
+        llvm::cl::desc("Package name of generated Scala file"));
     clang::tooling::CommonOptionsParser op(argc, (const char **)argv, Category);
     clang::tooling::ClangTool Tool(op.getCompilations(),
                                    op.getSourcePathList());
@@ -40,6 +43,10 @@ int main(int argc, char *argv[]) {
     int result = Tool.run(&actionFactory);
 
     IR ir = actionFactory.getIntermediateRepresentation();
+
+    if (!Package.empty()) {
+        ir.setPackageName(Package.getValue());
+    }
 
     auto printLoc = PrintHeadersLocation.getValue();
     if (printLoc) {
