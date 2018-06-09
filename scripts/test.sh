@@ -5,14 +5,14 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-if [[ ! -e target/.llvm-version ]] || [[ "$(<target/.llvm-version)" != "${LLVM_VERSION:-}" ]]; then
-  rm -rf target
-  mkdir -p target
-  echo "${LLVM_VERSION:-}" > target/.llvm-version
-  (cd target && cmake ..)
+if [[ ! -e bindgen/target/.llvm-version ]] || [[ "$(<bindgen/target/.llvm-version)" != "${LLVM_VERSION:-}" ]]; then
+  rm -rf bindgen/target
+  mkdir -p bindgen/target
+  echo "${LLVM_VERSION:-}" > bindgen/target/.llvm-version
+  (cd bindgen/target && cmake ..)
 fi
 
-make -C target
+make -C bindgen/target
 
 cd tests
 sbt "${@:-test}"
