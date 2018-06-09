@@ -122,6 +122,13 @@ void TreeVisitor::handleUnion(clang::RecordDecl *record, std::string name) {
 void TreeVisitor::handleStruct(clang::RecordDecl *record, std::string name) {
     std::string newName = "struct_" + name;
 
+    if (record->hasAttr<clang::PackedAttr>()) {
+        llvm::errs() << "Warning: struct " << name << " is packed. "
+                     << "Packed structs are not supported by Scala Native. "
+                     << "Access to fields will not work correctly.\n";
+        llvm::errs().flush();
+    }
+
     // Replace "struct x" with struct_x in scala
     typeTranslator.AddTranslation("struct " + name, newName);
 
@@ -147,12 +154,6 @@ void TreeVisitor::handleStruct(clang::RecordDecl *record, std::string name) {
         llvm::errs() << cycleDetection.isCyclic(newName) << "\n";
         llvm::errs().flush();
     }
-
-    // llvm::errs() << newName << "\n";
-    // for(auto& s : cycleDetection.dependencies[newName]){
-    //    llvm::errs() << "\t" << s << "\n";
-    //}
-    // llvm::errs() << cycleDetection.isCyclic(newName) << "\n";
 
     ir->addStruct(name, fields,
                   astContext->getTypeSize(record->getTypeForDecl()));
