@@ -39,6 +39,8 @@ class IR {
 
     void generate(const std::string &excludePrefix);
 
+    void setPackageName(std::string packageName);
+
   private:
     /**
      * Generates type defs for enums, structs and unions
@@ -106,6 +108,7 @@ class IR {
     std::vector<Union> unions;
     std::vector<Enum> enums;
     bool generated = false; // generate type defs only once
+    std::string packageName;
 };
 
 #endif // SCALA_NATIVE_BINDGEN_INTERMEDIATEREPRESENTATION_H

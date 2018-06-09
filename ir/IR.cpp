@@ -37,6 +37,10 @@ bool IR::libObjEmpty() const {
 llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir) {
     assert(ir.generated); // typedefs were generated
 
+    if (!ir.packageName.empty()) {
+        s << "package " << ir.packageName << "\n\n";
+    }
+
     if (!ir.libObjEmpty() || !ir.enums.empty()) {
         s << "import scala.scalanative._\n"
           << "import scala.scalanative.native._\n"
@@ -193,4 +197,8 @@ bool IR::isTypeUsed(const std::vector<T> &declarations,
 bool IR::typeIsUsedOnlyInTypeDefs(std::string type) {
     return !(isTypeUsed(functions, type) || isTypeUsed(structs, type) ||
              isTypeUsed(unions, type));
+}
+
+void IR::setPackageName(std::string packageName) {
+    this->packageName = packageName;
 }
