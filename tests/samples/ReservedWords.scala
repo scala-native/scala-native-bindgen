@@ -1,12 +1,11 @@
 import scala.scalanative._
 import scala.scalanative.native._
-import scala.scalanative.native.Nat._
 
 @native.link("ReservedWords")
 @native.extern
 object ReservedWords {
   type `match` = native.CInt
-  type `var` = native.CArray[`match`, _5]
+  type `var` = native.CArray[`match`, native.Nat._5]
   type `object` = struct_object
   type `type` = struct_object
   type `lazy` = union_lazy
@@ -14,7 +13,7 @@ object ReservedWords {
   type `finally` = struct_finally
   type struct_object = native.CStruct2[`match`, native.CInt]
   type struct_finally = native.CStruct2[`def`, `lazy`]
-  type union_lazy = native.CArray[Byte, Digit[_1, Digit[_2, _8]]]
+  type union_lazy = native.CArray[Byte, native.Nat.Digit[native.Nat._1, native.Nat.Digit[native.Nat._2, native.Nat._8]]]
   def `with`(`sealed`: `match`, `implicit`: native.Ptr[`match`], `forSome`: `lazy`): `type` = native.extern
   def `implicit`(`type`: native.Ptr[`finally`]): `match` = native.extern
 }
@@ -46,7 +45,7 @@ object ReservedWordsHelpers {
     def instance_=(value: native.Ptr[`object`]): Unit = !p.cast[native.Ptr[native.Ptr[`object`]]] = value
     def `forSome`: native.Ptr[`match`] = p.cast[native.Ptr[`match`]]
     def `forSome_=`(value: `match`): Unit = !p.cast[native.Ptr[`match`]] = value
-    def `implicit`: native.Ptr[native.CArray[Byte, Digit[_1, Digit[_2, _8]]]] = p.cast[native.Ptr[native.CArray[Byte, Digit[_1, Digit[_2, _8]]]]]
-    def `implicit_=`(value: native.CArray[Byte, Digit[_1, Digit[_2, _8]]]): Unit = !p.cast[native.Ptr[native.CArray[Byte, Digit[_1, Digit[_2, _8]]]]] = value
+    def `implicit`: native.Ptr[native.CArray[Byte, native.Nat.Digit[native.Nat._1, native.Nat.Digit[native.Nat._2, native.Nat._8]]]] = p.cast[native.Ptr[native.CArray[Byte, native.Nat.Digit[native.Nat._1, native.Nat.Digit[native.Nat._2, native.Nat._8]]]]]
+    def `implicit_=`(value: native.CArray[Byte, native.Nat.Digit[native.Nat._1, native.Nat.Digit[native.Nat._2, native.Nat._8]]]): Unit = !p.cast[native.Ptr[native.CArray[Byte, native.Nat.Digit[native.Nat._1, native.Nat.Digit[native.Nat._2, native.Nat._8]]]]] = value
   }
 }

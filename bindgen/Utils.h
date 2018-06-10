@@ -24,10 +24,12 @@ inline std::string uint64ToScalaNat(uint64_t v, std::string accumulator = "") {
     auto rest = v / 10;
 
     if (accumulator.empty()) {
-        return uint64ToScalaNat(rest, "_" + std::to_string(last_digit));
+        return uint64ToScalaNat(rest,
+                                "native.Nat._" + std::to_string(last_digit));
     } else {
-        return uint64ToScalaNat(rest, "Digit[_" + std::to_string(last_digit) +
-                                          ", " + accumulator + "]");
+        return uint64ToScalaNat(rest, "native.Nat.Digit[native.Nat._" +
+                                          std::to_string(last_digit) + ", " +
+                                          accumulator + "]");
     }
 }
 

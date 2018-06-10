@@ -1,11 +1,10 @@
 import scala.scalanative._
 import scala.scalanative.native._
-import scala.scalanative.native.Nat._
 
 @native.link("Union")
 @native.extern
 object Union {
-  type union_point = native.CArray[Byte, Digit[_6, _4]]
+  type union_point = native.CArray[Byte, native.Nat.Digit[native.Nat._6, native.Nat._4]]
 }
 
 import Union._

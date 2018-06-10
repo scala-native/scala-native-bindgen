@@ -43,8 +43,7 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir) {
 
     if (!ir.libObjEmpty() || !ir.enums.empty()) {
         s << "import scala.scalanative._\n"
-          << "import scala.scalanative.native._\n"
-          << "import scala.scalanative.native.Nat._\n\n";
+          << "import scala.scalanative.native._\n\n";
     }
 
     std::string libObjName = handleReservedWords(ir.libName);
