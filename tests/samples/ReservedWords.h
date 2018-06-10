@@ -28,3 +28,4 @@ typedef struct {
     lazy finally;
 } finally;
 match implicit(finally type[12]);
+void _1();

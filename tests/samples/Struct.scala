@@ -1,6 +1,5 @@
 import scala.scalanative._
 import scala.scalanative.native._
-import scala.scalanative.native.Nat._
 
 @native.link("Struct")
 @native.extern
