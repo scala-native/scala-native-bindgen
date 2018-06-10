@@ -16,6 +16,7 @@ object ReservedWords {
   type union_lazy = native.CArray[Byte, native.Nat.Digit[native.Nat._1, native.Nat.Digit[native.Nat._2, native.Nat._8]]]
   def `with`(`sealed`: `match`, `implicit`: native.Ptr[`match`], `forSome`: `lazy`): `type` = native.extern
   def `implicit`(`type`: native.Ptr[`finally`]): `match` = native.extern
+  def _1(): Unit = native.extern
 }
 
 import ReservedWords._
