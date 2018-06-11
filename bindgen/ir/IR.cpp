@@ -13,28 +13,28 @@ IR::IR(std::string libName) : libName(std::move(libName)) {
 
 void IR::addFunction(std::string name, std::vector<Parameter> parameters,
                      std::string retType, bool isVariadic) {
-    functions.push_back(Function(std::move(name), std::move(parameters),
-                                 std::move(retType), isVariadic));
+    functions.emplace_back(std::move(name), std::move(parameters),
+                           std::move(retType), isVariadic);
 }
 
 void IR::addTypeDef(std::string name, std::string type) {
-    typeDefs.push_back(TypeDef(std::move(name), std::move(type)));
+    typeDefs.emplace_back(std::move(name), std::move(type));
 }
 
 void IR::addEnum(std::string name, std::string type,
                  std::vector<Enumerator> enumerators) {
-    enums.push_back(
-        Enum(std::move(name), std::move(type), std::move(enumerators)));
+    enums.emplace_back(std::move(name), std::move(type),
+                       std::move(enumerators));
 }
 
 void IR::addStruct(std::string name, std::vector<Field> fields,
                    uint64_t typeSize) {
-    structs.push_back(Struct(std::move(name), std::move(fields), typeSize));
+    structs.emplace_back(std::move(name), std::move(fields), typeSize);
 }
 
 void IR::addUnion(std::string name, std::vector<Field> fields,
                   uint64_t maxSize) {
-    unions.push_back(Union(std::move(name), std::move(fields), maxSize));
+    unions.emplace_back(std::move(name), std::move(fields), maxSize);
 }
 
 bool IR::libObjEmpty() const {
