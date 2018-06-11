@@ -23,7 +23,7 @@ bool TreeVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
 
         std::string ptype =
             handleReservedWords(typeTranslator.Translate(parm->getType()));
-        parameters.push_back(Parameter(pname, ptype));
+        parameters.emplace_back(pname, ptype);
     }
 
     ir->addFunction(funcName, parameters, retType, func->isVariadic());
@@ -113,7 +113,7 @@ void TreeVisitor::handleUnion(clang::RecordDecl *record, std::string name) {
         std::string ftype = handleReservedWords(
             typeTranslator.Translate(field->getType(), &name));
 
-        fields.push_back(Field(fname, ftype));
+        fields.emplace_back(fname, ftype);
     }
 
     ir->addUnion(name, fields, maxSize);
@@ -138,7 +138,7 @@ void TreeVisitor::handleStruct(clang::RecordDecl *record, std::string name) {
     for (const clang::FieldDecl *field : record->fields()) {
         std::string ftype = handleReservedWords(
             typeTranslator.Translate(field->getType(), &name));
-        fields.push_back(Field(field->getNameAsString(), ftype));
+        fields.emplace_back(field->getNameAsString(), ftype);
 
         cycleDetection.AddDependcy(newName, field->getType());
 
