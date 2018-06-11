@@ -6,11 +6,14 @@ Parameter::Parameter(std::string name, std::string type)
 
 Function::Function(std::string name, std::vector<Parameter> parameters,
                    std::string retType, bool isVariadic)
-    : name(std::move(name)), parameters(std::move(parameters)),
+    : name(name), scalaName(name), parameters(std::move(parameters)),
       retType(std::move(retType)), isVariadic(isVariadic) {}
 
 llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const Function &func) {
-    s << "  def " << handleReservedWords(func.name) << "(";
+    if (func.scalaName != func.name) {
+        s << "  @native.link(\"" << func.name << "\")\n";
+    }
+    s << "  def " << handleReservedWords(func.scalaName) << "(";
     std::string sep = "";
     for (const auto &param : func.parameters) {
         s << sep << handleReservedWords(param.getName()) << ": "
@@ -43,17 +46,21 @@ std::string Function::getName() const { return name; }
 std::string Function::getVarargsParameterName() const {
     std::string parameterName = "varArgs";
     int i = 0;
-    while (existParameterWithName(parameterName)) {
+    while (existsParameterWithName(parameterName)) {
         parameterName = "varArgs" + std::to_string(i++);
     }
     return parameterName;
 }
 
-bool Function::existParameterWithName(const std::string &parameterName) const {
+bool Function::existsParameterWithName(const std::string &parameterName) const {
     for (const auto &parameter : parameters) {
         if (parameter.getName() == parameterName) {
             return true;
         }
     }
     return false;
+}
+
+void Function::setScalaName(std::string scalaName) {
+    this->scalaName = std::move(scalaName);
 }

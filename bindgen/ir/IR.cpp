@@ -1,7 +1,15 @@
 #include "IR.h"
 #include "../Utils.h"
 
-IR::IR(std::string libName) : libName(std::move(libName)) {}
+IR::IR(std::string libName) : libName(std::move(libName)) {
+    if (this->libName == "native") {
+        /* there are at most 3 objects in the file.
+         * All of them will have distinct names. */
+        libObjectName = "nativeLib";
+    } else {
+        libObjectName = this->libName;
+    }
+}
 
 void IR::addFunction(std::string name, std::vector<Parameter> parameters,
                      std::string retType, bool isVariadic) {
@@ -46,7 +54,7 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir) {
           << "import scala.scalanative.native._\n\n";
     }
 
-    std::string libObjName = handleReservedWords(ir.libName);
+    std::string libObjName = handleReservedWords(ir.libObjectName);
 
     if (!ir.libObjEmpty()) {
         s << "@native.link(\"" << ir.libName << "\")\n"
@@ -116,6 +124,7 @@ void IR::generateTypeDefs() {
 
 void IR::generate(const std::string &excludePrefix) {
     if (!generated) {
+        setScalaNames();
         filterDeclarations(excludePrefix);
         generateTypeDefs();
         generated = true;
@@ -199,5 +208,30 @@ bool IR::typeIsUsedOnlyInTypeDefs(std::string type) {
 }
 
 void IR::setPackageName(std::string packageName) {
-    this->packageName = packageName;
+    this->packageName = std::move(packageName);
+}
+
+void IR::setScalaNames() {
+    /* Renaming according to Scala naming conventions
+     * should happen here */
+
+    for (auto &function : functions) {
+        if (function.getName() == "native") {
+            std::string scalaName = "nativeFunc";
+            int i = 0;
+            while (existsFunctionWithName(scalaName)) {
+                scalaName = "nativeFunc" + std::to_string(i++);
+            }
+            function.setScalaName(scalaName);
+        }
+    }
+}
+
+bool IR::existsFunctionWithName(std::string functionName) {
+    for (const auto &function : functions) {
+        if (function.getName() == functionName) {
+            return true;
+        }
+    }
+    return false;
 }
