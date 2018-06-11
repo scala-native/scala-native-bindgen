@@ -8,16 +8,27 @@ int main(int argc, char *argv[]) {
     llvm::cl::extrahelp MoreHelp("\nProduce Bindings for scala native. Please "
                                  "specify lib name with parameter name\n");
 
-    llvm::cl::opt<std::string> LibName("name", llvm::cl::cat(Category));
-    llvm::cl::opt<std::string> StdHeaders("std-headers",
-                                          llvm::cl::cat(Category));
-    llvm::cl::opt<bool> PrintHeadersLocation("location",
-                                             llvm::cl::cat(Category));
-    llvm::cl::opt<std::string> ExcludePrefix("exclude-prefix",
-                                             llvm::cl::cat(Category));
+    llvm::cl::opt<std::string> LibName("name", llvm::cl::cat(Category),
+                                       llvm::cl::desc("Library name"));
+    llvm::cl::opt<std::string> StdHeaders(
+        "std-headers", llvm::cl::cat(Category),
+        llvm::cl::desc("Path to a file with the list of headers for which "
+                       "bindings\n"
+                       "will not be generated. "
+                       "The list contains header files names\n"
+                       "and package names that contain bindings for these "
+                       "headers.\nExample:\n"
+                       "math.h=scala.scalanative.native.math\n"
+                       "stdlib.h=scala.scalanative.native.stdlib"));
+    llvm::cl::opt<bool> PrintHeadersLocation(
+        "location", llvm::cl::cat(Category),
+        llvm::cl::desc("Print list of parsed headers"));
+    llvm::cl::opt<std::string> ExcludePrefix(
+        "exclude-prefix", llvm::cl::cat(Category),
+        llvm::cl::desc("Functions and unused typedefs will be removed if their "
+                       "names\nhave given prefix"));
     llvm::cl::opt<std::string> Package(
         "package", llvm::cl::cat(Category),
-        llvm::cl::value_desc("package-name"),
         llvm::cl::desc("Package name of generated Scala file"));
     clang::tooling::CommonOptionsParser op(argc, (const char **)argv, Category);
     clang::tooling::ClangTool Tool(op.getCompilations(),
