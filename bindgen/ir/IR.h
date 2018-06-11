@@ -101,7 +101,12 @@ class IR {
     bool isTypeUsed(const std::vector<T> &declarations,
                     const std::string &type);
 
-    std::string libName;
+    void setScalaNames();
+
+    bool existsFunctionWithName(std::string functionName);
+
+    std::string libName;       // name of the library
+    std::string libObjectName; // name of Scala object
     std::vector<Function> functions;
     std::vector<TypeDef> typeDefs;
     std::vector<Struct> structs;

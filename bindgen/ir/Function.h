@@ -23,12 +23,15 @@ class Function {
 
     std::string getName() const;
 
+    void setScalaName(std::string scalaName);
+
   private:
     std::string getVarargsParameterName() const;
 
-    bool existParameterWithName(const std::string &parameterName) const;
+    bool existsParameterWithName(const std::string &parameterName) const;
 
-    std::string name;
+    std::string name;      // real name of the function
+    std::string scalaName; // not empty
     std::vector<Parameter> parameters;
     std::string retType;
     bool isVariadic;
