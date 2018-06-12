@@ -20,6 +20,14 @@ add_executable(bindgen
   visitor/TreeVisitor.h
   visitor/TreeVisitor.cpp
   visitor/TreeConsumer.h
+  defines/DefineFinderAction.h
+  defines/DefineFinderAction.cpp
+  defines/DefineFinder.cpp
+  defines/DefineFinder.h
+  defines/DefineFinderActionFactory.cpp 
+  defines/DefineFinderActionFactory.h
+  ir/Define.h
+  ir/Define.cpp
   TypeTranslator.h
   TypeTranslator.cpp
   HeaderManager.h

@@ -1,6 +1,7 @@
 #ifndef SCALA_NATIVE_BINDGEN_INTERMEDIATEREPRESENTATION_H
 #define SCALA_NATIVE_BINDGEN_INTERMEDIATEREPRESENTATION_H
 
+#include "Define.h"
 #include "Enum.h"
 #include "Function.h"
 #include "Struct.h"
@@ -27,6 +28,8 @@ class IR {
 
     void addUnion(std::string name, std::vector<Field> fields,
                   uint64_t maxSize);
+
+    void addDefine(std::string name, std::string type);
 
     /**
      * @return true if there are no functions, types,
@@ -112,6 +115,7 @@ class IR {
     std::vector<Struct> structs;
     std::vector<Union> unions;
     std::vector<Enum> enums;
+    std::vector<Define> defines;
     bool generated = false; // generate type defs only once
     std::string packageName;
 };

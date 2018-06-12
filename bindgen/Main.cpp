@@ -1,3 +1,4 @@
+#include "defines/DefineFinderActionFactory.h"
 #include "visitor/ScalaFrontendActionFactory.h"
 #include <clang/Tooling/CommonOptionsParser.h>
 
@@ -71,8 +72,11 @@ int main(int argc, char *argv[]) {
     locations.clear();
 
     IR ir(libName, linkName, objectName, Package.getValue());
-    ScalaFrontendActionFactory actionFactory(ir);
 
+    DefineFinderActionFactory defineFinderActionFactory(ir);
+    Tool.run(&defineFinderActionFactory);
+
+    ScalaFrontendActionFactory actionFactory(ir);
     int result = Tool.run(&actionFactory);
 
     auto printLoc = PrintHeadersLocation.getValue();

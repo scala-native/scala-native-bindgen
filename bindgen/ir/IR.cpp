@@ -32,6 +32,10 @@ void IR::addUnion(std::string name, std::vector<Field> fields,
     unions.emplace_back(std::move(name), std::move(fields), maxSize);
 }
 
+void IR::addDefine(std::string name, std::string type) {
+    defines.emplace_back(std::move(name), std::move(type));
+}
+
 bool IR::libObjEmpty() const {
     return functions.empty() && typeDefs.empty() && structs.empty() &&
            unions.empty();
