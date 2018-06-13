@@ -12,15 +12,17 @@ inThisBuild(
     )
   ))
 
-val `scala-native-bindgen-tests` = project
-  .in(file("."))
+val tests = project
+  .in(file("tests"))
   .aggregate(samples)
   .settings(
     fork in Test := true,
-    javaOptions in Test += "-Dbindgen.path=" + file(
-      "../bindgen/target/scala-native-bindgen"),
+    javaOptions in Test += {
+      val rootDir = (ThisBuild / baseDirectory).value
+      s"-Dbindgen.path=$rootDir/bindgen/target/scala-native-bindgen"
+    },
     watchSources += WatchSource(
-      baseDirectory.value / "samples",
+      baseDirectory.value / "tests" / "samples",
       "*.h" || "*.scala",
       NothingFilter
     ),
@@ -28,5 +30,6 @@ val `scala-native-bindgen-tests` = project
   )
 
 lazy val samples = project
+  .in(file("tests/samples"))
   .enablePlugins(ScalaNativePlugin)
   .settings(test := (compile in Compile).value)

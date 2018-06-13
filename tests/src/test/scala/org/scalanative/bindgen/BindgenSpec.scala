@@ -15,7 +15,7 @@ class BindgenSpec extends FunSpec {
     outputDir.mkdirs()
 
     it("should exist") {
-      assert(new File(bindgenPath).exists)
+      assert(new File(bindgenPath).exists, s"$bindgenPath does not exist")
     }
 
     def bindgen(inputFile: File, name: String, outputFile: File): Unit = {
