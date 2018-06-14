@@ -40,21 +40,23 @@ lazy val samples = project
     libraryDependencies += "com.lihaoyi" %%% "utest" % "0.6.3" % "test",
     testFrameworks += new TestFramework("utest.runner.Framework"),
     nativeLinkStubs := true,
-    Test / nativeLinkingOptions += {
-      val cwd = (nativeWorkdir in Test).value.getAbsoluteFile / "bindgen"
-      s"-L$cwd"
+    Test / nativeLinkingOptions ++= {
+      val rootDir = (ThisBuild / baseDirectory).value.getAbsoluteFile
+      val cwd     = (Test / target).value.getAbsoluteFile / "bindgen"
+      val linker  = rootDir / "scripts" / "linker.sh"
+      Seq(s"-L$cwd", s"-fuse-ld=$linker")
     },
     Test / compile := {
       val log            = streams.value.log
-      val cwd            = (nativeWorkdir in Test).value.getAbsoluteFile / "bindgen"
-      val compileOptions = nativeCompileOptions.value
-      val cpaths         = (baseDirectory.value ** "*.c").get
+      val cwd            = (Test / target).value / "bindgen"
+      val compileOptions = (Test / nativeCompileOptions).value
+      val cpaths         = (baseDirectory.value.getAbsoluteFile * "*.c").get
       val clangPath      = nativeClang.value.toPath.toAbsolutePath.toString
 
       cwd.mkdirs()
 
       def abs(path: File): String =
-        path.getAbsolutePath.toString
+        path.getAbsolutePath
 
       def run(command: Seq[String]): Int = {
         log.info("Running " + command.mkString(" "))
@@ -75,7 +77,7 @@ lazy val samples = project
       }
 
       val archivePath = cwd / "libbindgentests.a"
-      val archive     = Seq("ar", "rs", abs(archivePath)) ++ opaths
+      val archive     = Seq("ar", "cr", abs(archivePath)) ++ opaths
       if (run(archive) != 0) {
         sys.error(s"Failed to create archive $archivePath")
       }
