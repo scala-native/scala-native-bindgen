@@ -1,10 +1,10 @@
 #include "IR.h"
 #include "../Utils.h"
 
-IR::IR(std::string libName, std::string objectName, std::string packageName)
-    : libName(std::move(libName)), objectName(std::move(objectName)),
-      packageName(packageName) {
-}
+IR::IR(std::string libName, std::string linkName, std::string objectName,
+       std::string packageName)
+    : libName(std::move(libName)), linkName(std::move(linkName)),
+      objectName(std::move(objectName)), packageName(packageName) {}
 
 void IR::addFunction(std::string name, std::vector<Parameter> parameters,
                      std::string retType, bool isVariadic) {
@@ -52,8 +52,11 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir) {
     std::string objectName = handleReservedWords(ir.objectName);
 
     if (!ir.libObjEmpty()) {
-        s << "@native.link(\"" << ir.libName << "\")\n"
-          << "@native.extern\n"
+        if (!ir.linkName.empty()) {
+            s << "@native.link(\"" << ir.linkName << "\")\n";
+        }
+
+        s << "@native.extern\n"
           << "object " << objectName << " {\n";
 
         for (const auto &typeDef : ir.typeDefs) {
