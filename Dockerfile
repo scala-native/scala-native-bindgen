@@ -28,4 +28,5 @@ RUN set -x \
             libclang-$LLVM_VERSION-dev llvm-$LLVM_VERSION-dev \
  && rm -rf /var/lib/apt/lists/*
 
+ENV PATH=$PATH:/usr/lib/llvm-$LLVM_VERSION/bin
 WORKDIR /src

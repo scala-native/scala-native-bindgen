@@ -24,6 +24,10 @@ class BindgenSpec extends FunSpec {
         inputFile.getAbsolutePath,
         "--name",
         name,
+        "--link",
+        "bindgentests",
+        "--package",
+        "org.scalanative.bindgen.samples",
         "--exclude-prefix=__",
         "--"
       )

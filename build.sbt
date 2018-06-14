@@ -1,3 +1,7 @@
+import scala.scalanative.sbtplugin.ScalaNativePluginInternal.nativeWorkdir
+import scala.sys.process._
+import java.nio.file.Path
+
 inThisBuild(
   Def.settings(
     organization := "org.scalanative.bindgen",
@@ -32,4 +36,50 @@ val tests = project
 lazy val samples = project
   .in(file("tests/samples"))
   .enablePlugins(ScalaNativePlugin)
-  .settings(test := (compile in Compile).value)
+  .settings(
+    libraryDependencies += "com.lihaoyi" %%% "utest" % "0.6.3" % "test",
+    testFrameworks += new TestFramework("utest.runner.Framework"),
+    nativeLinkStubs := true,
+    Test / nativeLinkingOptions += {
+      val cwd = (nativeWorkdir in Test).value.getAbsoluteFile / "bindgen"
+      s"-L$cwd"
+    },
+    Test / compile := {
+      val log            = streams.value.log
+      val cwd            = (nativeWorkdir in Test).value.getAbsoluteFile / "bindgen"
+      val compileOptions = nativeCompileOptions.value
+      val cpaths         = (baseDirectory.value ** "*.c").get
+      val clangPath      = nativeClang.value.toPath.toAbsolutePath.toString
+
+      cwd.mkdirs()
+
+      def abs(path: File): String =
+        path.getAbsolutePath.toString
+
+      def run(command: Seq[String]): Int = {
+        log.info("Running " + command.mkString(" "))
+        Process(command, cwd) ! log
+      }
+
+      val opaths = cpaths.map { cpath =>
+        val opath = abs(cwd / s"${cpath.getName}.o")
+        val command = Seq(clangPath) ++ compileOptions ++ Seq("-c",
+                                                              abs(cpath),
+                                                              "-o",
+                                                              opath)
+
+        if (run(command) != 0) {
+          sys.error(s"Failed to compile $cpath")
+        }
+        opath
+      }
+
+      val archivePath = cwd / "libbindgentests.a"
+      val archive     = Seq("ar", "rs", abs(archivePath)) ++ opaths
+      if (run(archive) != 0) {
+        sys.error(s"Failed to create archive $archivePath")
+      }
+
+      (Test / compile).value
+    }
+  )

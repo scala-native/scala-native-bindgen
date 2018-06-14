@@ -1,7 +1,9 @@
+package org.scalanative.bindgen.samples
+
 import scala.scalanative._
 import scala.scalanative.native._
 
-@native.link("Struct")
+@native.link("bindgentests")
 @native.extern
 object Struct {
   type point_s = native.Ptr[struct_point]
