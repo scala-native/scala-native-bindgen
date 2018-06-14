@@ -49,11 +49,7 @@ int main(int argc, char *argv[]) {
 
     locations.clear();
 
-    IR ir(libName);
-    if (!Package.empty()) {
-        ir.setPackageName(Package.getValue());
-    }
-
+    IR ir(libName, Package.getValue());
     ScalaFrontendActionFactory actionFactory(ir);
 
     int result = Tool.run(&actionFactory);

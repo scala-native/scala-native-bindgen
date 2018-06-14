@@ -11,7 +11,7 @@
  */
 class IR {
   public:
-    explicit IR(std::string libName);
+    explicit IR(std::string libName, std::string packageName);
 
     void addFunction(std::string name, std::vector<Parameter> parameters,
                      std::string, bool isVariadic);
@@ -38,8 +38,6 @@ class IR {
     friend llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir);
 
     void generate(const std::string &excludePrefix);
-
-    void setPackageName(std::string packageName);
 
   private:
     /**

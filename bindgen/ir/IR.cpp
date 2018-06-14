@@ -1,7 +1,8 @@
 #include "IR.h"
 #include "../Utils.h"
 
-IR::IR(std::string libName) : libName(std::move(libName)) {
+IR::IR(std::string libName, std::string packageName)
+    : libName(std::move(libName)), packageName(packageName) {
     if (this->libName == "native") {
         /* there are at most 3 objects in the file.
          * All of them will have distinct names. */
@@ -205,10 +206,6 @@ bool IR::isTypeUsed(const std::vector<T> &declarations,
 bool IR::typeIsUsedOnlyInTypeDefs(std::string type) {
     return !(isTypeUsed(functions, type) || isTypeUsed(structs, type) ||
              isTypeUsed(unions, type));
-}
-
-void IR::setPackageName(std::string packageName) {
-    this->packageName = std::move(packageName);
 }
 
 void IR::setScalaNames() {
