@@ -49,15 +49,14 @@ int main(int argc, char *argv[]) {
 
     locations.clear();
 
-    ScalaFrontendActionFactory actionFactory(libName);
-
-    int result = Tool.run(&actionFactory);
-
-    IR ir = actionFactory.getIntermediateRepresentation();
-
+    IR ir(libName);
     if (!Package.empty()) {
         ir.setPackageName(Package.getValue());
     }
+
+    ScalaFrontendActionFactory actionFactory(ir);
+
+    int result = Tool.run(&actionFactory);
 
     auto printLoc = PrintHeadersLocation.getValue();
     if (printLoc) {

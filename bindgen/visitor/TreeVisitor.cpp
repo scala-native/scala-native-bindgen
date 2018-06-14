@@ -26,7 +26,7 @@ bool TreeVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
         parameters.emplace_back(pname, ptype);
     }
 
-    ir->addFunction(funcName, parameters, retType, func->isVariadic());
+    ir.addFunction(funcName, parameters, retType, func->isVariadic());
 
     return true;
 }
@@ -47,7 +47,7 @@ bool TreeVisitor::VisitTypedefDecl(clang::TypedefDecl *tpdef) {
 
     std::string type = handleReservedWords(
         typeTranslator.Translate(tpdef->getUnderlyingType()));
-    ir->addTypeDef(name, type);
+    ir.addTypeDef(name, type);
     return true;
 }
 
@@ -70,8 +70,8 @@ bool TreeVisitor::VisitEnumDecl(clang::EnumDecl *enumdecl) {
         enumerators.emplace_back(en->getNameAsString(), value);
     }
 
-    ir->addEnum(name, typeTranslator.Translate(enumdecl->getIntegerType()),
-                enumerators);
+    ir.addEnum(name, typeTranslator.Translate(enumdecl->getIntegerType()),
+               enumerators);
 
     return true;
 }
@@ -116,7 +116,7 @@ void TreeVisitor::handleUnion(clang::RecordDecl *record, std::string name) {
         fields.emplace_back(fname, ftype);
     }
 
-    ir->addUnion(name, fields, maxSize);
+    ir.addUnion(name, fields, maxSize);
 }
 
 void TreeVisitor::handleStruct(clang::RecordDecl *record, std::string name) {
@@ -155,6 +155,6 @@ void TreeVisitor::handleStruct(clang::RecordDecl *record, std::string name) {
         llvm::errs().flush();
     }
 
-    ir->addStruct(name, fields,
-                  astContext->getTypeSize(record->getTypeForDecl()));
+    ir.addStruct(name, fields,
+                 astContext->getTypeSize(record->getTypeForDecl()));
 }

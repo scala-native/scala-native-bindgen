@@ -22,16 +22,14 @@ class TreeVisitor : public clang::RecursiveASTVisitor<TreeVisitor> {
     clang::ASTContext *astContext;
     TypeTranslator typeTranslator;
     CycleDetection cycleDetection;
-
-    /* pointer to ir that is stored in ScalaFrontendActionFactory */
-    IR *ir;
+    IR &ir;
 
     void handleUnion(clang::RecordDecl *record, std::string name);
 
     void handleStruct(clang::RecordDecl *record, std::string name);
 
   public:
-    TreeVisitor(clang::CompilerInstance *CI, IR *ir)
+    TreeVisitor(clang::CompilerInstance *CI, IR &ir)
         : astContext(&(CI->getASTContext())), typeTranslator(astContext),
           cycleDetection(typeTranslator), ir(ir) {}
 
