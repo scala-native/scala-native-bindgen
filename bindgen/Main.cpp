@@ -42,6 +42,13 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
+    auto objectName = libName;
+    if (objectName == "native") {
+        /* there are at most 3 objects in the file.
+         * All of them will have distinct names. */
+        objectName = "nativeLib";
+    }
+
     auto stdhead = StdHeaders.getValue();
     if (!stdhead.empty()) {
         headerMan.LoadConfig(stdhead);
@@ -49,7 +56,7 @@ int main(int argc, char *argv[]) {
 
     locations.clear();
 
-    IR ir(libName, Package.getValue());
+    IR ir(libName, objectName, Package.getValue());
     ScalaFrontendActionFactory actionFactory(ir);
 
     int result = Tool.run(&actionFactory);

@@ -1,15 +1,9 @@
 #include "IR.h"
 #include "../Utils.h"
 
-IR::IR(std::string libName, std::string packageName)
-    : libName(std::move(libName)), packageName(packageName) {
-    if (this->libName == "native") {
-        /* there are at most 3 objects in the file.
-         * All of them will have distinct names. */
-        libObjectName = "nativeLib";
-    } else {
-        libObjectName = this->libName;
-    }
+IR::IR(std::string libName, std::string objectName, std::string packageName)
+    : libName(std::move(libName)), objectName(std::move(objectName)),
+      packageName(packageName) {
 }
 
 void IR::addFunction(std::string name, std::vector<Parameter> parameters,
@@ -55,12 +49,12 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir) {
           << "import scala.scalanative.native._\n\n";
     }
 
-    std::string libObjName = handleReservedWords(ir.libObjectName);
+    std::string objectName = handleReservedWords(ir.objectName);
 
     if (!ir.libObjEmpty()) {
         s << "@native.link(\"" << ir.libName << "\")\n"
           << "@native.extern\n"
-          << "object " << libObjName << " {\n";
+          << "object " << objectName << " {\n";
 
         for (const auto &typeDef : ir.typeDefs) {
             s << typeDef;
@@ -74,7 +68,7 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir) {
     }
 
     if (!ir.enums.empty() || ir.hasHelperMethods()) {
-        s << "import " << libObjName << "._\n\n";
+        s << "import " << objectName << "._\n\n";
     }
 
     if (!ir.enums.empty()) {

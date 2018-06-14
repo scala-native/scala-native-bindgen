@@ -11,7 +11,8 @@
  */
 class IR {
   public:
-    explicit IR(std::string libName, std::string packageName);
+    explicit IR(std::string libName, std::string objectName,
+                std::string packageName);
 
     void addFunction(std::string name, std::vector<Parameter> parameters,
                      std::string, bool isVariadic);
@@ -104,7 +105,7 @@ class IR {
     bool existsFunctionWithName(std::string functionName);
 
     std::string libName;       // name of the library
-    std::string libObjectName; // name of Scala object
+    std::string objectName;    // name of Scala object
     std::vector<Function> functions;
     std::vector<TypeDef> typeDefs;
     std::vector<Struct> structs;
