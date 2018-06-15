@@ -14,6 +14,8 @@ Running the previous command wild also yield warnings along with the translation
 
 `./scala-native-bindgen /usr/include/uv.h -name uv -- > uv.scala`
 
+Run `./scala-native-bindgen -help` to see all available options.
+
 ## Building
 
 Building this tool requires [CMake], [LLVM] and [Clang]. See the [Scala
@@ -53,6 +55,25 @@ followed.
 cd tests
 sbt test
 ```
+
+## Current limitations
+There are multiple unsupported cases that should be considered when generating bindings:
+1. Currently bindgen does not support passing structs by value.  
+    For example, it will not be possible to call these two functions from Scala Native code:
+    ```c
+    struct MyStruct {
+        int a;
+    };
+    
+    struct MyStruct returnStruct();
+    
+    void handleStruct(struct MyStruct mystr);
+    ```
+    To support such cases one should generate bindings for C wrapper functions that use pointers to structs instead of actual structs.
+2. Bindgen does not generate bindings for defines.  
+    In order to use defines one should write wrapper functions that return defined values.
+3. There is no way to reuse already generated bindings.  
+    Bindgen outputs bindings also for headers that were included in a given header.
 
 ## License
 
