@@ -108,7 +108,8 @@ void TreeVisitor::handleUnion(clang::RecordDecl *record, std::string name) {
     std::vector<Field> fields;
 
     for (const clang::FieldDecl *field : record->fields()) {
-        maxSize = std::max(maxSize, astContext->getTypeSize(field->getType()));
+        uint64_t sizeInBytes = astContext->getTypeSize(field->getType()) / 8;
+        maxSize = std::max(maxSize, sizeInBytes);
         std::string fname = field->getNameAsString();
         std::string ftype = handleReservedWords(
             typeTranslator.Translate(field->getType(), &name));

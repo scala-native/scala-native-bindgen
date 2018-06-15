@@ -6,7 +6,7 @@ import scala.scalanative.native._
 @native.link("bindgentests")
 @native.extern
 object Union {
-  type union_values = native.CArray[Byte, native.Nat.Digit[native.Nat._6, native.Nat._4]]
+  type union_values = native.CArray[Byte, native.Nat._8]
   def getValues(): native.Ptr[union_values] = native.extern
 }
 
