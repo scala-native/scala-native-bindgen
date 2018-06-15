@@ -13,16 +13,12 @@
 class ScalaFrontendActionFactory
     : public clang::tooling::FrontendActionFactory {
   public:
-    explicit ScalaFrontendActionFactory(std::string libName);
+    explicit ScalaFrontendActionFactory(IR &ir);
 
     clang::FrontendAction *create() override;
 
-    const IR &getIntermediateRepresentation() const;
-
   private:
-    std::string libName;
-
-    IR ir;
+    IR &ir;
 };
 
 #endif // SCALA_NATIVE_BINDGEN_SCALAFRONTENDACTIONFACTORY_H

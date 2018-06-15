@@ -1,7 +1,9 @@
+package org.scalanative.bindgen.samples
+
 import scala.scalanative._
 import scala.scalanative.native._
 
-@native.link("Typedef")
+@native.link("bindgentests")
 @native.extern
 object Typedef {
   type toggle_e = enum_toggle_e

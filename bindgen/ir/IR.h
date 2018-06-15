@@ -11,7 +11,8 @@
  */
 class IR {
   public:
-    explicit IR(std::string libName);
+    explicit IR(std::string libName, std::string linkName,
+                std::string objectName, std::string packageName);
 
     void addFunction(std::string name, std::vector<Parameter> parameters,
                      std::string, bool isVariadic);
@@ -38,8 +39,6 @@ class IR {
     friend llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir);
 
     void generate(const std::string &excludePrefix);
-
-    void setPackageName(std::string packageName);
 
   private:
     /**
@@ -105,8 +104,9 @@ class IR {
 
     bool existsFunctionWithName(std::string functionName);
 
-    std::string libName;       // name of the library
-    std::string libObjectName; // name of Scala object
+    std::string libName;    // name of the library
+    std::string linkName;   // name of the library to link with
+    std::string objectName; // name of Scala object
     std::vector<Function> functions;
     std::vector<TypeDef> typeDefs;
     std::vector<Struct> structs;

@@ -1,15 +1,10 @@
 #include "IR.h"
 #include "../Utils.h"
 
-IR::IR(std::string libName) : libName(std::move(libName)) {
-    if (this->libName == "native") {
-        /* there are at most 3 objects in the file.
-         * All of them will have distinct names. */
-        libObjectName = "nativeLib";
-    } else {
-        libObjectName = this->libName;
-    }
-}
+IR::IR(std::string libName, std::string linkName, std::string objectName,
+       std::string packageName)
+    : libName(std::move(libName)), linkName(std::move(linkName)),
+      objectName(std::move(objectName)), packageName(packageName) {}
 
 void IR::addFunction(std::string name, std::vector<Parameter> parameters,
                      std::string retType, bool isVariadic) {
@@ -54,12 +49,15 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir) {
           << "import scala.scalanative.native._\n\n";
     }
 
-    std::string libObjName = handleReservedWords(ir.libObjectName);
+    std::string objectName = handleReservedWords(ir.objectName);
 
     if (!ir.libObjEmpty()) {
-        s << "@native.link(\"" << ir.libName << "\")\n"
-          << "@native.extern\n"
-          << "object " << libObjName << " {\n";
+        if (!ir.linkName.empty()) {
+            s << "@native.link(\"" << ir.linkName << "\")\n";
+        }
+
+        s << "@native.extern\n"
+          << "object " << objectName << " {\n";
 
         for (const auto &typeDef : ir.typeDefs) {
             s << typeDef;
@@ -73,7 +71,7 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir) {
     }
 
     if (!ir.enums.empty() || ir.hasHelperMethods()) {
-        s << "import " << libObjName << "._\n\n";
+        s << "import " << objectName << "._\n\n";
     }
 
     if (!ir.enums.empty()) {
@@ -205,10 +203,6 @@ bool IR::isTypeUsed(const std::vector<T> &declarations,
 bool IR::typeIsUsedOnlyInTypeDefs(std::string type) {
     return !(isTypeUsed(functions, type) || isTypeUsed(structs, type) ||
              isTypeUsed(unions, type));
-}
-
-void IR::setPackageName(std::string packageName) {
-    this->packageName = std::move(packageName);
 }
 
 void IR::setScalaNames() {

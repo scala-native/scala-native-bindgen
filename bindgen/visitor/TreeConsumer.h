@@ -18,7 +18,7 @@ class TreeConsumer : public clang::ASTConsumer {
     clang::SourceManager &smanager;
 
   public:
-    TreeConsumer(clang::CompilerInstance *CI, IR *ir)
+    TreeConsumer(clang::CompilerInstance *CI, IR &ir)
         : visitor(CI, ir), smanager(CI->getASTContext().getSourceManager()) {}
 
     bool HandleTopLevelDecl(clang::DeclGroupRef DG) override {

@@ -30,6 +30,12 @@ int main(int argc, char *argv[]) {
     llvm::cl::opt<std::string> Package(
         "package", llvm::cl::cat(Category),
         llvm::cl::desc("Package name of generated Scala file"));
+    llvm::cl::opt<bool> NoLinkName(
+        "no-link", llvm::cl::cat(Category),
+        llvm::cl::desc("Library does not require linking"));
+    llvm::cl::opt<std::string> LinkName(
+        "link", llvm::cl::cat(Category),
+        llvm::cl::desc("Library to link with, e.g. -luv for libuv"));
     clang::tooling::CommonOptionsParser op(argc, (const char **)argv, Category);
     clang::tooling::ClangTool Tool(op.getCompilations(),
                                    op.getSourcePathList());
@@ -42,6 +48,21 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
+    auto linkName = LinkName.getValue();
+    if (linkName.empty()) {
+        linkName = libName;
+    }
+    if (NoLinkName.getValue()) {
+        linkName = "";
+    }
+
+    auto objectName = libName;
+    if (objectName == "native") {
+        /* there are at most 3 objects in the file.
+         * All of them will have distinct names. */
+        objectName = "nativeLib";
+    }
+
     auto stdhead = StdHeaders.getValue();
     if (!stdhead.empty()) {
         headerMan.LoadConfig(stdhead);
@@ -49,15 +70,10 @@ int main(int argc, char *argv[]) {
 
     locations.clear();
 
-    ScalaFrontendActionFactory actionFactory(libName);
+    IR ir(libName, linkName, objectName, Package.getValue());
+    ScalaFrontendActionFactory actionFactory(ir);
 
     int result = Tool.run(&actionFactory);
-
-    IR ir = actionFactory.getIntermediateRepresentation();
-
-    if (!Package.empty()) {
-        ir.setPackageName(Package.getValue());
-    }
 
     auto printLoc = PrintHeadersLocation.getValue();
     if (printLoc) {

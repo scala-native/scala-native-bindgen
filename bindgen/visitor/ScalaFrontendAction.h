@@ -12,14 +12,14 @@
  */
 class ScalaFrontendAction : public clang::ASTFrontendAction {
   public:
-    explicit ScalaFrontendAction(IR *ir);
+    explicit ScalaFrontendAction(IR &ir);
 
     std::unique_ptr<clang::ASTConsumer>
     CreateASTConsumer(clang::CompilerInstance &CI,
                       clang::StringRef file) override;
 
   private:
-    IR *ir;
+    IR &ir;
 };
 
 #endif // SCALA_NATIVE_BINDGEN_SCALAFRONTENDACTION_H

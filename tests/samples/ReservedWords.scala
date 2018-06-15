@@ -1,7 +1,9 @@
+package org.scalanative.bindgen.samples
+
 import scala.scalanative._
 import scala.scalanative.native._
 
-@native.link("ReservedWords")
+@native.link("bindgentests")
 @native.extern
 object ReservedWords {
   type `match` = native.CInt

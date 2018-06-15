@@ -13,6 +13,4 @@ if [[ ! -e bindgen/target/.llvm-version ]] || [[ "$(<bindgen/target/.llvm-versio
 fi
 
 make -C bindgen/target
-
-cd tests
 sbt "${@:-test}"
