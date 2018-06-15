@@ -4,3 +4,5 @@ struct point {
 };
 
 typedef struct point *point_s;
+
+point_s getPoint();

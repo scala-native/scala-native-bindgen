@@ -8,6 +8,7 @@ import scala.scalanative.native._
 object Struct {
   type point_s = native.Ptr[struct_point]
   type struct_point = native.CStruct2[native.CInt, native.CInt]
+  def getPoint(): native.Ptr[struct_point] = native.extern
 }
 
 import Struct._

@@ -21,3 +21,7 @@ enum { // anonymous enum
 enum negativeValues { NEG_A = -1, NEG_B = -2 };
 
 enum bigNegativeValues { BIG_NEG_A = -10000000000, BIG_NEG_B = -1 };
+
+enum days get_WEDNESDAY();
+
+char *check_BIG_NEG_A(enum bigNegativeValues big_neg_a);

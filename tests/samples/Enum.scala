@@ -10,6 +10,8 @@ object Enum {
   type enum_bigValues = native.CUnsignedLong
   type enum_negativeValues = native.CInt
   type enum_bigNegativeValues = native.CLong
+  def get_WEDNESDAY(): enum_days = native.extern
+  def check_BIG_NEG_A(big_neg_a: enum_bigNegativeValues): native.CString = native.extern
 }
 
 import Enum._
