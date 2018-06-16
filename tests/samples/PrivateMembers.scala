@@ -16,7 +16,7 @@ object PrivateMembers {
   type struct_structWithPrivateStruct = native.CStruct1[native.Ptr[struct_structWithPrivateType]]
   type struct_normalStruct = native.CStruct1[native.CInt]
   type struct_privateStructWithTypedef = native.CStruct1[native.Ptr[__private_type]]
-  type union___unionWithPrivateName = native.CArray[Byte, native.Nat.Digit[native.Nat._3, native.Nat._2]]
+  type union___unionWithPrivateName = native.CArray[Byte, native.Nat._4]
   def getTypeThatUsesPrivateTypes(): pid_t = native.extern
   def getPrivateType(): native.Ptr[__private_type] = native.extern
   def usesPrivateUnion(anonymous0: union___unionWithPrivateName): Unit = native.extern
