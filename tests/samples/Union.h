@@ -1,7 +1,9 @@
 union values {
-    long a;
-    int b;
-    long long c;
+    long l;
+    int i;
+    long long ll;
 };
 
-union values *getValues();
+void setIntValue(union values *v);
+
+void setLongValue(union values *v);

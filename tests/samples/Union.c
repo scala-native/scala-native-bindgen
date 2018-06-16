@@ -1,8 +1,6 @@
 #include "Union.h"
 #include <stdlib.h>
 
-union values *getValues() {
-    union values *myValues = malloc(sizeof(union values));
-    myValues->a = 10;
-    return myValues;
-}
+void setIntValue(union values *v) { v->i = 10; }
+
+void setLongValue(union values *v) { v->l = 10000000000; }
