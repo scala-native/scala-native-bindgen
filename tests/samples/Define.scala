@@ -7,4 +7,5 @@ object DefineDefines {
   val STRING: native.CString = c"Hello, World!"
   val INT = 42
   val FLOAT = 5.6
+  val SHOULD_BE_DEFINED = 2
 }
