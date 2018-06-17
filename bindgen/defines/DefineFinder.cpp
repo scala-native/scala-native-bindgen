@@ -65,3 +65,13 @@ DefineFinder::getFinalIdentifier(const clang::Token &token) const {
     // TODO: token is another definition. Find the original value
     return nullptr;
 }
+
+void DefineFinder::MacroUndefined(const clang::Token &MacroNameTok,
+                                  const clang::MacroDefinition &MD) {
+    clang::SourceManager &sm = compiler.getSourceManager();
+    if (sm.isWrittenInMainFile(MacroNameTok.getLocation()) &&
+        !MD.getMacroInfo()->isFunctionLike()) {
+        std::string macroName = MacroNameTok.getIdentifierInfo()->getName();
+        ir.removeDefine(macroName);
+    }
+}

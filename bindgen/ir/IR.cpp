@@ -247,3 +247,13 @@ bool IR::existsFunctionWithName(std::string functionName) {
     }
     return false;
 }
+
+void IR::removeDefine(const std::string &name) {
+    for (auto it = literalDefines.begin(), end = literalDefines.end();
+         it != end; ++it) {
+        if ((*it).getName() == name) {
+            literalDefines.erase(it);
+            return;
+        }
+    }
+}

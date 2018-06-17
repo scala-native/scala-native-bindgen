@@ -4,7 +4,7 @@
 #include "Define.h"
 #include <llvm/Support/raw_ostream.h>
 
-class LiteralDefine : Define {
+class LiteralDefine : public Define {
   public:
     LiteralDefine(std::string name, std::string literal);
 

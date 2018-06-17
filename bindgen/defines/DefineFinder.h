@@ -12,6 +12,9 @@ class DefineFinder : public clang::PPCallbacks {
     void MacroDefined(const clang::Token &MacroNameTok,
                       const clang::MacroDirective *MD) override;
 
+    void MacroUndefined(const clang::Token &MacroNameTok,
+                        const clang::MacroDefinition &MD) override;
+
   private:
     IR &ir;
     const clang::CompilerInstance &compiler;

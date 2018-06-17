@@ -7,8 +7,10 @@ class Define {
   public:
     explicit Define(std::string name);
 
+    std::string getName();
+
   protected:
-    const std::string name;
+    std::string name;
 };
 
 #endif // SCALA_NATIVE_BINDGEN_DEFINE_H

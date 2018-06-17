@@ -10,11 +10,15 @@ extern int a;
 #define MY_A a // unsupported
 
 #ifdef NOT_DEFINED
-#define SHOULD_NOT_BE_DEFINED 0
+#define SHOULD_NOT_BE_DEFINED "Because NOT_DEFINED is not defined"
 #endif
 
+#define DEFINED_ONLY_IN_HEADER "Defined only inside the header file"
+
 #if INT == 0
-#define SHOULD_NOT_BE_DEFINED 1
+#define SHOULD_NOT_BE_DEFINED "Because INT is 42"
 #else
-#define SHOULD_BE_DEFINED 2
+#define SHOULD_BE_DEFINED "Because INT is not equal to 0"
 #endif
+
+#undef DEFINED_ONLY_IN_HEADER

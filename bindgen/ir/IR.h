@@ -46,6 +46,8 @@ class IR {
 
     void generate(const std::string &excludePrefix);
 
+    void removeDefine(const std::string &name);
+
   private:
     /**
      * Generates type defs for enums, structs and unions
