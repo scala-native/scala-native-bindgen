@@ -10,13 +10,7 @@ class DefineFinderAction : public clang::PreprocessOnlyAction {
     explicit DefineFinderAction(IR &ir);
 
   protected:
-    void ExecuteAction() override {
-        getCompilerInstance().getPreprocessor().addPPCallbacks(
-            std::unique_ptr<clang::PPCallbacks>(
-                new DefineFinder(ir, getCompilerInstance())));
-
-        clang::PreprocessOnlyAction::ExecuteAction();
-    }
+    void ExecuteAction() override;
 
   private:
     IR &ir;

@@ -4,7 +4,7 @@
 IR::IR(std::string libName, std::string linkName, std::string objectName,
        std::string packageName)
     : libName(std::move(libName)), linkName(std::move(linkName)),
-      objectName(std::move(objectName)), packageName(packageName) {}
+      objectName(std::move(objectName)), packageName(std::move(packageName)) {}
 
 void IR::addFunction(std::string name, std::vector<Parameter> parameters,
                      std::string retType, bool isVariadic) {
@@ -32,8 +32,14 @@ void IR::addUnion(std::string name, std::vector<Field> fields,
     unions.emplace_back(std::move(name), std::move(fields), maxSize);
 }
 
-void IR::addDefine(std::string name, std::string type) {
-    defines.emplace_back(std::move(name), std::move(type));
+void IR::addLiteralDefine(std::string name, std::string literal) {
+    literalDefines.emplace_back(std::move(name), std::move(literal));
+}
+
+void IR::addLiteralDefine(std::string name, std::string literal,
+                          std::string type) {
+    literalDefines.emplace_back(std::move(name), std::move(literal),
+                                std::move(type));
 }
 
 bool IR::libObjEmpty() const {
@@ -48,7 +54,7 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir) {
         s << "package " << ir.packageName << "\n\n";
     }
 
-    if (!ir.libObjEmpty() || !ir.enums.empty()) {
+    if (!ir.libObjEmpty() || !ir.enums.empty() || !ir.literalDefines.empty()) {
         s << "import scala.scalanative._\n"
           << "import scala.scalanative.native._\n\n";
     }
@@ -71,6 +77,14 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir) {
             s << func;
         }
 
+        s << "}\n\n";
+    }
+
+    if (!ir.literalDefines.empty()) {
+        s << "object " << ir.libName << "Defines {\n";
+        for (const auto &literalDefine : ir.literalDefines) {
+            s << literalDefine;
+        }
         s << "}\n\n";
     }
 

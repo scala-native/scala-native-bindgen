@@ -26,8 +26,6 @@ add_executable(bindgen
   defines/DefineFinder.h
   defines/DefineFinderActionFactory.cpp 
   defines/DefineFinderActionFactory.h
-  ir/Define.h
-  ir/Define.cpp
   TypeTranslator.h
   TypeTranslator.cpp
   HeaderManager.h
@@ -46,6 +44,10 @@ add_executable(bindgen
   ir/Enum.h
   ir/TypeAndName.cpp
   ir/TypeAndName.h
+  ir/Define.h
+  ir/Define.cpp
+  ir/LiteralDefine.cpp
+  ir/LiteralDefine.h
 )
 
 set_target_properties(bindgen

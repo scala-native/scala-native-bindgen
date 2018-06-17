@@ -3,9 +3,12 @@
 
 #include "TypeAndName.h"
 
-class Define : TypeAndName {
+class Define {
   public:
-    Define(const std::string &name, const std::string &type);
+    explicit Define(std::string name);
+
+  protected:
+    const std::string name;
 };
 
 #endif // SCALA_NATIVE_BINDGEN_DEFINE_H

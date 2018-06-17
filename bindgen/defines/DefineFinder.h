@@ -15,6 +15,8 @@ class DefineFinder : public clang::PPCallbacks {
   private:
     IR &ir;
     const clang::CompilerInstance &compiler;
+
+    const clang::Token *getFinalIdentifier(const clang::Token &token) const;
 };
 
 #endif // SCALA_NATIVE_BINDGEN_DEFINEFINDER_H
