@@ -1,10 +1,12 @@
 #include "DefineFinder.h"
 
 #include <clang/Basic/IdentifierTable.h>
+#include <clang/Lex/LiteralSupport.h>
 #include <clang/Lex/MacroInfo.h>
 
-DefineFinder::DefineFinder(IR &ir, const clang::CompilerInstance &compiler)
-    : ir(ir), compiler(compiler) {}
+DefineFinder::DefineFinder(IR &ir, const clang::CompilerInstance &compiler,
+                           clang::Preprocessor &pp)
+    : ir(ir), compiler(compiler), pp(pp) {}
 
 void DefineFinder::MacroDefined(const clang::Token &MacroNameTok,
                                 const clang::MacroDirective *MD) {
@@ -38,14 +40,11 @@ void DefineFinder::MacroDefined(const clang::Token &MacroNameTok,
             /* might be converted directly to Scala code */
             std::string literal(finalToken->getLiteralData(),
                                 finalToken->getLength());
-            switch (finalToken->getKind()) {
-            case clang::tok::numeric_constant:
-                ir.addLiteralDefine(macroName, literal);
-                break;
-            case clang::tok::string_literal:
+            if (finalToken->getKind() == clang::tok::numeric_constant) {
+                addNumericConstantDefine(macroName, literal, finalToken);
+            } else if (finalToken->getKind() == clang::tok::string_literal) {
                 ir.addLiteralDefine(macroName, "c" + literal, "native.CString");
-                break;
-            default:
+            } else {
                 llvm::errs() << "Warning: type of literal "
                              << finalToken->getName() << " is unsupported\n";
                 llvm::errs().flush();
@@ -73,5 +72,30 @@ void DefineFinder::MacroUndefined(const clang::Token &MacroNameTok,
         !MD.getMacroInfo()->isFunctionLike()) {
         std::string macroName = MacroNameTok.getIdentifierInfo()->getName();
         ir.removeDefine(macroName);
+    }
+}
+
+void DefineFinder::addNumericConstantDefine(const std::string &macroName,
+                                            const std::string &literal,
+                                            const clang::Token *finalToken) {
+    clang::NumericLiteralParser parser(literal, finalToken->getLocation(), pp);
+    std::string type;
+    if (parser.isIntegerLiteral()) {
+        if (parser.isLongLong) {
+            return;
+        }
+        if (parser.isLong) {
+            type = "native.CLong";
+        } else {
+            type = "native.CInt";
+        }
+    } else {
+        if (parser.isFloat) {
+            type = "native.CFloat";
+            // TODO: distinguish between float and double
+        }
+    }
+    if (!type.empty()) {
+        ir.addLiteralDefine(macroName, literal, type);
     }
 }

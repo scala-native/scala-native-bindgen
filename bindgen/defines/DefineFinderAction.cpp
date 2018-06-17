@@ -5,7 +5,8 @@ DefineFinderAction::DefineFinderAction(IR &ir) : ir(ir) {}
 void DefineFinderAction::ExecuteAction() {
     getCompilerInstance().getPreprocessor().addPPCallbacks(
         std::unique_ptr<clang::PPCallbacks>(
-            new DefineFinder(ir, getCompilerInstance())));
+            new DefineFinder(ir, getCompilerInstance(),
+                             getCompilerInstance().getPreprocessor())));
 
     clang::PreprocessOnlyAction::ExecuteAction();
 }
