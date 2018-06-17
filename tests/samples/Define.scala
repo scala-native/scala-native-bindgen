@@ -5,7 +5,10 @@ import scala.scalanative.native._
 
 object DefineDefines {
   val STRING: native.CString = c"Hello, World!"
-  val INT = 42
-  val FLOAT = 5.6
+  val LONG: native.CLong = 1000000000000L
+  val LONG_WITHOUT_ENDING: native.CLong = 1000000000000L
+  val LONG_LONG: native.CLongLong = 1000000000000L
+  val MAXIMUM_SIGNED_LONG: native.CLong = 9223372036854775807L
+  val INT: native.CInt = 42
   val SHOULD_BE_DEFINED: native.CString = c"Because INT is not equal to 0"
 }

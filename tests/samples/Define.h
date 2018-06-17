@@ -1,9 +1,21 @@
 #define STRING "Hello, World!"
 
-#define INT 42
-// #define LONG 10000000000 // this will fail
+#define LONG 1000000000000l
+#define LONG_WITHOUT_ENDING 1000000000000
+#define LONG_LONG 1000000000000ll
+
+/* maximum unsigned long does not fit into long type
+ * therefore warning will be printed and definition will be ignored. */
+#define MAXIMUM_UNSIGNED_LONG 18446744073709551615
+#define MAXIMUM_SIGNED_LONG 9223372036854775807 // OK
+
+/* negative values are currently ignored because there are 2 tokens in the
+ * representation */
+// #define MINIMUM_SIGNED_LONG -9223372036854775808
+
 #define FLOAT 5.6
 
+#define INT 42
 #define NEW_INT INT // unsupported
 
 extern int a;

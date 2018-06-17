@@ -3,6 +3,8 @@
 #include <clang/Basic/IdentifierTable.h>
 #include <clang/Lex/LiteralSupport.h>
 #include <clang/Lex/MacroInfo.h>
+#include <llvm/ADT/APInt.h>
+#include <llvm/ADT/APSInt.h>
 
 DefineFinder::DefineFinder(IR &ir, const clang::CompilerInstance &compiler,
                            clang::Preprocessor &pp)
@@ -76,18 +78,27 @@ void DefineFinder::MacroUndefined(const clang::Token &MacroNameTok,
 }
 
 void DefineFinder::addNumericConstantDefine(const std::string &macroName,
-                                            const std::string &literal,
+                                            std::string literal,
                                             const clang::Token *finalToken) {
     clang::NumericLiteralParser parser(literal, finalToken->getLocation(), pp);
     std::string type;
     if (parser.isIntegerLiteral()) {
+        std::replace(literal.begin(), literal.end(), 'l', 'L');
         if (parser.isLongLong) {
-            return;
-        }
-        if (parser.isLong) {
+            /* literal has `LL` ending but `long long` is represented as
+             * `Long` in Scala Native */
+            literal = literal.substr(0, literal.length() - 1); // remove last L
+            type = "native.CLongLong";
+        } else if (parser.isLong) {
+            /* literal already has `L` ending */
             type = "native.CLong";
         } else {
-            type = "native.CInt";
+            /* literal may not have `l` or `ll` ending but still be of long type
+             * NumericLiteralParser does not recognize that 10000000000
+             * is a long value.
+             * Therefore we need to check that value fits into certain number
+             * of bits. */
+            getTypeOfIntLiteralWithoutEnding(parser, literal, type);
         }
     } else {
         if (parser.isFloat) {
@@ -97,5 +108,47 @@ void DefineFinder::addNumericConstantDefine(const std::string &macroName,
     }
     if (!type.empty()) {
         ir.addLiteralDefine(macroName, literal, type);
+    }
+}
+
+/**
+ * Check if literal without `l` or `ll` ending fits into int or long variable.
+ *
+ * Set `literal` and `type` parameters.
+ */
+void DefineFinder::getTypeOfIntLiteralWithoutEnding(
+    clang::NumericLiteralParser parser, std::string &literal,
+    std::string &type) {
+
+    bool isSigned = llvm::APSInt(literal).isSigned();
+
+    llvm::APInt intSignedVal(4 * 8, 0, false);
+    llvm::APInt intUnsignedVal(4 * 8 - 1, 0, false);
+    /* it does not matter if APInt instance is signed or not
+     * because when calling GetIntegerValue it will check if unsigned value may
+     * fit into the full width defined in APInt */
+    if ((!isSigned && !parser.GetIntegerValue(intUnsignedVal)) ||
+        (isSigned && !parser.GetIntegerValue(intSignedVal))) {
+        type = "native.CInt";
+    } else {
+        llvm::APInt longSignedVal(8 * 8, 0, false);
+        llvm::APInt longUnsignedVal(8 * 8 - 1, 0, false);
+        if ((!isSigned && !parser.GetIntegerValue(longUnsignedVal)) ||
+            (isSigned && !parser.GetIntegerValue(longSignedVal))) {
+            type = "native.CLong";
+            literal = literal + "L";
+        } else {
+            llvm::errs() << "Waring: integer value does not fit into 8 bytes: "
+                         << literal << "\n";
+            llvm::errs().flush();
+            /**
+             * `long long` value has mostly the same size as `long`.
+             * Moreover in Scala Native the type is represented as `Long`:
+             * @code
+             * type CLongLong = Long
+             * @endcode
+             * Therefore the case of `long long` is not considered here.
+             */
+        }
     }
 }
