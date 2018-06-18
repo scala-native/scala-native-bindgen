@@ -9,6 +9,8 @@
 #define MAXIMUM_UNSIGNED_LONG 18446744073709551615
 #define MAXIMUM_SIGNED_LONG 9223372036854775807 // OK
 
+#define NEGATIVE_NUMBER -1 // unsupported
+
 /* negative values are currently ignored because there are 2 tokens in the
  * representation */
 // #define MINIMUM_SIGNED_LONG -9223372036854775808
@@ -16,10 +18,15 @@
 #define FLOAT 5.6
 
 #define INT 42
-#define NEW_INT INT // unsupported
+#define NEW_INT INT
 
 extern int a;
 #define MY_A a // unsupported
+
+#define wait_for_it(cond)                                                      \
+    do {                                                                       \
+        sleep(1000);                                                           \
+    } while (!cond) // unsupported
 
 #ifdef NOT_DEFINED
 #define SHOULD_NOT_BE_DEFINED "Because NOT_DEFINED is not defined"

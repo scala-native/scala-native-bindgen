@@ -74,10 +74,13 @@ int main(int argc, char *argv[]) {
     IR ir(libName, linkName, objectName, Package.getValue());
 
     DefineFinderActionFactory defineFinderActionFactory(ir);
-    Tool.run(&defineFinderActionFactory);
+    int result = Tool.run(&defineFinderActionFactory);
+    if (result) {
+        return result;
+    }
 
     ScalaFrontendActionFactory actionFactory(ir);
-    int result = Tool.run(&actionFactory);
+    result = Tool.run(&actionFactory);
 
     auto printLoc = PrintHeadersLocation.getValue();
     if (printLoc) {

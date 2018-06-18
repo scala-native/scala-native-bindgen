@@ -32,10 +32,6 @@ void IR::addUnion(std::string name, std::vector<Field> fields,
     unions.emplace_back(std::move(name), std::move(fields), maxSize);
 }
 
-void IR::addLiteralDefine(std::string name, std::string literal) {
-    literalDefines.emplace_back(std::move(name), std::move(literal));
-}
-
 void IR::addLiteralDefine(std::string name, std::string literal,
                           std::string type) {
     literalDefines.emplace_back(std::move(name), std::move(literal),

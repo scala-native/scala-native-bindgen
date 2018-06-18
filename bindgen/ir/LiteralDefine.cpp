@@ -1,8 +1,5 @@
 #include "LiteralDefine.h"
 
-LiteralDefine::LiteralDefine(std::string name, std::string literal)
-    : Define(std::move(name)), literal(std::move(literal)) {}
-
 LiteralDefine::LiteralDefine(std::string name, std::string literal,
                              std::string type)
     : Define(std::move(name)), literal(std::move(literal)),

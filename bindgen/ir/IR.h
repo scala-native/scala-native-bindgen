@@ -29,8 +29,6 @@ class IR {
     void addUnion(std::string name, std::vector<Field> fields,
                   uint64_t maxSize);
 
-    void addLiteralDefine(std::string name, std::string literal);
-
     void addLiteralDefine(std::string name, std::string literal,
                           std::string type);
 

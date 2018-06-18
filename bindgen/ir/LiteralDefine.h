@@ -6,8 +6,6 @@
 
 class LiteralDefine : public Define {
   public:
-    LiteralDefine(std::string name, std::string literal);
-
     LiteralDefine(std::string name, std::string literal, std::string type);
 
     friend llvm::raw_ostream &operator<<(llvm::raw_ostream &s,
@@ -15,7 +13,7 @@ class LiteralDefine : public Define {
 
   private:
     std::string literal;
-    std::string type; // might be empty
+    std::string type;
 };
 
 #endif // SCALA_NATIVE_BINDGEN_LITERALDEFINE_H
