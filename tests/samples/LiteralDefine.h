@@ -9,16 +9,15 @@
 #define MAXIMUM_UNSIGNED_LONG 18446744073709551615
 #define MAXIMUM_SIGNED_LONG 9223372036854775807 // OK
 
-#define NEGATIVE_NUMBER -1 // unsupported
-
-/* negative values are currently ignored because there are 2 tokens in the
- * representation */
-// #define MINIMUM_SIGNED_LONG -9223372036854775808
+#define MINIMUM_SIGNED_LONG -9223372036854775808           // OK
+#define LESS_THEN_MINIMUM_SIGNED_LONG -9223372036854775809 // excluded
 
 #define FLOAT 5.6
 
 #define INT 42
+#define MAXIMUM_INT 2147483647
 #define NEW_INT INT
+#define NEG_INT -INT
 
 extern int a;
 #define MY_A a // unsupported

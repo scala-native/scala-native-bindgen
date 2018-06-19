@@ -1,7 +1,7 @@
 #ifndef SCALA_NATIVE_BINDGEN_DEFINE_H
 #define SCALA_NATIVE_BINDGEN_DEFINE_H
 
-#include "TypeAndName.h"
+#include <string>
 
 class Define {
   public:

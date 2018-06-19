@@ -1,10 +1,6 @@
 #include "DefineFinder.h"
 
-#include <clang/Basic/IdentifierTable.h>
-#include <clang/Lex/LiteralSupport.h>
-#include <clang/Lex/MacroInfo.h>
 #include <llvm/ADT/APInt.h>
-#include <llvm/ADT/APSInt.h>
 
 DefineFinder::DefineFinder(IR &ir, const clang::CompilerInstance &compiler,
                            clang::Preprocessor &pp)
@@ -20,55 +16,80 @@ void DefineFinder::MacroDefined(const clang::Token &macroNameTok,
          * Ignore function-like definitions because they usually are meaningful
          * only inside C functions. */
 
-        const clang::Token *token = expandDefine(*md);
-        if (!token) {
+        std::vector<clang::Token> *tokens = expandDefine(*md);
+        if (!tokens) { // there was function-like macro
             return;
         }
         std::string macroName = macroNameTok.getIdentifierInfo()->getName();
 
-        if (token->isLiteral()) {
-            /* might be converted directly to Scala code */
-            std::string literal(token->getLiteralData(), token->getLength());
-            if (token->getKind() == clang::tok::numeric_constant) {
-                addNumericConstantDefine(macroName, literal, token);
-            } else if (token->getKind() == clang::tok::string_literal) {
-                ir.addLiteralDefine(macroName, "c" + literal, "native.CString");
-            } else {
-                llvm::errs() << "Warning: type of literal " << token->getName()
-                             << " is unsupported\n";
-                llvm::errs().flush();
-            }
-        } else if (token->isAnyIdentifier()) {
-            // TODO: save identifier and get its type in ScalaFrontendAction
+        if (tokens->size() == 1 &&
+            (*tokens)[0].getKind() == clang::tok::numeric_constant) {
+            clang::Token numberToken = (*tokens)[0];
+            std::string literal(numberToken.getLiteralData(),
+                                numberToken.getLength());
+            addNumericConstantDefine(macroName, literal, numberToken);
+        } else if (tokens->size() == 2 &&
+                   (*tokens)[0].getKind() == clang::tok::minus &&
+                   (*tokens)[1].getKind() == clang::tok::numeric_constant) {
+            clang::Token numberToken = (*tokens)[1];
+            std::string literal(numberToken.getLiteralData(),
+                                numberToken.getLength());
+            addNumericConstantDefine(macroName, literal, numberToken, false);
+        } else if (tokens->size() == 1 &&
+                   (*tokens)[0].getKind() == clang::tok::string_literal) {
+            clang::Token stringToken = (*tokens)[0];
+            std::string literal(stringToken.getLiteralData(),
+                                stringToken.getLength());
+            ir.addLiteralDefine(macroName, "c" + literal, "native.CString");
         }
+        std::free(tokens);
     }
 }
 
 /**
- * Follows simple chain of defines.
- *
- * @return token that is not a define
+ * @return array of tokens. Non of the returned tokens is a macro.
  */
-const clang::Token *
+std::vector<clang::Token> *
 DefineFinder::expandDefine(const clang::MacroDirective &md) {
+    auto *expandedTokens = new std::vector<clang::Token>();
     clang::ArrayRef<clang::Token> tokens = md.getMacroInfo()->tokens();
-    if (tokens.size() != 1) {
-        /* process only simple definitions that contain 1 token */
-        return nullptr;
+    for (const auto &token : tokens) {
+        if (isMacro(token)) {
+            if (isFunctionLikeMacro(token)) {
+                /* function-like macros are unsupported */
+                return nullptr;
+            }
+            std::vector<clang::Token> *newTokens = expandDefine(
+                *pp.getLocalMacroDirective(token.getIdentifierInfo()));
+            if (!newTokens) {
+                std::free(expandedTokens);
+                return nullptr;
+            }
+            for (const auto &newToken : *newTokens) {
+                (*expandedTokens).push_back(newToken);
+            }
+            std::free(newTokens);
+        } else {
+            (*expandedTokens).push_back(token);
+        }
     }
-    clang::Token token = tokens[0];
-    if (!(token.isAnyIdentifier() || token.isLiteral())) {
-        /* unsupported */
-        return nullptr;
-    }
-    if (token.isLiteral() || !token.getIdentifierInfo()->hasMacroDefinition()) {
-        return &(tokens[0]);
-    }
-    return expandDefine(*pp.getLocalMacroDirective(token.getIdentifierInfo()));
+    return expandedTokens;
+}
+
+bool DefineFinder::isMacro(const clang::Token &token) {
+    return token.isAnyIdentifier() &&
+           token.getIdentifierInfo()->hasMacroDefinition();
+}
+
+bool DefineFinder::isFunctionLikeMacro(const clang::Token &token) {
+    clang::MacroDirective *md =
+        pp.getLocalMacroDirective(token.getIdentifierInfo());
+    return md->getMacroInfo()->isFunctionLike();
 }
 
 void DefineFinder::MacroUndefined(const clang::Token &macroNameTok,
-                                  const clang::MacroDefinition &md) {
+                                  const clang::MacroDefinition &md,
+                                  const clang::MacroDirective *undef) {
     clang::SourceManager &sm = compiler.getSourceManager();
     if (sm.isWrittenInMainFile(macroNameTok.getLocation()) &&
         !md.getMacroInfo()->isFunctionLike()) {
@@ -79,8 +100,9 @@ void DefineFinder::MacroUndefined(const clang::Token &macroNameTok,
 
 void DefineFinder::addNumericConstantDefine(const std::string &macroName,
                                             std::string literal,
-                                            const clang::Token *token) {
-    clang::NumericLiteralParser parser(literal, token->getLocation(), pp);
+                                            const clang::Token &token,
+                                            bool positive) {
+    clang::NumericLiteralParser parser(literal, token.getLocation(), pp);
     std::string type;
     if (parser.isIntegerLiteral()) {
         std::replace(literal.begin(), literal.end(), 'l', 'L');
@@ -98,50 +120,63 @@ void DefineFinder::addNumericConstantDefine(const std::string &macroName,
              * is a long value.
              * Therefore we need to check that value fits into certain number
              * of bits. */
-            getTypeOfIntLiteralWithoutEnding(parser, literal, type);
+            getTypeOfIntLiteralWithoutEnding(parser, literal, type, positive);
         }
     } else {
-        if (parser.isFloat) {
-            type = "native.CFloat";
+        if (parser.isFloatingLiteral()) {
+            type = "native.CDouble";
             // TODO: distinguish between float and double
         }
     }
     if (!type.empty()) {
+        if (!positive) {
+            literal = "-" + literal;
+        }
         ir.addLiteralDefine(macroName, literal, type);
     }
 }
 
-/**
- * Check if literal without `l` or `ll` ending fits into int or long variable.
- * Supports only non-negative numbers
- *
- * Set `literal` and `type` parameters.
- */
 void DefineFinder::getTypeOfIntLiteralWithoutEnding(
-    clang::NumericLiteralParser parser, std::string &literal,
-    std::string &type) {
+    clang::NumericLiteralParser parser, std::string &literal, std::string &type,
+    bool positive) {
 
-    llvm::APInt intValue(4 * 8 - 1, 0, false);
-    /* check if abs value fits into 4 * 8 - 1 bits */
-    if (!parser.GetIntegerValue(intValue)) {
+    if (fitsIntoType<int, uint>(parser, positive)) {
         type = "native.CInt";
+    } else if (fitsIntoType<long, ulong>(parser, positive)) {
+        type = "native.CLong";
+        literal = literal + "L";
     } else {
-        llvm::APInt longValue(8 * 8 - 1, 0, false);
-        if (!parser.GetIntegerValue(longValue)) {
-            type = "native.CLong";
-            literal = literal + "L";
-        } else {
-            llvm::errs() << "Waring: integer value does not fit into 8 bytes: "
-                         << literal << "\n";
-            llvm::errs().flush();
-            /**
-             * `long long` value has mostly the same size as `long`.
-             * Moreover in Scala Native the type is represented as `Long`:
-             * @code
-             * type CLongLong = Long
-             * @endcode
-             * Therefore the case of `long long` is not considered here.
-             */
-        }
+        llvm::errs() << "Waring: integer value does not fit into 8 bytes: "
+                     << literal << "\n";
+        llvm::errs().flush();
+        /**
+         * `long long` value has mostly the same size as `long`.
+         * Moreover in Scala Native the type is represented as `Long`:
+         * @code
+         * type CLongLong = Long
+         * @endcode
+         * Therefore the case of `long long` is not considered here.
+         */
+    }
+}
+
+template <typename signedT, typename unsignedT>
+bool DefineFinder::fitsIntoType(clang::NumericLiteralParser parser,
+                                bool positive) {
+    /* absolute value of minimum negative number will not fit
+     * into (sizeof(signedT) * 8 - 1) bits */
+    llvm::APInt uintValue(sizeof(signedT) * 8, 0, false);
+    if (parser.GetIntegerValue(uintValue)) {
+        /* absolute value of the number does not fit into (sizeof(signedT) * 8)
+         * bits */
+        return false;
+    }
+    auto uval = static_cast<unsignedT>(uintValue.getZExtValue());
+    if (positive) {
+        return uval <=
+               static_cast<unsignedT>(std::numeric_limits<signedT>::max());
+    } else {
+        return uval <=
+               static_cast<unsignedT>(-std::numeric_limits<signedT>::min());
     }
 }
