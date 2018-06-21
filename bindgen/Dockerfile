@@ -23,4 +23,4 @@ RUN set -x \
 
 COPY --from=builder /src/target/scala-native-bindgen /usr/bin/scala-native-bindgen
 WORKDIR /src
-ENTRYPOINT [scala-native-bindgen]
+ENTRYPOINT ["scala-native-bindgen"]
