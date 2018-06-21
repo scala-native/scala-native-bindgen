@@ -22,6 +22,8 @@
 extern int a;
 #define MY_A a // unsupported
 
+#define __PRIVATE 1
+
 #define wait_for_it(cond)                                                      \
     do {                                                                       \
         sleep(1000);                                                           \

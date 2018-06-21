@@ -166,7 +166,9 @@ void IR::filterDeclarations(const std::string &excludePrefix) {
 
     filterTypeDefs(excludePrefix);
 
-    filterFunctions(excludePrefix);
+    filter(functions, excludePrefix);
+
+    filter(literalDefines, excludePrefix);
 }
 
 void IR::filterTypeDefs(const std::string &excludePrefix) {
@@ -188,17 +190,6 @@ void IR::replaceTypeInTypeDefs(const std::string &oldType,
     for (auto &typeDef : typeDefs) {
         if (typeDef.getType() == oldType) {
             typeDef.setType(newType);
-        }
-    }
-}
-
-void IR::filterFunctions(const std::string &excludePrefix) {
-    for (auto it = functions.begin(); it != functions.end();) {
-        Function &function = *it;
-        if (startsWith(function.getName(), excludePrefix)) {
-            it = functions.erase(it);
-        } else {
-            it++;
         }
     }
 }
@@ -250,6 +241,19 @@ void IR::removeDefine(const std::string &name) {
         if ((*it).getName() == name) {
             literalDefines.erase(it);
             return;
+        }
+    }
+}
+
+template <typename T>
+void IR::filter(std::vector<T> &declarations,
+                const std::string &excludePrefix) {
+    for (auto it = declarations.begin(); it != declarations.end();) {
+        auto &declaration = *it;
+        if (startsWith(declaration.getName(), excludePrefix)) {
+            it = declarations.erase(it);
+        } else {
+            it++;
         }
     }
 }

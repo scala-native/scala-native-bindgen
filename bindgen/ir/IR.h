@@ -90,11 +90,6 @@ class IR {
                                const std::string &newType);
 
     /**
-     * Remove functions with names that start with excludePrefix.
-     */
-    void filterFunctions(const std::string &excludePrefix);
-
-    /**
      * @return true if given type is used only in typedefs.
      */
     bool typeIsUsedOnlyInTypeDefs(std::string type);
@@ -109,6 +104,9 @@ class IR {
     void setScalaNames();
 
     bool existsFunctionWithName(std::string functionName);
+
+    template <typename T>
+    void filter(std::vector<T> &declarations, const std::string &excludePrefix);
 
     std::string libName;    // name of the library
     std::string linkName;   // name of the library to link with
