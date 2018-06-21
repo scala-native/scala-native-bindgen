@@ -29,14 +29,13 @@ class DefineFinder : public clang::PPCallbacks {
                                   bool positive = true);
 
     /**
-     * Check if a number without `l` or `ll` ending fits into int or long
-     * variable. Supports only non-negative numbers
+     * Check if the number fits into int or long variable.
      *
-     * Updates `literal` and `type` parameters.
+     * @return type of the number
      */
-    void getTypeOfIntLiteralWithoutEnding(clang::NumericLiteralParser parser,
-                                          std::string &literal,
-                                          std::string &type, bool positive);
+    std::string
+    getTypeOfIntegerLiteral(const clang::NumericLiteralParser &parser,
+                            const std::string &literal, bool positive);
 
     std::vector<clang::Token> *expandDefine(const clang::MacroDirective &md);
 
@@ -48,7 +47,13 @@ class DefineFinder : public clang::PPCallbacks {
      * @return true if number contained in parser fits into int type
      */
     template <typename signedT, typename unsignedT>
-    bool fitsIntoType(clang::NumericLiteralParser parser, bool positive);
+    bool integerFitsIntoType(clang::NumericLiteralParser parser, bool positive);
+
+    std::string getDecimalLiteral(clang::NumericLiteralParser parser);
+
+    std::string getDoubleLiteral(clang::NumericLiteralParser parser);
+
+    bool fitsIntoDouble(clang::NumericLiteralParser parser);
 };
 
 #endif // SCALA_NATIVE_BINDGEN_DEFINEFINDER_H

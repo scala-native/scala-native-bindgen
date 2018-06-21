@@ -12,7 +12,7 @@
 #define MINIMUM_SIGNED_LONG -9223372036854775808           // OK
 #define LESS_THEN_MINIMUM_SIGNED_LONG -9223372036854775809 // excluded
 
-#define FLOAT 5.6
+#define FLOAT 5.6f
 
 #define INT 42
 #define MAXIMUM_INT 2147483647
@@ -40,3 +40,14 @@ extern int a;
 #endif
 
 #undef DEFINED_ONLY_IN_HEADER
+
+// integer literals
+#define OCTAL 0213       // 139
+#define HEXADECIMAL 0x4b // 75
+
+// floating point literals
+#define EXPONENT 1e-10L
+#define DOT_EXPONENT 1.e-2
+#define HEXADECIMAL_WITHOUT_RADIX 0x1ffp10
+#define HEXADECIMAL_WITH_RADIX 0xf.p-1
+#define HEXADECIMAL_FRACTIONAL_WITH_RADIX 0x0.123p-1

@@ -16,4 +16,11 @@ object LiteralDefineDefines {
   val NEW_INT: native.CInt = 42
   val NEG_INT: native.CInt = -42
   val SHOULD_BE_DEFINED: native.CString = c"Because INT is not equal to 0"
+  val OCTAL: native.CInt = 139
+  val HEXADECIMAL: native.CInt = 75
+  val EXPONENT: native.CDouble = 1e-10
+  val DOT_EXPONENT: native.CDouble = 0.01
+  val HEXADECIMAL_WITHOUT_RADIX: native.CDouble = 523264
+  val HEXADECIMAL_WITH_RADIX: native.CDouble = 7.5
+  val HEXADECIMAL_FRACTIONAL_WITH_RADIX: native.CDouble = 0.0355225
 }

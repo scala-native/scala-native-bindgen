@@ -1,6 +1,7 @@
 #include "DefineFinder.h"
 
 #include <llvm/ADT/APInt.h>
+#include <sstream>
 
 DefineFinder::DefineFinder(IR &ir, const clang::CompilerInstance &compiler,
                            clang::Preprocessor &pp)
@@ -92,7 +93,7 @@ void DefineFinder::MacroUndefined(const clang::Token &macroNameTok,
                                   const clang::MacroDirective *undef) {
     clang::SourceManager &sm = compiler.getSourceManager();
     if (sm.isWrittenInMainFile(macroNameTok.getLocation()) &&
-        !md.getMacroInfo()->isFunctionLike()) {
+        md.getMacroInfo() && !md.getMacroInfo()->isFunctionLike()) {
         std::string macroName = macroNameTok.getIdentifierInfo()->getName();
         ir.removeDefine(macroName);
     }
@@ -104,47 +105,59 @@ void DefineFinder::addNumericConstantDefine(const std::string &macroName,
                                             bool positive) {
     clang::NumericLiteralParser parser(literal, token.getLocation(), pp);
     std::string type;
+    std::string scalaLiteral;
     if (parser.isIntegerLiteral()) {
-        std::replace(literal.begin(), literal.end(), 'l', 'L');
         if (parser.isLongLong) {
-            /* literal has `LL` ending but `long long` is represented as
-             * `Long` in Scala Native */
-            literal = literal.substr(0, literal.length() - 1); // remove last L
+            /* literal has `LL` ending. `long long` is represented as `Long`
+             * in Scala Native */
             type = "native.CLongLong";
+
+            /* must fit into Scala integer type */
+            if (getTypeOfIntegerLiteral(parser, literal, positive).empty()) {
+                type = "";
+            }
         } else if (parser.isLong) {
-            /* literal already has `L` ending */
+            /* literal has `L` ending */
             type = "native.CLong";
+
+            /* must fit into Scala integer type */
+            if (getTypeOfIntegerLiteral(parser, literal, positive).empty()) {
+                type = "";
+            }
         } else {
-            /* literal may not have `l` or `ll` ending but still be of long type
-             * NumericLiteralParser does not recognize that 10000000000
-             * is a long value.
-             * Therefore we need to check that value fits into certain number
-             * of bits. */
-            getTypeOfIntLiteralWithoutEnding(parser, literal, type, positive);
+            type = getTypeOfIntegerLiteral(parser, literal, positive);
         }
-    } else {
-        if (parser.isFloatingLiteral()) {
+
+        if (!type.empty()) {
+            scalaLiteral = getDecimalLiteral(parser);
+            if (type == "native.CLong" || type == "native.CLongLong") {
+                scalaLiteral = scalaLiteral + "L";
+            }
+        }
+    } else if (parser.isFloatingLiteral()) {
+        if (fitsIntoDouble(parser)) {
             type = "native.CDouble";
-            // TODO: distinguish between float and double
+            scalaLiteral = getDoubleLiteral(parser);
         }
     }
+
     if (!type.empty()) {
         if (!positive) {
-            literal = "-" + literal;
+            scalaLiteral = "-" + scalaLiteral;
         }
-        ir.addLiteralDefine(macroName, literal, type);
+        ir.addLiteralDefine(macroName, scalaLiteral, type);
     }
 }
 
-void DefineFinder::getTypeOfIntLiteralWithoutEnding(
-    clang::NumericLiteralParser parser, std::string &literal, std::string &type,
-    bool positive) {
+std::string
+DefineFinder::getTypeOfIntegerLiteral(const clang::NumericLiteralParser &parser,
+                                      const std::string &literal,
+                                      bool positive) {
 
-    if (fitsIntoType<int, uint>(parser, positive)) {
-        type = "native.CInt";
-    } else if (fitsIntoType<long, ulong>(parser, positive)) {
-        type = "native.CLong";
-        literal = literal + "L";
+    if (integerFitsIntoType<int, uint>(parser, positive)) {
+        return "native.CInt";
+    } else if (integerFitsIntoType<long, ulong>(parser, positive)) {
+        return "native.CLong";
     } else {
         llvm::errs() << "Waring: integer value does not fit into 8 bytes: "
                      << literal << "\n";
@@ -157,12 +170,13 @@ void DefineFinder::getTypeOfIntLiteralWithoutEnding(
          * @endcode
          * Therefore the case of `long long` is not considered here.
          */
+        return "";
     }
 }
 
 template <typename signedT, typename unsignedT>
-bool DefineFinder::fitsIntoType(clang::NumericLiteralParser parser,
-                                bool positive) {
+bool DefineFinder::integerFitsIntoType(clang::NumericLiteralParser parser,
+                                       bool positive) {
     /* absolute value of minimum negative number will not fit
      * into (sizeof(signedT) * 8 - 1) bits */
     llvm::APInt uintValue(sizeof(signedT) * 8, 0, false);
@@ -179,4 +193,27 @@ bool DefineFinder::fitsIntoType(clang::NumericLiteralParser parser,
         return uval <=
                static_cast<unsignedT>(-std::numeric_limits<signedT>::min());
     }
+}
+
+std::string
+DefineFinder::getDecimalLiteral(clang::NumericLiteralParser parser) {
+    llvm::APInt val(8 * 8, 0, false);
+    parser.GetIntegerValue(val);
+    return std::to_string(val.getZExtValue());
+}
+
+std::string DefineFinder::getDoubleLiteral(clang::NumericLiteralParser parser) {
+    llvm::APFloat val(.0); // double
+    parser.GetFloatValue(val);
+    std::ostringstream ss;
+    ss << val.convertToDouble();
+    return ss.str();
+}
+
+bool DefineFinder::fitsIntoDouble(clang::NumericLiteralParser parser) {
+    llvm::APFloat val(.0); // double
+    parser.GetFloatValue(val);
+    std::ostringstream ss;
+    ss << val.convertToDouble();
+    return ss.str() != "inf";
 }
