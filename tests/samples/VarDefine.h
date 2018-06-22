@@ -7,4 +7,7 @@ extern int c;
 #define C c
 #undef C // removed
 
+extern float f;
+#define __PRIVATE f // should be filtered
+
 int getA();
