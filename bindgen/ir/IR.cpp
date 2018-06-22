@@ -4,7 +4,7 @@
 IR::IR(std::string libName, std::string linkName, std::string objectName,
        std::string packageName)
     : libName(std::move(libName)), linkName(std::move(linkName)),
-      objectName(std::move(objectName)), packageName(packageName) {}
+      objectName(std::move(objectName)), packageName(std::move(packageName)) {}
 
 void IR::addFunction(std::string name, std::vector<Parameter> parameters,
                      std::string retType, bool isVariadic) {
@@ -32,6 +32,12 @@ void IR::addUnion(std::string name, std::vector<Field> fields,
     unions.emplace_back(std::move(name), std::move(fields), maxSize);
 }
 
+void IR::addLiteralDefine(std::string name, std::string literal,
+                          std::string type) {
+    literalDefines.emplace_back(std::move(name), std::move(literal),
+                                std::move(type));
+}
+
 bool IR::libObjEmpty() const {
     return functions.empty() && typeDefs.empty() && structs.empty() &&
            unions.empty();
@@ -44,7 +50,7 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir) {
         s << "package " << ir.packageName << "\n\n";
     }
 
-    if (!ir.libObjEmpty() || !ir.enums.empty()) {
+    if (!ir.libObjEmpty() || !ir.enums.empty() || !ir.literalDefines.empty()) {
         s << "import scala.scalanative._\n"
           << "import scala.scalanative.native._\n\n";
     }
@@ -67,6 +73,14 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir) {
             s << func;
         }
 
+        s << "}\n\n";
+    }
+
+    if (!ir.literalDefines.empty()) {
+        s << "object " << ir.libName << "Defines {\n";
+        for (const auto &literalDefine : ir.literalDefines) {
+            s << literalDefine;
+        }
         s << "}\n\n";
     }
 
@@ -152,7 +166,9 @@ void IR::filterDeclarations(const std::string &excludePrefix) {
 
     filterTypeDefs(excludePrefix);
 
-    filterFunctions(excludePrefix);
+    filter(functions, excludePrefix);
+
+    filter(literalDefines, excludePrefix);
 }
 
 void IR::filterTypeDefs(const std::string &excludePrefix) {
@@ -174,17 +190,6 @@ void IR::replaceTypeInTypeDefs(const std::string &oldType,
     for (auto &typeDef : typeDefs) {
         if (typeDef.getType() == oldType) {
             typeDef.setType(newType);
-        }
-    }
-}
-
-void IR::filterFunctions(const std::string &excludePrefix) {
-    for (auto it = functions.begin(); it != functions.end();) {
-        Function &function = *it;
-        if (startsWith(function.getName(), excludePrefix)) {
-            it = functions.erase(it);
-        } else {
-            it++;
         }
     }
 }
@@ -228,4 +233,27 @@ bool IR::existsFunctionWithName(std::string functionName) {
         }
     }
     return false;
+}
+
+void IR::removeDefine(const std::string &name) {
+    for (auto it = literalDefines.begin(), end = literalDefines.end();
+         it != end; ++it) {
+        if ((*it).getName() == name) {
+            literalDefines.erase(it);
+            return;
+        }
+    }
+}
+
+template <typename T>
+void IR::filter(std::vector<T> &declarations,
+                const std::string &excludePrefix) {
+    for (auto it = declarations.begin(); it != declarations.end();) {
+        auto &declaration = *it;
+        if (startsWith(declaration.getName(), excludePrefix)) {
+            it = declarations.erase(it);
+        } else {
+            it++;
+        }
+    }
 }
