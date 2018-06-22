@@ -6,6 +6,7 @@
 #include "LiteralDefine.h"
 #include "Struct.h"
 #include "TypeDef.h"
+#include "VarDefine.h"
 
 /**
  * Intermediate representation
@@ -32,6 +33,12 @@ class IR {
     void addLiteralDefine(std::string name, std::string literal,
                           std::string type);
 
+    void addPossibleVarDefine(const std::string &macroName,
+                              const std::string &varName);
+
+    void addVarDefine(const std::string &macroName, const std::string &varName,
+                      const std::string &type);
+
     /**
      * @return true if there are no functions, types,
      *         structs and unions
@@ -45,6 +52,12 @@ class IR {
     void generate(const std::string &excludePrefix);
 
     void removeDefine(const std::string &name);
+
+    /**
+     * @return macro name if there is a macro for the variable.
+     *         otherwise return empty string
+     */
+    std::string getDefineForVar(const std::string &varName) const;
 
   private:
     /**
@@ -106,7 +119,11 @@ class IR {
     bool existsFunctionWithName(std::string functionName);
 
     template <typename T>
-    void filter(std::vector<T> &declarations, const std::string &excludePrefix);
+    void filterByPrefix(std::vector<T> &declarations,
+                        const std::string &excludePrefix);
+
+    template <typename T>
+    void filterByName(std::vector<T> &declarations, const std::string &name);
 
     std::string libName;    // name of the library
     std::string linkName;   // name of the library to link with
@@ -117,6 +134,8 @@ class IR {
     std::vector<Union> unions;
     std::vector<Enum> enums;
     std::vector<LiteralDefine> literalDefines;
+    std::vector<VarDefine> possibleVarDefines;
+    std::vector<VarDefine> varDefines;
     bool generated = false; // generate type defs only once
     std::string packageName;
 };

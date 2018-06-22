@@ -42,6 +42,11 @@ void DefineFinder::MacroDefined(const clang::Token &macroNameTok,
             std::string literal(stringToken.getLiteralData(),
                                 stringToken.getLength());
             ir.addLiteralDefine(macroName, "c" + literal, "native.CString");
+        } else if (tokens->size() == 1 &&
+                   (*tokens)[0].getKind() == clang::tok::identifier) {
+            // token might be a variable
+            std::string varName = (*tokens)[0].getIdentifierInfo()->getName();
+            ir.addPossibleVarDefine(macroName, varName);
         }
         std::free(tokens);
     }

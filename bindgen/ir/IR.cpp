@@ -38,9 +38,19 @@ void IR::addLiteralDefine(std::string name, std::string literal,
                                 std::move(type));
 }
 
+void IR::addPossibleVarDefine(const std::string &macroName,
+                              const std::string &varName) {
+    possibleVarDefines.emplace_back(macroName, varName, "");
+}
+
+void IR::addVarDefine(const std::string &macroName, const std::string &varName,
+                      const std::string &type) {
+    varDefines.emplace_back(macroName, varName, type);
+}
+
 bool IR::libObjEmpty() const {
     return functions.empty() && typeDefs.empty() && structs.empty() &&
-           unions.empty();
+           unions.empty() && varDefines.empty();
 }
 
 llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir) {
@@ -67,6 +77,12 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir) {
 
         for (const auto &typeDef : ir.typeDefs) {
             s << typeDef;
+        }
+
+        for (const auto &varDefine : ir.varDefines) {
+            s << "  @name(\"" << varDefine.getVarName() << "\")\n"
+              << "  def " << varDefine.getName() << ": " << varDefine.getType()
+              << " = native.extern\n";
         }
 
         for (const auto &func : ir.functions) {
@@ -166,9 +182,9 @@ void IR::filterDeclarations(const std::string &excludePrefix) {
 
     filterTypeDefs(excludePrefix);
 
-    filter(functions, excludePrefix);
+    filterByPrefix(functions, excludePrefix);
 
-    filter(literalDefines, excludePrefix);
+    filterByPrefix(literalDefines, excludePrefix);
 }
 
 void IR::filterTypeDefs(const std::string &excludePrefix) {
@@ -236,18 +252,14 @@ bool IR::existsFunctionWithName(std::string functionName) {
 }
 
 void IR::removeDefine(const std::string &name) {
-    for (auto it = literalDefines.begin(), end = literalDefines.end();
-         it != end; ++it) {
-        if ((*it).getName() == name) {
-            literalDefines.erase(it);
-            return;
-        }
-    }
+    filterByName(literalDefines, name);
+    filterByName(possibleVarDefines, name);
+    filterByName(varDefines, name);
 }
 
 template <typename T>
-void IR::filter(std::vector<T> &declarations,
-                const std::string &excludePrefix) {
+void IR::filterByPrefix(std::vector<T> &declarations,
+                        const std::string &excludePrefix) {
     for (auto it = declarations.begin(); it != declarations.end();) {
         auto &declaration = *it;
         if (startsWith(declaration.getName(), excludePrefix)) {
@@ -256,4 +268,25 @@ void IR::filter(std::vector<T> &declarations,
             it++;
         }
     }
+}
+
+template <typename T>
+void IR::filterByName(std::vector<T> &declarations, const std::string &name) {
+    for (auto it = declarations.begin(); it != declarations.end();) {
+        auto &declaration = *it;
+        if (declaration.getName() == name) {
+            it = declarations.erase(it);
+        } else {
+            it++;
+        }
+    }
+}
+
+std::string IR::getDefineForVar(const std::string &varName) const {
+    for (const auto &varDefine : possibleVarDefines) {
+        if (varDefine.getVarName() == varName) {
+            return varDefine.getName();
+        }
+    }
+    return "";
 }
