@@ -137,16 +137,15 @@ std::string TypeTranslator::Translate(const clang::QualType &qtpe,
     // Warning / Sanity checks
 
     if (qtpe.isConstQualified() || (ctx && qtpe.isConstant(*ctx))) {
-        llvm::errs() << "Warning: Const qualifier not supported\n";
-        llvm::errs().flush();
+        warningManager.printWarning("Warning: Const qualifier not supported");
     }
     if (qtpe.isVolatileQualified()) {
-        llvm::errs() << "Warning: Volatile qualifier not supported\n";
-        llvm::errs().flush();
+        warningManager.printWarning(
+            "Warning: Volatile qualifier not supported");
     }
     if (qtpe.isRestrictQualified()) {
-        llvm::errs() << "Warning: Restrict qualifier not supported\n";
-        llvm::errs().flush();
+        warningManager.printWarning(
+            "Warning: Restrict qualifier not supported");
     }
 
     const clang::Type *tpe = qtpe.getTypePtr();

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "utils/WarningManager.h"
 #include <clang/AST/AST.h>
 #include <clang/AST/ASTContext.h>
 #include <clang/Tooling/Tooling.h>
@@ -8,6 +9,7 @@ class TypeTranslator {
   private:
     clang::ASTContext *ctx;
     std::map<std::string, std::string> typeMap;
+    WarningManager warningManager;
 
   public:
     explicit TypeTranslator(clang::ASTContext *ctx);
