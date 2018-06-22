@@ -48,6 +48,8 @@ add_executable(bindgen
   ir/Define.cpp
   ir/LiteralDefine.cpp
   ir/LiteralDefine.h
+  utils/WarningManager.cpp
+  utils/WarningManager.h
 )
 
 set_target_properties(bindgen
