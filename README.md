@@ -96,6 +96,7 @@ There are multiple unsupported cases that should be considered when generating b
     In order to use defines one should write wrapper functions that return defined values.
 3. There is no way to reuse already generated bindings.  
     Bindgen outputs bindings also for headers that were included in a given header.
+4. Type qualifiers `const`, `volatile` and `restrict` are not supported.
 
 ## License
 
