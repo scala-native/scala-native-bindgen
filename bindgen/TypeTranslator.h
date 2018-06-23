@@ -11,7 +11,6 @@ class TypeTranslator {
 
   public:
     explicit TypeTranslator(clang::ASTContext *ctx);
-    void AddTranslation(std::string from, std::string to);
 
     /**
      * @brief Translate the qualified type from c to a scala type

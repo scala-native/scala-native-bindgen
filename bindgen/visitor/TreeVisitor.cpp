@@ -58,11 +58,6 @@ bool TreeVisitor::VisitEnumDecl(clang::EnumDecl *enumdecl) {
         name = enumdecl->getTypedefNameForAnonDecl()->getNameAsString();
     }
 
-    if (!name.empty()) {
-        // Replace "enum x" with enum_x in scala
-        typeTranslator.AddTranslation("enum " + name, "enum_" + name);
-    }
-
     std::vector<Enumerator> enumerators;
 
     for (const clang::EnumConstantDecl *en : enumdecl->enumerators()) {
@@ -100,9 +95,6 @@ bool TreeVisitor::VisitRecordDecl(clang::RecordDecl *record) {
 }
 
 void TreeVisitor::handleUnion(clang::RecordDecl *record, std::string name) {
-    // Replace "union x" with union_x in scala
-    typeTranslator.AddTranslation("union " + name, "union_" + name);
-
     uint64_t maxSize = 0;
 
     std::vector<Field> fields;
@@ -129,9 +121,6 @@ void TreeVisitor::handleStruct(clang::RecordDecl *record, std::string name) {
                      << "Access to fields will not work correctly.\n";
         llvm::errs().flush();
     }
-
-    // Replace "struct x" with struct_x in scala
-    typeTranslator.AddTranslation("struct " + name, newName);
 
     int fieldCnt = 0;
     std::vector<Field> fields;

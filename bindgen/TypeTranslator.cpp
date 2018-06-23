@@ -27,7 +27,6 @@ TypeTranslator::TypeTranslator(clang::ASTContext *ctx_) : ctx(ctx_), typeMap() {
     typeMap["char32_t"] = "native.CChar32";
     typeMap["float"] = "native.CFloat";
     typeMap["double"] = "native.CDouble";
-    typeMap["void*"] = "native.Ptr[Byte]";
 }
 
 std::string
@@ -171,8 +170,4 @@ std::string TypeTranslator::Translate(const clang::QualType &qtpe,
             return handleReservedWords(qtpe.getUnqualifiedType().getAsString());
         }
     }
-}
-
-void TypeTranslator::AddTranslation(std::string from, std::string to) {
-    typeMap[from] = to;
 }
