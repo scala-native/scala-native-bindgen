@@ -3,6 +3,7 @@
 
 #include "Enum.h"
 #include "Function.h"
+#include "LiteralDefine.h"
 #include "Struct.h"
 #include "TypeDef.h"
 
@@ -28,6 +29,9 @@ class IR {
     void addUnion(std::string name, std::vector<Field> fields,
                   uint64_t maxSize);
 
+    void addLiteralDefine(std::string name, std::string literal,
+                          std::string type);
+
     /**
      * @return true if there are no functions, types,
      *         structs and unions
@@ -39,6 +43,8 @@ class IR {
     friend llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir);
 
     void generate(const std::string &excludePrefix);
+
+    void removeDefine(const std::string &name);
 
   private:
     /**
@@ -84,11 +90,6 @@ class IR {
                                const std::string &newType);
 
     /**
-     * Remove functions with names that start with excludePrefix.
-     */
-    void filterFunctions(const std::string &excludePrefix);
-
-    /**
      * @return true if given type is used only in typedefs.
      */
     bool typeIsUsedOnlyInTypeDefs(std::string type);
@@ -104,6 +105,9 @@ class IR {
 
     bool existsFunctionWithName(std::string functionName);
 
+    template <typename T>
+    void filter(std::vector<T> &declarations, const std::string &excludePrefix);
+
     std::string libName;    // name of the library
     std::string linkName;   // name of the library to link with
     std::string objectName; // name of Scala object
@@ -112,6 +116,7 @@ class IR {
     std::vector<Struct> structs;
     std::vector<Union> unions;
     std::vector<Enum> enums;
+    std::vector<LiteralDefine> literalDefines;
     bool generated = false; // generate type defs only once
     std::string packageName;
 };
