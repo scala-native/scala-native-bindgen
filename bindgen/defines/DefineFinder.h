@@ -33,9 +33,8 @@ class DefineFinder : public clang::PPCallbacks {
      *
      * @return type of the number
      */
-    std::string
-    getTypeOfIntegerLiteral(const clang::NumericLiteralParser &parser,
-                            const std::string &literal, bool positive);
+    Type *getTypeOfIntegerLiteral(const clang::NumericLiteralParser &parser,
+                                  const std::string &literal, bool positive);
 
     std::vector<clang::Token> *expandDefine(const clang::MacroDirective &md);
 

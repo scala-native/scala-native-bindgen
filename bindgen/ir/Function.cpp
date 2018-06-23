@@ -1,13 +1,13 @@
 #include "Function.h"
 #include "../Utils.h"
 
-Parameter::Parameter(std::string name, std::string type)
-    : TypeAndName(std::move(name), std::move(type)) {}
+Parameter::Parameter(std::string name, Type *type)
+    : TypeAndName(std::move(name), type) {}
 
-Function::Function(std::string name, std::vector<Parameter> parameters,
-                   std::string retType, bool isVariadic)
+Function::Function(const std::string &name, std::vector<Parameter> parameters,
+                   Type *retType, bool isVariadic)
     : name(name), scalaName(name), parameters(std::move(parameters)),
-      retType(std::move(retType)), isVariadic(isVariadic) {}
+      retType(retType), isVariadic(isVariadic) {}
 
 llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const Function &func) {
     if (func.scalaName != func.name) {
@@ -17,7 +17,7 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const Function &func) {
     std::string sep = "";
     for (const auto &param : func.parameters) {
         s << sep << handleReservedWords(param.getName()) << ": "
-          << param.getType();
+          << param.getType()->str();
         sep = ", ";
     }
     if (func.isVariadic) {
@@ -25,16 +25,16 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const Function &func) {
          * the comma is fine */
         s << ", " << func.getVarargsParameterName() << ": native.CVararg*";
     }
-    s << "): " << func.retType << " = native.extern\n";
+    s << "): " << func.retType->str() << " = native.extern\n";
     return s;
 }
 
-bool Function::usesType(const std::string &type) const {
-    if (typeUsesOtherType(retType, type)) {
+bool Function::usesType(Type *type) const {
+    if (retType == type) {
         return true;
     }
     for (const auto &parameter : parameters) {
-        if (typeUsesOtherType(parameter.getType(), type)) {
+        if (parameter.getType() == type) {
             return true;
         }
     }

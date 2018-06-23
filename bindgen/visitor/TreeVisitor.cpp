@@ -1,5 +1,4 @@
 #include "TreeVisitor.h"
-#include "../Utils.h"
 
 HeaderManager headerMan;
 
@@ -7,8 +6,7 @@ std::set<std::string> locations;
 
 bool TreeVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
     std::string funcName = func->getNameInfo().getName().getAsString();
-    std::string retType =
-        handleReservedWords(typeTranslator.Translate(func->getReturnType()));
+    Type *retType = typeTranslator.translate(func->getReturnType());
     std::vector<Parameter> parameters;
 
     int anonCounter = 0;
@@ -21,8 +19,7 @@ bool TreeVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
             pname = "anonymous" + std::to_string(anonCounter++);
         }
 
-        std::string ptype =
-            handleReservedWords(typeTranslator.Translate(parm->getType()));
+        Type *ptype = typeTranslator.translate(parm->getType());
         parameters.emplace_back(pname, ptype);
     }
 
@@ -45,8 +42,7 @@ bool TreeVisitor::VisitTypedefDecl(clang::TypedefDecl *tpdef) {
         llvm::errs().flush();
     }
 
-    std::string type = handleReservedWords(
-        typeTranslator.Translate(tpdef->getUnderlyingType()));
+    Type *type = typeTranslator.translate(tpdef->getUnderlyingType());
     ir.addTypeDef(name, type);
     return true;
 }
@@ -65,8 +61,13 @@ bool TreeVisitor::VisitEnumDecl(clang::EnumDecl *enumdecl) {
         enumerators.emplace_back(en->getNameAsString(), value);
     }
 
-    ir.addEnum(name, typeTranslator.Translate(enumdecl->getIntegerType()),
-               enumerators);
+    std::string scalaType = typeTranslator.getTypeFromTypeMap(
+        enumdecl->getIntegerType().getUnqualifiedType().getAsString());
+
+    Type *alias = ir.addEnum(name, scalaType, enumerators);
+    if (alias != nullptr) {
+        typeTranslator.addAlias("enum " + name, alias);
+    }
 
     return true;
 }
@@ -103,13 +104,14 @@ void TreeVisitor::handleUnion(clang::RecordDecl *record, std::string name) {
         uint64_t sizeInBytes = astContext->getTypeSize(field->getType()) / 8;
         maxSize = std::max(maxSize, sizeInBytes);
         std::string fname = field->getNameAsString();
-        std::string ftype = handleReservedWords(
-            typeTranslator.Translate(field->getType(), &name));
+        Type *ftype = typeTranslator.translate(field->getType(), &name);
 
         fields.emplace_back(fname, ftype);
     }
 
-    ir.addUnion(name, fields, maxSize);
+    Type *alias = ir.addUnion(name, fields, maxSize);
+
+    typeTranslator.addAlias("union " + name, alias);
 }
 
 void TreeVisitor::handleStruct(clang::RecordDecl *record, std::string name) {
@@ -126,8 +128,7 @@ void TreeVisitor::handleStruct(clang::RecordDecl *record, std::string name) {
     std::vector<Field> fields;
 
     for (const clang::FieldDecl *field : record->fields()) {
-        std::string ftype = handleReservedWords(
-            typeTranslator.Translate(field->getType(), &name));
+        Type *ftype = typeTranslator.translate(field->getType(), &name);
         fields.emplace_back(field->getNameAsString(), ftype);
 
         cycleDetection.AddDependcy(newName, field->getType());
@@ -145,8 +146,10 @@ void TreeVisitor::handleStruct(clang::RecordDecl *record, std::string name) {
         llvm::errs().flush();
     }
 
-    ir.addStruct(name, fields,
-                 astContext->getTypeSize(record->getTypeForDecl()));
+    Type *alias = ir.addStruct(
+        name, fields, astContext->getTypeSize(record->getTypeForDecl()));
+
+    typeTranslator.addAlias("struct " + name, alias);
 }
 
 bool TreeVisitor::VisitVarDecl(clang::VarDecl *varDecl) {

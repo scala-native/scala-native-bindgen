@@ -30,7 +30,7 @@ class TreeVisitor : public clang::RecursiveASTVisitor<TreeVisitor> {
 
   public:
     TreeVisitor(clang::CompilerInstance *CI, IR &ir)
-        : astContext(&(CI->getASTContext())), typeTranslator(astContext),
+        : astContext(&(CI->getASTContext())), typeTranslator(astContext, ir),
           cycleDetection(typeTranslator), ir(ir) {}
 
     virtual bool VisitFunctionDecl(clang::FunctionDecl *func);

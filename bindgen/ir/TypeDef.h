@@ -5,14 +5,17 @@
 #include <llvm/Support/raw_ostream.h>
 #include <string>
 
-class TypeDef : public TypeAndName {
+class TypeDef : public TypeAndName, public Type {
   public:
-    TypeDef(std::string name, std::string type);
+    TypeDef(std::string name, Type *type);
 
     friend llvm::raw_ostream &operator<<(llvm::raw_ostream &s,
                                          const TypeDef &type);
 
-    bool usesType(const std::string &type) const;
+    bool usesType(Type *type) const override;
+
+  protected:
+    std::string _str() const override;
 };
 
 #endif // SCALA_NATIVE_BINDGEN_TYPEDEF_H

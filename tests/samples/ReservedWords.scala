@@ -8,14 +8,14 @@ import scala.scalanative.native._
 object ReservedWords {
   type `match` = native.CInt
   type `var` = native.CArray[`match`, native.Nat._5]
+  type struct_object = native.CStruct2[`match`, native.CInt]
   type `object` = struct_object
   type `type` = struct_object
+  type union_lazy = native.CArray[Byte, native.Nat.Digit[native.Nat._1, native.Nat._6]]
   type `lazy` = union_lazy
   type `def` = `match`
-  type `finally` = struct_finally
-  type struct_object = native.CStruct2[`match`, native.CInt]
   type struct_finally = native.CStruct2[`def`, `lazy`]
-  type union_lazy = native.CArray[Byte, native.Nat.Digit[native.Nat._1, native.Nat._6]]
+  type `finally` = struct_finally
   def `with`(`sealed`: `match`, `implicit`: native.Ptr[`match`], `forSome`: `lazy`): `type` = native.extern
   def `implicit`(`type`: native.Ptr[`finally`]): `match` = native.extern
   def _1(): Unit = native.extern

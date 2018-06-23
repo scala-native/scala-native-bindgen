@@ -6,12 +6,12 @@ import scala.scalanative.native._
 @native.link("bindgentests")
 @native.extern
 object Typedef {
+  type enum_days = native.CUnsignedInt
+  type enum_toggle_e = native.CUnsignedInt
   type toggle_e = enum_toggle_e
   type int2int = native.CFunctionPtr1[native.CInt, native.CInt]
   type day2string = native.CFunctionPtr1[enum_days, native.CString]
   type toggle = native.CFunctionPtr1[toggle_e, Unit]
-  type enum_days = native.CUnsignedInt
-  type enum_toggle_e = native.CUnsignedInt
 }
 
 import Typedef._

@@ -20,21 +20,29 @@ class IR {
     ~IR();
 
     void addFunction(std::string name, std::vector<Parameter> parameters,
-                     std::string, bool isVariadic);
+                     Type *retType, bool isVariadic);
 
-    void addTypeDef(std::string name, std::string type);
+    void addTypeDef(std::string name, Type *type);
 
-    void addEnum(std::string name, std::string type,
-                 std::vector<Enumerator> enumerators);
+    /**
+     * @return type alias for the enum
+     */
+    Type *addEnum(std::string name, const std::string &type,
+                  std::vector<Enumerator> enumerators);
 
-    void addStruct(std::string name, std::vector<Field> fields,
-                   uint64_t typeSize);
+    /**
+     * @return type alias for the struct
+     */
+    Type *addStruct(std::string name, std::vector<Field> fields,
+                    uint64_t typeSize);
 
-    void addUnion(std::string name, std::vector<Field> fields,
-                  uint64_t maxSize);
+    /**
+     * @return type alias for the union
+     */
+    Type *addUnion(std::string name, std::vector<Field> fields,
+                   uint64_t maxSize);
 
-    void addLiteralDefine(std::string name, std::string literal,
-                          std::string type);
+    void addLiteralDefine(std::string name, std::string literal, Type *type);
 
     void addPossibleVarDefine(const std::string &macroName,
                               const std::string &varName);
@@ -62,6 +70,14 @@ class IR {
      *         otherwise return empty string
      */
     std::string getDefineForVar(const std::string &varName) const;
+
+    Enum *getEnumWithName(const std::string &name);
+
+    Struct *getStructWithName(const std::string &name);
+
+    Union *getUnionWithName(const std::string &name);
+
+    TypeDef *getTypeDefWithName(const std::string &name);
 
   private:
     /**
@@ -103,20 +119,18 @@ class IR {
     /**
      * Find all typedefs that use oldType and replace it with newType.
      */
-    void replaceTypeInTypeDefs(const std::string &oldType,
-                               const std::string &newType);
+    void replaceTypeInTypeDefs(Type *oldType, Type *newType);
 
     /**
      * @return true if given type is used only in typedefs.
      */
-    bool typeIsUsedOnlyInTypeDefs(std::string type);
+    bool typeIsUsedOnlyInTypeDefs(Type *type);
 
     /**
      * @return true if type is used in one of given declarations.
      */
     template <typename T>
-    bool isTypeUsed(const std::vector<T> &declarations,
-                    const std::string &type);
+    bool isTypeUsed(const std::vector<T> &declarations, Type *type);
 
     void setScalaNames();
 
@@ -129,17 +143,22 @@ class IR {
     template <typename T>
     void filterByName(std::vector<T> &declarations, const std::string &name);
 
+    template <typename T>
+    T getDeclarationWithName(std::vector<T> &declarations,
+                             const std::string &name);
+
     std::string libName;    // name of the library
     std::string linkName;   // name of the library to link with
     std::string objectName; // name of Scala object
-    std::vector<Function> functions;
-    std::vector<TypeDef> typeDefs;
-    std::vector<Struct> structs;
-    std::vector<Union> unions;
-    std::vector<Enum> enums;
-    std::vector<LiteralDefine> literalDefines;
-    std::vector<PossibleVarDefine> possibleVarDefines;
-    std::vector<VarDefine> varDefines;
+    // TODO: free memory
+    std::vector<Function *> functions;
+    std::vector<TypeDef *> typeDefs;
+    std::vector<Struct *> structs;
+    std::vector<Union *> unions;
+    std::vector<Enum *> enums;
+    std::vector<LiteralDefine *> literalDefines;
+    std::vector<PossibleVarDefine *> possibleVarDefines;
+    std::vector<VarDefine *> varDefines;
     std::vector<Variable *> variables;
     bool generated = false; // generate type defs only once
     std::string packageName;

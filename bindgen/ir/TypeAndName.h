@@ -1,6 +1,7 @@
 #ifndef SCALA_NATIVE_BINDGEN_TYPEANDNAME_H
 #define SCALA_NATIVE_BINDGEN_TYPEANDNAME_H
 
+#include "types/Type.h"
 #include <string>
 
 /**
@@ -9,17 +10,17 @@
  */
 class TypeAndName {
   public:
-    TypeAndName(std::string name, std::string type);
+    TypeAndName(std::string name, Type *type);
 
-    std::string getType() const;
+    Type *getType() const;
 
-    void setType(std::string name);
+    void setType(Type *name);
 
     std::string getName() const;
 
   protected:
     std::string name;
-    std::string type;
+    Type *type;
 };
 
 #endif // SCALA_NATIVE_BINDGEN_TYPEANDNAME_H

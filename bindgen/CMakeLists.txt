@@ -54,6 +54,16 @@ add_executable(bindgen
   ir/Variable.h
   ir/PossibleVarDefine.cpp
   ir/PossibleVarDefine.h
+  ir/types/Type.cpp
+  ir/types/Type.h
+  ir/types/SimpleType.cpp
+  ir/types/SimpleType.h
+  ir/types/PointerType.cpp
+  ir/types/PointerType.h
+  ir/types/FunctionPointerType.cpp
+  ir/types/FunctionPointerType.h
+  ir/types/ArrayType.cpp
+  ir/types/ArrayType.h
 )
 
 set_target_properties(bindgen

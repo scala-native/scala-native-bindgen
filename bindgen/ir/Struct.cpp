@@ -1,49 +1,31 @@
 #include "Struct.h"
 #include "../Utils.h"
+#include "types/ArrayType.h"
+#include "types/SimpleType.h"
 #include <sstream>
+#include <utility>
 
-Field::Field(std::string name, std::string type)
-    : TypeAndName(std::move(name), std::move(type)) {}
+Field::Field(std::string name, Type *type)
+    : TypeAndName(std::move(name), type) {}
 
 StructOrUnion::StructOrUnion(std::string name, std::vector<Field> fields)
     : name(std::move(name)), fields(std::move(fields)) {}
 
 std::string StructOrUnion::getName() const { return name; }
 
-bool StructOrUnion::usesType(const std::string &type) const {
-    for (const auto &field : fields) {
-        if (typeUsesOtherType(field.getType(), type)) {
-            return true;
-        }
-    }
-    return false;
-}
-
 Struct::Struct(std::string name, std::vector<Field> fields, uint64_t typeSize)
     : StructOrUnion(std::move(name), std::move(fields)), typeSize(typeSize) {}
 
-TypeDef Struct::generateTypeDef() const {
+TypeDef *Struct::generateTypeDef() {
     if (fields.size() < SCALA_NATIVE_MAX_STRUCT_FIELDS) {
-        return TypeDef("struct_" + name, "native.CStruct" +
-                                             std::to_string(fields.size()) +
-                                             "[" + getFieldsTypes() + "]");
+        return new TypeDef(getAliasType(), this);
     } else {
         // There is no easy way to represent it as a struct in scala native,
         // have to represent it as an array and then Add helpers to help with
         // its manipulation
-        return TypeDef("struct_" + name, "native.CArray[Byte, " +
-                                             uint64ToScalaNat(typeSize) + "]");
+        return new TypeDef(getAliasType(),
+                           new ArrayType(new SimpleType("Byte"), typeSize));
     }
-}
-
-std::string Struct::getFieldsTypes() const {
-    std::stringstream s;
-    std::string sep = "";
-    for (const auto &field : fields) {
-        s << sep << field.getType();
-        sep = ", ";
-    }
-    return s.str();
 }
 
 std::string Struct::generateHelperClass() const {
@@ -52,7 +34,7 @@ std::string Struct::generateHelperClass() const {
         return "";
     }
     std::stringstream s;
-    std::string type = getType();
+    std::string type = getAliasType();
     s << "  implicit class " << type << "_ops(val p: native.Ptr[" << type
       << "])"
       << " extends AnyVal {\n";
@@ -61,10 +43,11 @@ std::string Struct::generateHelperClass() const {
         if (!field.getName().empty()) {
             std::string getter = handleReservedWords(field.getName());
             std::string setter = handleReservedWords(field.getName(), "_=");
-            std::string ftype = field.getType();
-            s << "    def " << getter << ": " << ftype << " = !p._"
+            Type *ftype = field.getType();
+            s << "    def " << getter << ": " << ftype->str() << " = !p._"
               << std::to_string(fieldIndex + 1) << "\n"
-              << "    def " << setter << "(value: " + ftype + "):Unit = !p._"
+              << "    def " << setter
+              << "(value: " + ftype->str() + "):Unit = !p._"
               << std::to_string(fieldIndex + 1) << " = value\n";
         }
         fieldIndex++;
@@ -83,35 +66,60 @@ bool Struct::hasHelperMethods() const {
     return !fields.empty() && fields.size() < SCALA_NATIVE_MAX_STRUCT_FIELDS;
 }
 
-std::string Struct::getType() const { return "struct_" + name; }
+std::string Struct::getAliasType() const { return "struct_" + name; }
 
-Union::Union(std::string name, std::vector<Field> members, uint64_t maxSize)
-    : StructOrUnion(std::move(name), std::move(members)), maxSize(maxSize) {}
+std::string Struct::_str() const {
+    std::stringstream ss;
+    ss << "native.CStruct" << std::to_string(fields.size()) << "[";
 
-TypeDef Union::generateTypeDef() const {
-    return TypeDef(getType(),
-                   "native.CArray[Byte, " + uint64ToScalaNat(maxSize) + "]");
+    std::string sep = "";
+    for (const auto &field : fields) {
+        ss << sep << field.getType()->str();
+        sep = ", ";
+    }
+
+    ss << "]";
+    return ss.str();
 }
+
+bool Struct::usesType(Type *type) const {
+    if (this == type) {
+        return true;
+    }
+    for (const auto &field : fields) {
+        if (field.getType() == type) {
+            return true;
+        }
+    }
+    return false;
+}
+
+Union::Union(std::string name, std::vector<Field> fields, uint64_t maxSize)
+    : StructOrUnion(std::move(name), std::move(fields)),
+      ArrayType(new SimpleType("Byte"), maxSize) {}
+
+TypeDef *Union::generateTypeDef() { return new TypeDef(getTypeAlias(), this); }
 
 std::string Union::generateHelperClass() const {
     std::stringstream s;
-    std::string type = getType();
+    std::string type = getTypeAlias();
     s << "  implicit class " << type << "_pos"
       << "(val p: native.Ptr[" << type << "]) extends AnyVal {\n";
     for (const auto &field : fields) {
         if (!field.getName().empty()) {
             std::string getter = handleReservedWords(field.getName());
             std::string setter = handleReservedWords(field.getName(), "_=");
-            std::string ftype = field.getType();
-            s << "    def " << getter << ": native.Ptr[" << ftype
-              << "] = p.cast[native.Ptr[" << ftype << "]]\n";
+            Type *ftype = field.getType();
+            s << "    def " << getter << ": native.Ptr[" << ftype->str()
+              << "] = p.cast[native.Ptr[" << ftype->str() << "]]\n";
 
-            s << "    def " << setter << "(value: " << ftype
-              << "): Unit = !p.cast[native.Ptr[" << ftype << "]] = value\n";
+            s << "    def " << setter << "(value: " << ftype->str()
+              << "): Unit = !p.cast[native.Ptr[" << ftype->str()
+              << "]] = value\n";
         }
     }
     s << "  }\n";
     return s.str();
 }
 
-std::string Union::getType() const { return "union_" + name; }
+std::string Union::getTypeAlias() const { return "union_" + name; }

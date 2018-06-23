@@ -28,7 +28,12 @@ class CycleDetection {
             return;
         }
 
-        std::string qtpeString = tpeTransl.Translate(qtpe);
+        Type *type = tpeTransl.translate(qtpe);
+        if (type == nullptr) {
+            /* temp fix for function pointer */
+            return;
+        }
+        std::string qtpeString = type->str();
 
         // Add the dependence of qtpe
         if (contains(qtpeString)) {

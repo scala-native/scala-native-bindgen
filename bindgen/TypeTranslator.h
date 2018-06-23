@@ -1,16 +1,14 @@
 #pragma once
 
+#include "ir/IR.h"
+#include "ir/types/Type.h"
 #include <clang/AST/AST.h>
 #include <clang/AST/ASTContext.h>
 #include <clang/Tooling/Tooling.h>
 
 class TypeTranslator {
-  private:
-    clang::ASTContext *ctx;
-    std::map<std::string, std::string> typeMap;
-
   public:
-    explicit TypeTranslator(clang::ASTContext *ctx);
+    TypeTranslator(clang::ASTContext *ctx, IR &ir);
 
     /**
      * @brief Translate the qualified type from c to a scala type
@@ -19,14 +17,31 @@ class TypeTranslator {
      * structs, unions, ...
      * @return the type translated
      */
-    std::string Translate(const clang::QualType &tpe,
-                          const std::string * = nullptr);
-    std::string TranslateFunctionPointer(const clang::QualType &qtpe,
-                                         const std::string *avoid);
-    std::string TranslatePointer(const clang::QualType &pointee,
+    Type *translate(const clang::QualType &tpe, const std::string * = nullptr);
+
+    void addAlias(std::string cName, Type *type);
+
+    std::string getTypeFromTypeMap(std::string cType);
+
+  private:
+    clang::ASTContext *ctx;
+    IR &ir;
+    std::map<std::string, std::string> typeMap;
+
+    std::map<std::string, Type *> aliasesMap;
+
+    Type *translateEnum(const clang::QualType &qtpe);
+
+    Type *translateStruct(const clang::QualType &qtpe);
+
+    Type *translateUnion(const clang::QualType &qtpe);
+
+    Type *translateFunctionPointer(const clang::QualType &qtpe,
+                                   const std::string *avoid);
+
+    Type *TranslatePointer(const clang::QualType &pointee,
+                           const std::string *avoid);
+
+    Type *translateConstantArray(const clang::ConstantArrayType *ar,
                                  const std::string *avoid);
-    std::string TranslateStructOrUnion(const clang::QualType &qtpe);
-    std::string TranslateEnum(const clang::QualType &qtpe);
-    std::string TranslateConstantArray(const clang::ConstantArrayType *ar,
-                                       const std::string *avoid);
 };

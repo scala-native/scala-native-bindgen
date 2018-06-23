@@ -8,15 +8,15 @@ import scala.scalanative.native._
 object PrivateMembers {
   type pid_t = native.CInt
   type __private_type = native.CInt
-  type privateStructWithTypedef = struct_privateStructWithTypedef
-  type privateStructWithTypedefPtr = native.Ptr[struct_privateStructWithTypedef]
-  type enum___privateEnum = native.CUnsignedInt
-  type enum_enumWithPrivateMembers = native.CUnsignedInt
   type struct_structWithPrivateType = native.CStruct2[native.CInt, __private_type]
+  type union___unionWithPrivateName = native.CArray[Byte, native.Nat._4]
   type struct_structWithPrivateStruct = native.CStruct1[native.Ptr[struct_structWithPrivateType]]
   type struct_normalStruct = native.CStruct1[native.CInt]
+  type enum___privateEnum = native.CUnsignedInt
+  type enum_enumWithPrivateMembers = native.CUnsignedInt
   type struct_privateStructWithTypedef = native.CStruct1[native.Ptr[__private_type]]
-  type union___unionWithPrivateName = native.CArray[Byte, native.Nat._4]
+  type privateStructWithTypedef = struct_privateStructWithTypedef
+  type privateStructWithTypedefPtr = native.Ptr[struct_privateStructWithTypedef]
   def getTypeThatUsesPrivateTypes(): pid_t = native.extern
   def getPrivateType(): native.Ptr[__private_type] = native.extern
   def usesPrivateUnion(anonymous0: union___unionWithPrivateName): Unit = native.extern

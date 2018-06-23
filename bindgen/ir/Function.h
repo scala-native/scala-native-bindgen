@@ -8,18 +8,18 @@
 
 class Parameter : public TypeAndName {
   public:
-    Parameter(std::string name, std::string type);
+    Parameter(std::string name, Type *type);
 };
 
 class Function {
   public:
-    Function(std::string name, std::vector<Parameter> parameters,
-             std::string retType, bool isVariadic);
+    Function(const std::string &name, std::vector<Parameter> parameters,
+             Type *retType, bool isVariadic);
 
     friend llvm::raw_ostream &operator<<(llvm::raw_ostream &s,
                                          const Function &func);
 
-    bool usesType(const std::string &type) const;
+    bool usesType(Type *type) const;
 
     std::string getName() const;
 
@@ -33,7 +33,7 @@ class Function {
     std::string name;      // real name of the function
     std::string scalaName; // not empty
     std::vector<Parameter> parameters;
-    std::string retType;
+    Type *retType;
     bool isVariadic;
 };
 
