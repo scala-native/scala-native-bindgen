@@ -16,7 +16,29 @@ Running the previous command wild also yield warnings along with the translation
 
 Run `./scala-native-bindgen -help` to see all available options.
 
-## Building
+## Obtaining bindgen
+
+There are 2 ways to obtain bindgen:
+ * [use docker container](#docker-container) 
+ * [build binary from sources](#building)
+
+### Docker container
+This option requires [Docker].
+
+Download docker image with the binary:
+```bash
+docker pull scalabindgen/scala-native-bindgen
+```
+
+Mount directory with needed header file and run bindgen:
+```bash
+docker run --entrypoint=scala-native-bindgen -v /path/to/header:/src --rm scalabindgen/scala-native-bindgen /src/my_header.h --name my_header --
+```
+The docker image does not contain standard headers. Add `-v /usr/include:/usr/include` option to use headers from `/usr/include` in a container.
+
+ [Docker]: https://www.docker.com/
+
+### Building
 
 Building this tool requires [CMake], [LLVM] and [Clang]. See the [Scala
 Native setup guide] for instructions on installing the dependencies.
