@@ -12,7 +12,7 @@ IFS=$'\n\t'
 
 outdir="tests/target/docker-samples"
 rm -rf "$outdir"
-mkdir "$outdir"
+mkdir -p "$outdir"
 
 for input in tests/samples/*.h; do
   name="$(basename "$input" .h)"
