@@ -156,7 +156,7 @@ DefineFinder::getTypeOfIntegerLiteral(const clang::NumericLiteralParser &parser,
 
     if (integerFitsIntoType<int, uint>(parser, positive)) {
         return "native.CInt";
-    } else if (integerFitsIntoType<long, ulong>(parser, positive)) {
+    } else if (integerFitsIntoType<long, unsigned long>(parser, positive)) {
         return "native.CLong";
     } else {
         llvm::errs() << "Warning: integer value does not fit into 8 bytes: "
