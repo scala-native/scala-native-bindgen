@@ -8,7 +8,6 @@ services:
       args:
         - UBUNTU_VERSION=18.04
         - LLVM_VERSION=6.0
-        - LLVM_DEB_COMPONENT=
     entrypoint: [scala-native-bindgen]
 
   ubuntu-18.04-llvm-dev:
