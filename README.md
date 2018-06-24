@@ -23,20 +23,32 @@ There are 2 ways to obtain bindgen:
  * [build binary from sources](#building)
 
 ### Docker container
+
 This option requires [Docker].
 
 Download docker image with the binary:
-```bash
+
+```sh
 docker pull scalabindgen/scala-native-bindgen
 ```
 
-Mount directory with needed header file and run bindgen:
-```bash
-docker run --entrypoint=scala-native-bindgen -v /path/to/header:/src --rm scalabindgen/scala-native-bindgen /src/my_header.h --name my_header --
+Mount directories with required header files and run bindgen:
+
+```sh
+docker run -v "$(pwd)":/src -v /usr/include:/usr/include \
+  --rm scalabindgen/scala-native-bindgen \
+  relative/path/to/my_header.h --name my_header --
 ```
-The docker image does not contain standard headers. Add `-v /usr/include:/usr/include` option to use headers from `/usr/include` in a container.
+
+The docker image does not contain standard headers so it is important to
+mount all system include directories that are used by the header file
+passed to `scala-native-bindgen`. See the [docker-bindgen.sh] script for
+how to wrap the dockerized program. The `$CWD` of the container is
+`/src` which should be mounted from `$(pwd)` in case relative paths are
+used.
 
  [Docker]: https://www.docker.com/
+ [docker-bindgen.sh]: scripts/docker-bindgen.sh
 
 ### Building
 
