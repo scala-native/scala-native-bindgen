@@ -47,6 +47,9 @@ how to wrap the dockerized program. The `$CWD` of the container is
 `/src` which should be mounted from `$(pwd)` in case relative paths are
 used.
 
+Note, the `scalabindgen/scala-native-bindgen:latest` image is updated on
+each merge to the `master` branch.
+
  [Docker]: https://www.docker.com/
  [docker-bindgen.sh]: scripts/docker-bindgen.sh
 
