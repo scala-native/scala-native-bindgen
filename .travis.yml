@@ -9,6 +9,10 @@ script:
      docker-compose run --rm $TEST_ENV scripts/scalafmt --test;
      docker-compose run --rm $TEST_ENV scripts/clangfmt --test;
    fi
+ - if [[ "$TEST_ENV" = *llvm-6.0 ]]; then
+     docker-compose build bindgen;
+     scripts/docker-test.sh;
+   fi
 
 matrix:
   include:
