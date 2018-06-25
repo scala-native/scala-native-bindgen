@@ -56,8 +56,8 @@ add_executable(bindgen
   ir/PossibleVarDefine.h
   ir/types/Type.cpp
   ir/types/Type.h
-  ir/types/SimpleType.cpp
-  ir/types/SimpleType.h
+  ir/types/PrimitiveType.cpp
+  ir/types/PrimitiveType.h
   ir/types/PointerType.cpp
   ir/types/PointerType.h
   ir/types/FunctionPointerType.cpp

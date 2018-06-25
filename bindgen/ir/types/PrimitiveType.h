@@ -7,9 +7,9 @@
 /**
  * For example native.CInt
  */
-class SimpleType : public Type {
+class PrimitiveType : public Type {
   public:
-    explicit SimpleType(std::string type);
+    explicit PrimitiveType(std::string type);
 
     std::string getType() const;
 

@@ -8,8 +8,8 @@ IR::IR(std::string libName, std::string linkName, std::string objectName,
 
 void IR::addFunction(std::string name, std::vector<Parameter> parameters,
                      Type *retType, bool isVariadic) {
-    functions.push_back(new Function(name, std::move(parameters),
-                                     retType, isVariadic));
+    functions.push_back(
+        new Function(name, std::move(parameters), retType, isVariadic));
 }
 
 void IR::addTypeDef(std::string name, Type *type) {
@@ -50,7 +50,7 @@ void IR::addLiteralDefine(std::string name, std::string literal, Type *type) {
 
 void IR::addPossibleVarDefine(const std::string &macroName,
                               const std::string &varName) {
-    possibleVarDefines.emplace_back(macroName, varName);
+    possibleVarDefines.push_back(new PossibleVarDefine(macroName, varName));
 }
 
 void IR::addVarDefine(std::string name, Variable *variable) {
@@ -164,8 +164,6 @@ bool IR::hasHelperMethods() const {
     }
     return false;
 }
-
-bool IR::hasEnums() const { return !enums.empty(); }
 
 void IR::filterDeclarations(const std::string &excludePrefix) {
     if (excludePrefix.empty()) {
@@ -283,28 +281,10 @@ std::string IR::getDefineForVar(const std::string &varName) const {
     return "";
 }
 
-Variable *IR::addVariable(const std::string &name, const std::string &type) {
+Variable *IR::addVariable(const std::string &name, Type *type) {
     Variable *variable = new Variable(name, type);
     variables.push_back(variable);
     return variable;
-}
-
-IR::~IR() {
-    for (auto variable : variables) {
-        std::free(variable);
-    }
-}
-
-Enum *IR::getEnumWithName(const std::string &name) {
-    return getDeclarationWithName(enums, name);
-}
-
-Struct *IR::getStructWithName(const std::string &name) {
-    return getDeclarationWithName(structs, name);
-}
-
-Union *IR::getUnionWithName(const std::string &name) {
-    return getDeclarationWithName(unions, name);
 }
 
 TypeDef *IR::getTypeDefWithName(const std::string &name) {
@@ -322,4 +302,22 @@ T IR::getDeclarationWithName(std::vector<T> &declarations,
         }
     }
     return nullptr;
+}
+
+IR::~IR() {
+    clearVector(functions);
+    clearVector(typeDefs);
+    clearVector(structs);
+    clearVector(unions);
+    clearVector(enums);
+    clearVector(literalDefines);
+    clearVector(possibleVarDefines);
+    clearVector(variables);
+    clearVector(varDefines);
+}
+
+template <typename T> void IR::clearVector(std::vector<T> v) {
+    for (auto e : v) {
+        std::free(e);
+    }
 }

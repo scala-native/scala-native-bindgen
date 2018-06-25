@@ -2,8 +2,6 @@
 #define SCALA_NATIVE_BINDGEN_ARRAYTYPE_H
 
 #include "Type.h"
-#include <cstdint>
-#include <string>
 
 class ArrayType : public Type {
   public:

@@ -1,9 +1,11 @@
 #ifndef SCALA_NATIVE_BINDGEN_TYPE_H
 #define SCALA_NATIVE_BINDGEN_TYPE_H
 
-#include <llvm/Support/raw_ostream.h>
 #include <string>
 
+/**
+ * Base class for types.
+ */
 class Type {
   public:
     std::string str() const;

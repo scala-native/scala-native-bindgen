@@ -1,9 +1,7 @@
 #include "TypeTranslator.h"
 #include "Utils.h"
-#include "ir/types/ArrayType.h"
 #include "ir/types/FunctionPointerType.h"
 #include "ir/types/PointerType.h"
-#include "ir/types/SimpleType.h"
 
 TypeTranslator::TypeTranslator(clang::ASTContext *ctx_, IR &ir)
     : ctx(ctx_), ir(ir), typeMap() {
@@ -67,13 +65,13 @@ Type *TypeTranslator::TranslatePointer(const clang::QualType &pte,
 
         // Take care of void*
         if (as->getKind() == clang::BuiltinType::Void) {
-            return new PointerType(new SimpleType("Byte"));
+            return new PointerType(new PrimitiveType("Byte"));
         }
 
         // Take care of char*
         if (as->getKind() == clang::BuiltinType::Char_S ||
             as->getKind() == clang::BuiltinType::SChar) {
-            return new SimpleType("native.CString");
+            return new PrimitiveType("native.CString");
         }
     }
 
@@ -84,7 +82,7 @@ Type *TypeTranslator::translateStruct(const clang::QualType &qtpe) {
     if (qtpe->hasUnnamedOrLocalType()) {
         // TODO: Verify that the local part is not a problem
         uint64_t size = ctx->getTypeSize(qtpe);
-        return new ArrayType(new SimpleType("Byte"), size);
+        return new ArrayType(new PrimitiveType("Byte"), size);
     }
 
     std::string name = qtpe.getUnqualifiedType().getAsString();
@@ -92,7 +90,7 @@ Type *TypeTranslator::translateStruct(const clang::QualType &qtpe) {
     // TODO: do it properly
     size_t f = name.find(std::string("struct __dirstream"));
     if (f != std::string::npos) {
-        return new ArrayType(new SimpleType("Byte"), 320);
+        return new ArrayType(new PrimitiveType("Byte"), 320);
     }
 
     auto it = aliasesMap.find(name);
@@ -109,7 +107,7 @@ Type *TypeTranslator::translateUnion(const clang::QualType &qtpe) {
     if (qtpe->hasUnnamedOrLocalType()) {
         // TODO: Verify that the local part is not a problem
         uint64_t size = ctx->getTypeSize(qtpe);
-        return new ArrayType(new SimpleType("Byte"), size);
+        return new ArrayType(new PrimitiveType("Byte"), size);
     }
 
     std::string name = qtpe.getUnqualifiedType().getAsString();
@@ -152,7 +150,7 @@ Type *TypeTranslator::translate(const clang::QualType &qtpe,
         // This is a type that we want to avoid the usage.
         // Êxample: A struct that has a pointer to itself
         uint64_t size = ctx->getTypeSize(tpe);
-        return new ArrayType(new SimpleType("Byte"), size);
+        return new ArrayType(new PrimitiveType("Byte"), size);
     }
 
     if (tpe->isFunctionPointerType()) {
@@ -180,7 +178,7 @@ Type *TypeTranslator::translate(const clang::QualType &qtpe,
 
         auto found = typeMap.find(qtpe.getUnqualifiedType().getAsString());
         if (found != typeMap.end()) {
-            return new SimpleType(found->second);
+            return new PrimitiveType(found->second);
         } else {
             return ir.getTypeDefWithName(
                 qtpe.getUnqualifiedType().getAsString());

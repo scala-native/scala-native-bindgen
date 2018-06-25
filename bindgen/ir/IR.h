@@ -14,8 +14,8 @@
  */
 class IR {
   public:
-    explicit IR(std::string libName, std::string linkName,
-                std::string objectName, std::string packageName);
+    IR(std::string libName, std::string linkName, std::string objectName,
+       std::string packageName);
 
     ~IR();
 
@@ -49,15 +49,13 @@ class IR {
 
     void addVarDefine(std::string name, Variable *variable);
 
-    Variable *addVariable(const std::string &name, const std::string &type);
+    Variable *addVariable(const std::string &name, Type *type);
 
     /**
      * @return true if there are no functions, types,
      *         structs and unions
      */
     bool libObjEmpty() const;
-
-    bool hasEnums() const;
 
     friend llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir);
 
@@ -71,20 +69,9 @@ class IR {
      */
     std::string getDefineForVar(const std::string &varName) const;
 
-    Enum *getEnumWithName(const std::string &name);
-
-    Struct *getStructWithName(const std::string &name);
-
-    Union *getUnionWithName(const std::string &name);
-
     TypeDef *getTypeDefWithName(const std::string &name);
 
   private:
-    /**
-     * Generates type defs for enums, structs and unions
-     */
-    void generateTypeDefs();
-
     /**
      * @return true if helper methods will be generated for this library
      */
@@ -147,10 +134,11 @@ class IR {
     T getDeclarationWithName(std::vector<T> &declarations,
                              const std::string &name);
 
+    template <typename T> void clearVector(std::vector<T> v);
+
     std::string libName;    // name of the library
     std::string linkName;   // name of the library to link with
     std::string objectName; // name of Scala object
-    // TODO: free memory
     std::vector<Function *> functions;
     std::vector<TypeDef *> typeDefs;
     std::vector<Struct *> structs;

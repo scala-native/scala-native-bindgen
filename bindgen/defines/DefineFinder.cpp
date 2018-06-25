@@ -1,5 +1,5 @@
 #include "DefineFinder.h"
-#include "../ir/types/SimpleType.h"
+#include "../ir/types/PrimitiveType.h"
 
 #include <llvm/ADT/APInt.h>
 #include <sstream>
@@ -42,7 +42,8 @@ void DefineFinder::MacroDefined(const clang::Token &macroNameTok,
             clang::Token stringToken = (*tokens)[0];
             std::string literal(stringToken.getLiteralData(),
                                 stringToken.getLength());
-            ir.addLiteralDefine(macroName, "c" + literal, new SimpleType("native.CString"));
+            ir.addLiteralDefine(macroName, "c" + literal,
+                                new PrimitiveType("native.CString"));
         } else if (tokens->size() == 1 &&
                    (*tokens)[0].getKind() == clang::tok::identifier) {
             // token might be a variable
@@ -116,19 +117,19 @@ void DefineFinder::addNumericConstantDefine(const std::string &macroName,
         if (parser.isLongLong) {
             /* literal has `LL` ending. `long long` is represented as `Long`
              * in Scala Native */
-            type = new SimpleType("native.CLongLong");
+            type = new PrimitiveType("native.CLongLong");
 
             /* must fit into Scala integer type */
-            if (!integerFitsIntoType<long, ulong>(parser, positive)) {
+            if (!integerFitsIntoType<long, unsigned long>(parser, positive)) {
                 std::free(type);
                 type = nullptr;
             }
         } else if (parser.isLong) {
             /* literal has `L` ending */
-            type = new SimpleType("native.CLong");
+            type = new PrimitiveType("native.CLong");
 
             /* must fit into Scala integer type */
-            if (!integerFitsIntoType<long, ulong>(parser, positive)) {
+            if (!integerFitsIntoType<long, unsigned long>(parser, positive)) {
                 std::free(type);
                 type = nullptr;
             }
@@ -145,7 +146,7 @@ void DefineFinder::addNumericConstantDefine(const std::string &macroName,
         }
     } else if (parser.isFloatingLiteral()) {
         if (fitsIntoDouble(parser)) {
-            type = new SimpleType("native.CDouble");
+            type = new PrimitiveType("native.CDouble");
             scalaLiteral = getDoubleLiteral(parser);
         }
     }
@@ -164,9 +165,9 @@ DefineFinder::getTypeOfIntegerLiteral(const clang::NumericLiteralParser &parser,
                                       bool positive) {
 
     if (integerFitsIntoType<int, uint>(parser, positive)) {
-        return new SimpleType("native.CInt");
+        return new PrimitiveType("native.CInt");
     } else if (integerFitsIntoType<long, unsigned long>(parser, positive)) {
-        return new SimpleType("native.CLong");
+        return new PrimitiveType("native.CLong");
     } else {
         llvm::errs() << "Warning: integer value does not fit into 8 bytes: "
                      << literal << "\n";

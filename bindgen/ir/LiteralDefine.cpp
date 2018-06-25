@@ -1,5 +1,4 @@
 #include "LiteralDefine.h"
-#include "types/Type.h"
 
 LiteralDefine::LiteralDefine(std::string name, std::string literal, Type *type)
     : Define(std::move(name)), literal(std::move(literal)), type(type) {}

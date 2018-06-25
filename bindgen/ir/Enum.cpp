@@ -1,6 +1,4 @@
 #include "Enum.h"
-#include <sstream>
-#include <utility>
 
 Enumerator::Enumerator(std::string name, int64_t value)
     : name(std::move(name)), value(value) {}
@@ -11,7 +9,7 @@ int64_t Enumerator::getValue() { return value; }
 
 Enum::Enum(std::string name, std::string type,
            std::vector<Enumerator> enumerators)
-    : SimpleType(std::move(type)), name(std::move(name)),
+    : PrimitiveType(std::move(type)), name(std::move(name)),
       enumerators(std::move(enumerators)) {}
 
 bool Enum::isAnonymous() const { return name.empty(); }

@@ -1,7 +1,7 @@
 #include "Struct.h"
 #include "../Utils.h"
 #include "types/ArrayType.h"
-#include "types/SimpleType.h"
+#include "types/PrimitiveType.h"
 #include <sstream>
 #include <utility>
 
@@ -24,7 +24,7 @@ TypeDef *Struct::generateTypeDef() {
         // have to represent it as an array and then Add helpers to help with
         // its manipulation
         return new TypeDef(getAliasType(),
-                           new ArrayType(new SimpleType("Byte"), typeSize));
+                           new ArrayType(new PrimitiveType("Byte"), typeSize));
     }
 }
 
@@ -96,7 +96,7 @@ bool Struct::usesType(Type *type) const {
 
 Union::Union(std::string name, std::vector<Field> fields, uint64_t maxSize)
     : StructOrUnion(std::move(name), std::move(fields)),
-      ArrayType(new SimpleType("Byte"), maxSize) {}
+      ArrayType(new PrimitiveType("Byte"), maxSize) {}
 
 TypeDef *Union::generateTypeDef() { return new TypeDef(getTypeAlias(), this); }
 

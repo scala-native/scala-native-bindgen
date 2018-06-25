@@ -23,7 +23,8 @@ bool TreeVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
         parameters.emplace_back(pname, ptype);
     }
 
-    ir.addFunction(funcName, parameters, retType, func->isVariadic());
+    ir.addFunction(funcName, std::move(parameters), retType,
+                   func->isVariadic());
 
     return true;
 }
@@ -64,7 +65,7 @@ bool TreeVisitor::VisitEnumDecl(clang::EnumDecl *enumdecl) {
     std::string scalaType = typeTranslator.getTypeFromTypeMap(
         enumdecl->getIntegerType().getUnqualifiedType().getAsString());
 
-    Type *alias = ir.addEnum(name, scalaType, enumerators);
+    Type *alias = ir.addEnum(name, scalaType, std::move(enumerators));
     if (alias != nullptr) {
         typeTranslator.addAlias("enum " + name, alias);
     }
@@ -109,7 +110,7 @@ void TreeVisitor::handleUnion(clang::RecordDecl *record, std::string name) {
         fields.emplace_back(fname, ftype);
     }
 
-    Type *alias = ir.addUnion(name, fields, maxSize);
+    Type *alias = ir.addUnion(name, std::move(fields), maxSize);
 
     typeTranslator.addAlias("union " + name, alias);
 }
@@ -146,8 +147,9 @@ void TreeVisitor::handleStruct(clang::RecordDecl *record, std::string name) {
         llvm::errs().flush();
     }
 
-    Type *alias = ir.addStruct(
-        name, fields, astContext->getTypeSize(record->getTypeForDecl()));
+    Type *alias =
+        ir.addStruct(name, std::move(fields),
+                     astContext->getTypeSize(record->getTypeForDecl()));
 
     typeTranslator.addAlias("struct " + name, alias);
 }
@@ -155,8 +157,7 @@ void TreeVisitor::handleStruct(clang::RecordDecl *record, std::string name) {
 bool TreeVisitor::VisitVarDecl(clang::VarDecl *varDecl) {
     if (!varDecl->isThisDeclarationADefinition()) {
         std::string variableName = varDecl->getName().str();
-        std::string type =
-            handleReservedWords(typeTranslator.Translate(varDecl->getType()));
+        Type *type = typeTranslator.translate(varDecl->getType());
         Variable *variable = ir.addVariable(variableName, type);
         /* check if there is a macro for the variable.
          * Macros were saved by DefineFinder */

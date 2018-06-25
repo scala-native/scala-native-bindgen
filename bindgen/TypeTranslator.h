@@ -1,9 +1,6 @@
 #pragma once
 
 #include "ir/IR.h"
-#include "ir/types/Type.h"
-#include <clang/AST/AST.h>
-#include <clang/AST/ASTContext.h>
 #include <clang/Tooling/Tooling.h>
 
 class TypeTranslator {
@@ -26,8 +23,15 @@ class TypeTranslator {
   private:
     clang::ASTContext *ctx;
     IR &ir;
+
+    /**
+     * Primitive types
+     */
     std::map<std::string, std::string> typeMap;
 
+    /**
+     * Maps C struct, union or enum name to Type alias
+     */
     std::map<std::string, Type *> aliasesMap;
 
     Type *translateEnum(const clang::QualType &qtpe);

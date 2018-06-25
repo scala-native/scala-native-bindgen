@@ -2,9 +2,7 @@
 #define SCALA_NATIVE_BINDGEN_ENUM_H
 
 #include "TypeDef.h"
-#include "types/SimpleType.h"
-#include <llvm/Support/raw_ostream.h>
-#include <string>
+#include "types/PrimitiveType.h"
 #include <vector>
 
 class Enumerator {
@@ -20,7 +18,7 @@ class Enumerator {
     int64_t value;
 };
 
-class Enum : public SimpleType {
+class Enum : public PrimitiveType {
   public:
     Enum(std::string name, std::string type,
          std::vector<Enumerator> enumerators);
