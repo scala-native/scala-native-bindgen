@@ -10,11 +10,17 @@ RUN set -x \
  && apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 2EE0EA64E40A89B84B2DF73499E82A75642AC823 \
  && apt update \
  && apt install -y --no-install-recommends \
+            locales locales-all \
             g++ openjdk-8-jdk-headless sbt cmake make curl git \
             zlib1g-dev \
             libgc-dev libunwind8-dev libre2-dev \
             nlohmann-json-dev \
  && rm -rf /var/lib/apt/lists/*
+
+ARG LOCALE=en_US.UTF-8
+ENV LANG=$LOCALE
+ENV LANGUAGE=$LOCALE
+ENV LC_ALL=$LOCALE
 
 ARG LLVM_VERSION=6.0
 ENV LLVM_VERSION=$LLVM_VERSION
@@ -26,4 +32,14 @@ RUN set -x \
  && rm -rf /var/lib/apt/lists/*
 
 ENV PATH=$PATH:/usr/lib/llvm-$LLVM_VERSION/bin
+
+##bindings-dev-package
+# Install binding dependencies
+RUN set -x \
+ && apt update \
+ && apt install -y --no-install-recommends \
+	libutf8proc-dev \
+ && rm -rf /var/lib/apt/lists/*
+##bindings-dev-package
+
 WORKDIR /src

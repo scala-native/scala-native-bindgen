@@ -1,8 +1,11 @@
 import scala.sys.process._
+import scala.util.Try
 import org.scalanative.bindgen.sbt.ScalaNativeBindgenPlugin
+import BindingHelpers._
 
-addCommandAlias("verify",
-                "; tests/test ; docs/test ; ^scripted ; docs/makeSite")
+addCommandAlias(
+  "verify",
+  "; tests/test ; docs/test ; bindings/test ; ^scripted ; docs/makeSite")
 
 val Versions = new {
   val scala210 = "2.10.6"
@@ -51,6 +54,7 @@ val root = project("scala-native-bindgen")
     samples,
     tools,
     sbtPlugin,
+    bindings,
     docs
   )
   .enablePlugins(ReleasePlugin)
@@ -60,6 +64,10 @@ val root = project("scala-native-bindgen")
     releaseVersionFile := target.value / "unused-version.sbt",
     releaseProcess := {
       import ReleaseTransformations._
+
+      val setReleaseVersions: String => State => State =
+        v => _.put(ReleaseKeys.versions, (v, v))
+
       Seq[ReleaseStep](
         checkSnapshotDependencies,
         setReleaseVersions(version.value),
@@ -98,7 +106,7 @@ lazy val samples = project("samples")
   .settings(
     publish / skip := true,
     scalaVersion := Versions.scala211,
-    libraryDependencies += "com.lihaoyi" %%% "utest" % "0.6.3" % "test",
+    libraryDependencies += "com.lihaoyi" %%% "utest" % "0.6.3" % Test,
     testFrameworks += new TestFramework("utest.runner.Framework"),
     nativeLinkStubs := true,
     compileTask("bindgentests", baseDirectory)
@@ -157,13 +165,43 @@ lazy val docs = project("docs")
     }
   )
 
+lazy val bindings = project("bindings")
+  .settings(
+    publish / skip := false
+  )
+  .aggregate(
+    libiconv,
+    libposix,
+    libutf8proc
+  )
+
+lazy val libiconv = bindingProject("iconv")
+  .configure(binding("iconv.h"))
+  .settings(
+    Test / nativeLinkingOptions ++= {
+      // Link with libiconv on macOS.
+      Option(System.getProperty("os.name")) match {
+        case Some("Mac OS X") => Seq("-liconv")
+        case _                => Seq.empty
+      }
+    }
+  )
+
+//#sbt-binding-project
+lazy val libposix = bindingProject("posix")
+  .configure(binding("fnmatch.h"))
+  .configure(binding("regex.h"))
+//#sbt-binding-project
+
+lazy val libutf8proc = bindingProject("utf8proc")
+  .configure(binding("utf8proc.h", Some("utf8proc")))
+
 def project(name: String, plugged: AutoPlugin*) = {
   val unplugged = Seq(ScriptedPlugin).filterNot(plugged.toSet)
 
   Project(id = name, base = file(name))
     .disablePlugins(unplugged: _*)
-    .enablePlugins(GitPlugin)
-    .enablePlugins(GitVersioning)
+    .enablePlugins(GitPlugin, GitVersioning)
     .settings(
       versionWithGit,
       git.useGitDescribe := true,
@@ -184,9 +222,6 @@ def project(name: String, plugged: AutoPlugin*) = {
       Test / publishArtifact := false
     )
 }
-
-lazy val setReleaseVersions: String => State => State =
-  v => _.put(ReleaseKeys.versions, (v, v))
 
 def compileTask(libname: String, srcDirTask: SettingKey[File]) = Def.settings(
   Test / nativeLinkingOptions += {
@@ -237,3 +272,55 @@ def compileTask(libname: String, srcDirTask: SettingKey[File]) = Def.settings(
     (Test / compile).value
   }
 )
+
+// Add Clang's directory include dir with platform specific headers, like stddef.h.
+lazy val bindingsExtraArgs = Try {
+  val version = "llvm-config --version".!!.trim
+  val libDir  = "llvm-config --libdir".!!.trim
+  s"-I$libDir/clang/$version/include"
+}.toOption
+
+def bindingProject(name: String) = {
+  project(s"lib$name")
+    .enablePlugins(ScalaNativePlugin, ScalaNativeBindgenPlugin)
+    .in(file(s"bindings/$name"))
+    .settings(
+      scalaVersion := Versions.scala211,
+      nativeLinkStubs := true,
+      libraryDependencies += "org.scalatest" %%% "scalatest" % "3.2.0-SNAP10" % Test,
+      Compile / nativeBindgen / target :=
+        (Compile / scalaSource).value / "org/scalanative/bindgen/bindings" / name
+    )
+}
+
+def binding(header: String, link: Option[String] = None)(
+    project: Project): Project = {
+  val headerFile = file("/usr/include") / header
+  val libname    = project.base.getName
+  project.settings(
+    inConfig(Compile)(
+      Def.settings(
+        nativeBindings ++= {
+          if (headerFile.exists) Seq {
+            NativeBinding(headerFile)
+              .name(header.replace(".h", ""))
+              .packageName(s"org.scalanative.bindgen.bindings.$libname")
+              .maybe(link, _.link)
+              .excludePrefix("__")
+              .extraArgs(bindingsExtraArgs.toSeq: _*)
+              .extraArgs("-D_POSIX_C_SOURCE")
+          } else {
+            Seq.empty
+          }
+        }
+      )),
+    test := (Def.taskDyn {
+      if (headerFile.exists)
+        Def.task { (Test / test).value } else
+        Def.task {
+          streams.value.log.warn(
+            s"Skipping $libname tests due to missing header file $headerFile")
+        }
+    }).value
+  )
+}
