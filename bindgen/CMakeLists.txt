@@ -46,9 +46,18 @@ execute_process(COMMAND ${LLVM_CONFIG_PROGRAM} --system-libs --link-static
 include_directories(SYSTEM ${LLVM_INCLUDE_DIR})
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${LLVM_CXX_FLAGS}")
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${LLVM_LINKER_FLAGS} -static")
 
-add_compile_options(-fexceptions -std=c++11 -Wall -Wconversion) # -Werror)
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  # macOS does not guarantee backwards compatible system calls and therefore
+  # discourages statically linked binaries. Instead add -L/usr/lib before the
+  # LLVM LDFLAGS to link against the dynamic system libc++ instead of the one
+  # from LLVM.
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -L/usr/lib ${LLVM_LINKER_FLAGS}")
+else()
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${LLVM_LINKER_FLAGS} -static")
+endif()
+
+add_compile_options(-Wall -Wconversion)
 
 add_executable(bindgen
   Main.cpp
