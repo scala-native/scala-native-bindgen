@@ -41,8 +41,7 @@ class IR {
 
     void addVarDefine(std::string name, Variable *variable);
 
-    Variable *addVariable(const std::string &name, const std::string &type,
-                          bool isConst);
+    Variable *addVariable(const std::string &name, const std::string &type);
 
     /**
      * @return true if there are no functions, types,

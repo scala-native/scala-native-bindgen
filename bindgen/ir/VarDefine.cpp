@@ -5,13 +5,8 @@ VarDefine::VarDefine(std::string name, Variable *variable)
 
 llvm::raw_ostream &operator<<(llvm::raw_ostream &s,
                               const VarDefine &varDefine) {
-    s << "  @name(\"" << varDefine.variable->getName() << "\")\n";
-    if (varDefine.variable->getIsConst()) {
-        s << "  val ";
-    } else {
-        s << "  def ";
-    }
-    s << varDefine.getName() << ": " << varDefine.variable->getType()
-      << " = native.extern\n";
+    s << "  @name(\"" << varDefine.variable->getName() << "\")\n"
+      << "  val " << varDefine.getName() << ": "
+      << varDefine.variable->getType() << " = native.extern\n";
     return s;
 }

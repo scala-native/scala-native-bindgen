@@ -290,9 +290,8 @@ std::string IR::getDefineForVar(const std::string &varName) const {
     return "";
 }
 
-Variable *IR::addVariable(const std::string &name, const std::string &type,
-                          bool isConst) {
-    Variable *variable = new Variable(name, type, isConst);
+Variable *IR::addVariable(const std::string &name, const std::string &type) {
+    Variable *variable = new Variable(name, type);
     variables.push_back(variable);
     return variable;
 }

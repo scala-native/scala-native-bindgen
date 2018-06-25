@@ -7,9 +7,9 @@ import scala.scalanative.native._
 @native.extern
 object VarDefine {
   @name("a")
-  def A: native.CInt = native.extern
+  val A: native.CInt = native.extern
   @name("constInt")
   val CONST_INT: native.CInt = native.extern
   @name("constIntPointer")
-  def CONST_INT_POINTER: native.Ptr[native.CInt] = native.extern
+  val CONST_INT_POINTER: native.Ptr[native.CInt] = native.extern
 }

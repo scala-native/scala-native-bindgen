@@ -5,12 +5,7 @@
 
 class Variable : public TypeAndName {
   public:
-    Variable(const std::string &name, const std::string &type, bool isConst);
-
-    bool getIsConst();
-
-  private:
-    bool isConst;
+    Variable(const std::string &name, const std::string &type);
 };
 
 #endif // SCALA_NATIVE_BINDGEN_VARIABLE_H
