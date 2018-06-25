@@ -11,17 +11,13 @@ RUN set -x \
  && apt update \
  && apt install -y --no-install-recommends \
             g++ openjdk-8-jdk-headless sbt cmake make curl git \
+            zlib1g-dev \
             libgc-dev libunwind8-dev libre2-dev \
  && rm -rf /var/lib/apt/lists/*
 
 ARG LLVM_VERSION=6.0
 ENV LLVM_VERSION=$LLVM_VERSION
-# LLVM dev versions do not have a "-x.y" version suffix.
-ARG LLVM_DEB_COMPONENT=-$LLVM_VERSION
 RUN set -x \
- && . /etc/lsb-release \
- && echo "deb https://apt.llvm.org/$DISTRIB_CODENAME/ llvm-toolchain-$DISTRIB_CODENAME$LLVM_DEB_COMPONENT main" > /etc/apt/sources.list.d/llvm.list \
- && apt-key adv --fetch-keys https://apt.llvm.org/llvm-snapshot.gpg.key \
  && apt update \
  && apt install -y --no-install-recommends \
             clang-$LLVM_VERSION clang-format-$LLVM_VERSION \

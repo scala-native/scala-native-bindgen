@@ -1,15 +1,54 @@
 cmake_minimum_required(VERSION 3.9)
 project(scala-native-bindgen)
 
-# Locate $LLVM_PATH/lib/cmake/clang/ClangConfig.cmake
-find_package(Clang REQUIRED CONFIG)
-message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
-message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
+# Locate LLVMConfig.cmake
+#find_package(LLVM REQUIRED CONFIG)
+#message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
+#message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
 
-include_directories(SYSTEM ${LLVM_INCLUDE_DIRS})
-add_definitions(${LLVM_DEFINITIONS})
+find_program(LLVM_CONFIG_PROGRAM
+  NAMES
+#  llvm-config-${LLVM_VERSION_MAJOR}.${LLVM_VERSION_MINOR}
+  llvm-config-6.0
+  llvm-config-5.0
+  llvm-config-4.0
+  llvm-config
+)
 
-add_compile_options(-fexceptions -std=c++11 -Wall -Wconversion -Werror)
+execute_process(COMMAND ${LLVM_CONFIG_PROGRAM} --includedir
+  OUTPUT_VARIABLE LLVM_INCLUDE_DIR
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+message(STATUS "Using LLVM include dir: ${LLVM_INCLUDE_DIR}")
+
+execute_process(COMMAND ${LLVM_CONFIG_PROGRAM} --cxxflags
+  OUTPUT_VARIABLE LLVM_CXX_FLAGS
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+message(STATUS "Using LLVM CXXFLAGS: ${LLVM_CXX_FLAGS}")
+
+execute_process(COMMAND ${LLVM_CONFIG_PROGRAM} --ldflags
+  OUTPUT_VARIABLE LLVM_LINKER_FLAGS
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+message(STATUS "Using LLVM LDFLAGS: ${LLVM_LINKER_FLAGS}")
+
+execute_process(COMMAND ${LLVM_CONFIG_PROGRAM} --libs --link-static
+  OUTPUT_VARIABLE LLVM_LIBS
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+execute_process(COMMAND ${LLVM_CONFIG_PROGRAM} --system-libs --link-static
+  OUTPUT_VARIABLE LLVM_SYSTEM_LIBS
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+include_directories(SYSTEM ${LLVM_INCLUDE_DIR})
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${LLVM_CXX_FLAGS}")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${LLVM_LINKER_FLAGS} -static")
+
+add_compile_options(-fexceptions -std=c++11 -Wall -Wconversion) # -Werror)
 
 add_executable(bindgen
   Main.cpp
@@ -75,4 +114,21 @@ target_link_libraries(bindgen
   PRIVATE
   clangFrontend
   clangTooling
+
+  clangFrontend
+  clangSerialization
+  clangDriver
+  clangTooling
+  clangParse
+  clangSema
+
+  clangAnalysis
+
+  clangEdit
+  clangAST
+  clangLex
+  clangBasic
+
+  "${LLVM_LIBS}"
+  "${LLVM_SYSTEM_LIBS}"
 )
