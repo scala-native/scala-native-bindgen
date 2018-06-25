@@ -50,6 +50,10 @@ add_executable(bindgen
   ir/LiteralDefine.h
   ir/VarDefine.cpp
   ir/VarDefine.h
+  ir/Variable.cpp
+  ir/Variable.h
+  ir/PossibleVarDefine.cpp
+  ir/PossibleVarDefine.h
 )
 
 set_target_properties(bindgen

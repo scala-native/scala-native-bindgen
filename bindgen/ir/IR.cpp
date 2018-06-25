@@ -40,12 +40,11 @@ void IR::addLiteralDefine(std::string name, std::string literal,
 
 void IR::addPossibleVarDefine(const std::string &macroName,
                               const std::string &varName) {
-    possibleVarDefines.emplace_back(macroName, varName, "", false);
+    possibleVarDefines.emplace_back(macroName, varName);
 }
 
-void IR::addVarDefine(const std::string &macroName, const std::string &varName,
-                      const std::string &type, bool isConst) {
-    varDefines.emplace_back(macroName, varName, type, isConst);
+void IR::addVarDefine(std::string name, Variable *variable) {
+    varDefines.emplace_back(name, variable);
 }
 
 bool IR::libObjEmpty() const {
@@ -284,9 +283,22 @@ void IR::filterByName(std::vector<T> &declarations, const std::string &name) {
 
 std::string IR::getDefineForVar(const std::string &varName) const {
     for (const auto &varDefine : possibleVarDefines) {
-        if (varDefine.getVarName() == varName) {
+        if (varDefine.getVariableName() == varName) {
             return varDefine.getName();
         }
     }
     return "";
+}
+
+Variable *IR::addVariable(const std::string &name, const std::string &type,
+                          bool isConst) {
+    Variable *variable = new Variable(name, type, isConst);
+    variables.push_back(variable);
+    return variable;
+}
+
+IR::~IR() {
+    for (auto variable : variables) {
+        std::free(variable);
+    }
 }

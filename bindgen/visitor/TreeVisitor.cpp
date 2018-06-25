@@ -162,15 +162,16 @@ void TreeVisitor::handleStruct(clang::RecordDecl *record, std::string name) {
 
 bool TreeVisitor::VisitVarDecl(clang::VarDecl *varDecl) {
     if (!varDecl->isThisDeclarationADefinition()) {
+        std::string variableName = varDecl->getName().str();
+        std::string type =
+            handleReservedWords(typeTranslator.Translate(varDecl->getType()));
+        Variable *variable = ir.addVariable(
+            variableName, type, varDecl->getType().isConstQualified());
         /* check if there is a macro for the variable.
          * Macros were saved by DefineFinder */
-        std::string varName = varDecl->getName().str();
-        std::string macroName = ir.getDefineForVar(varName);
+        std::string macroName = ir.getDefineForVar(variableName);
         if (!macroName.empty()) {
-            std::string type = handleReservedWords(
-                typeTranslator.Translate(varDecl->getType()));
-            ir.addVarDefine(macroName, varName, type,
-                            varDecl->getType().isConstQualified());
+            ir.addVarDefine(macroName, variable);
         }
     }
     return true;

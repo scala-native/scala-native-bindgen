@@ -4,6 +4,7 @@
 #include "Enum.h"
 #include "Function.h"
 #include "LiteralDefine.h"
+#include "PossibleVarDefine.h"
 #include "Struct.h"
 #include "TypeDef.h"
 #include "VarDefine.h"
@@ -15,6 +16,8 @@ class IR {
   public:
     explicit IR(std::string libName, std::string linkName,
                 std::string objectName, std::string packageName);
+
+    ~IR();
 
     void addFunction(std::string name, std::vector<Parameter> parameters,
                      std::string, bool isVariadic);
@@ -36,8 +39,10 @@ class IR {
     void addPossibleVarDefine(const std::string &macroName,
                               const std::string &varName);
 
-    void addVarDefine(const std::string &macroName, const std::string &varName,
-                      const std::string &type, bool isConst);
+    void addVarDefine(std::string name, Variable *variable);
+
+    Variable *addVariable(const std::string &name, const std::string &type,
+                          bool isConst);
 
     /**
      * @return true if there are no functions, types,
@@ -134,8 +139,9 @@ class IR {
     std::vector<Union> unions;
     std::vector<Enum> enums;
     std::vector<LiteralDefine> literalDefines;
-    std::vector<VarDefine> possibleVarDefines;
+    std::vector<PossibleVarDefine> possibleVarDefines;
     std::vector<VarDefine> varDefines;
+    std::vector<Variable *> variables;
     bool generated = false; // generate type defs only once
     std::string packageName;
 };
