@@ -9,5 +9,3 @@ extern int c;
 
 extern float f;
 #define __PRIVATE f // should be filtered
-
-int getA();

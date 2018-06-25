@@ -80,9 +80,7 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir) {
         }
 
         for (const auto &varDefine : ir.varDefines) {
-            s << "  @name(\"" << varDefine.getVarName() << "\")\n"
-              << "  def " << varDefine.getName() << ": " << varDefine.getType()
-              << " = native.extern\n";
+            s << varDefine;
         }
 
         for (const auto &func : ir.functions) {

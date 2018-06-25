@@ -7,6 +7,5 @@ import scala.scalanative.native._
 @native.extern
 object VarDefine {
   @name("a")
-  def A: native.CInt = native.extern
-  def getA(): native.CInt = native.extern
+  val A: native.CInt = native.extern
 }
