@@ -17,22 +17,26 @@ script:
 
 matrix:
   include:
-  - env: TEST_ENV=ubuntu-18.04-llvm-dev
   - env: TEST_ENV=ubuntu-18.04-llvm-6.0
+    deploy:
+    - provider: script
+      script: scripts/docker-deploy.sh "$TRAVIS_TAG"
+      on:
+        tags: true
+    - provider: script
+      script: scripts/docker-deploy.sh latest
+      on:
+        branch: master
+  - env: TEST_ENV=ubuntu-18.04-llvm-dev
   - env: TEST_ENV=ubuntu-18.04-llvm-5.0
 
 before_cache:
   # See https://www.scala-sbt.org/1.0/docs/Travis-CI-with-sbt.html
   # Tricks to avoid unnecessary cache updates
-  - find $HOME/.sbt -name "*.lock" | xargs rm
-  - find $HOME/.ivy2 -name "ivydata-*.properties" | xargs rm
+  - find $HOME/.sbt -name "*.lock" | xargs sudo rm
+  - find $HOME/.ivy2 -name "ivydata-*.properties" | xargs sudo rm
 
 cache:
   directories:
    - "$HOME/.ivy2/cache"
    - "$HOME/.sbt/boot"
-
-env:
-  global:
-   - secure: dtXD6RordjwlXhNA41jv93TtkC5cbJzHalJo60S/OPri9p3Eet7D4kXcNWhGHdIw5kcSkeYhzvhif12NXLDFMmWQKOttqZ4RMI1CQyT+1w+COwiHdWSbSUf91K9RmrRBQiFRSHM/XRDThUe4qD3Nh3WFK5P+cQOeM3FsJrRfa7U2XP3CgZ0vUytqtd0aIGRH23p7LM0koaTx1g6PpIcOFQ1NRTUAnGFqI3rDrB+STZuoFq6RXq13oSGBD3VEb0gyfyWrvxbQleLvSa4Gy6JmLvuM99jLJqCh8UW+M2cmtAmDkuku7bkgTeWLYjTctkMOaRe+N2Gzf90H6rjjJEAgK5O5fb+ER7zF9mVt8JKe0CUzQy7Uz2EoMTwUAIdkR8bvP7J/EwWXoA2siXtv5mFykx0HfUMQgh1GQD8WXqE9pLPN8uICK+mwxgyCzcnlJgGkG0BoIWWz1kqxUp61jGdiquIgJMIiYHKEL2eP1MLACTWQ9I4F8XfZJk9eE9ZzEca6/5d/H6KUerasqQnaATlx6ng6AXsUsf2dKL7UBtgv6tCuj2T3D/PdFtwHFHVRko1mlk41XLCEbSzJeghZg4h5fy5PrCg2MQD3XlxhypAIi+mIZzl3REiGXtZUM3JUFZDYLPe7+u5/zJtlBg1F++38/EIqWgiLcz4ssjzcMUTjYjg=
-   - secure: KxYU6s9JBJnLkDvH/Gbm8vbm8Muvbjf3xlheaCKT93F39/3KUxHvaqYIMwsWnBbTxa3p8c7DpyzU8Lfn6WH1qYolTM9Wy3xwawV7vY2yzTbhp54fnm5W1SBQw5zykx/9MO5O78GqLuSh74o/lmLpUcDOg25vg6VRMMeS5rm7rufuyLQUe3vhvajb1k+h0ANDRJ5aIZJPSx0r+FDeWFmWfiXirXA5nQ//Mg1zKmPXPMWnFW/fmU/+bi+gKsPR9IXTeUTxDf6Ktfgp8aCnhGxbObHOSyYVHKkXdM/7q6IzUb2aklkhFeLZB1jR1jTCLOhUpvpORy4lnjKMLqwK6flKBfapbTArg+RbiNIiXnn1kMPYLN1gBFB7790/TyekiDZqCJwCsFngI0AaugPmM8/TpLB8bPuI/fZiccjC3mcj9xYLO3uEKSb2CVcqo0V37wZeTJDLxQKRIUKMZ34SXnmWg1OhJck1v27B6ARDbHxASvpr7wzEZ3Kiqfna+gHk8oTOv9UoMYGI8Zua3tQGoeQfdCE8qmdppahsH0s1ZNMKMT4ial6juQb4lwaXGVqWU8+1G+ISHgwmN4a+KlJVSc51WWLUD9NW2a62sVFvHv6jKlJ5chyXOe+KvZEjWAL1DR6EYa0vWxlMokaYuqXow8v6vn4PdIfN5FbcR97jPnCnPwI=
