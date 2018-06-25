@@ -27,7 +27,6 @@ matrix:
       script: scripts/docker-deploy.sh latest
       on:
         branch: master
-  - env: TEST_ENV=ubuntu-18.04-llvm-dev
   - env: TEST_ENV=ubuntu-18.04-llvm-5.0
 
 before_cache:
