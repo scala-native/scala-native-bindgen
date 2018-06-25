@@ -40,12 +40,12 @@ void IR::addLiteralDefine(std::string name, std::string literal,
 
 void IR::addPossibleVarDefine(const std::string &macroName,
                               const std::string &varName) {
-    possibleVarDefines.emplace_back(macroName, varName, "");
+    possibleVarDefines.emplace_back(macroName, varName, "", false);
 }
 
 void IR::addVarDefine(const std::string &macroName, const std::string &varName,
-                      const std::string &type) {
-    varDefines.emplace_back(macroName, varName, type);
+                      const std::string &type, bool isConst) {
+    varDefines.emplace_back(macroName, varName, type, isConst);
 }
 
 bool IR::libObjEmpty() const {

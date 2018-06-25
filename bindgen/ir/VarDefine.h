@@ -6,7 +6,8 @@
 
 class VarDefine : public Define {
   public:
-    VarDefine(std::string name, std::string varName, std::string type);
+    VarDefine(std::string name, std::string varName, std::string type,
+              bool isConst);
 
     std::string getVarName() const;
 
@@ -18,6 +19,7 @@ class VarDefine : public Define {
   private:
     std::string varName;
     std::string type;
+    bool isConst;
 };
 
 #endif // SCALA_NATIVE_BINDGEN_VARDEFINE_H

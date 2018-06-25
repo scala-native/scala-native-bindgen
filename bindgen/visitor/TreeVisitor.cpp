@@ -169,7 +169,8 @@ bool TreeVisitor::VisitVarDecl(clang::VarDecl *varDecl) {
         if (!macroName.empty()) {
             std::string type = handleReservedWords(
                 typeTranslator.Translate(varDecl->getType()));
-            ir.addVarDefine(macroName, varName, type);
+            ir.addVarDefine(macroName, varName, type,
+                            varDecl->getType().isConstQualified());
         }
     }
     return true;

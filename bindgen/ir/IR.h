@@ -37,7 +37,7 @@ class IR {
                               const std::string &varName);
 
     void addVarDefine(const std::string &macroName, const std::string &varName,
-                      const std::string &type);
+                      const std::string &type, bool isConst);
 
     /**
      * @return true if there are no functions, types,
