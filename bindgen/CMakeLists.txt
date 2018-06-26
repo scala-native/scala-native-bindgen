@@ -1,51 +1,19 @@
 cmake_minimum_required(VERSION 3.9)
 project(scala-native-bindgen)
 
+set(USE_SHARED OFF)
+
 # Locate LLVMConfig.cmake
-#find_package(LLVM REQUIRED CONFIG)
-#message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
-#message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
+find_package(LLVM REQUIRED CONFIG)
+message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
+message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
 
-find_program(LLVM_CONFIG_PROGRAM
-  NAMES
-#  llvm-config-${LLVM_VERSION_MAJOR}.${LLVM_VERSION_MINOR}
-  llvm-config-6.0
-  llvm-config-5.0
-  llvm-config-4.0
-  llvm-config
-)
+message(STATUS "Using LLVM include dirs: ${LLVM_INCLUDE_DIRS}")
+include_directories(SYSTEM ${LLVM_INCLUDE_DIRS})
 
-execute_process(COMMAND ${LLVM_CONFIG_PROGRAM} --includedir
-  OUTPUT_VARIABLE LLVM_INCLUDE_DIR
-  OUTPUT_STRIP_TRAILING_WHITESPACE
-)
-message(STATUS "Using LLVM include dir: ${LLVM_INCLUDE_DIR}")
+message(STATUS "Using LLVM defs: ${LLVM_DEFINITIONS}")
+add_definitions(${LLVM_DEFINITIONS})
 
-execute_process(COMMAND ${LLVM_CONFIG_PROGRAM} --cxxflags
-  OUTPUT_VARIABLE LLVM_CXX_FLAGS
-  OUTPUT_STRIP_TRAILING_WHITESPACE
-)
-message(STATUS "Using LLVM CXXFLAGS: ${LLVM_CXX_FLAGS}")
-
-execute_process(COMMAND ${LLVM_CONFIG_PROGRAM} --ldflags
-  OUTPUT_VARIABLE LLVM_LINKER_FLAGS
-  OUTPUT_STRIP_TRAILING_WHITESPACE
-)
-message(STATUS "Using LLVM LDFLAGS: ${LLVM_LINKER_FLAGS}")
-
-execute_process(COMMAND ${LLVM_CONFIG_PROGRAM} --libs --link-static
-  OUTPUT_VARIABLE LLVM_LIBS
-  OUTPUT_STRIP_TRAILING_WHITESPACE
-)
-
-execute_process(COMMAND ${LLVM_CONFIG_PROGRAM} --system-libs --link-static
-  OUTPUT_VARIABLE LLVM_SYSTEM_LIBS
-  OUTPUT_STRIP_TRAILING_WHITESPACE
-)
-
-include_directories(SYSTEM ${LLVM_INCLUDE_DIR})
-
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${LLVM_CXX_FLAGS}")
 add_compile_options(-fexceptions -std=c++11 -Wall -Wconversion -Werror)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
@@ -53,10 +21,14 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   # discourages statically linked binaries. Instead add -L/usr/lib before the
   # LLVM LDFLAGS to link against the dynamic system libc++ instead of the one
   # from LLVM.
-  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -L/usr/lib ${LLVM_LINKER_FLAGS}")
+  set(BINDGEN_LINK_FLAG "-L/usr/lib")
 else()
-  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${LLVM_LINKER_FLAGS} -static")
+  set(BINDGEN_LINK_FLAG "-static")
 endif()
+message(STATUS "Using link flag: ${BINDGEN_LINK_FLAG}")
+
+message(STATUS "Using LLVM library directories: ${LLVM_LIBRARY_DIRS}")
+link_directories(${LLVM_LIBRARY_DIRS})
 
 add_executable(bindgen
   Main.cpp
@@ -116,27 +88,23 @@ add_executable(bindgen
 set_target_properties(bindgen
   PROPERTIES
   OUTPUT_NAME scala-native-bindgen
+  LINK_FLAGS "${BINDGEN_LINK_FLAG}"
 )
+
+llvm_map_components_to_libnames(LLVM_LIBS support core irreader object option profiledata)
 
 target_link_libraries(bindgen
   PRIVATE
   clangFrontend
   clangTooling
-
-  clangFrontend
   clangSerialization
   clangDriver
-  clangTooling
   clangParse
   clangSema
-
   clangAnalysis
-
   clangEdit
   clangAST
   clangLex
   clangBasic
-
-  "${LLVM_LIBS}"
-  "${LLVM_SYSTEM_LIBS}"
+  ${LLVM_LIBS}
 )
