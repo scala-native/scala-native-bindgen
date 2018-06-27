@@ -85,3 +85,5 @@ lazy val samples = project
       (Test / compile).value
     }
   )
+
+lazy val tools = project in file("tools")
