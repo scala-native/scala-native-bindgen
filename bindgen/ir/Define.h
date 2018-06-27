@@ -7,7 +7,7 @@ class Define {
   public:
     explicit Define(std::string name);
 
-    std::string getName();
+    std::string getName() const;
 
   protected:
     std::string name;

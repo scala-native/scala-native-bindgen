@@ -37,4 +37,5 @@ class TreeVisitor : public clang::RecursiveASTVisitor<TreeVisitor> {
     virtual bool VisitTypedefDecl(clang::TypedefDecl *tpdef);
     virtual bool VisitEnumDecl(clang::EnumDecl *enumdecl);
     virtual bool VisitRecordDecl(clang::RecordDecl *record);
+    virtual bool VisitVarDecl(clang::VarDecl *VD);
 };
