@@ -1,6 +1,12 @@
 cmake_minimum_required(VERSION 3.9)
 project(scala-native-bindgen)
 
+SET(USE_SHARED FALSE)
+SET(SHARED_LIBRARY FALSE)
+SET(LLVM_BUILD_LLVM_DYLIB FALSE)
+SET(LLVM_LINK_LLVM_DYLIB FALSE)
+SET(BUILD_SHARED_LIBS FALSE)
+
 # Locate $LLVM_PATH/lib/cmake/clang/ClangConfig.cmake
 find_package(Clang REQUIRED CONFIG)
 message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
@@ -56,13 +62,15 @@ add_executable(bindgen
   ir/PossibleVarDefine.h
 )
 
+# llvm_config(bindgen)
+
 set_target_properties(bindgen
   PROPERTIES
   OUTPUT_NAME scala-native-bindgen
+  LINK_FLAGS "-static"
 )
 
 target_link_libraries(bindgen
   PRIVATE
-  clangFrontend
   clangTooling
 )
