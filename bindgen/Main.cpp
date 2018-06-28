@@ -2,7 +2,7 @@
 #include "visitor/ScalaFrontendActionFactory.h"
 #include <clang/Tooling/CommonOptionsParser.h>
 
-int main(int argc, char *argv[]) {
+int main(int argc, const char *argv[]) {
     llvm::cl::OptionCategory Category("Binding Generator");
     llvm::cl::extrahelp CommonHelp(
         clang::tooling::CommonOptionsParser::HelpMessage);
@@ -37,7 +37,7 @@ int main(int argc, char *argv[]) {
     llvm::cl::opt<std::string> LinkName(
         "link", llvm::cl::cat(Category),
         llvm::cl::desc("Library to link with, e.g. -luv for libuv"));
-    clang::tooling::CommonOptionsParser op(argc, (const char **)argv, Category);
+    clang::tooling::CommonOptionsParser op(argc, argv, Category);
     clang::tooling::ClangTool Tool(op.getCompilations(),
                                    op.getSourcePathList());
 

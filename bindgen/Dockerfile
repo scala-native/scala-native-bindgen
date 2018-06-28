@@ -11,16 +11,8 @@ RUN set -x \
  && cmake .. \
  && make
 
-ARG UBUNTU_VERSION=18.04
-FROM ubuntu:$UBUNTU_VERSION
+FROM scratch
 
-ARG LLVM_VERSION=6.0
-ENV LLVM_VERSION=$LLVM_VERSION
-RUN set -x \
- && apt update \
- && apt install -y --no-install-recommends libclang1-$LLVM_VERSION \
- && rm -rf /var/lib/apt/lists/*
-
-COPY --from=builder /src/target/scala-native-bindgen /usr/bin/scala-native-bindgen
+COPY --from=builder /src/target/scala-native-bindgen /scala-native-bindgen
 WORKDIR /src
-ENTRYPOINT ["scala-native-bindgen"]
+ENTRYPOINT ["/scala-native-bindgen"]

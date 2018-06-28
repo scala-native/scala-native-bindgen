@@ -10,20 +10,6 @@ services:
         - LLVM_VERSION=6.0
     entrypoint: [scala-native-bindgen]
 
-  ubuntu-18.04-llvm-dev:
-    image: scalabindgen/scala-native-bindgen-builder:ubuntu-18.04-llvm-dev
-    build:
-      context: .
-      args:
-        - UBUNTU_VERSION=18.04
-        - LLVM_VERSION=7
-        - LLVM_DEB_COMPONENT=
-    command: scripts/test.sh
-    volumes:
-      - .:/src
-      - ${HOME}/.ivy2:/root/.ivy2
-      - ${HOME}/.sbt:/root/.sbt
-
   ubuntu-18.04-llvm-6.0:
     image: scalabindgen/scala-native-bindgen-builder:ubuntu-18.04-llvm-6.0
     build:

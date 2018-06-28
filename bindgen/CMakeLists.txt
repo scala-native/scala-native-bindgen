@@ -1,15 +1,34 @@
 cmake_minimum_required(VERSION 3.9)
 project(scala-native-bindgen)
 
-# Locate $LLVM_PATH/lib/cmake/clang/ClangConfig.cmake
-find_package(Clang REQUIRED CONFIG)
+set(USE_SHARED OFF)
+
+# Locate LLVMConfig.cmake
+find_package(LLVM REQUIRED CONFIG)
 message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
 message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
 
+message(STATUS "Using LLVM include dirs: ${LLVM_INCLUDE_DIRS}")
 include_directories(SYSTEM ${LLVM_INCLUDE_DIRS})
+
+message(STATUS "Using LLVM defs: ${LLVM_DEFINITIONS}")
 add_definitions(${LLVM_DEFINITIONS})
 
 add_compile_options(-fexceptions -std=c++11 -Wall -Wconversion -Werror)
+
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  # macOS does not guarantee backwards compatible system calls and therefore
+  # discourages statically linked binaries. Instead add -L/usr/lib before the
+  # LLVM LDFLAGS to link against the dynamic system libc++ instead of the one
+  # from LLVM.
+  set(BINDGEN_LINK_FLAG "-L/usr/lib")
+else()
+  set(BINDGEN_LINK_FLAG "-static")
+endif()
+message(STATUS "Using link flag: ${BINDGEN_LINK_FLAG}")
+
+message(STATUS "Using LLVM library directories: ${LLVM_LIBRARY_DIRS}")
+link_directories(${LLVM_LIBRARY_DIRS})
 
 add_executable(bindgen
   Main.cpp
@@ -69,10 +88,23 @@ add_executable(bindgen
 set_target_properties(bindgen
   PROPERTIES
   OUTPUT_NAME scala-native-bindgen
+  LINK_FLAGS "${BINDGEN_LINK_FLAG}"
 )
+
+llvm_map_components_to_libnames(LLVM_LIBS support core irreader object option profiledata)
 
 target_link_libraries(bindgen
   PRIVATE
   clangFrontend
   clangTooling
+  clangSerialization
+  clangDriver
+  clangParse
+  clangSema
+  clangAnalysis
+  clangEdit
+  clangAST
+  clangLex
+  clangBasic
+  ${LLVM_LIBS}
 )
