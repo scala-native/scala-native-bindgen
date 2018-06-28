@@ -1,4 +1,5 @@
 #include "DefineFinder.h"
+#include "../ir/types/PrimitiveType.h"
 
 #include <llvm/ADT/APInt.h>
 #include <sstream>
@@ -41,14 +42,15 @@ void DefineFinder::MacroDefined(const clang::Token &macroNameTok,
             clang::Token stringToken = (*tokens)[0];
             std::string literal(stringToken.getLiteralData(),
                                 stringToken.getLength());
-            ir.addLiteralDefine(macroName, "c" + literal, "native.CString");
+            ir.addLiteralDefine(macroName, "c" + literal,
+                                new PrimitiveType("native.CString"));
         } else if (tokens->size() == 1 &&
                    (*tokens)[0].getKind() == clang::tok::identifier) {
             // token might be a variable
             std::string varName = (*tokens)[0].getIdentifierInfo()->getName();
             ir.addPossibleVarDefine(macroName, varName);
         }
-        std::free(tokens);
+        delete tokens;
     }
 }
 
@@ -68,13 +70,13 @@ DefineFinder::expandDefine(const clang::MacroDirective &md) {
             std::vector<clang::Token> *newTokens = expandDefine(
                 *pp.getLocalMacroDirective(token.getIdentifierInfo()));
             if (!newTokens) {
-                std::free(expandedTokens);
+                delete expandedTokens;
                 return nullptr;
             }
             for (const auto &newToken : *newTokens) {
                 (*expandedTokens).push_back(newToken);
             }
-            std::free(newTokens);
+            delete newTokens;
         } else {
             (*expandedTokens).push_back(token);
         }
@@ -118,16 +120,16 @@ void DefineFinder::addNumericConstantDefine(const std::string &macroName,
             type = "native.CLongLong";
 
             /* must fit into Scala integer type */
-            if (getTypeOfIntegerLiteral(parser, literal, positive).empty()) {
-                type = "";
+            if (!integerFitsIntoType<long, unsigned long>(parser, positive)) {
+                type.clear();
             }
         } else if (parser.isLong) {
             /* literal has `L` ending */
             type = "native.CLong";
 
             /* must fit into Scala integer type */
-            if (getTypeOfIntegerLiteral(parser, literal, positive).empty()) {
-                type = "";
+            if (!integerFitsIntoType<long, unsigned long>(parser, positive)) {
+                type.clear();
             }
         } else {
             type = getTypeOfIntegerLiteral(parser, literal, positive);
@@ -150,7 +152,7 @@ void DefineFinder::addNumericConstantDefine(const std::string &macroName,
         if (!positive) {
             scalaLiteral = "-" + scalaLiteral;
         }
-        ir.addLiteralDefine(macroName, scalaLiteral, type);
+        ir.addLiteralDefine(macroName, scalaLiteral, new PrimitiveType(type));
     }
 }
 

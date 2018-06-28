@@ -1,10 +1,16 @@
 #include "TypeAndName.h"
 
-TypeAndName::TypeAndName(std::string name, std::string type)
-    : name(std::move(name)), type(std::move(type)) {}
+TypeAndName::TypeAndName(std::string name, Type *type)
+    : name(std::move(name)), type(type) {}
 
-std::string TypeAndName::getType() const { return type; }
+Type *TypeAndName::getType() const { return type; }
 
 std::string TypeAndName::getName() const { return name; }
 
-void TypeAndName::setType(std::string type) { this->type = std::move(type); }
+void TypeAndName::setType(Type *type) { this->type = type; }
+
+void TypeAndName::deallocateTypesThatAreNotInIR() {
+    if (type->canBeDeallocated()) {
+        delete type;
+    }
+}

@@ -1,13 +1,13 @@
 #include "Function.h"
 #include "../Utils.h"
 
-Parameter::Parameter(std::string name, std::string type)
-    : TypeAndName(std::move(name), std::move(type)) {}
+Parameter::Parameter(std::string name, Type *type)
+    : TypeAndName(std::move(name), type) {}
 
-Function::Function(std::string name, std::vector<Parameter> parameters,
-                   std::string retType, bool isVariadic)
+Function::Function(const std::string &name, std::vector<Parameter *> parameters,
+                   Type *retType, bool isVariadic)
     : name(name), scalaName(name), parameters(std::move(parameters)),
-      retType(std::move(retType)), isVariadic(isVariadic) {}
+      retType(retType), isVariadic(isVariadic) {}
 
 llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const Function &func) {
     if (func.scalaName != func.name) {
@@ -16,8 +16,8 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const Function &func) {
     s << "  def " << handleReservedWords(func.scalaName) << "(";
     std::string sep = "";
     for (const auto &param : func.parameters) {
-        s << sep << handleReservedWords(param.getName()) << ": "
-          << param.getType();
+        s << sep << handleReservedWords(param->getName()) << ": "
+          << param->getType()->str();
         sep = ", ";
     }
     if (func.isVariadic) {
@@ -25,16 +25,16 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const Function &func) {
          * the comma is fine */
         s << ", " << func.getVarargsParameterName() << ": native.CVararg*";
     }
-    s << "): " << func.retType << " = native.extern\n";
+    s << "): " << func.retType->str() << " = native.extern\n";
     return s;
 }
 
-bool Function::usesType(const std::string &type) const {
-    if (typeUsesOtherType(retType, type)) {
+bool Function::usesType(Type *type) const {
+    if (retType == type) {
         return true;
     }
     for (const auto &parameter : parameters) {
-        if (typeUsesOtherType(parameter.getType(), type)) {
+        if (parameter->getType() == type) {
             return true;
         }
     }
@@ -54,7 +54,7 @@ std::string Function::getVarargsParameterName() const {
 
 bool Function::existsParameterWithName(const std::string &parameterName) const {
     for (const auto &parameter : parameters) {
-        if (parameter.getName() == parameterName) {
+        if (parameter->getName() == parameterName) {
             return true;
         }
     }
@@ -63,4 +63,20 @@ bool Function::existsParameterWithName(const std::string &parameterName) const {
 
 void Function::setScalaName(std::string scalaName) {
     this->scalaName = std::move(scalaName);
+}
+
+void Function::deallocateTypesThatAreNotInIR() {
+    if (retType->canBeDeallocated()) {
+        delete retType;
+    }
+
+    for (const auto &parameter : parameters) {
+        parameter->deallocateTypesThatAreNotInIR();
+    }
+}
+
+Function::~Function() {
+    for (const auto &parameter : parameters) {
+        delete parameter;
+    }
 }

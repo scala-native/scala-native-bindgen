@@ -4,13 +4,7 @@
 #include "../HeaderManager.h"
 #include "../TypeTranslator.h"
 #include "../ir/IR.h"
-#include <clang/AST/AST.h>
-#include <clang/AST/ASTConsumer.h>
-#include <clang/AST/ASTContext.h>
 #include <clang/AST/RecursiveASTVisitor.h>
-#include <clang/Basic/LangOptions.h>
-#include <clang/Driver/Options.h>
-#include <clang/Frontend/ASTConsumers.h>
 #include <clang/Frontend/CompilerInstance.h>
 
 extern HeaderManager headerMan;
@@ -30,7 +24,7 @@ class TreeVisitor : public clang::RecursiveASTVisitor<TreeVisitor> {
 
   public:
     TreeVisitor(clang::CompilerInstance *CI, IR &ir)
-        : astContext(&(CI->getASTContext())), typeTranslator(astContext),
+        : astContext(&(CI->getASTContext())), typeTranslator(astContext, ir),
           cycleDetection(typeTranslator), ir(ir) {}
 
     virtual bool VisitFunctionDecl(clang::FunctionDecl *func);

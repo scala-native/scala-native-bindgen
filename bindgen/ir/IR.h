@@ -14,42 +14,48 @@
  */
 class IR {
   public:
-    explicit IR(std::string libName, std::string linkName,
-                std::string objectName, std::string packageName);
+    IR(std::string libName, std::string linkName, std::string objectName,
+       std::string packageName);
 
     ~IR();
 
-    void addFunction(std::string name, std::vector<Parameter> parameters,
-                     std::string, bool isVariadic);
+    void addFunction(std::string name, std::vector<Parameter *> parameters,
+                     Type *retType, bool isVariadic);
 
-    void addTypeDef(std::string name, std::string type);
+    void addTypeDef(std::string name, Type *type);
 
-    void addEnum(std::string name, std::string type,
-                 std::vector<Enumerator> enumerators);
+    /**
+     * @return type alias for the enum
+     */
+    Type *addEnum(std::string name, const std::string &type,
+                  std::vector<Enumerator> enumerators);
 
-    void addStruct(std::string name, std::vector<Field> fields,
-                   uint64_t typeSize);
+    /**
+     * @return type alias for the struct
+     */
+    Type *addStruct(std::string name, std::vector<Field *> fields,
+                    uint64_t typeSize);
 
-    void addUnion(std::string name, std::vector<Field> fields,
-                  uint64_t maxSize);
+    /**
+     * @return type alias for the union
+     */
+    Type *addUnion(std::string name, std::vector<Field *> fields,
+                   uint64_t maxSize);
 
-    void addLiteralDefine(std::string name, std::string literal,
-                          std::string type);
+    void addLiteralDefine(std::string name, std::string literal, Type *type);
 
     void addPossibleVarDefine(const std::string &macroName,
                               const std::string &varName);
 
     void addVarDefine(std::string name, Variable *variable);
 
-    Variable *addVariable(const std::string &name, const std::string &type);
+    Variable *addVariable(const std::string &name, Type *type);
 
     /**
      * @return true if there are no functions, types,
      *         structs and unions
      */
     bool libObjEmpty() const;
-
-    bool hasEnums() const;
 
     friend llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir);
 
@@ -63,12 +69,9 @@ class IR {
      */
     std::string getDefineForVar(const std::string &varName) const;
 
-  private:
-    /**
-     * Generates type defs for enums, structs and unions
-     */
-    void generateTypeDefs();
+    TypeDef *getTypeDefWithName(const std::string &name);
 
+  private:
     /**
      * @return true if helper methods will be generated for this library
      */
@@ -103,20 +106,18 @@ class IR {
     /**
      * Find all typedefs that use oldType and replace it with newType.
      */
-    void replaceTypeInTypeDefs(const std::string &oldType,
-                               const std::string &newType);
+    void replaceTypeInTypeDefs(Type *oldType, Type *newType);
 
     /**
      * @return true if given type is used only in typedefs.
      */
-    bool typeIsUsedOnlyInTypeDefs(std::string type);
+    bool typeIsUsedOnlyInTypeDefs(Type *type);
 
     /**
      * @return true if type is used in one of given declarations.
      */
     template <typename T>
-    bool isTypeUsed(const std::vector<T> &declarations,
-                    const std::string &type);
+    bool isTypeUsed(const std::vector<T> &declarations, Type *type);
 
     void setScalaNames();
 
@@ -129,17 +130,25 @@ class IR {
     template <typename T>
     void filterByName(std::vector<T> &declarations, const std::string &name);
 
+    template <typename T>
+    T getDeclarationWithName(std::vector<T> &declarations,
+                             const std::string &name);
+
+    template <typename T> void clearVector(std::vector<T> v);
+
+    template <typename T> void deallocateTypesThatAreNotInIR(std::vector<T> v);
+
     std::string libName;    // name of the library
     std::string linkName;   // name of the library to link with
     std::string objectName; // name of Scala object
-    std::vector<Function> functions;
-    std::vector<TypeDef> typeDefs;
-    std::vector<Struct> structs;
-    std::vector<Union> unions;
-    std::vector<Enum> enums;
-    std::vector<LiteralDefine> literalDefines;
-    std::vector<PossibleVarDefine> possibleVarDefines;
-    std::vector<VarDefine> varDefines;
+    std::vector<Function *> functions;
+    std::vector<TypeDef *> typeDefs;
+    std::vector<Struct *> structs;
+    std::vector<Union *> unions;
+    std::vector<Enum *> enums;
+    std::vector<LiteralDefine *> literalDefines;
+    std::vector<PossibleVarDefine *> possibleVarDefines;
+    std::vector<VarDefine *> varDefines;
     std::vector<Variable *> variables;
     bool generated = false; // generate type defs only once
     std::string packageName;

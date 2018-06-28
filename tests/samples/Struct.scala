@@ -6,8 +6,8 @@ import scala.scalanative.native._
 @native.link("bindgentests")
 @native.extern
 object Struct {
-  type point_s = native.Ptr[struct_point]
   type struct_point = native.CStruct2[native.CInt, native.CInt]
+  type point_s = native.Ptr[struct_point]
   def getPoint(): native.Ptr[struct_point] = native.extern
 }
 

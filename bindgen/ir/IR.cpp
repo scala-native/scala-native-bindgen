@@ -6,45 +6,55 @@ IR::IR(std::string libName, std::string linkName, std::string objectName,
     : libName(std::move(libName)), linkName(std::move(linkName)),
       objectName(std::move(objectName)), packageName(std::move(packageName)) {}
 
-void IR::addFunction(std::string name, std::vector<Parameter> parameters,
-                     std::string retType, bool isVariadic) {
-    functions.emplace_back(std::move(name), std::move(parameters),
-                           std::move(retType), isVariadic);
+void IR::addFunction(std::string name, std::vector<Parameter *> parameters,
+                     Type *retType, bool isVariadic) {
+    functions.push_back(
+        new Function(name, std::move(parameters), retType, isVariadic));
 }
 
-void IR::addTypeDef(std::string name, std::string type) {
-    typeDefs.emplace_back(std::move(name), std::move(type));
+void IR::addTypeDef(std::string name, Type *type) {
+    typeDefs.push_back(new TypeDef(std::move(name), type));
 }
 
-void IR::addEnum(std::string name, std::string type,
-                 std::vector<Enumerator> enumerators) {
-    enums.emplace_back(std::move(name), std::move(type),
-                       std::move(enumerators));
+Type *IR::addEnum(std::string name, const std::string &type,
+                  std::vector<Enumerator> enumerators) {
+    Enum *e = new Enum(std::move(name), type, std::move(enumerators));
+    enums.push_back(e);
+    if (!e->isAnonymous()) {
+        typeDefs.push_back(e->generateTypeDef());
+        return typeDefs.back();
+    }
+    return nullptr;
 }
 
-void IR::addStruct(std::string name, std::vector<Field> fields,
-                   uint64_t typeSize) {
-    structs.emplace_back(std::move(name), std::move(fields), typeSize);
+Type *IR::addStruct(std::string name, std::vector<Field *> fields,
+                    uint64_t typeSize) {
+    Struct *s = new Struct(std::move(name), std::move(fields), typeSize);
+    structs.push_back(s);
+    typeDefs.push_back(s->generateTypeDef());
+    return typeDefs.back();
 }
 
-void IR::addUnion(std::string name, std::vector<Field> fields,
-                  uint64_t maxSize) {
-    unions.emplace_back(std::move(name), std::move(fields), maxSize);
+Type *IR::addUnion(std::string name, std::vector<Field *> fields,
+                   uint64_t maxSize) {
+    Union *u = new Union(std::move(name), std::move(fields), maxSize);
+    unions.push_back(u);
+    typeDefs.push_back(u->generateTypeDef());
+    return typeDefs.back();
 }
 
-void IR::addLiteralDefine(std::string name, std::string literal,
-                          std::string type) {
-    literalDefines.emplace_back(std::move(name), std::move(literal),
-                                std::move(type));
+void IR::addLiteralDefine(std::string name, std::string literal, Type *type) {
+    literalDefines.push_back(
+        new LiteralDefine(std::move(name), std::move(literal), type));
 }
 
 void IR::addPossibleVarDefine(const std::string &macroName,
                               const std::string &varName) {
-    possibleVarDefines.emplace_back(macroName, varName);
+    possibleVarDefines.push_back(new PossibleVarDefine(macroName, varName));
 }
 
 void IR::addVarDefine(std::string name, Variable *variable) {
-    varDefines.emplace_back(name, variable);
+    varDefines.push_back(new VarDefine(std::move(name), variable));
 }
 
 bool IR::libObjEmpty() const {
@@ -75,15 +85,15 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir) {
           << "object " << objectName << " {\n";
 
         for (const auto &typeDef : ir.typeDefs) {
-            s << typeDef;
+            s << *typeDef;
         }
 
         for (const auto &varDefine : ir.varDefines) {
-            s << varDefine;
+            s << *varDefine;
         }
 
         for (const auto &func : ir.functions) {
-            s << func;
+            s << *func;
         }
 
         s << "}\n\n";
@@ -92,7 +102,7 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir) {
     if (!ir.literalDefines.empty()) {
         s << "object " << ir.libName << "Defines {\n";
         for (const auto &literalDefine : ir.literalDefines) {
-            s << literalDefine;
+            s << *literalDefine;
         }
         s << "}\n\n";
     }
@@ -106,8 +116,8 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir) {
 
         unsigned long enumeratorsCount = ir.enums.size();
         for (unsigned long i = 0; i < enumeratorsCount; i++) {
-            auto &e = ir.enums[i];
-            s << e;
+            auto e = ir.enums[i];
+            s << *e;
             if (i < enumeratorsCount - 1) {
                 s << "\n"; // space between groups of enums
             }
@@ -120,11 +130,11 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir) {
         s << "object " << ir.libName << "Helpers {\n";
 
         for (const auto &st : ir.structs) {
-            s << "\n" << st.generateHelperClass();
+            s << "\n" << st->generateHelperClass();
         }
 
         for (const auto &u : ir.unions) {
-            s << "\n" << u.generateHelperClass();
+            s << "\n" << u->generateHelperClass();
         }
 
         s << "}\n\n";
@@ -133,25 +143,10 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir) {
     return s;
 }
 
-void IR::generateTypeDefs() {
-    for (const auto &e : enums) {
-        if (!e.isAnonymous()) { // enum might be anon
-            typeDefs.push_back(e.generateTypeDef());
-        }
-    }
-    for (const auto &s : structs) {
-        typeDefs.push_back(s.generateTypeDef());
-    }
-    for (const auto &u : unions) {
-        typeDefs.push_back(u.generateTypeDef());
-    }
-}
-
 void IR::generate(const std::string &excludePrefix) {
     if (!generated) {
         setScalaNames();
         filterDeclarations(excludePrefix);
-        generateTypeDefs();
         generated = true;
     }
 }
@@ -163,14 +158,12 @@ bool IR::hasHelperMethods() const {
     }
 
     for (const auto &s : structs) {
-        if (s.hasHelperMethods()) {
+        if (s->hasHelperMethods()) {
             return true;
         }
     }
     return false;
 }
-
-bool IR::hasEnums() const { return !enums.empty(); }
 
 void IR::filterDeclarations(const std::string &excludePrefix) {
     if (excludePrefix.empty()) {
@@ -188,11 +181,11 @@ void IR::filterDeclarations(const std::string &excludePrefix) {
 
 void IR::filterTypeDefs(const std::string &excludePrefix) {
     for (auto it = typeDefs.begin(); it != typeDefs.end();) {
-        TypeDef &typeDef = *it;
-        if (startsWith(typeDef.getName(), excludePrefix) &&
-            typeIsUsedOnlyInTypeDefs(typeDef.getName())) {
+        TypeDef *typeDef = *it;
+        if (startsWith(typeDef->getName(), excludePrefix) &&
+            typeIsUsedOnlyInTypeDefs(typeDef)) {
             /* remove this typedef and replace aliases with actual type */
-            replaceTypeInTypeDefs(typeDef.getName(), typeDef.getType());
+            replaceTypeInTypeDefs(typeDef, typeDef->getType());
             it = typeDefs.erase(it);
         } else {
             ++it;
@@ -200,27 +193,25 @@ void IR::filterTypeDefs(const std::string &excludePrefix) {
     }
 }
 
-void IR::replaceTypeInTypeDefs(const std::string &oldType,
-                               const std::string &newType) {
+void IR::replaceTypeInTypeDefs(Type *oldType, Type *newType) {
     for (auto &typeDef : typeDefs) {
-        if (typeDef.getType() == oldType) {
-            typeDef.setType(newType);
+        if (typeDef->getType() == oldType) {
+            typeDef->setType(newType);
         }
     }
 }
 
 template <typename T>
-bool IR::isTypeUsed(const std::vector<T> &declarations,
-                    const std::string &type) {
-    for (const auto &decl : declarations) {
-        if (decl.usesType(type)) {
+bool IR::isTypeUsed(const std::vector<T> &declarations, Type *type) {
+    for (const auto decl : declarations) {
+        if (decl->usesType(type)) {
             return true;
         }
     }
     return false;
 }
 
-bool IR::typeIsUsedOnlyInTypeDefs(std::string type) {
+bool IR::typeIsUsedOnlyInTypeDefs(Type *type) {
     return !(isTypeUsed(functions, type) || isTypeUsed(structs, type) ||
              isTypeUsed(unions, type));
 }
@@ -230,20 +221,20 @@ void IR::setScalaNames() {
      * should happen here */
 
     for (auto &function : functions) {
-        if (function.getName() == "native") {
+        if (function->getName() == "native") {
             std::string scalaName = "nativeFunc";
             int i = 0;
             while (existsFunctionWithName(scalaName)) {
                 scalaName = "nativeFunc" + std::to_string(i++);
             }
-            function.setScalaName(scalaName);
+            function->setScalaName(scalaName);
         }
     }
 }
 
 bool IR::existsFunctionWithName(std::string functionName) {
     for (const auto &function : functions) {
-        if (function.getName() == functionName) {
+        if (function->getName() == functionName) {
             return true;
         }
     }
@@ -260,8 +251,8 @@ template <typename T>
 void IR::filterByPrefix(std::vector<T> &declarations,
                         const std::string &excludePrefix) {
     for (auto it = declarations.begin(); it != declarations.end();) {
-        auto &declaration = *it;
-        if (startsWith(declaration.getName(), excludePrefix)) {
+        T declaration = *it;
+        if (startsWith(declaration->getName(), excludePrefix)) {
             it = declarations.erase(it);
         } else {
             it++;
@@ -272,8 +263,8 @@ void IR::filterByPrefix(std::vector<T> &declarations,
 template <typename T>
 void IR::filterByName(std::vector<T> &declarations, const std::string &name) {
     for (auto it = declarations.begin(); it != declarations.end();) {
-        auto &declaration = *it;
-        if (declaration.getName() == name) {
+        T declaration = *it;
+        if (declaration->getName() == name) {
             it = declarations.erase(it);
         } else {
             it++;
@@ -283,21 +274,62 @@ void IR::filterByName(std::vector<T> &declarations, const std::string &name) {
 
 std::string IR::getDefineForVar(const std::string &varName) const {
     for (const auto &varDefine : possibleVarDefines) {
-        if (varDefine.getVariableName() == varName) {
-            return varDefine.getName();
+        if (varDefine->getVariableName() == varName) {
+            return varDefine->getName();
         }
     }
     return "";
 }
 
-Variable *IR::addVariable(const std::string &name, const std::string &type) {
+Variable *IR::addVariable(const std::string &name, Type *type) {
     Variable *variable = new Variable(name, type);
     variables.push_back(variable);
     return variable;
 }
 
+TypeDef *IR::getTypeDefWithName(const std::string &name) {
+    return getDeclarationWithName(typeDefs, name);
+}
+
+template <typename T>
+T IR::getDeclarationWithName(std::vector<T> &declarations,
+                             const std::string &name) {
+    for (auto it = declarations.begin(), end = declarations.end(); it != end;
+         ++it) {
+        T declaration = (*it);
+        if (declaration->getName() == name) {
+            return declaration;
+        }
+    }
+    return nullptr;
+}
+
 IR::~IR() {
-    for (auto variable : variables) {
-        std::free(variable);
+    deallocateTypesThatAreNotInIR(functions);
+    deallocateTypesThatAreNotInIR(typeDefs);
+    deallocateTypesThatAreNotInIR(structs);
+    deallocateTypesThatAreNotInIR(unions);
+    deallocateTypesThatAreNotInIR(variables);
+
+    clearVector(functions);
+    clearVector(typeDefs);
+    clearVector(structs);
+    clearVector(unions);
+    clearVector(enums);
+    clearVector(literalDefines);
+    clearVector(possibleVarDefines);
+    clearVector(variables);
+    clearVector(varDefines);
+}
+
+template <typename T> void IR::clearVector(std::vector<T> v) {
+    for (const auto &e : v) {
+        delete e;
+    }
+}
+
+template <typename T> void IR::deallocateTypesThatAreNotInIR(std::vector<T> v) {
+    for (const auto &e : v) {
+        e->deallocateTypesThatAreNotInIR();
     }
 }

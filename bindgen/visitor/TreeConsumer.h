@@ -1,15 +1,8 @@
 #pragma once
 
 #include "../Utils.h"
-#include "TreeVisitor.h"
-
 #include "../ir/IR.h"
-#include <clang/AST/AST.h>
-#include <clang/AST/ASTConsumer.h>
-#include <clang/AST/ASTContext.h>
-#include <clang/AST/RecursiveASTVisitor.h>
-#include <clang/Frontend/ASTConsumers.h>
-#include <clang/Frontend/CompilerInstance.h>
+#include "TreeVisitor.h"
 
 class TreeConsumer : public clang::ASTConsumer {
   private:

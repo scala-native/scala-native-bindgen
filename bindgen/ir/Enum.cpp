@@ -1,5 +1,4 @@
 #include "Enum.h"
-#include <sstream>
 
 Enumerator::Enumerator(std::string name, int64_t value)
     : name(std::move(name)), value(value) {}
@@ -10,38 +9,38 @@ int64_t Enumerator::getValue() { return value; }
 
 Enum::Enum(std::string name, std::string type,
            std::vector<Enumerator> enumerators)
-    : name(std::move(name)), type(std::move(type)),
+    : PrimitiveType(std::move(type)), name(std::move(name)),
       enumerators(std::move(enumerators)) {}
 
 bool Enum::isAnonymous() const { return name.empty(); }
 
-TypeDef Enum::generateTypeDef() const {
+TypeDef *Enum::generateTypeDef() {
     assert(!isAnonymous());
-    return TypeDef(getTypeName(), type);
+    return new TypeDef("enum_" + name, this);
 }
 
 llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const Enum &e) {
     for (auto enumerator : e.enumerators) {
         std::string enumeratorName;
         if (!e.name.empty()) {
-            enumeratorName = e.getTypeName() + "_" + enumerator.getName();
+            enumeratorName = "enum_" + e.name + "_" + enumerator.getName();
         } else {
             enumeratorName = "enum_" + enumerator.getName();
         }
         s << "  final val " << enumeratorName;
         std::string type;
         if (e.isAnonymous()) {
-            type = e.type;
+            type = e.getType();
         } else {
-            type = e.getTypeName();
+            type = "enum_" + e.name;
         }
         s << ": " << type << " = " << std::to_string(enumerator.getValue());
 
-        if (e.type == "native.CLong") {
+        if (e.getType() == "native.CLong") {
             s << "L";
-        } else if (e.type == "native.CUnsignedInt") {
+        } else if (e.getType() == "native.CUnsignedInt") {
             s << ".toUInt";
-        } else if (e.type == "native.CUnsignedLong") {
+        } else if (e.getType() == "native.CUnsignedLong") {
             s << "L.toULong";
         }
         s << "\n";
@@ -49,7 +48,6 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const Enum &e) {
     return s;
 }
 
-std::string Enum::getTypeName() const {
-    assert(!isAnonymous());
-    return "enum_" + name;
-}
+std::string Enum::getName() const { return name; }
+
+bool Enum::canBeDeallocated() const { return false; }
