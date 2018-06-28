@@ -34,16 +34,14 @@ class TypeTranslator {
      */
     std::map<std::string, Type *> aliasesMap;
 
-    Type *translateEnum(const clang::QualType &qtpe);
+    Type *translateStructOrUnionOrEnum(const clang::QualType &qtpe);
 
-    Type *translateStruct(const clang::QualType &qtpe);
-
-    Type *translateUnion(const clang::QualType &qtpe);
+    Type *translateStructOrUnion(const clang::QualType &qtpe);
 
     Type *translateFunctionPointer(const clang::QualType &qtpe,
                                    const std::string *avoid);
 
-    Type *TranslatePointer(const clang::QualType &pointee,
+    Type *translatePointer(const clang::QualType &pointee,
                            const std::string *avoid);
 
     Type *translateConstantArray(const clang::ConstantArrayType *ar,

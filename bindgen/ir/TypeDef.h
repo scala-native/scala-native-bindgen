@@ -14,8 +14,7 @@ class TypeDef : public TypeAndName, public Type {
 
     bool usesType(Type *type) const override;
 
-  protected:
-    std::string _str() const override;
+    std::string str() const override;
 };
 
 #endif // SCALA_NATIVE_BINDGEN_TYPEDEF_H

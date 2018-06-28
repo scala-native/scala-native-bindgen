@@ -57,7 +57,7 @@ Type *TypeTranslator::translateFunctionPointer(const clang::QualType &qtpe,
     }
 }
 
-Type *TypeTranslator::TranslatePointer(const clang::QualType &pte,
+Type *TypeTranslator::translatePointer(const clang::QualType &pte,
                                        const std::string *avoid) {
 
     if (pte->isBuiltinType()) {
@@ -71,6 +71,7 @@ Type *TypeTranslator::TranslatePointer(const clang::QualType &pte,
         // Take care of char*
         if (as->getKind() == clang::BuiltinType::Char_S ||
             as->getKind() == clang::BuiltinType::SChar) {
+            // TODO: new PointerType(new PrimitiveType("native.CChar"))
             return new PrimitiveType("native.CString");
         }
     }
@@ -78,20 +79,9 @@ Type *TypeTranslator::TranslatePointer(const clang::QualType &pte,
     return new PointerType(translate(pte, avoid));
 }
 
-Type *TypeTranslator::translateStruct(const clang::QualType &qtpe) {
-    if (qtpe->hasUnnamedOrLocalType()) {
-        // TODO: Verify that the local part is not a problem
-        uint64_t size = ctx->getTypeSize(qtpe);
-        return new ArrayType(new PrimitiveType("Byte"), size);
-    }
-
+Type *
+TypeTranslator::translateStructOrUnionOrEnum(const clang::QualType &qtpe) {
     std::string name = qtpe.getUnqualifiedType().getAsString();
-
-    // TODO: do it properly
-    size_t f = name.find(std::string("struct __dirstream"));
-    if (f != std::string::npos) {
-        return new ArrayType(new PrimitiveType("Byte"), 320);
-    }
 
     auto it = aliasesMap.find(name);
     if (it != aliasesMap.end()) {
@@ -103,36 +93,14 @@ Type *TypeTranslator::translateStruct(const clang::QualType &qtpe) {
     return ir.getTypeDefWithName(name);
 }
 
-Type *TypeTranslator::translateUnion(const clang::QualType &qtpe) {
+Type *TypeTranslator::translateStructOrUnion(const clang::QualType &qtpe) {
     if (qtpe->hasUnnamedOrLocalType()) {
         // TODO: Verify that the local part is not a problem
         uint64_t size = ctx->getTypeSize(qtpe);
         return new ArrayType(new PrimitiveType("Byte"), size);
     }
 
-    std::string name = qtpe.getUnqualifiedType().getAsString();
-
-    auto it = aliasesMap.find(name);
-    if (it != aliasesMap.end()) {
-        /* name contains space: union <name>.
-         * Use type alias instead union type */
-        return (*it).second;
-    }
-    /* type has typedef alias */
-    return ir.getTypeDefWithName(name);
-}
-
-Type *TypeTranslator::translateEnum(const clang::QualType &qtpe) {
-    std::string name = qtpe.getUnqualifiedType().getAsString();
-
-    auto it = aliasesMap.find(name);
-    if (it != aliasesMap.end()) {
-        /* name contains space: enum <name>.
-         * Use type alias instead enum type */
-        return (*it).second;
-    }
-    /* type has typedef alias */
-    return ir.getTypeDefWithName(name);
+    return translateStructOrUnionOrEnum(qtpe);
 }
 
 Type *TypeTranslator::translateConstantArray(const clang::ConstantArrayType *ar,
@@ -157,22 +125,22 @@ Type *TypeTranslator::translate(const clang::QualType &qtpe,
         return translateFunctionPointer(qtpe, avoid);
 
     } else if (tpe->isPointerType()) {
-        return TranslatePointer(
+        return translatePointer(
             tpe->getAs<clang::PointerType>()->getPointeeType(), avoid);
 
     } else if (qtpe->isStructureType()) {
-        return translateStruct(qtpe);
+        return translateStructOrUnion(qtpe);
 
     } else if (qtpe->isUnionType()) {
-        return translateUnion(qtpe);
+        return translateStructOrUnion(qtpe);
 
     } else if (qtpe->isEnumeralType()) {
-        return translateEnum(qtpe);
+        return translateStructOrUnionOrEnum(qtpe);
 
     } else if (qtpe->isConstantArrayType()) {
         return translateConstantArray(ctx->getAsConstantArrayType(qtpe), avoid);
     } else if (qtpe->isArrayType()) {
-        return TranslatePointer(ctx->getAsArrayType(qtpe)->getElementType(),
+        return translatePointer(ctx->getAsArrayType(qtpe)->getElementType(),
                                 avoid);
     } else {
 

@@ -111,63 +111,60 @@ void DefineFinder::addNumericConstantDefine(const std::string &macroName,
                                             const clang::Token &token,
                                             bool positive) {
     clang::NumericLiteralParser parser(literal, token.getLocation(), pp);
-    Type *type = nullptr;
+    std::string type;
     std::string scalaLiteral;
     if (parser.isIntegerLiteral()) {
         if (parser.isLongLong) {
             /* literal has `LL` ending. `long long` is represented as `Long`
              * in Scala Native */
-            type = new PrimitiveType("native.CLongLong");
+            type = "native.CLongLong";
 
             /* must fit into Scala integer type */
             if (!integerFitsIntoType<long, unsigned long>(parser, positive)) {
-                std::free(type);
-                type = nullptr;
+                type.clear();
             }
         } else if (parser.isLong) {
             /* literal has `L` ending */
-            type = new PrimitiveType("native.CLong");
+            type = "native.CLong";
 
             /* must fit into Scala integer type */
             if (!integerFitsIntoType<long, unsigned long>(parser, positive)) {
-                std::free(type);
-                type = nullptr;
+                type.clear();
             }
         } else {
             type = getTypeOfIntegerLiteral(parser, literal, positive);
         }
 
-        if (type != nullptr) {
+        if (!type.empty()) {
             scalaLiteral = getDecimalLiteral(parser);
-            if (type->str() == "native.CLong" ||
-                type->str() == "native.CLongLong") {
+            if (type == "native.CLong" || type == "native.CLongLong") {
                 scalaLiteral = scalaLiteral + "L";
             }
         }
     } else if (parser.isFloatingLiteral()) {
         if (fitsIntoDouble(parser)) {
-            type = new PrimitiveType("native.CDouble");
+            type = "native.CDouble";
             scalaLiteral = getDoubleLiteral(parser);
         }
     }
 
-    if (type != nullptr) {
+    if (!type.empty()) {
         if (!positive) {
             scalaLiteral = "-" + scalaLiteral;
         }
-        ir.addLiteralDefine(macroName, scalaLiteral, type);
+        ir.addLiteralDefine(macroName, scalaLiteral, new PrimitiveType(type));
     }
 }
 
-Type *
+std::string
 DefineFinder::getTypeOfIntegerLiteral(const clang::NumericLiteralParser &parser,
                                       const std::string &literal,
                                       bool positive) {
 
     if (integerFitsIntoType<int, uint>(parser, positive)) {
-        return new PrimitiveType("native.CInt");
+        return "native.CInt";
     } else if (integerFitsIntoType<long, unsigned long>(parser, positive)) {
-        return new PrimitiveType("native.CLong");
+        return "native.CLong";
     } else {
         llvm::errs() << "Warning: integer value does not fit into 8 bytes: "
                      << literal << "\n";
@@ -180,7 +177,7 @@ DefineFinder::getTypeOfIntegerLiteral(const clang::NumericLiteralParser &parser,
          * @endcode
          * Therefore the case of `long long` is not considered here.
          */
-        return nullptr;
+        return "";
     }
 }
 

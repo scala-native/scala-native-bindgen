@@ -68,7 +68,7 @@ bool Struct::hasHelperMethods() const {
 
 std::string Struct::getAliasType() const { return "struct_" + name; }
 
-std::string Struct::_str() const {
+std::string Struct::str() const {
     std::stringstream ss;
     ss << "native.CStruct" << std::to_string(fields.size()) << "[";
 

@@ -7,7 +7,7 @@ FunctionPointerType::FunctionPointerType(
     : returnType(returnType), parametersTypes(parametersTypes),
       isVariadic(isVariadic) {}
 
-std::string FunctionPointerType::_str() const {
+std::string FunctionPointerType::str() const {
     std::stringstream ss;
     ss << "native.CFunctionPtr" << parametersTypes.size() << "[";
 

@@ -46,8 +46,7 @@ class Struct : public StructOrUnion, public Type {
 
     bool usesType(Type *type) const override;
 
-  protected:
-    std::string _str() const override;
+    std::string str() const override;
 
   private:
     /* type size is needed if number of fields is bigger than 22 */

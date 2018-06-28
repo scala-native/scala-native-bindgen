@@ -9,8 +9,7 @@ class PointerType : public Type {
 
     bool usesType(Type *type) const override;
 
-  protected:
-    std::string _str() const override;
+    std::string str() const override;
 
   private:
     Type *type;

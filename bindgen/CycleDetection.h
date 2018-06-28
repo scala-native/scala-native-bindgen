@@ -10,29 +10,31 @@ class CycleDetection {
   private:
     TypeTranslator &tpeTransl;
 
-    bool contains(std::string &k) { return !!dependencies.count(k); }
+    bool contains(const std::string &k) const {
+        return dependencies.count(k) != 0;
+    }
 
   public:
     std::map<std::string, std::set<std::string>> dependencies;
-    CycleDetection(TypeTranslator &tpeTransl_)
+
+    explicit CycleDetection(TypeTranslator &tpeTransl_)
         : tpeTransl(tpeTransl_), dependencies{} {}
 
-    void AddDependcy(std::string name, const clang::QualType &qtpe) {
+    void AddDependency(const std::string &name, const clang::QualType &qtpe) {
 
-        // TODO: function pointer
+        if (qtpe->isFunctionPointerType()) {
+            // TODO: function pointer
+            /* type translator cannot translate function type */
+            return;
+        }
 
         if (qtpe->isPointerType()) {
-            const clang::PointerType *ptr =
-                qtpe.getTypePtr()->getAs<clang::PointerType>();
-            AddDependcy(name, ptr->getPointeeType());
+            const auto *ptr = qtpe.getTypePtr()->getAs<clang::PointerType>();
+            AddDependency(name, ptr->getPointeeType());
             return;
         }
 
         Type *type = tpeTransl.translate(qtpe);
-        if (type == nullptr) {
-            /* temp fix for function pointer */
-            return;
-        }
         std::string qtpeString = type->str();
 
         // Add the dependence of qtpe
@@ -44,7 +46,7 @@ class CycleDetection {
         dependencies[name].insert(qtpeString);
     }
 
-    bool isCyclic(std::string &name) {
+    bool isCyclic(const std::string &name) {
         if (contains(name)) {
             if (dependencies[name].count(name) != 0) {
                 return true;

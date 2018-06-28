@@ -32,7 +32,7 @@ bool TreeVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
 bool TreeVisitor::VisitTypedefDecl(clang::TypedefDecl *tpdef) {
     std::string name = tpdef->getName();
 
-    cycleDetection.AddDependcy(name, tpdef->getUnderlyingType());
+    cycleDetection.AddDependency(name, tpdef->getUnderlyingType());
     if (cycleDetection.isCyclic(name)) {
         llvm::errs() << "Error: " << name << " is cyclic\n";
         llvm::errs() << name << "\n";
@@ -132,7 +132,7 @@ void TreeVisitor::handleStruct(clang::RecordDecl *record, std::string name) {
         Type *ftype = typeTranslator.translate(field->getType(), &name);
         fields.emplace_back(field->getNameAsString(), ftype);
 
-        cycleDetection.AddDependcy(newName, field->getType());
+        cycleDetection.AddDependency(newName, field->getType());
 
         fieldCnt++;
     }

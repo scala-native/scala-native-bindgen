@@ -15,10 +15,10 @@ class PrimitiveType : public Type {
 
     bool usesType(Type *type) const override;
 
+    std::string str() const override;
+
   private:
     std::string type;
-
-    std::string _str() const override;
 };
 
 #endif // SCALA_NATIVE_BINDGEN_SIMPLETYPE_H

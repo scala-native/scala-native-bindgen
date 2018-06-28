@@ -1,8 +1,9 @@
 #include "PrimitiveType.h"
+#include "../../Utils.h"
 
 PrimitiveType::PrimitiveType(std::string type) : type(std::move(type)) {}
 
-std::string PrimitiveType::_str() const { return type; }
+std::string PrimitiveType::str() const { return handleReservedWords(type); }
 
 std::string PrimitiveType::getType() const { return type; }
 

@@ -4,7 +4,7 @@
 ArrayType::ArrayType(Type *elementsType, uint64_t size)
     : size(size), elementsType(elementsType) {}
 
-std::string ArrayType::_str() const {
+std::string ArrayType::str() const {
     return "native.CArray[" + elementsType->str() + ", " +
            uint64ToScalaNat(size) + "]";
 }

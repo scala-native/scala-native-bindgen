@@ -14,4 +14,4 @@ bool TypeDef::usesType(Type *type) const {
     return this == type || this->type == type;
 }
 
-std::string TypeDef::_str() const { return name; }
+std::string TypeDef::str() const { return handleReservedWords(name); }

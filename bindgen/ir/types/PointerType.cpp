@@ -2,7 +2,7 @@
 
 PointerType::PointerType(Type *type) : type(type) {}
 
-std::string PointerType::_str() const {
+std::string PointerType::str() const {
     return "native.Ptr[" + type->str() + "]";
 }
 

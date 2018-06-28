@@ -9,8 +9,7 @@ class ArrayType : public Type {
 
     bool usesType(Type *type) const override;
 
-  protected:
-    std::string _str() const override;
+    std::string str() const override;
 
   private:
     const uint64_t size;
