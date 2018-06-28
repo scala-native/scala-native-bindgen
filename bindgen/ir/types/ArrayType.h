@@ -7,6 +7,8 @@ class ArrayType : public Type {
   public:
     ArrayType(Type *elementsType, uint64_t size);
 
+    ~ArrayType() override;
+
     bool usesType(Type *type) const override;
 
     std::string str() const override;

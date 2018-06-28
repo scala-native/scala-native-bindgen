@@ -15,3 +15,5 @@ bool TypeDef::usesType(Type *type) const {
 }
 
 std::string TypeDef::str() const { return handleReservedWords(name); }
+
+bool TypeDef::canBeDeallocated() const { return false; }

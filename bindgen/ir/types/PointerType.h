@@ -7,6 +7,8 @@ class PointerType : public Type {
   public:
     explicit PointerType(Type *type);
 
+    ~PointerType() override;
+
     bool usesType(Type *type) const override;
 
     std::string str() const override;

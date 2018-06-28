@@ -10,6 +10,8 @@ class FunctionPointerType : public Type {
                         const std::vector<Type *> &parametersTypes,
                         bool isVariadic);
 
+    ~FunctionPointerType() override;
+
     bool usesType(Type *type) const override;
 
     std::string str() const override;

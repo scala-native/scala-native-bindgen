@@ -16,7 +16,9 @@ class Field : public TypeAndName {
 
 class StructOrUnion {
   public:
-    StructOrUnion(std::string name, std::vector<Field> fields);
+    StructOrUnion(std::string name, std::vector<Field *> fields);
+
+    ~StructOrUnion();
 
     virtual TypeDef *generateTypeDef() = 0;
 
@@ -24,14 +26,16 @@ class StructOrUnion {
 
     std::string getName() const;
 
+    void deallocateTypesThatAreNotInIR();
+
   protected:
     std::string name;
-    std::vector<Field> fields;
+    std::vector<Field *> fields;
 };
 
 class Struct : public StructOrUnion, public Type {
   public:
-    Struct(std::string name, std::vector<Field> fields, uint64_t typeSize);
+    Struct(std::string name, std::vector<Field *> fields, uint64_t typeSize);
 
     TypeDef *generateTypeDef() override;
 
@@ -48,6 +52,8 @@ class Struct : public StructOrUnion, public Type {
 
     std::string str() const override;
 
+    bool canBeDeallocated() const override;
+
   private:
     /* type size is needed if number of fields is bigger than 22 */
     uint64_t typeSize;
@@ -55,11 +61,13 @@ class Struct : public StructOrUnion, public Type {
 
 class Union : public StructOrUnion, public ArrayType {
   public:
-    Union(std::string name, std::vector<Field> fields, uint64_t maxSize);
+    Union(std::string name, std::vector<Field *> fields, uint64_t maxSize);
 
     TypeDef *generateTypeDef() override;
 
     std::string generateHelperClass() const override;
+
+    bool canBeDeallocated() const override;
 
   private:
     std::string getTypeAlias() const;

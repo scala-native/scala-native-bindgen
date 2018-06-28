@@ -7,7 +7,7 @@ std::set<std::string> locations;
 bool TreeVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
     std::string funcName = func->getNameInfo().getName().getAsString();
     Type *retType = typeTranslator.translate(func->getReturnType());
-    std::vector<Parameter> parameters;
+    std::vector<Parameter *> parameters;
 
     int anonCounter = 0;
 
@@ -20,7 +20,7 @@ bool TreeVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
         }
 
         Type *ptype = typeTranslator.translate(parm->getType());
-        parameters.emplace_back(pname, ptype);
+        parameters.emplace_back(new Parameter(pname, ptype));
     }
 
     ir.addFunction(funcName, std::move(parameters), retType,
@@ -99,7 +99,7 @@ bool TreeVisitor::VisitRecordDecl(clang::RecordDecl *record) {
 void TreeVisitor::handleUnion(clang::RecordDecl *record, std::string name) {
     uint64_t maxSize = 0;
 
-    std::vector<Field> fields;
+    std::vector<Field *> fields;
 
     for (const clang::FieldDecl *field : record->fields()) {
         uint64_t sizeInBytes = astContext->getTypeSize(field->getType()) / 8;
@@ -107,7 +107,7 @@ void TreeVisitor::handleUnion(clang::RecordDecl *record, std::string name) {
         std::string fname = field->getNameAsString();
         Type *ftype = typeTranslator.translate(field->getType(), &name);
 
-        fields.emplace_back(fname, ftype);
+        fields.push_back(new Field(fname, ftype));
     }
 
     Type *alias = ir.addUnion(name, std::move(fields), maxSize);
@@ -126,11 +126,11 @@ void TreeVisitor::handleStruct(clang::RecordDecl *record, std::string name) {
     }
 
     int fieldCnt = 0;
-    std::vector<Field> fields;
+    std::vector<Field *> fields;
 
     for (const clang::FieldDecl *field : record->fields()) {
         Type *ftype = typeTranslator.translate(field->getType(), &name);
-        fields.emplace_back(field->getNameAsString(), ftype);
+        fields.push_back(new Field(field->getNameAsString(), ftype));
 
         cycleDetection.AddDependency(newName, field->getType());
 

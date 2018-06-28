@@ -6,7 +6,7 @@ IR::IR(std::string libName, std::string linkName, std::string objectName,
     : libName(std::move(libName)), linkName(std::move(linkName)),
       objectName(std::move(objectName)), packageName(std::move(packageName)) {}
 
-void IR::addFunction(std::string name, std::vector<Parameter> parameters,
+void IR::addFunction(std::string name, std::vector<Parameter *> parameters,
                      Type *retType, bool isVariadic) {
     functions.push_back(
         new Function(name, std::move(parameters), retType, isVariadic));
@@ -27,7 +27,7 @@ Type *IR::addEnum(std::string name, const std::string &type,
     return nullptr;
 }
 
-Type *IR::addStruct(std::string name, std::vector<Field> fields,
+Type *IR::addStruct(std::string name, std::vector<Field *> fields,
                     uint64_t typeSize) {
     Struct *s = new Struct(std::move(name), std::move(fields), typeSize);
     structs.push_back(s);
@@ -35,7 +35,7 @@ Type *IR::addStruct(std::string name, std::vector<Field> fields,
     return typeDefs.back();
 }
 
-Type *IR::addUnion(std::string name, std::vector<Field> fields,
+Type *IR::addUnion(std::string name, std::vector<Field *> fields,
                    uint64_t maxSize) {
     Union *u = new Union(std::move(name), std::move(fields), maxSize);
     unions.push_back(u);
@@ -305,6 +305,12 @@ T IR::getDeclarationWithName(std::vector<T> &declarations,
 }
 
 IR::~IR() {
+    deallocateTypesThatAreNotInIR(functions);
+    deallocateTypesThatAreNotInIR(typeDefs);
+    deallocateTypesThatAreNotInIR(structs);
+    deallocateTypesThatAreNotInIR(unions);
+    deallocateTypesThatAreNotInIR(variables);
+
     clearVector(functions);
     clearVector(typeDefs);
     clearVector(structs);
@@ -317,7 +323,13 @@ IR::~IR() {
 }
 
 template <typename T> void IR::clearVector(std::vector<T> v) {
-    for (auto e : v) {
-        std::free(e);
+    for (const auto &e : v) {
+        delete e;
+    }
+}
+
+template <typename T> void IR::deallocateTypesThatAreNotInIR(std::vector<T> v) {
+    for (const auto &e : v) {
+        e->deallocateTypesThatAreNotInIR();
     }
 }

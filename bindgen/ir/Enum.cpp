@@ -49,3 +49,5 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const Enum &e) {
 }
 
 std::string Enum::getName() const { return name; }
+
+bool Enum::canBeDeallocated() const { return false; }

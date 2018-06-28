@@ -31,6 +31,8 @@ class Enum : public PrimitiveType {
 
     friend llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const Enum &e);
 
+    bool canBeDeallocated() const override;
+
   private:
     std::string name; // might be empty
     std::vector<Enumerator> enumerators;

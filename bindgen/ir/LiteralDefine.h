@@ -12,6 +12,8 @@ class LiteralDefine : public Define {
     friend llvm::raw_ostream &operator<<(llvm::raw_ostream &s,
                                          const LiteralDefine &literalDefine);
 
+    void deallocateTypesThatAreNotInIR();
+
   private:
     std::string literal;
     Type *type;

@@ -36,6 +36,9 @@ class CycleDetection {
 
         Type *type = tpeTransl.translate(qtpe);
         std::string qtpeString = type->str();
+        if (type->canBeDeallocated()) {
+            delete type;
+        }
 
         // Add the dependence of qtpe
         if (contains(qtpeString)) {

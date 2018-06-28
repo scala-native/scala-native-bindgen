@@ -8,12 +8,24 @@
 Field::Field(std::string name, Type *type)
     : TypeAndName(std::move(name), type) {}
 
-StructOrUnion::StructOrUnion(std::string name, std::vector<Field> fields)
+StructOrUnion::StructOrUnion(std::string name, std::vector<Field *> fields)
     : name(std::move(name)), fields(std::move(fields)) {}
 
 std::string StructOrUnion::getName() const { return name; }
 
-Struct::Struct(std::string name, std::vector<Field> fields, uint64_t typeSize)
+StructOrUnion::~StructOrUnion() {
+    for (const auto &field : fields) {
+        delete field;
+    }
+}
+
+void StructOrUnion::deallocateTypesThatAreNotInIR() {
+    for (const auto &field : fields) {
+        field->deallocateTypesThatAreNotInIR();
+    }
+}
+
+Struct::Struct(std::string name, std::vector<Field *> fields, uint64_t typeSize)
     : StructOrUnion(std::move(name), std::move(fields)), typeSize(typeSize) {}
 
 TypeDef *Struct::generateTypeDef() {
@@ -40,10 +52,10 @@ std::string Struct::generateHelperClass() const {
       << " extends AnyVal {\n";
     int fieldIndex = 0;
     for (const auto &field : fields) {
-        if (!field.getName().empty()) {
-            std::string getter = handleReservedWords(field.getName());
-            std::string setter = handleReservedWords(field.getName(), "_=");
-            Type *ftype = field.getType();
+        if (!field->getName().empty()) {
+            std::string getter = handleReservedWords(field->getName());
+            std::string setter = handleReservedWords(field->getName(), "_=");
+            Type *ftype = field->getType();
             s << "    def " << getter << ": " << ftype->str() << " = !p._"
               << std::to_string(fieldIndex + 1) << "\n"
               << "    def " << setter
@@ -74,7 +86,7 @@ std::string Struct::str() const {
 
     std::string sep = "";
     for (const auto &field : fields) {
-        ss << sep << field.getType()->str();
+        ss << sep << field->getType()->str();
         sep = ", ";
     }
 
@@ -87,14 +99,16 @@ bool Struct::usesType(Type *type) const {
         return true;
     }
     for (const auto &field : fields) {
-        if (field.getType() == type) {
+        if (field->getType() == type) {
             return true;
         }
     }
     return false;
 }
 
-Union::Union(std::string name, std::vector<Field> fields, uint64_t maxSize)
+bool Struct::canBeDeallocated() const { return false; }
+
+Union::Union(std::string name, std::vector<Field *> fields, uint64_t maxSize)
     : StructOrUnion(std::move(name), std::move(fields)),
       ArrayType(new PrimitiveType("Byte"), maxSize) {}
 
@@ -106,10 +120,10 @@ std::string Union::generateHelperClass() const {
     s << "  implicit class " << type << "_pos"
       << "(val p: native.Ptr[" << type << "]) extends AnyVal {\n";
     for (const auto &field : fields) {
-        if (!field.getName().empty()) {
-            std::string getter = handleReservedWords(field.getName());
-            std::string setter = handleReservedWords(field.getName(), "_=");
-            Type *ftype = field.getType();
+        if (!field->getName().empty()) {
+            std::string getter = handleReservedWords(field->getName());
+            std::string setter = handleReservedWords(field->getName(), "_=");
+            Type *ftype = field->getType();
             s << "    def " << getter << ": native.Ptr[" << ftype->str()
               << "] = p.cast[native.Ptr[" << ftype->str() << "]]\n";
 
@@ -123,3 +137,5 @@ std::string Union::generateHelperClass() const {
 }
 
 std::string Union::getTypeAlias() const { return "union_" + name; }
+
+bool Union::canBeDeallocated() const { return false; }

@@ -9,3 +9,9 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s,
       << " = " << literalDefine.literal << "\n";
     return s;
 }
+
+void LiteralDefine::deallocateTypesThatAreNotInIR() {
+    if (type->canBeDeallocated()) {
+        delete type;
+    }
+}

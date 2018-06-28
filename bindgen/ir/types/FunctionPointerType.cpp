@@ -37,3 +37,14 @@ bool FunctionPointerType::usesType(Type *type) const {
     }
     return false;
 }
+
+FunctionPointerType::~FunctionPointerType() {
+    if (returnType->canBeDeallocated()) {
+        delete returnType;
+    }
+    for (const auto &parameterType : parametersTypes) {
+        if (parameterType->canBeDeallocated()) {
+            delete parameterType;
+        }
+    }
+}

@@ -19,7 +19,7 @@ class IR {
 
     ~IR();
 
-    void addFunction(std::string name, std::vector<Parameter> parameters,
+    void addFunction(std::string name, std::vector<Parameter *> parameters,
                      Type *retType, bool isVariadic);
 
     void addTypeDef(std::string name, Type *type);
@@ -33,13 +33,13 @@ class IR {
     /**
      * @return type alias for the struct
      */
-    Type *addStruct(std::string name, std::vector<Field> fields,
+    Type *addStruct(std::string name, std::vector<Field *> fields,
                     uint64_t typeSize);
 
     /**
      * @return type alias for the union
      */
-    Type *addUnion(std::string name, std::vector<Field> fields,
+    Type *addUnion(std::string name, std::vector<Field *> fields,
                    uint64_t maxSize);
 
     void addLiteralDefine(std::string name, std::string literal, Type *type);
@@ -135,6 +135,8 @@ class IR {
                              const std::string &name);
 
     template <typename T> void clearVector(std::vector<T> v);
+
+    template <typename T> void deallocateTypesThatAreNotInIR(std::vector<T> v);
 
     std::string libName;    // name of the library
     std::string linkName;   // name of the library to link with

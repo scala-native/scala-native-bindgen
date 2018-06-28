@@ -8,3 +8,9 @@ Type *TypeAndName::getType() const { return type; }
 std::string TypeAndName::getName() const { return name; }
 
 void TypeAndName::setType(Type *type) { this->type = type; }
+
+void TypeAndName::deallocateTypesThatAreNotInIR() {
+    if (type->canBeDeallocated()) {
+        delete type;
+    }
+}

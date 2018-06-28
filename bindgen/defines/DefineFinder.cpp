@@ -50,7 +50,7 @@ void DefineFinder::MacroDefined(const clang::Token &macroNameTok,
             std::string varName = (*tokens)[0].getIdentifierInfo()->getName();
             ir.addPossibleVarDefine(macroName, varName);
         }
-        std::free(tokens);
+        delete tokens;
     }
 }
 
@@ -70,13 +70,13 @@ DefineFinder::expandDefine(const clang::MacroDirective &md) {
             std::vector<clang::Token> *newTokens = expandDefine(
                 *pp.getLocalMacroDirective(token.getIdentifierInfo()));
             if (!newTokens) {
-                std::free(expandedTokens);
+                delete expandedTokens;
                 return nullptr;
             }
             for (const auto &newToken : *newTokens) {
                 (*expandedTokens).push_back(newToken);
             }
-            std::free(newTokens);
+            delete newTokens;
         } else {
             (*expandedTokens).push_back(token);
         }

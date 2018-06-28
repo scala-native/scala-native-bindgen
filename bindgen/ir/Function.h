@@ -13,8 +13,10 @@ class Parameter : public TypeAndName {
 
 class Function {
   public:
-    Function(const std::string &name, std::vector<Parameter> parameters,
+    Function(const std::string &name, std::vector<Parameter *> parameters,
              Type *retType, bool isVariadic);
+
+    ~Function();
 
     friend llvm::raw_ostream &operator<<(llvm::raw_ostream &s,
                                          const Function &func);
@@ -25,6 +27,8 @@ class Function {
 
     void setScalaName(std::string scalaName);
 
+    void deallocateTypesThatAreNotInIR();
+
   private:
     std::string getVarargsParameterName() const;
 
@@ -32,7 +36,7 @@ class Function {
 
     std::string name;      // real name of the function
     std::string scalaName; // not empty
-    std::vector<Parameter> parameters;
+    std::vector<Parameter *> parameters;
     Type *retType;
     bool isVariadic;
 };

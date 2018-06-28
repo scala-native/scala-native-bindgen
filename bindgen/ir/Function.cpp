@@ -4,7 +4,7 @@
 Parameter::Parameter(std::string name, Type *type)
     : TypeAndName(std::move(name), type) {}
 
-Function::Function(const std::string &name, std::vector<Parameter> parameters,
+Function::Function(const std::string &name, std::vector<Parameter *> parameters,
                    Type *retType, bool isVariadic)
     : name(name), scalaName(name), parameters(std::move(parameters)),
       retType(retType), isVariadic(isVariadic) {}
@@ -16,8 +16,8 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const Function &func) {
     s << "  def " << handleReservedWords(func.scalaName) << "(";
     std::string sep = "";
     for (const auto &param : func.parameters) {
-        s << sep << handleReservedWords(param.getName()) << ": "
-          << param.getType()->str();
+        s << sep << handleReservedWords(param->getName()) << ": "
+          << param->getType()->str();
         sep = ", ";
     }
     if (func.isVariadic) {
@@ -34,7 +34,7 @@ bool Function::usesType(Type *type) const {
         return true;
     }
     for (const auto &parameter : parameters) {
-        if (parameter.getType() == type) {
+        if (parameter->getType() == type) {
             return true;
         }
     }
@@ -54,7 +54,7 @@ std::string Function::getVarargsParameterName() const {
 
 bool Function::existsParameterWithName(const std::string &parameterName) const {
     for (const auto &parameter : parameters) {
-        if (parameter.getName() == parameterName) {
+        if (parameter->getName() == parameterName) {
             return true;
         }
     }
@@ -63,4 +63,20 @@ bool Function::existsParameterWithName(const std::string &parameterName) const {
 
 void Function::setScalaName(std::string scalaName) {
     this->scalaName = std::move(scalaName);
+}
+
+void Function::deallocateTypesThatAreNotInIR() {
+    if (retType->canBeDeallocated()) {
+        delete retType;
+    }
+
+    for (const auto &parameter : parameters) {
+        parameter->deallocateTypesThatAreNotInIR();
+    }
+}
+
+Function::~Function() {
+    for (const auto &parameter : parameters) {
+        delete parameter;
+    }
 }

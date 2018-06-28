@@ -18,6 +18,8 @@ class TypeAndName {
 
     std::string getName() const;
 
+    void deallocateTypesThatAreNotInIR();
+
   protected:
     std::string name;
     Type *type;

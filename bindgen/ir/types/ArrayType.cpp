@@ -12,3 +12,9 @@ std::string ArrayType::str() const {
 bool ArrayType::usesType(Type *type) const {
     return this == type || elementsType == type;
 }
+
+ArrayType::~ArrayType() {
+    if (elementsType->canBeDeallocated()) {
+        delete elementsType;
+    }
+}

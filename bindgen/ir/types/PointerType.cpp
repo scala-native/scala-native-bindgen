@@ -12,3 +12,9 @@ bool PointerType::usesType(Type *type) const {
     }
     return this->type == type;
 }
+
+PointerType::~PointerType() {
+    if (type->canBeDeallocated()) {
+        delete type;
+    }
+}
