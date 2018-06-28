@@ -88,6 +88,10 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir) {
             s << *typeDef;
         }
 
+        for (const auto &variable : ir.variables) {
+            s << *variable;
+        }
+
         for (const auto &varDefine : ir.varDefines) {
             s << *varDefine;
         }
