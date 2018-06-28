@@ -10,6 +10,7 @@ script:
      docker-compose run --rm $TEST_ENV scripts/clangfmt --test;
    fi
  - if [[ "$TEST_ENV" = *llvm-6.0 ]]; then
+     export VERSION="${TRAVIS_COMMIT}";
      docker-compose build bindgen;
      find . -name target | xargs sudo rm -rf;
      scripts/docker-test.sh;
