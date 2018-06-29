@@ -7,16 +7,14 @@
 
 class TypeDef : public TypeAndName, public Type {
   public:
-    TypeDef(std::string name, Type *type);
+    TypeDef(std::string name, std::shared_ptr<Type> type);
 
     friend llvm::raw_ostream &operator<<(llvm::raw_ostream &s,
                                          const TypeDef &type);
 
-    bool usesType(Type *type) const override;
+    bool usesType(std::shared_ptr<Type> type) const override;
 
     std::string str() const override;
-
-    bool canBeDeallocated() const override;
 };
 
 #endif // SCALA_NATIVE_BINDGEN_TYPEDEF_H

@@ -1,6 +1,6 @@
 #include "Variable.h"
 
-Variable::Variable(const std::string &name, Type *type)
+Variable::Variable(const std::string &name, std::shared_ptr<Type> type)
     : TypeAndName(name, type) {}
 
 llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const Variable &variable) {

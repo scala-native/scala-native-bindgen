@@ -1,16 +1,11 @@
 #include "TypeAndName.h"
+#include <clang/Tooling/Tooling.h>
 
-TypeAndName::TypeAndName(std::string name, Type *type)
+TypeAndName::TypeAndName(std::string name, std::shared_ptr<Type> type)
     : name(std::move(name)), type(type) {}
 
-Type *TypeAndName::getType() const { return type; }
+std::shared_ptr<Type> TypeAndName::getType() const { return type; }
 
 std::string TypeAndName::getName() const { return name; }
 
-void TypeAndName::setType(Type *type) { this->type = type; }
-
-void TypeAndName::deallocateTypesThatAreNotInIR() {
-    if (type->canBeDeallocated()) {
-        delete type;
-    }
-}
+void TypeAndName::setType(std::shared_ptr<Type> type) { this->type = type; }

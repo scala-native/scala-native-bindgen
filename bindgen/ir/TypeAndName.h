@@ -2,6 +2,7 @@
 #define SCALA_NATIVE_BINDGEN_TYPEANDNAME_H
 
 #include "types/Type.h"
+#include <memory>
 #include <string>
 
 /**
@@ -10,19 +11,17 @@
  */
 class TypeAndName {
   public:
-    TypeAndName(std::string name, Type *type);
+    TypeAndName(std::string name, std::shared_ptr<Type> type);
 
-    Type *getType() const;
+    std::shared_ptr<Type> getType() const;
 
-    void setType(Type *name);
+    void setType(std::shared_ptr<Type> name);
 
     std::string getName() const;
 
-    void deallocateTypesThatAreNotInIR();
-
   protected:
     std::string name;
-    Type *type;
+    std::shared_ptr<Type> type;
 };
 
 #endif // SCALA_NATIVE_BINDGEN_TYPEANDNAME_H

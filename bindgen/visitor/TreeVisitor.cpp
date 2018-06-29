@@ -6,7 +6,8 @@ std::set<std::string> locations;
 
 bool TreeVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
     std::string funcName = func->getNameInfo().getName().getAsString();
-    Type *retType = typeTranslator.translate(func->getReturnType());
+    std::shared_ptr<Type> retType =
+        typeTranslator.translate(func->getReturnType());
     std::vector<Parameter *> parameters;
 
     int anonCounter = 0;
@@ -19,7 +20,7 @@ bool TreeVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
             pname = "anonymous" + std::to_string(anonCounter++);
         }
 
-        Type *ptype = typeTranslator.translate(parm->getType());
+        std::shared_ptr<Type> ptype = typeTranslator.translate(parm->getType());
         parameters.emplace_back(new Parameter(pname, ptype));
     }
 
@@ -43,7 +44,8 @@ bool TreeVisitor::VisitTypedefDecl(clang::TypedefDecl *tpdef) {
         llvm::errs().flush();
     }
 
-    Type *type = typeTranslator.translate(tpdef->getUnderlyingType());
+    std::shared_ptr<Type> type =
+        typeTranslator.translate(tpdef->getUnderlyingType());
     ir.addTypeDef(name, type);
     return true;
 }
@@ -65,7 +67,8 @@ bool TreeVisitor::VisitEnumDecl(clang::EnumDecl *enumdecl) {
     std::string scalaType = typeTranslator.getTypeFromTypeMap(
         enumdecl->getIntegerType().getUnqualifiedType().getAsString());
 
-    Type *alias = ir.addEnum(name, scalaType, std::move(enumerators));
+    std::shared_ptr<Type> alias =
+        ir.addEnum(name, scalaType, std::move(enumerators));
     if (alias != nullptr) {
         typeTranslator.addAlias("enum " + name, alias);
     }
@@ -105,12 +108,13 @@ void TreeVisitor::handleUnion(clang::RecordDecl *record, std::string name) {
         uint64_t sizeInBytes = astContext->getTypeSize(field->getType()) / 8;
         maxSize = std::max(maxSize, sizeInBytes);
         std::string fname = field->getNameAsString();
-        Type *ftype = typeTranslator.translate(field->getType(), &name);
+        std::shared_ptr<Type> ftype =
+            typeTranslator.translate(field->getType(), &name);
 
         fields.push_back(new Field(fname, ftype));
     }
 
-    Type *alias = ir.addUnion(name, std::move(fields), maxSize);
+    std::shared_ptr<Type> alias = ir.addUnion(name, std::move(fields), maxSize);
 
     typeTranslator.addAlias("union " + name, alias);
 }
@@ -129,7 +133,8 @@ void TreeVisitor::handleStruct(clang::RecordDecl *record, std::string name) {
     std::vector<Field *> fields;
 
     for (const clang::FieldDecl *field : record->fields()) {
-        Type *ftype = typeTranslator.translate(field->getType(), &name);
+        std::shared_ptr<Type> ftype =
+            typeTranslator.translate(field->getType(), &name);
         fields.push_back(new Field(field->getNameAsString(), ftype));
 
         cycleDetection.AddDependency(newName, field->getType());
@@ -147,7 +152,7 @@ void TreeVisitor::handleStruct(clang::RecordDecl *record, std::string name) {
         llvm::errs().flush();
     }
 
-    Type *alias =
+    std::shared_ptr<Type> alias =
         ir.addStruct(name, std::move(fields),
                      astContext->getTypeSize(record->getTypeForDecl()));
 
@@ -157,8 +162,9 @@ void TreeVisitor::handleStruct(clang::RecordDecl *record, std::string name) {
 bool TreeVisitor::VisitVarDecl(clang::VarDecl *varDecl) {
     if (!varDecl->isThisDeclarationADefinition()) {
         std::string variableName = varDecl->getName().str();
-        Type *type = typeTranslator.translate(varDecl->getType());
-        Variable *variable = ir.addVariable(variableName, type);
+        std::shared_ptr<Type> type =
+            typeTranslator.translate(varDecl->getType());
+        std::shared_ptr<Variable> variable = ir.addVariable(variableName, type);
         /* check if there is a macro for the variable.
          * Macros were saved by DefineFinder */
         std::string macroName = ir.getDefineForVar(variableName);

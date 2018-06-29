@@ -9,13 +9,13 @@
  */
 class VarDefine : public Define {
   public:
-    VarDefine(std::string name, Variable *variable);
+    VarDefine(std::string name, std::shared_ptr<Variable> variable);
 
     friend llvm::raw_ostream &operator<<(llvm::raw_ostream &s,
                                          const VarDefine &varDefine);
 
   private:
-    Variable *variable;
+    std::shared_ptr<Variable> variable;
 };
 
 #endif // SCALA_NATIVE_BINDGEN_VARDEFINE_H
