@@ -48,7 +48,7 @@ object ReservedWordsHelpers {
     def instance_=(value: native.Ptr[`object`]): Unit = !p.cast[native.Ptr[native.Ptr[`object`]]] = value
     def `forSome`: native.Ptr[`match`] = p.cast[native.Ptr[`match`]]
     def `forSome_=`(value: `match`): Unit = !p.cast[native.Ptr[`match`]] = value
-    def `implicit`: native.Ptr[native.CArray[Byte, native.Nat.Digit[native.Nat._1, native.Nat.Digit[native.Nat._2, native.Nat._8]]]] = p.cast[native.Ptr[native.CArray[Byte, native.Nat.Digit[native.Nat._1, native.Nat.Digit[native.Nat._2, native.Nat._8]]]]]
-    def `implicit_=`(value: native.CArray[Byte, native.Nat.Digit[native.Nat._1, native.Nat.Digit[native.Nat._2, native.Nat._8]]]): Unit = !p.cast[native.Ptr[native.CArray[Byte, native.Nat.Digit[native.Nat._1, native.Nat.Digit[native.Nat._2, native.Nat._8]]]]] = value
+    def `implicit`: native.Ptr[native.CArray[Byte, native.Nat.Digit[native.Nat._1, native.Nat._6]]] = p.cast[native.Ptr[native.CArray[Byte, native.Nat.Digit[native.Nat._1, native.Nat._6]]]]
+    def `implicit_=`(value: native.CArray[Byte, native.Nat.Digit[native.Nat._1, native.Nat._6]]): Unit = !p.cast[native.Ptr[native.CArray[Byte, native.Nat.Digit[native.Nat._1, native.Nat._6]]]] = value
   }
 }

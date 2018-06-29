@@ -101,9 +101,10 @@ std::shared_ptr<Type>
 TypeTranslator::translateStructOrUnion(const clang::QualType &qtpe) {
     if (qtpe->hasUnnamedOrLocalType()) {
         // TODO: Verify that the local part is not a problem
-        uint64_t size = ctx->getTypeSize(qtpe);
+        uint64_t sizeInBits = ctx->getTypeSize(qtpe);
+        assert(sizeInBits % 8 == 0);
         return std::make_shared<ArrayType>(
-            std::make_shared<PrimitiveType>("Byte"), size);
+            std::make_shared<PrimitiveType>("Byte"), sizeInBits / 8);
     }
 
     return translateStructOrUnionOrEnum(qtpe);
