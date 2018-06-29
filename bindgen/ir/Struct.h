@@ -11,7 +11,7 @@
 
 class Field : public TypeAndName {
   public:
-    Field(std::string name, Type *type);
+    Field(std::string name, std::shared_ptr<Type> type);
 };
 
 class StructOrUnion {
@@ -20,24 +20,24 @@ class StructOrUnion {
 
     ~StructOrUnion();
 
-    virtual TypeDef *generateTypeDef() = 0;
+    virtual std::shared_ptr<TypeDef> generateTypeDef() = 0;
 
     virtual std::string generateHelperClass() const = 0;
 
     std::string getName() const;
-
-    void deallocateTypesThatAreNotInIR();
 
   protected:
     std::string name;
     std::vector<Field *> fields;
 };
 
-class Struct : public StructOrUnion, public Type {
+class Struct : public StructOrUnion,
+               public Type,
+               public std::enable_shared_from_this<Struct> {
   public:
     Struct(std::string name, std::vector<Field *> fields, uint64_t typeSize);
 
-    TypeDef *generateTypeDef() override;
+    std::shared_ptr<TypeDef> generateTypeDef() override;
 
     std::string generateHelperClass() const override;
 
@@ -48,26 +48,24 @@ class Struct : public StructOrUnion, public Type {
      */
     bool hasHelperMethods() const;
 
-    bool usesType(Type *type) const override;
+    bool usesType(std::shared_ptr<Type> type) const override;
 
     std::string str() const override;
-
-    bool canBeDeallocated() const override;
 
   private:
     /* type size is needed if number of fields is bigger than 22 */
     uint64_t typeSize;
 };
 
-class Union : public StructOrUnion, public ArrayType {
+class Union : public StructOrUnion,
+              public ArrayType,
+              public std::enable_shared_from_this<Union> {
   public:
     Union(std::string name, std::vector<Field *> fields, uint64_t maxSize);
 
-    TypeDef *generateTypeDef() override;
+    std::shared_ptr<TypeDef> generateTypeDef() override;
 
     std::string generateHelperClass() const override;
-
-    bool canBeDeallocated() const override;
 
   private:
     std::string getTypeAlias() const;

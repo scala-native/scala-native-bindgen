@@ -14,9 +14,10 @@ class TypeTranslator {
      * structs, unions, ...
      * @return the type translated
      */
-    Type *translate(const clang::QualType &tpe, const std::string * = nullptr);
+    std::shared_ptr<Type> translate(const clang::QualType &tpe,
+                                    const std::string * = nullptr);
 
-    void addAlias(std::string cName, Type *type);
+    void addAlias(std::string cName, std::shared_ptr<Type> type);
 
     std::string getTypeFromTypeMap(std::string cType);
 
@@ -32,18 +33,20 @@ class TypeTranslator {
     /**
      * Maps C struct, union or enum name to Type alias
      */
-    std::map<std::string, Type *> aliasesMap;
+    std::map<std::string, std::shared_ptr<Type>> aliasesMap;
 
-    Type *translateStructOrUnionOrEnum(const clang::QualType &qtpe);
+    std::shared_ptr<Type>
+    translateStructOrUnionOrEnum(const clang::QualType &qtpe);
 
-    Type *translateStructOrUnion(const clang::QualType &qtpe);
+    std::shared_ptr<Type> translateStructOrUnion(const clang::QualType &qtpe);
 
-    Type *translateFunctionPointer(const clang::QualType &qtpe,
-                                   const std::string *avoid);
+    std::shared_ptr<Type> translateFunctionPointer(const clang::QualType &qtpe,
+                                                   const std::string *avoid);
 
-    Type *translatePointer(const clang::QualType &pointee,
+    std::shared_ptr<Type> translatePointer(const clang::QualType &pointee,
+                                           const std::string *avoid);
+
+    std::shared_ptr<Type>
+    translateConstantArray(const clang::ConstantArrayType *ar,
                            const std::string *avoid);
-
-    Type *translateConstantArray(const clang::ConstantArrayType *ar,
-                                 const std::string *avoid);
 };

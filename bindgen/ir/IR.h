@@ -20,36 +20,38 @@ class IR {
     ~IR();
 
     void addFunction(std::string name, std::vector<Parameter *> parameters,
-                     Type *retType, bool isVariadic);
+                     std::shared_ptr<Type> retType, bool isVariadic);
 
-    void addTypeDef(std::string name, Type *type);
+    void addTypeDef(std::string name, std::shared_ptr<Type> type);
 
     /**
      * @return type alias for the enum
      */
-    Type *addEnum(std::string name, const std::string &type,
-                  std::vector<Enumerator> enumerators);
+    std::shared_ptr<Type> addEnum(std::string name, const std::string &type,
+                                  std::vector<Enumerator> enumerators);
 
     /**
      * @return type alias for the struct
      */
-    Type *addStruct(std::string name, std::vector<Field *> fields,
-                    uint64_t typeSize);
+    std::shared_ptr<Type>
+    addStruct(std::string name, std::vector<Field *> fields, uint64_t typeSize);
 
     /**
      * @return type alias for the union
      */
-    Type *addUnion(std::string name, std::vector<Field *> fields,
-                   uint64_t maxSize);
+    std::shared_ptr<Type>
+    addUnion(std::string name, std::vector<Field *> fields, uint64_t maxSize);
 
-    void addLiteralDefine(std::string name, std::string literal, Type *type);
+    void addLiteralDefine(std::string name, std::string literal,
+                          std::shared_ptr<Type> type);
 
     void addPossibleVarDefine(const std::string &macroName,
                               const std::string &varName);
 
-    void addVarDefine(std::string name, Variable *variable);
+    void addVarDefine(std::string name, std::shared_ptr<Variable> variable);
 
-    Variable *addVariable(const std::string &name, Type *type);
+    std::shared_ptr<Variable> addVariable(const std::string &name,
+                                          std::shared_ptr<Type> type);
 
     /**
      * @return true if there are no functions, types,
@@ -69,7 +71,7 @@ class IR {
      */
     std::string getDefineForVar(const std::string &varName) const;
 
-    TypeDef *getTypeDefWithName(const std::string &name);
+    std::shared_ptr<TypeDef> getTypeDefWithName(const std::string &name);
 
   private:
     /**
@@ -106,18 +108,20 @@ class IR {
     /**
      * Find all typedefs that use oldType and replace it with newType.
      */
-    void replaceTypeInTypeDefs(Type *oldType, Type *newType);
+    void replaceTypeInTypeDefs(std::shared_ptr<Type> oldType,
+                               std::shared_ptr<Type> newType);
 
     /**
      * @return true if given type is used only in typedefs.
      */
-    bool typeIsUsedOnlyInTypeDefs(Type *type);
+    bool typeIsUsedOnlyInTypeDefs(std::shared_ptr<Type> type);
 
     /**
      * @return true if type is used in one of given declarations.
      */
     template <typename T>
-    bool isTypeUsed(const std::vector<T> &declarations, Type *type);
+    bool isTypeUsed(const std::vector<T> &declarations,
+                    std::shared_ptr<Type> type);
 
     void setScalaNames();
 
@@ -136,20 +140,18 @@ class IR {
 
     template <typename T> void clearVector(std::vector<T> v);
 
-    template <typename T> void deallocateTypesThatAreNotInIR(std::vector<T> v);
-
     std::string libName;    // name of the library
     std::string linkName;   // name of the library to link with
     std::string objectName; // name of Scala object
-    std::vector<Function *> functions;
-    std::vector<TypeDef *> typeDefs;
-    std::vector<Struct *> structs;
-    std::vector<Union *> unions;
-    std::vector<Enum *> enums;
-    std::vector<LiteralDefine *> literalDefines;
-    std::vector<PossibleVarDefine *> possibleVarDefines;
-    std::vector<VarDefine *> varDefines;
-    std::vector<Variable *> variables;
+    std::vector<std::shared_ptr<Function>> functions;
+    std::vector<std::shared_ptr<TypeDef>> typeDefs;
+    std::vector<std::shared_ptr<Struct>> structs;
+    std::vector<std::shared_ptr<Union>> unions;
+    std::vector<std::shared_ptr<Enum>> enums;
+    std::vector<std::shared_ptr<LiteralDefine>> literalDefines;
+    std::vector<std::shared_ptr<PossibleVarDefine>> possibleVarDefines;
+    std::vector<std::shared_ptr<VarDefine>> varDefines;
+    std::vector<std::shared_ptr<Variable>> variables;
     bool generated = false; // generate type defs only once
     std::string packageName;
 };

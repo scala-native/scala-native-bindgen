@@ -5,7 +5,7 @@
 #include <sstream>
 #include <utility>
 
-Field::Field(std::string name, Type *type)
+Field::Field(std::string name, std::shared_ptr<Type> type)
     : TypeAndName(std::move(name), type) {}
 
 StructOrUnion::StructOrUnion(std::string name, std::vector<Field *> fields)
@@ -19,24 +19,20 @@ StructOrUnion::~StructOrUnion() {
     }
 }
 
-void StructOrUnion::deallocateTypesThatAreNotInIR() {
-    for (const auto &field : fields) {
-        field->deallocateTypesThatAreNotInIR();
-    }
-}
-
 Struct::Struct(std::string name, std::vector<Field *> fields, uint64_t typeSize)
     : StructOrUnion(std::move(name), std::move(fields)), typeSize(typeSize) {}
 
-TypeDef *Struct::generateTypeDef() {
+std::shared_ptr<TypeDef> Struct::generateTypeDef() {
     if (fields.size() < SCALA_NATIVE_MAX_STRUCT_FIELDS) {
-        return new TypeDef(getAliasType(), this);
+        return std::make_shared<TypeDef>(getAliasType(), shared_from_this());
     } else {
         // There is no easy way to represent it as a struct in scala native,
         // have to represent it as an array and then Add helpers to help with
         // its manipulation
-        return new TypeDef(getAliasType(),
-                           new ArrayType(new PrimitiveType("Byte"), typeSize));
+        return std::make_shared<TypeDef>(
+            getAliasType(),
+            std::make_shared<ArrayType>(std::make_shared<PrimitiveType>("Byte"),
+                                        typeSize));
     }
 }
 
@@ -55,7 +51,7 @@ std::string Struct::generateHelperClass() const {
         if (!field->getName().empty()) {
             std::string getter = handleReservedWords(field->getName());
             std::string setter = handleReservedWords(field->getName(), "_=");
-            Type *ftype = field->getType();
+            std::shared_ptr<Type> ftype = field->getType();
             s << "    def " << getter << ": " << ftype->str() << " = !p._"
               << std::to_string(fieldIndex + 1) << "\n"
               << "    def " << setter
@@ -94,8 +90,8 @@ std::string Struct::str() const {
     return ss.str();
 }
 
-bool Struct::usesType(Type *type) const {
-    if (this == type) {
+bool Struct::usesType(std::shared_ptr<Type> type) const {
+    if (this == type.get()) {
         return true;
     }
     for (const auto &field : fields) {
@@ -106,13 +102,13 @@ bool Struct::usesType(Type *type) const {
     return false;
 }
 
-bool Struct::canBeDeallocated() const { return false; }
-
 Union::Union(std::string name, std::vector<Field *> fields, uint64_t maxSize)
     : StructOrUnion(std::move(name), std::move(fields)),
-      ArrayType(new PrimitiveType("Byte"), maxSize) {}
+      ArrayType(std::make_shared<PrimitiveType>("Byte"), maxSize) {}
 
-TypeDef *Union::generateTypeDef() { return new TypeDef(getTypeAlias(), this); }
+std::shared_ptr<TypeDef> Union::generateTypeDef() {
+    return std::make_shared<TypeDef>(getTypeAlias(), shared_from_this());
+}
 
 std::string Union::generateHelperClass() const {
     std::stringstream s;
@@ -123,7 +119,7 @@ std::string Union::generateHelperClass() const {
         if (!field->getName().empty()) {
             std::string getter = handleReservedWords(field->getName());
             std::string setter = handleReservedWords(field->getName(), "_=");
-            Type *ftype = field->getType();
+            std::shared_ptr<Type> ftype = field->getType();
             s << "    def " << getter << ": native.Ptr[" << ftype->str()
               << "] = p.cast[native.Ptr[" << ftype->str() << "]]\n";
 
@@ -137,5 +133,3 @@ std::string Union::generateHelperClass() const {
 }
 
 std::string Union::getTypeAlias() const { return "union_" + name; }
-
-bool Union::canBeDeallocated() const { return false; }

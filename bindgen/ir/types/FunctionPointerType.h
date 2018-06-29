@@ -6,19 +6,20 @@
 
 class FunctionPointerType : public Type {
   public:
-    FunctionPointerType(Type *returnType,
-                        const std::vector<Type *> &parametersTypes,
-                        bool isVariadic);
+    FunctionPointerType(
+        std::shared_ptr<Type> returnType,
+        const std::vector<std::shared_ptr<Type>> &parametersTypes,
+        bool isVariadic);
 
     ~FunctionPointerType() override;
 
-    bool usesType(Type *type) const override;
+    bool usesType(std::shared_ptr<Type> type) const override;
 
     std::string str() const override;
 
   private:
-    Type *returnType;
-    std::vector<Type *> parametersTypes;
+    std::shared_ptr<Type> returnType;
+    std::vector<std::shared_ptr<Type>> parametersTypes;
     bool isVariadic;
 };
 
