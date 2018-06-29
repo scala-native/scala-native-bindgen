@@ -148,12 +148,13 @@ object Bindgen {
       }
 
       if (excludePrefix != null) {
-        cmd :+= excludePrefix
+        cmd ++= Seq("--exclude-prefix", excludePrefix)
       }
 
-      cmd :+= "--"
+      for (arg <- extraArg) cmd ++= Seq("--extra-arg", arg)
+      for (arg <- extraArgBefore) cmd ++= Seq("--extra-arg-before", arg)
 
-      // TODO: extra args
+      cmd :+= "--"
 
       val output = Process(cmd).lineStream.mkString("\n")
 

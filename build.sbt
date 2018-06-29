@@ -18,6 +18,7 @@ inThisBuild(
 
 val tests = project
   .in(file("tests"))
+  .dependsOn(tools)
   .aggregate(samples)
   .settings(
     fork in Test := true,
