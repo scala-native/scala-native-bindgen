@@ -66,7 +66,7 @@ void IR::addVarDefine(std::string name, std::shared_ptr<Variable> variable) {
 
 bool IR::libObjEmpty() const {
     return functions.empty() && typeDefs.empty() && structs.empty() &&
-           unions.empty() && varDefines.empty();
+           unions.empty() && varDefines.empty() && variables.empty();
 }
 
 llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir) {
