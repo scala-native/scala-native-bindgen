@@ -3,7 +3,6 @@
 
 #include "Define.h"
 #include "Variable.h"
-#include <llvm/Support/raw_ostream.h>
 
 /**
  * Stores a pointer to Variable instance from IR
