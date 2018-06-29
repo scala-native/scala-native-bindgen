@@ -21,11 +21,11 @@ matrix:
   - env: TEST_ENV=ubuntu-18.04-llvm-6.0
     deploy:
     - provider: script
-      script: scripts/docker-deploy.sh "$TRAVIS_TAG"
+      script: scripts/docker-deploy.sh "$TRAVIS_COMMIT" "$TRAVIS_TAG"
       on:
         tags: true
     - provider: script
-      script: scripts/docker-deploy.sh latest
+      script: scripts/docker-deploy.sh "$TRAVIS_COMMIT" latest
       on:
         branch: master
   - env: TEST_ENV=ubuntu-18.04-llvm-5.0

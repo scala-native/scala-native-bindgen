@@ -5,11 +5,14 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-IMAGE="scalabindgen/scala-native-bindgen:${1#v}"
-echo "Pushing $IMAGE"
+SOURCE_IMAGE="scalabindgen/scala-native-bindgen:${1}"
+TARGET_IMAGE="scalabindgen/scala-native-bindgen:${2#v}"
+echo "Pushing $TARGET_IMAGE from $SOURCE_IMAGE"
 
-docker tag scalabindgen/scala-native-bindgen:latest "$IMAGE"
+if [[ "$SOURCE_IMAGE" != "$TARGET_IMAGE" ]]; then
+  docker tag "$SOURCE_IMAGE" "$TARGET_IMAGE"
+fi
 
 echo "$DOCKER_PASSWORD" | docker login --password-stdin --username "$DOCKER_USERNAME"
 
-docker push "$IMAGE"
+docker push "$TARGET_IMAGE"
