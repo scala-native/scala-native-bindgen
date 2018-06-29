@@ -301,6 +301,7 @@ T IR::getDeclarationWithName(std::vector<T> &declarations,
             return declaration;
         }
     }
+    llvm::errs() << "Failed to get declaration for " << name << "\n";
     return nullptr;
 }
 

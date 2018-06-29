@@ -35,6 +35,10 @@ class CycleDetection {
         }
 
         Type *type = tpeTransl.translate(qtpe);
+        if (type == nullptr) {
+            return;
+        }
+
         std::string qtpeString = type->str();
         if (type->canBeDeallocated()) {
             delete type;

@@ -106,7 +106,15 @@ Type *TypeTranslator::translateStructOrUnion(const clang::QualType &qtpe) {
 Type *TypeTranslator::translateConstantArray(const clang::ConstantArrayType *ar,
                                              const std::string *avoid) {
     const uint64_t size = ar->getSize().getZExtValue();
-    return new ArrayType(translate(ar->getElementType(), avoid), size);
+    Type *elementType = translate(ar->getElementType(), avoid);
+    if (elementType == nullptr) {
+        llvm::errs() << "Failed to translate array type "
+                     << ar->getElementType().getAsString()
+                     << "\n";
+        elementType = new PrimitiveType("Byte");
+    }
+
+    return new ArrayType(elementType, size);
 }
 
 Type *TypeTranslator::translate(const clang::QualType &qtpe,
