@@ -2,7 +2,7 @@ version: '3'
 
 services:
   bindgen:
-    image: scalabindgen/scala-native-bindgen
+    image: scalabindgen/scala-native-bindgen:${VERSION:-latest}
     build:
       context: bindgen
       args:

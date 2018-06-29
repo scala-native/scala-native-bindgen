@@ -14,6 +14,8 @@ outdir="tests/target/docker-samples"
 rm -rf "$outdir"
 mkdir -p "$outdir"
 
+echo "Using version '${VERSION:-latest}'"
+
 for input in tests/samples/*.h; do
   name="$(basename "$input" .h)"
   output="$outdir/$name.scala"

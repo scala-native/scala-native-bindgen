@@ -14,4 +14,4 @@ if [[ "$#" -gt 1 ]] && [[ "$1" == /* ]]; then
   volumes+="--volume=$1:$1"  
 fi
 
-exec docker run --rm "${volumes[@]}" scalabindgen/scala-native-bindgen "$@"
+exec docker run --rm "${volumes[@]}" "scalabindgen/scala-native-bindgen:${VERSION:-latest}" "$@"
