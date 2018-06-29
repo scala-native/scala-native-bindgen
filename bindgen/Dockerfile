@@ -8,7 +8,7 @@ COPY . /src
 RUN set -x \
  && mkdir target \
  && cd target \
- && cmake .. \
+ && cmake -DSTATIC_LINKING=ON .. \
  && make
 
 FROM scratch

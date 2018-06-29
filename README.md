@@ -66,6 +66,12 @@ make
 ./scala-native-bindgen /usr/include/ctype.h -name ctype --
 ```
 
+To build a statically linked executable pass `-DSTATIC_LINKING=ON` when invoking `cmake`:
+
+```sh
+cmake -DSTATIC_LINKING=ON ..
+```
+
 Alternatively, you can use [docker-compose] to build and test the program:
 
 ```sh
