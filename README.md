@@ -89,6 +89,14 @@ To build a statically linked executable pass `-DSTATIC_LINKING=ON` when invoking
 cmake -DSTATIC_LINKING=ON ..
 ```
 
+Additional compiler and linker flags may be passed as environment variable sor their CMake
+equivalent, e.g. to compile with debug symbols the following are the same:
+
+```sh
+cmake -DCMAKE_CXX_FLAGS=-g ..
+CXXFLAGS=-g cmake ..
+```
+
 ### Building with `docker-compose`
 
 Alternatively, you can use [docker-compose] to build and test the program:
