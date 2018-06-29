@@ -14,9 +14,9 @@ Enum::Enum(std::string name, std::string type,
 
 bool Enum::isAnonymous() const { return name.empty(); }
 
-TypeDef *Enum::generateTypeDef() {
+std::shared_ptr<TypeDef> Enum::generateTypeDef() {
     assert(!isAnonymous());
-    return new TypeDef("enum_" + name, this);
+    return std::make_shared<TypeDef>("enum_" + name, shared_from_this());
 }
 
 llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const Enum &e) {
@@ -49,5 +49,3 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const Enum &e) {
 }
 
 std::string Enum::getName() const { return name; }
-
-bool Enum::canBeDeallocated() const { return false; }

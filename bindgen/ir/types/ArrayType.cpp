@@ -1,7 +1,7 @@
 #include "ArrayType.h"
 #include "../../Utils.h"
 
-ArrayType::ArrayType(Type *elementsType, uint64_t size)
+ArrayType::ArrayType(std::shared_ptr<Type> elementsType, uint64_t size)
     : size(size), elementsType(elementsType) {}
 
 std::string ArrayType::str() const {
@@ -9,12 +9,8 @@ std::string ArrayType::str() const {
            uint64ToScalaNat(size) + "]";
 }
 
-bool ArrayType::usesType(Type *type) const {
-    return this == type || elementsType == type;
+bool ArrayType::usesType(std::shared_ptr<Type> type) const {
+    return this == type.get() || elementsType == type;
 }
 
-ArrayType::~ArrayType() {
-    if (elementsType->canBeDeallocated()) {
-        delete elementsType;
-    }
-}
+ArrayType::~ArrayType() {}

@@ -5,16 +5,16 @@
 
 class PointerType : public Type {
   public:
-    explicit PointerType(Type *type);
+    explicit PointerType(std::shared_ptr<Type> type);
 
     ~PointerType() override;
 
-    bool usesType(Type *type) const override;
+    bool usesType(std::shared_ptr<Type> type) const override;
 
     std::string str() const override;
 
   private:
-    Type *type;
+    std::shared_ptr<Type> type;
 };
 
 #endif // SCALA_NATIVE_BINDGEN_POINTERTYPE_H

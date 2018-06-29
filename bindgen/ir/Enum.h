@@ -18,20 +18,18 @@ class Enumerator {
     int64_t value;
 };
 
-class Enum : public PrimitiveType {
+class Enum : public PrimitiveType, public std::enable_shared_from_this<Enum> {
   public:
     Enum(std::string name, std::string type,
          std::vector<Enumerator> enumerators);
 
     bool isAnonymous() const;
 
-    TypeDef *generateTypeDef();
+    std::shared_ptr<TypeDef> generateTypeDef();
 
     std::string getName() const;
 
     friend llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const Enum &e);
-
-    bool canBeDeallocated() const override;
 
   private:
     std::string name; // might be empty

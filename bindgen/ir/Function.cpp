@@ -1,11 +1,11 @@
 #include "Function.h"
 #include "../Utils.h"
 
-Parameter::Parameter(std::string name, Type *type)
+Parameter::Parameter(std::string name, std::shared_ptr<Type> type)
     : TypeAndName(std::move(name), type) {}
 
 Function::Function(const std::string &name, std::vector<Parameter *> parameters,
-                   Type *retType, bool isVariadic)
+                   std::shared_ptr<Type> retType, bool isVariadic)
     : name(name), scalaName(name), parameters(std::move(parameters)),
       retType(retType), isVariadic(isVariadic) {}
 
@@ -29,7 +29,7 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const Function &func) {
     return s;
 }
 
-bool Function::usesType(Type *type) const {
+bool Function::usesType(std::shared_ptr<Type> type) const {
     if (retType == type) {
         return true;
     }
@@ -63,16 +63,6 @@ bool Function::existsParameterWithName(const std::string &parameterName) const {
 
 void Function::setScalaName(std::string scalaName) {
     this->scalaName = std::move(scalaName);
-}
-
-void Function::deallocateTypesThatAreNotInIR() {
-    if (retType->canBeDeallocated()) {
-        delete retType;
-    }
-
-    for (const auto &parameter : parameters) {
-        parameter->deallocateTypesThatAreNotInIR();
-    }
 }
 
 Function::~Function() {

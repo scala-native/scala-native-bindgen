@@ -2,8 +2,8 @@
 #include <sstream>
 
 FunctionPointerType::FunctionPointerType(
-    Type *returnType, const std::vector<Type *> &parametersTypes,
-    bool isVariadic)
+    std::shared_ptr<Type> returnType,
+    const std::vector<std::shared_ptr<Type>> &parametersTypes, bool isVariadic)
     : returnType(returnType), parametersTypes(parametersTypes),
       isVariadic(isVariadic) {}
 
@@ -22,8 +22,8 @@ std::string FunctionPointerType::str() const {
     return ss.str();
 }
 
-bool FunctionPointerType::usesType(Type *type) const {
-    if (this == type) {
+bool FunctionPointerType::usesType(std::shared_ptr<Type> type) const {
+    if (this == type.get()) {
         return true;
     }
     if (returnType == type) {
@@ -38,13 +38,4 @@ bool FunctionPointerType::usesType(Type *type) const {
     return false;
 }
 
-FunctionPointerType::~FunctionPointerType() {
-    if (returnType->canBeDeallocated()) {
-        delete returnType;
-    }
-    for (const auto &parameterType : parametersTypes) {
-        if (parameterType->canBeDeallocated()) {
-            delete parameterType;
-        }
-    }
-}
+FunctionPointerType::~FunctionPointerType() {}

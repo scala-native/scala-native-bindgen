@@ -13,7 +13,7 @@ class PrimitiveType : public Type {
 
     std::string getType() const;
 
-    bool usesType(Type *type) const override;
+    bool usesType(std::shared_ptr<Type> type) const override;
 
     std::string str() const override;
 

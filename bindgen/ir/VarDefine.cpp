@@ -1,6 +1,6 @@
 #include "VarDefine.h"
 
-VarDefine::VarDefine(std::string name, Variable *variable)
+VarDefine::VarDefine(std::string name, std::shared_ptr<Variable> variable)
     : Define(std::move(name)), variable(variable) {}
 
 llvm::raw_ostream &operator<<(llvm::raw_ostream &s,

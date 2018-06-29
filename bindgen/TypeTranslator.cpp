@@ -32,22 +32,24 @@ TypeTranslator::TypeTranslator(clang::ASTContext *ctx_, IR &ir)
     typeMap["double"] = "native.CDouble";
 }
 
-Type *TypeTranslator::translateFunctionPointer(const clang::QualType &qtpe,
-                                               const std::string *avoid) {
+std::shared_ptr<Type>
+TypeTranslator::translateFunctionPointer(const clang::QualType &qtpe,
+                                         const std::string *avoid) {
     const auto *ptr = qtpe.getTypePtr()->getAs<clang::PointerType>();
     const clang::QualType &inner = ptr->getPointeeType();
 
     if (inner->isFunctionProtoType()) {
         const auto *fc = inner->getAs<clang::FunctionProtoType>();
-        Type *returnType = translate(fc->getReturnType(), avoid);
-        std::vector<Type *> parametersTypes;
+        std::shared_ptr<Type> returnType =
+            translate(fc->getReturnType(), avoid);
+        std::vector<std::shared_ptr<Type>> parametersTypes;
 
         for (const clang::QualType &param : fc->param_types()) {
             parametersTypes.push_back(translate(param, avoid));
         }
 
-        return new FunctionPointerType(returnType, parametersTypes,
-                                       fc->isVariadic());
+        return std::make_shared<FunctionPointerType>(
+            returnType, parametersTypes, fc->isVariadic());
 
     } else {
         llvm::errs() << "Unsupported function pointer type: "
@@ -57,29 +59,31 @@ Type *TypeTranslator::translateFunctionPointer(const clang::QualType &qtpe,
     }
 }
 
-Type *TypeTranslator::translatePointer(const clang::QualType &pte,
-                                       const std::string *avoid) {
+std::shared_ptr<Type>
+TypeTranslator::translatePointer(const clang::QualType &pte,
+                                 const std::string *avoid) {
 
     if (pte->isBuiltinType()) {
         const clang::BuiltinType *as = pte->getAs<clang::BuiltinType>();
 
         // Take care of void*
         if (as->getKind() == clang::BuiltinType::Void) {
-            return new PointerType(new PrimitiveType("Byte"));
+            return std::make_shared<PointerType>(
+                std::make_shared<PrimitiveType>("Byte"));
         }
 
         // Take care of char*
         if (as->getKind() == clang::BuiltinType::Char_S ||
             as->getKind() == clang::BuiltinType::SChar) {
             // TODO: new PointerType(new PrimitiveType("native.CChar"))
-            return new PrimitiveType("native.CString");
+            return std::make_shared<PrimitiveType>("native.CString");
         }
     }
 
-    return new PointerType(translate(pte, avoid));
+    return std::make_shared<PointerType>(translate(pte, avoid));
 }
 
-Type *
+std::shared_ptr<Type>
 TypeTranslator::translateStructOrUnionOrEnum(const clang::QualType &qtpe) {
     std::string name = qtpe.getUnqualifiedType().getAsString();
 
@@ -93,24 +97,34 @@ TypeTranslator::translateStructOrUnionOrEnum(const clang::QualType &qtpe) {
     return ir.getTypeDefWithName(name);
 }
 
-Type *TypeTranslator::translateStructOrUnion(const clang::QualType &qtpe) {
+std::shared_ptr<Type>
+TypeTranslator::translateStructOrUnion(const clang::QualType &qtpe) {
     if (qtpe->hasUnnamedOrLocalType()) {
         // TODO: Verify that the local part is not a problem
         uint64_t size = ctx->getTypeSize(qtpe);
-        return new ArrayType(new PrimitiveType("Byte"), size);
+        return std::make_shared<ArrayType>(
+            std::make_shared<PrimitiveType>("Byte"), size);
     }
 
     return translateStructOrUnionOrEnum(qtpe);
 }
 
-Type *TypeTranslator::translateConstantArray(const clang::ConstantArrayType *ar,
-                                             const std::string *avoid) {
+std::shared_ptr<Type>
+TypeTranslator::translateConstantArray(const clang::ConstantArrayType *ar,
+                                       const std::string *avoid) {
     const uint64_t size = ar->getSize().getZExtValue();
-    return new ArrayType(translate(ar->getElementType(), avoid), size);
+    std::shared_ptr<Type> elementType = translate(ar->getElementType(), avoid);
+    if (elementType == nullptr) {
+        llvm::errs() << "Failed to translate array type "
+                     << ar->getElementType().getAsString() << "\n";
+        elementType = std::make_shared<PrimitiveType>("Byte");
+    }
+
+    return std::make_shared<ArrayType>(elementType, size);
 }
 
-Type *TypeTranslator::translate(const clang::QualType &qtpe,
-                                const std::string *avoid) {
+std::shared_ptr<Type> TypeTranslator::translate(const clang::QualType &qtpe,
+                                                const std::string *avoid) {
 
     const clang::Type *tpe = qtpe.getTypePtr();
 
@@ -118,7 +132,8 @@ Type *TypeTranslator::translate(const clang::QualType &qtpe,
         // This is a type that we want to avoid the usage.
         // Êxample: A struct that has a pointer to itself
         uint64_t size = ctx->getTypeSize(tpe);
-        return new ArrayType(new PrimitiveType("Byte"), size);
+        return std::make_shared<ArrayType>(
+            std::make_shared<PrimitiveType>("Byte"), size);
     }
 
     if (tpe->isFunctionPointerType()) {
@@ -146,7 +161,7 @@ Type *TypeTranslator::translate(const clang::QualType &qtpe,
 
         auto found = typeMap.find(qtpe.getUnqualifiedType().getAsString());
         if (found != typeMap.end()) {
-            return new PrimitiveType(found->second);
+            return std::make_shared<PrimitiveType>(found->second);
         } else {
             return ir.getTypeDefWithName(
                 qtpe.getUnqualifiedType().getAsString());
@@ -154,7 +169,7 @@ Type *TypeTranslator::translate(const clang::QualType &qtpe,
     }
 }
 
-void TypeTranslator::addAlias(std::string cName, Type *type) {
+void TypeTranslator::addAlias(std::string cName, std::shared_ptr<Type> type) {
     aliasesMap[cName] = type;
 }
 
