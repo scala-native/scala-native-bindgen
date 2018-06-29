@@ -8,13 +8,17 @@ This tool generates Scala Native bindings from C headers. It's built upon clang 
 
 Calling the tool is pretty easy, you need to specify the file(s) and the name of the created bindings.
 
-`./scala-native-bindgen /usr/include/uv.h -name uv --`
+```sh
+scala-native-bindgen --name uv /usr/include/uv.h --
+```
 
 Running the previous command wild also yield warnings along with the translation. To keep only the bindings please redirect the output to a file like this:
 
-`./scala-native-bindgen /usr/include/uv.h -name uv -- > uv.scala`
+```sh
+scala-native-bindgen --name uv /usr/include/uv.h -- > uv.scala
+```
 
-Run `./scala-native-bindgen -help` to see all available options.
+Run `scala-native-bindgen --help` to see all available options.
 
 ## Obtaining bindgen
 
@@ -53,17 +57,30 @@ each merge to the `master` branch.
  [Docker]: https://www.docker.com/
  [docker-bindgen.sh]: scripts/docker-bindgen.sh
 
-### Building
+## Building
 
-Building this tool requires [CMake], [LLVM] and [Clang]. See the [Scala
-Native setup guide] for instructions on installing the dependencies.
+Building `scala-native-bindgen` requires the following tools and libraries:
+
+ - [CMake] version 3.9 or higher
+ - [LLVM] and [Clang] version 5.0 or 6.0.
+
+```sh
+# On apt-based systems
+apt install cmake clang-$LLVM_VERSION libclang-$LLVM_VERSION-dev llvm-$LLVM_VERSION-dev
+
+# With `brew`
+brew install cmake llvm@6
+```
+
+To run the tests you also need the required Scala Native libraries.
+See the [Scala Native setup guide] for instructions on installing the dependencies.
 
 ```sh
 mkdir -p bindgen/target
 cd bindgen/target
 cmake ..
 make
-./scala-native-bindgen /usr/include/ctype.h -name ctype --
+./scala-native-bindgen --name ctype /usr/include/ctype.h --
 ```
 
 To build a statically linked executable pass `-DSTATIC_LINKING=ON` when invoking `cmake`:
@@ -72,15 +89,18 @@ To build a statically linked executable pass `-DSTATIC_LINKING=ON` when invoking
 cmake -DSTATIC_LINKING=ON ..
 ```
 
+### Building with `docker-compose`
+
 Alternatively, you can use [docker-compose] to build and test the program:
 
 ```sh
 # Build the docker image with LLVM version 6.0.
 docker-compose build ubuntu-18.04-llvm-6.0
 # Build the bindgen tool and run the tests.
-docker-compose run --rm ubuntu-18.04-llvm-6.0
+docker-compose run --rm ubuntu-18.04-llvm-6.0 ./script/test.sh
 # Run the bindgen tool inside the container.
-docker-compose run --rm ubuntu-18.04-llvm-6.0 bindgen/target/scala-native-bindgen -name union tests/samples/Union.h --
+docker-compose run --rm ubuntu-18.04-llvm-6.0 \
+    bindgen/target/scala-native-bindgen --name union tests/samples/Union.h --
 ```
 
  [CMake]: https://cmake.org/
@@ -91,17 +111,19 @@ docker-compose run --rm ubuntu-18.04-llvm-6.0 bindgen/target/scala-native-bindge
 
 ## Testing
 
-The tests assume that the above instructions for building has been
-followed.
+The tests assume that the above instructions for building `scala-native-bindgen` from source
+has been followed.
 
 ```sh
 cd tests
 sbt test
 ```
 
-## Current limitations
+## Limitations
+
 There are multiple unsupported cases that should be considered when generating bindings:
-1. Currently bindgen does not support passing structs by value.  
+
+ 1. Currently bindgen does not support passing structs by value.  
     For example, it will not be possible to call these two functions from Scala Native code:
     ```c
     struct MyStruct {
@@ -113,12 +135,26 @@ There are multiple unsupported cases that should be considered when generating b
     void handleStruct(struct MyStruct mystr);
     ```
     To support such cases one should generate bindings for C wrapper functions that use pointers to structs instead of actual structs.
-2. Bindgen does not generate bindings for defines.  
-    In order to use defines one should write wrapper functions that return defined values.
-3. There is no way to reuse already generated bindings.  
-    Bindgen outputs bindings also for headers that were included in a given header.
-4. Type qualifiers `const`, `volatile` and `restrict` are not supported.
-5. Extern variables are read-only. 
+ 2. `#define`s for literals and variables are supported. For other types of `#define`s,
+    write wrapper functions that return defined values.
+    ```c
+    // Supported
+    #define ESC 0x1b            /* Defines for numerical and string literals. */
+    extern const int pi_const;
+    #define PI pi_const         /* Defines aliasing extern variables. */
+
+    // Not supported (non-exhaustive list)
+    #define COLS      (getenv("COLS") ? atoi(getenv("COLS")) : 80)
+    #define MAX(a, b) (a > b ? a : b)
+    ```
+
+ 3. There is no way to reuse already generated bindings.  
+    Bindgen outputs bindings also for headers that were included in a given header. See [#2].
+ 4. Type qualifiers `const`, `volatile` and `restrict` are not supported.
+ 5. Extern variables are read-only. See [scala-native/scala-native#202].
+
+ [#2]: https://github.com/kornilova-l/scala-native-bindgen/issues/2
+ [scala-native/scala-native#202]: https://github.com/scala-native/scala-native/issues/202
 
 ## License
 
