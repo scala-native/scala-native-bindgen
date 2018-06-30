@@ -1,6 +1,6 @@
 package org.scalanative.bindgen
 
-import java.io.{File}
+import java.io.File
 import org.scalatest.FunSpec
 import scala.io.Source
 

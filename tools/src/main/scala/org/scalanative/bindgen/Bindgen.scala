@@ -2,7 +2,7 @@ package org.scalanative.bindgen
 
 import java.io.File
 
-import scala.collection.mutable
+import scala.collection.immutable
 import scala.sys.process.Process
 
 sealed trait Bindgen {
@@ -42,12 +42,12 @@ sealed trait Bindgen {
   /**
    * Additional argument to append to the compiler command line
    */
-  def extraArg(arg: String): Bindgen
+  def extraArg(args: String*): Bindgen
 
   /**
    * Additional argument to append to the compiler command line
    */
-  def extraArgBefore(arg: String): Bindgen
+  def extraArgBefore(args: String*): Bindgen
 
   /**
    * Run binding generator
@@ -58,62 +58,55 @@ sealed trait Bindgen {
 object Bindgen {
   def apply(): Bindgen = Impl()
 
-  private final case class Impl() extends Bindgen {
-    private var executable: File                    = _
-    private var library: String                     = _
-    private var header: File                        = _
-    private var scalaObjectName: String             = _
-    private var packageName: String                 = _
-    private var excludePrefix: String               = _
-    private val extraArg: mutable.Seq[String]       = mutable.Seq()
-    private val extraArgBefore: mutable.Seq[String] = mutable.Seq()
+  private final case class Impl(
+      executable: File = null,
+      library: String = null,
+      header: File = null,
+      scalaObjectName: String = null,
+      packageName: String = null,
+      excludePrefix: String = null,
+      extraArg: immutable.Seq[String] = immutable.Seq[String](),
+      extraArgBefore: immutable.Seq[String] = immutable.Seq[String]())
+      extends Bindgen {
 
     def bindgenExecutable(executable: File): Bindgen = {
       require(executable.exists())
-      this.executable = executable
-      this
+      copy(executable = executable)
     }
 
     def header(header: File): Bindgen = {
       require(header.exists())
-      this.header = header
-      this
+      copy(header = header)
     }
 
     def link(library: String): Bindgen = {
       require(!library.isEmpty)
-      this.library = library
-      this
+      copy(library = library)
     }
 
     def scalaObjectName(scalaObjectName: String): Bindgen = {
       require(!scalaObjectName.isEmpty)
-      this.scalaObjectName = scalaObjectName
-      this
+      copy(scalaObjectName = scalaObjectName)
     }
 
     def packageName(packageName: String): Bindgen = {
       require(!packageName.isEmpty)
-      this.packageName = packageName
-      this
+      copy(packageName = packageName)
     }
 
     def excludePrefix(prefix: String): Bindgen = {
       require(!prefix.isEmpty)
-      excludePrefix = prefix
-      this
+      copy(excludePrefix = prefix)
     }
 
-    def extraArg(arg: String): Bindgen = {
-      require(!arg.isEmpty)
-      extraArg :+ arg
-      this
+    def extraArg(args: String*): Bindgen = {
+      require(args.forall(_.nonEmpty))
+      copy(extraArg = extraArg ++ args)
     }
 
-    def extraArgBefore(arg: String): Bindgen = {
-      require(!arg.isEmpty)
-      extraArgBefore :+ arg
-      this
+    def extraArgBefore(args: String*): Bindgen = {
+      require(args.forall(_.nonEmpty))
+      copy(extraArgBefore = extraArgBefore ++ args)
     }
 
     private def validateFields(): Unit = {
@@ -131,9 +124,12 @@ object Bindgen {
     def generate(): Bindings = {
       validateFields()
 
-      if (scalaObjectName == null) {
-        scalaObjectName = library
-      }
+      val scalaObjectName =
+        if (this.scalaObjectName != null)
+          this.scalaObjectName
+        else
+          library
+
       var cmd = Seq(
         executable.getAbsolutePath,
         header.getAbsolutePath,
@@ -151,8 +147,8 @@ object Bindgen {
         cmd ++= Seq("--exclude-prefix", excludePrefix)
       }
 
-      for (arg <- extraArg) cmd ++= Seq("--extra-arg", arg)
-      for (arg <- extraArgBefore) cmd ++= Seq("--extra-arg-before", arg)
+      extraArg.foreach(arg => cmd ++= Seq("--extra-arg", arg))
+      extraArgBefore.foreach(arg => cmd ++= Seq("--extra-arg-before", arg))
 
       cmd :+= "--"
 
