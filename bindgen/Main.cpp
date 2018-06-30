@@ -3,7 +3,7 @@
 #include <clang/Tooling/CommonOptionsParser.h>
 
 int main(int argc, const char *argv[]) {
-    llvm::cl::OptionCategory Category("Binding Generator");
+    llvm::cl::OptionCategory Category("Scala Native Binding Generator");
     llvm::cl::extrahelp CommonHelp(
         clang::tooling::CommonOptionsParser::HelpMessage);
     llvm::cl::extrahelp MoreHelp("\nProduce Bindings for scala native. Please "
