@@ -34,3 +34,15 @@ struct bigStruct {
 };
 
 int getBigStructSize();
+
+struct structWithAnonymousStruct {
+    int a;
+    struct {
+        char c;
+        int i;
+    } anonymousStruct;
+};
+
+char getCharFromAnonymousStruct(struct structWithAnonymousStruct *s);
+
+char getIntFromAnonymousStruct(struct structWithAnonymousStruct *s);
