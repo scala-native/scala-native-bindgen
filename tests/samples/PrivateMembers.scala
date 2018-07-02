@@ -41,30 +41,30 @@ object PrivateMembersHelpers {
 
   implicit class struct_structWithPrivateType_ops(val p: native.Ptr[struct_structWithPrivateType]) extends AnyVal {
     def field1: native.CInt = !p._1
-    def field1_=(value: native.CInt):Unit = !p._1 = value
+    def field1_=(value: native.CInt): Unit = !p._1 = value
     def field2: __private_type = !p._2
-    def field2_=(value: __private_type):Unit = !p._2 = value
+    def field2_=(value: __private_type): Unit = !p._2 = value
   }
 
   def struct_structWithPrivateType()(implicit z: native.Zone): native.Ptr[struct_structWithPrivateType] = native.alloc[struct_structWithPrivateType]
 
   implicit class struct_structWithPrivateStruct_ops(val p: native.Ptr[struct_structWithPrivateStruct]) extends AnyVal {
     def s: native.Ptr[struct_structWithPrivateType] = !p._1
-    def s_=(value: native.Ptr[struct_structWithPrivateType]):Unit = !p._1 = value
+    def s_=(value: native.Ptr[struct_structWithPrivateType]): Unit = !p._1 = value
   }
 
   def struct_structWithPrivateStruct()(implicit z: native.Zone): native.Ptr[struct_structWithPrivateStruct] = native.alloc[struct_structWithPrivateStruct]
 
   implicit class struct_normalStruct_ops(val p: native.Ptr[struct_normalStruct]) extends AnyVal {
     def a: native.CInt = !p._1
-    def a_=(value: native.CInt):Unit = !p._1 = value
+    def a_=(value: native.CInt): Unit = !p._1 = value
   }
 
   def struct_normalStruct()(implicit z: native.Zone): native.Ptr[struct_normalStruct] = native.alloc[struct_normalStruct]
 
   implicit class struct_privateStructWithTypedef_ops(val p: native.Ptr[struct_privateStructWithTypedef]) extends AnyVal {
     def a: native.Ptr[__private_type] = !p._1
-    def a_=(value: native.Ptr[__private_type]):Unit = !p._1 = value
+    def a_=(value: native.Ptr[__private_type]): Unit = !p._1 = value
   }
 
   def struct_privateStructWithTypedef()(implicit z: native.Zone): native.Ptr[struct_privateStructWithTypedef] = native.alloc[struct_privateStructWithTypedef]
