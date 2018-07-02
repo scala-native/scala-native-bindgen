@@ -8,7 +8,9 @@ import scala.scalanative.native._
 object Struct {
   type struct_point = native.CStruct2[native.CInt, native.CInt]
   type point_s = native.Ptr[struct_point]
+  type struct_bigStruct = native.CArray[Byte, native.Nat.Digit[native.Nat._1, native.Nat.Digit[native.Nat._1, native.Nat._2]]]
   def getPoint(): native.Ptr[struct_point] = native.extern
+  def getBigStructSize(): native.CInt = native.extern
 }
 
 import Struct._

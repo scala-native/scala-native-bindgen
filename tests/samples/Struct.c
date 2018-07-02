@@ -7,3 +7,5 @@ point_s getPoint() {
     point->y = 20;
     return point;
 }
+
+int getBigStructSize() { return sizeof(struct bigStruct); }

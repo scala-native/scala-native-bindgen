@@ -13,6 +13,8 @@ object UnionTests extends TestSuite {
         assert(!structPtr.i == 10)
         Union.setLongValue(structPtr)
         assert(!structPtr.l == 10000000000L)
+
+        assert(Union.getUnionSize() == sizeof[Union.union_values])
       }
     }
   }

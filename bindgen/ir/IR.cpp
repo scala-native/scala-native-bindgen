@@ -141,7 +141,9 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir) {
         s << "object " << ir.libName << "Helpers {\n";
 
         for (const auto &st : ir.structs) {
-            s << "\n" << st->generateHelperClass();
+            if (st->hasHelperMethods()) {
+                s << "\n" << st->generateHelperClass();
+            }
         }
 
         for (const auto &u : ir.unions) {
