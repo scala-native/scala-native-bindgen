@@ -26,7 +26,7 @@ sealed trait Bindgen {
    * Name of Scala object that contains bindings.
    * Default is set to library name.
    */
-  def scalaObjectName(scalaObjectName: String): Bindgen
+  def name(name: String): Bindgen
 
   /**
    * Package name of generated Scala file
@@ -59,44 +59,44 @@ object Bindgen {
   def apply(): Bindgen = Impl()
 
   private final case class Impl(
-      executable: File = null,
-      library: String = null,
-      header: File = null,
-      scalaObjectName: String = null,
-      packageName: String = null,
-      excludePrefix: String = null,
+      executable: Option[File] = None,
+      library: Option[String] = None,
+      header: Option[File] = None,
+      name: Option[String] = None,
+      packageName: Option[String] = None,
+      excludePrefix: Option[String] = None,
       extraArg: immutable.Seq[String] = immutable.Seq[String](),
       extraArgBefore: immutable.Seq[String] = immutable.Seq[String]())
       extends Bindgen {
 
     def bindgenExecutable(executable: File): Bindgen = {
       require(executable.exists())
-      copy(executable = executable)
+      copy(executable = Option(executable))
     }
 
     def header(header: File): Bindgen = {
       require(header.exists())
-      copy(header = header)
+      copy(header = Option(header))
     }
 
     def link(library: String): Bindgen = {
       require(!library.isEmpty)
-      copy(library = library)
+      copy(library = Option(library))
     }
 
-    def scalaObjectName(scalaObjectName: String): Bindgen = {
-      require(!scalaObjectName.isEmpty)
-      copy(scalaObjectName = scalaObjectName)
+    def name(name: String): Bindgen = {
+      require(!name.isEmpty)
+      copy(name = Option(name))
     }
 
     def packageName(packageName: String): Bindgen = {
       require(!packageName.isEmpty)
-      copy(packageName = packageName)
+      copy(packageName = Option(packageName))
     }
 
     def excludePrefix(prefix: String): Bindgen = {
       require(!prefix.isEmpty)
-      copy(excludePrefix = prefix)
+      copy(excludePrefix = Option(prefix))
     }
 
     def extraArg(args: String*): Bindgen = {
@@ -110,41 +110,31 @@ object Bindgen {
     }
 
     private def validateFields(): Unit = {
-      if (executable == null) {
-        throw new AssertionError("Specify bindgen executable")
-      }
-      if (header == null) {
-        throw new AssertionError("Specify header file")
-      }
-      if (library == null) {
-        throw new AssertionError("Specify library name")
-      }
+      require(executable.isDefined, "The executable must be specified")
+      require(header.isDefined, "Header file must be specified")
+      require(library.isDefined, "Library name must be specified")
     }
 
     def generate(): Bindings = {
       validateFields()
 
-      val scalaObjectName =
-        if (this.scalaObjectName != null)
-          this.scalaObjectName
-        else
-          library
+      val name = this.name.getOrElse(library.get)
 
       var cmd = Seq(
-        executable.getAbsolutePath,
-        header.getAbsolutePath,
+        executable.get.getAbsolutePath,
+        header.get.getAbsolutePath,
         "--name",
-        scalaObjectName,
+        name,
         "--link",
-        library
+        library.get
       )
 
-      if (packageName != null) {
-        cmd ++= Seq("--package", packageName)
+      if (packageName.isDefined) {
+        cmd ++= Seq("--package", packageName.get)
       }
 
-      if (excludePrefix != null) {
-        cmd ++= Seq("--exclude-prefix", excludePrefix)
+      if (excludePrefix.isDefined) {
+        cmd ++= Seq("--exclude-prefix", excludePrefix.get)
       }
 
       extraArg.foreach(arg => cmd ++= Seq("--extra-arg", arg))

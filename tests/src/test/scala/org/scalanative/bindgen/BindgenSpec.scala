@@ -21,7 +21,7 @@ class BindgenSpec extends FunSpec {
       Bindgen()
         .bindgenExecutable(new File(bindgenPath))
         .header(inputFile)
-        .scalaObjectName(name)
+        .name(name)
         .link("bindgentests")
         .packageName("org.scalanative.bindgen.samples")
         .excludePrefix("__")
