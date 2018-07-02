@@ -95,4 +95,9 @@ static inline bool startsWith(const std::string &str,
     return str.substr(0, prefix.size()) == prefix;
 }
 
+template <typename T, typename PT> static inline bool isInstanceOf(PT *type) {
+    auto *p = dynamic_cast<T *>(type);
+    return p != nullptr;
+}
+
 #endif // UTILS_H

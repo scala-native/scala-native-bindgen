@@ -27,18 +27,18 @@ object ReservedWordsHelpers {
 
   implicit class struct_object_ops(val p: native.Ptr[struct_object]) extends AnyVal {
     def `yield`: `match` = !p._1
-    def `yield_=`(value: `match`):Unit = !p._1 = value
+    def `yield_=`(value: `match`): Unit = !p._1 = value
     def `val`: native.CInt = !p._2
-    def `val_=`(value: native.CInt):Unit = !p._2 = value
+    def `val_=`(value: native.CInt): Unit = !p._2 = value
   }
 
   def struct_object()(implicit z: native.Zone): native.Ptr[struct_object] = native.alloc[struct_object]
 
   implicit class struct_finally_ops(val p: native.Ptr[struct_finally]) extends AnyVal {
     def `val`: `def` = !p._1
-    def `val_=`(value: `def`):Unit = !p._1 = value
+    def `val_=`(value: `def`): Unit = !p._1 = value
     def `finally`: `lazy` = !p._2
-    def `finally_=`(value: `lazy`):Unit = !p._2 = value
+    def `finally_=`(value: `lazy`): Unit = !p._2 = value
   }
 
   def struct_finally()(implicit z: native.Zone): native.Ptr[struct_finally] = native.alloc[struct_finally]

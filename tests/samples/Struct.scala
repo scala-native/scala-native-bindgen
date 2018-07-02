@@ -22,18 +22,18 @@ object StructHelpers {
 
   implicit class struct_point_ops(val p: native.Ptr[struct_point]) extends AnyVal {
     def x: native.CInt = !p._1
-    def x_=(value: native.CInt):Unit = !p._1 = value
+    def x_=(value: native.CInt): Unit = !p._1 = value
     def y: native.CInt = !p._2
-    def y_=(value: native.CInt):Unit = !p._2 = value
+    def y_=(value: native.CInt): Unit = !p._2 = value
   }
 
   def struct_point()(implicit z: native.Zone): native.Ptr[struct_point] = native.alloc[struct_point]
 
   implicit class struct_structWithAnonymousStruct_ops(val p: native.Ptr[struct_structWithAnonymousStruct]) extends AnyVal {
     def a: native.CInt = !p._1
-    def a_=(value: native.CInt):Unit = !p._1 = value
-    def anonymousStruct: native.CArray[Byte, native.Nat._8] = !p._2
-    def anonymousStruct_=(value: native.CArray[Byte, native.Nat._8]):Unit = !p._2 = value
+    def a_=(value: native.CInt): Unit = !p._1 = value
+    def anonymousStruct: native.Ptr[native.CArray[Byte, native.Nat._8]] = p._2
+    def anonymousStruct_=(value: native.Ptr[native.CArray[Byte, native.Nat._8]]): Unit = !p._2 = !value
   }
 
   def struct_structWithAnonymousStruct()(implicit z: native.Zone): native.Ptr[struct_structWithAnonymousStruct] = native.alloc[struct_structWithAnonymousStruct]

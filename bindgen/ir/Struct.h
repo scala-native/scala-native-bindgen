@@ -12,6 +12,10 @@
 class Field : public TypeAndName {
   public:
     Field(std::string name, std::shared_ptr<Type> type);
+
+    std::string generateSetter(int fieldIndex);
+
+    std::string generateGetter(int fieldIndex);
 };
 
 class StructOrUnion {

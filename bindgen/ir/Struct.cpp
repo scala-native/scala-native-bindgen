@@ -6,7 +6,38 @@
 #include <utility>
 
 Field::Field(std::string name, std::shared_ptr<Type> type)
-    : TypeAndName(std::move(name), type) {}
+    : TypeAndName(std::move(name), std::move(type)) {}
+
+std::string Field::generateSetter(int fieldIndex) {
+    std::string setter = handleReservedWords(getName(), "_=");
+    std::string parameterType = type->str();
+    std::string value = "value";
+    if (isInstanceOf<ArrayType>(type.get()) ||
+        isInstanceOf<Struct>(type.get())) {
+        parameterType = "native.Ptr[" + parameterType + "]";
+        value = "!" + value;
+    }
+    std::stringstream s;
+    s << "    def " << setter << "(value: " + parameterType + "): Unit = !p._"
+      << std::to_string(fieldIndex + 1) << " = " << value;
+    return s.str();
+}
+
+std::string Field::generateGetter(int fieldIndex) {
+    std::string getter = handleReservedWords(getName());
+    std::string returnType = type->str();
+    std::string methodBody;
+    if (isInstanceOf<ArrayType>(type.get()) ||
+        isInstanceOf<Struct>(type.get())) {
+        returnType = "native.Ptr[" + returnType + "]";
+        methodBody = "p._" + std::to_string(fieldIndex + 1);
+    } else {
+        methodBody = "!p._" + std::to_string(fieldIndex + 1);
+    }
+    std::stringstream s;
+    s << "    def " << getter << ": " << returnType << " = " << methodBody;
+    return s.str();
+}
 
 StructOrUnion::StructOrUnion(std::string name, std::vector<Field *> fields)
     : name(std::move(name)), fields(std::move(fields)) {}
@@ -47,14 +78,8 @@ std::string Struct::generateHelperClass() const {
     int fieldIndex = 0;
     for (const auto &field : fields) {
         if (!field->getName().empty()) {
-            std::string getter = handleReservedWords(field->getName());
-            std::string setter = handleReservedWords(field->getName(), "_=");
-            std::shared_ptr<Type> ftype = field->getType();
-            s << "    def " << getter << ": " << ftype->str() << " = !p._"
-              << std::to_string(fieldIndex + 1) << "\n"
-              << "    def " << setter
-              << "(value: " + ftype->str() + "):Unit = !p._"
-              << std::to_string(fieldIndex + 1) << " = value\n";
+            s << field->generateGetter(fieldIndex) << "\n";
+            s << field->generateSetter(fieldIndex) << "\n";
         }
         fieldIndex++;
     }
