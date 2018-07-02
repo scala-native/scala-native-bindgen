@@ -9,7 +9,7 @@
  */
 class Type {
   public:
-    virtual ~Type();
+    virtual ~Type() = default;
 
     virtual std::string str() const;
 

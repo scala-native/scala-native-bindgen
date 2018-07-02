@@ -12,7 +12,7 @@ class TypeTranslator {
      * @param tpe The type to translate
      * @param avoid A type to avoid, useful to avoid cyclic definitions inside
      * structs, unions, ...
-     * @return the type translated
+     * @return the type translated or nullptr if type is function type.
      */
     std::shared_ptr<Type> translate(const clang::QualType &tpe,
                                     const std::string * = nullptr);

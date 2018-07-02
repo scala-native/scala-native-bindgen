@@ -22,7 +22,8 @@ class IR {
     void addFunction(std::string name, std::vector<Parameter *> parameters,
                      std::shared_ptr<Type> retType, bool isVariadic);
 
-    void addTypeDef(std::string name, std::shared_ptr<Type> type);
+    std::shared_ptr<TypeDef> addTypeDef(std::string name,
+                                        std::shared_ptr<Type> type);
 
     /**
      * @return type alias for the enum
@@ -37,10 +38,22 @@ class IR {
     addStruct(std::string name, std::vector<Field *> fields, uint64_t typeSize);
 
     /**
+     * Add struct for which TypeDef already exists
+     */
+    void addStruct(std::string name, std::vector<Field *> fields,
+                   uint64_t typeSize, const std::shared_ptr<TypeDef> &typeDef);
+
+    /**
      * @return type alias for the union
      */
     std::shared_ptr<Type>
     addUnion(std::string name, std::vector<Field *> fields, uint64_t maxSize);
+
+    /**
+     * Add union for which TypeDef already exists
+     */
+    void addUnion(std::string name, std::vector<Field *> fields,
+                  uint64_t maxSize, const std::shared_ptr<TypeDef> &typeDef);
 
     void addLiteralDefine(std::string name, std::string literal,
                           std::shared_ptr<Type> type);
@@ -137,8 +150,6 @@ class IR {
     template <typename T>
     T getDeclarationWithName(std::vector<T> &declarations,
                              const std::string &name);
-
-    template <typename T> void clearVector(std::vector<T> v);
 
     std::string libName;    // name of the library
     std::string linkName;   // name of the library to link with

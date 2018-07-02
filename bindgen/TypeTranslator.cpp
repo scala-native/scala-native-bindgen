@@ -30,6 +30,7 @@ TypeTranslator::TypeTranslator(clang::ASTContext *ctx_, IR &ir)
     typeMap["char32_t"] = "native.CChar32";
     typeMap["float"] = "native.CFloat";
     typeMap["double"] = "native.CDouble";
+    typeMap["long double"] = "native.CDouble";
 }
 
 std::shared_ptr<Type>
@@ -93,8 +94,16 @@ TypeTranslator::translateStructOrUnionOrEnum(const clang::QualType &qtpe) {
          * Use type alias instead struct type */
         return (*it).second;
     }
-    /* type has typedef alias */
-    return ir.getTypeDefWithName(name);
+    std::shared_ptr<TypeDef> typeDef = ir.getTypeDefWithName(name);
+    if (typeDef) {
+        /* type has typedef alias */
+        return typeDef;
+    }
+    /* type is not yet defined.
+     * nullptr will be replaced by actual type */
+    typeDef = ir.addTypeDef(replaceChar(name, " ", "_"), nullptr);
+    addAlias(name, typeDef);
+    return typeDef;
 }
 
 std::shared_ptr<Type>
@@ -136,6 +145,10 @@ std::shared_ptr<Type> TypeTranslator::translate(const clang::QualType &qtpe,
         assert(sizeInBits % 8 == 0);
         return std::make_shared<ArrayType>(
             std::make_shared<PrimitiveType>("Byte"), sizeInBits / 8);
+    }
+
+    if (tpe->isFunctionType()) {
+        return nullptr;
     }
 
     if (tpe->isFunctionPointerType()) {

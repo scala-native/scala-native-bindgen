@@ -12,8 +12,10 @@ void IR::addFunction(std::string name, std::vector<Parameter *> parameters,
                                                    retType, isVariadic));
 }
 
-void IR::addTypeDef(std::string name, std::shared_ptr<Type> type) {
+std::shared_ptr<TypeDef> IR::addTypeDef(std::string name,
+                                        std::shared_ptr<Type> type) {
     typeDefs.push_back(std::make_shared<TypeDef>(std::move(name), type));
+    return typeDefs.back();
 }
 
 std::shared_ptr<Type> IR::addEnum(std::string name, const std::string &type,
@@ -38,6 +40,14 @@ std::shared_ptr<Type> IR::addStruct(std::string name,
     return typeDefs.back();
 }
 
+void IR::addStruct(std::string name, std::vector<Field *> fields,
+                   uint64_t typeSize, const std::shared_ptr<TypeDef> &typeDef) {
+    std::shared_ptr<Struct> s =
+        std::make_shared<Struct>(std::move(name), std::move(fields), typeSize);
+    structs.push_back(s);
+    typeDef.get()->setType(s);
+}
+
 std::shared_ptr<Type>
 IR::addUnion(std::string name, std::vector<Field *> fields, uint64_t maxSize) {
     std::shared_ptr<Union> u =
@@ -45,6 +55,14 @@ IR::addUnion(std::string name, std::vector<Field *> fields, uint64_t maxSize) {
     unions.push_back(u);
     typeDefs.push_back(u->generateTypeDef());
     return typeDefs.back();
+}
+
+void IR::addUnion(std::string name, std::vector<Field *> fields,
+                  uint64_t maxSize, const std::shared_ptr<TypeDef> &typeDef) {
+    std::shared_ptr<Union> u =
+        std::make_shared<Union>(std::move(name), std::move(fields), maxSize);
+    unions.push_back(u);
+    typeDef.get()->setType(u);
 }
 
 void IR::addLiteralDefine(std::string name, std::string literal,
@@ -317,7 +335,6 @@ T IR::getDeclarationWithName(std::vector<T> &declarations,
             return declaration;
         }
     }
-    llvm::errs() << "Failed to get declaration for " << name << "\n";
     return nullptr;
 }
 

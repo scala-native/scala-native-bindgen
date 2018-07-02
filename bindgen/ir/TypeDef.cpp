@@ -2,9 +2,15 @@
 #include "../Utils.h"
 
 TypeDef::TypeDef(std::string name, std::shared_ptr<Type> type)
-    : TypeAndName(std::move(name), type) {}
+    : TypeAndName(std::move(name), std::move(type)) {}
 
 llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const TypeDef &typeDef) {
+    if (!typeDef.getType()) {
+        llvm::errs() << "Error: type declaration for " << typeDef.getName()
+                     << " was not found.\n";
+        llvm::errs().flush();
+        return s;
+    }
     s << "  type " + handleReservedWords(typeDef.name) + " = " +
              typeDef.getType()->str() + "\n";
     return s;

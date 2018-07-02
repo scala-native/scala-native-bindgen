@@ -46,7 +46,9 @@ bool TreeVisitor::VisitTypedefDecl(clang::TypedefDecl *tpdef) {
 
     std::shared_ptr<Type> type =
         typeTranslator.translate(tpdef->getUnderlyingType());
-    ir.addTypeDef(name, type);
+    if (type) {
+        ir.addTypeDef(name, type);
+    }
     return true;
 }
 
@@ -86,8 +88,8 @@ bool TreeVisitor::VisitRecordDecl(clang::RecordDecl *record) {
         name = record->getTypedefNameForAnonDecl()->getNameAsString();
     }
 
-    if (record->isUnion() && !record->isAnonymousStructOrUnion() &&
-        !name.empty()) {
+    if (record->isUnion() && record->isThisDeclarationADefinition() &&
+        !record->isAnonymousStructOrUnion() && !name.empty()) {
         handleUnion(record, name);
         return true;
 
@@ -115,7 +117,16 @@ void TreeVisitor::handleUnion(clang::RecordDecl *record, std::string name) {
         fields.push_back(new Field(fname, ftype));
     }
 
-    std::shared_ptr<Type> alias = ir.addUnion(name, std::move(fields), maxSize);
+    std::shared_ptr<Type> alias = nullptr;
+
+    std::shared_ptr<TypeDef> typeDef = ir.getTypeDefWithName("union_" + name);
+    if (typeDef) {
+        /* typedef for this union already exists */
+        ir.addUnion(name, std::move(fields), maxSize, typeDef);
+        alias = typeDef;
+    } else {
+        alias = ir.addUnion(name, std::move(fields), maxSize);
+    }
 
     typeTranslator.addAlias("union " + name, alias);
 }
@@ -155,8 +166,16 @@ void TreeVisitor::handleStruct(clang::RecordDecl *record, std::string name) {
 
     uint64_t sizeInBits = astContext->getTypeSize(record->getTypeForDecl());
     assert(sizeInBits % 8 == 0);
-    std::shared_ptr<Type> alias =
-        ir.addStruct(name, std::move(fields), sizeInBits / 8);
+    std::shared_ptr<Type> alias = nullptr;
+
+    std::shared_ptr<TypeDef> typeDef = ir.getTypeDefWithName(newName);
+    if (typeDef) {
+        /* typedef for this struct already exists */
+        alias = typeDef;
+        ir.addStruct(name, std::move(fields), sizeInBits / 8, typeDef);
+    } else {
+        alias = ir.addStruct(name, std::move(fields), sizeInBits / 8);
+    }
 
     typeTranslator.addAlias("struct " + name, alias);
 }

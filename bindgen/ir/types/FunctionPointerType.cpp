@@ -4,7 +4,7 @@
 FunctionPointerType::FunctionPointerType(
     std::shared_ptr<Type> returnType,
     const std::vector<std::shared_ptr<Type>> &parametersTypes, bool isVariadic)
-    : returnType(returnType), parametersTypes(parametersTypes),
+    : returnType(std::move(returnType)), parametersTypes(parametersTypes),
       isVariadic(isVariadic) {}
 
 std::string FunctionPointerType::str() const {
@@ -30,12 +30,10 @@ bool FunctionPointerType::usesType(std::shared_ptr<Type> type) const {
         return true;
     }
 
-    for (auto parameterType : parametersTypes) {
+    for (const auto &parameterType : parametersTypes) {
         if (parameterType == type) {
             return true;
         }
     }
     return false;
 }
-
-FunctionPointerType::~FunctionPointerType() {}

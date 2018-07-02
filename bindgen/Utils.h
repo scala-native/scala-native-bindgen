@@ -100,4 +100,13 @@ template <typename T, typename PT> static inline bool isInstanceOf(PT *type) {
     return p != nullptr;
 }
 
+static inline std::string replaceChar(std::string str, const std::string &c1,
+                                      const std::string &c2) {
+    auto f = str.find(c1);
+    if (f != std::string::npos) {
+        return str.replace(f, c1.length(), c2);
+    }
+    return str;
+}
+
 #endif // UTILS_H

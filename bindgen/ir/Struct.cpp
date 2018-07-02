@@ -3,7 +3,6 @@
 #include "types/ArrayType.h"
 #include "types/PrimitiveType.h"
 #include <sstream>
-#include <utility>
 
 Field::Field(std::string name, std::shared_ptr<Type> type)
     : TypeAndName(std::move(name), std::move(type)) {}
