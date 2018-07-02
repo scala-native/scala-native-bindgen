@@ -4,3 +4,5 @@
 void setIntValue(union values *v) { v->i = 10; }
 
 void setLongValue(union values *v) { v->l = 10000000000; }
+
+int getUnionSize() { return sizeof(union values); }

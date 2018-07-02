@@ -37,10 +37,8 @@ std::shared_ptr<TypeDef> Struct::generateTypeDef() {
 }
 
 std::string Struct::generateHelperClass() const {
-    if (!hasHelperMethods()) {
-        /* struct is empty or represented as an array */
-        return "";
-    }
+    assert(hasHelperMethods());
+    /* struct is not empty and not represented as an array */
     std::stringstream s;
     std::string type = getAliasType();
     s << "  implicit class " << type << "_ops(val p: native.Ptr[" << type

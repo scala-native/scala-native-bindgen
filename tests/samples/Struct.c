@@ -7,3 +7,13 @@ point_s getPoint() {
     point->y = 20;
     return point;
 }
+
+int getBigStructSize() { return sizeof(struct bigStruct); }
+
+char getCharFromAnonymousStruct(struct structWithAnonymousStruct *s) {
+    return s->anonymousStruct.c;
+}
+
+char getIntFromAnonymousStruct(struct structWithAnonymousStruct *s) {
+    return s->anonymousStruct.i;
+}

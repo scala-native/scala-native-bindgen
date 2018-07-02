@@ -9,6 +9,7 @@ object Union {
   type union_values = native.CArray[Byte, native.Nat._8]
   def setIntValue(v: native.Ptr[union_values]): Unit = native.extern
   def setLongValue(v: native.Ptr[union_values]): Unit = native.extern
+  def getUnionSize(): native.CInt = native.extern
 }
 
 import Union._
