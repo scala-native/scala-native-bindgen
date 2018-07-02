@@ -1,9 +1,8 @@
 package org.scalanative.bindgen
 
-import java.io.{File, PrintWriter}
+import java.io.File
 import org.scalatest.FunSpec
 import scala.io.Source
-import scala.sys.process._
 
 class BindgenSpec extends FunSpec {
   describe("Bindgen") {
@@ -19,24 +18,15 @@ class BindgenSpec extends FunSpec {
     }
 
     def bindgen(inputFile: File, name: String, outputFile: File): Unit = {
-      val cmd = Seq(
-        bindgenPath,
-        inputFile.getAbsolutePath,
-        "--name",
-        name,
-        "--link",
-        "bindgentests",
-        "--package",
-        "org.scalanative.bindgen.samples",
-        "--exclude-prefix=__",
-        "--"
-      )
-      val output = Process(cmd).lineStream.mkString("\n")
-
-      new PrintWriter(outputFile) {
-        write(output)
-        close()
-      }
+      Bindgen()
+        .bindgenExecutable(new File(bindgenPath))
+        .header(inputFile)
+        .name(name)
+        .link("bindgentests")
+        .packageName("org.scalanative.bindgen.samples")
+        .excludePrefix("__")
+        .generate()
+        .writeToFile(outputFile)
     }
 
     def contentOf(file: File) =

@@ -18,6 +18,7 @@ inThisBuild(
 
 val tests = project
   .in(file("tests"))
+  .dependsOn(tools)
   .aggregate(samples)
   .settings(
     fork in Test := true,
@@ -85,3 +86,5 @@ lazy val samples = project
       (Test / compile).value
     }
   )
+
+lazy val tools = project in file("tools")
