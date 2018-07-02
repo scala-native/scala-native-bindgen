@@ -132,9 +132,10 @@ std::shared_ptr<Type> TypeTranslator::translate(const clang::QualType &qtpe,
     if (typeEquals(tpe, avoid)) {
         // This is a type that we want to avoid the usage.
         // Êxample: A struct that has a pointer to itself
-        uint64_t size = ctx->getTypeSize(tpe);
+        uint64_t sizeInBits = ctx->getTypeSize(tpe);
+        assert(sizeInBits % 8 == 0);
         return std::make_shared<ArrayType>(
-            std::make_shared<PrimitiveType>("Byte"), size);
+            std::make_shared<PrimitiveType>("Byte"), sizeInBits / 8);
     }
 
     if (tpe->isFunctionPointerType()) {
