@@ -2,7 +2,7 @@ package org.scalanative.bindgen
 
 import java.io.File
 
-import scala.collection.immutable
+import scala.collection.immutable.Seq
 import scala.sys.process.Process
 
 sealed trait Bindgen {
@@ -65,8 +65,8 @@ object Bindgen {
       name: Option[String] = None,
       packageName: Option[String] = None,
       excludePrefix: Option[String] = None,
-      extraArg: immutable.Seq[String] = immutable.Seq[String](),
-      extraArgBefore: immutable.Seq[String] = immutable.Seq[String]())
+      extraArg: Seq[String] = Seq.empty,
+      extraArgBefore: Seq[String] = Seq.empty)
       extends Bindgen {
 
     def bindgenExecutable(executable: File): Bindgen = {
@@ -109,38 +109,26 @@ object Bindgen {
       copy(extraArgBefore = extraArgBefore ++ args)
     }
 
-    private def validateFields(): Unit = {
+    def generate(): Bindings = {
       require(executable.isDefined, "The executable must be specified")
       require(header.isDefined, "Header file must be specified")
       require(library.isDefined, "Library name must be specified")
-    }
 
-    def generate(): Bindings = {
-      validateFields()
-
-      val name = this.name.getOrElse(library.get)
+      def withArgs(arg: String, values: Iterable[String]) =
+        values.toSeq.flatMap(Seq(arg, _))
 
       var cmd = Seq(
         executable.get.getAbsolutePath,
-        header.get.getAbsolutePath,
         "--name",
-        name,
+        name.getOrElse(library.get),
         "--link",
         library.get
-      )
-
-      if (packageName.isDefined) {
-        cmd ++= Seq("--package", packageName.get)
-      }
-
-      if (excludePrefix.isDefined) {
-        cmd ++= Seq("--exclude-prefix", excludePrefix.get)
-      }
-
-      extraArg.foreach(arg => cmd ++= Seq("--extra-arg", arg))
-      extraArgBefore.foreach(arg => cmd ++= Seq("--extra-arg-before", arg))
-
-      cmd :+= "--"
+      ) ++
+        withArgs("--package", packageName) ++
+        withArgs("--exclude-prefix", excludePrefix) ++
+        withArgs("--extra-arg", extraArg) ++
+        withArgs("--extra-arg-before", extraArgBefore) ++
+        Seq(header.get.getAbsolutePath, "--")
 
       val output = Process(cmd).lineStream.mkString("\n")
 
