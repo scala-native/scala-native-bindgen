@@ -71,9 +71,6 @@ bool TreeVisitor::VisitEnumDecl(clang::EnumDecl *enumdecl) {
 
     std::shared_ptr<Type> alias =
         ir.addEnum(name, scalaType, std::move(enumerators));
-    if (alias != nullptr) {
-        typeTranslator.addAlias("enum " + name, alias);
-    }
 
     return true;
 }
@@ -127,8 +124,6 @@ void TreeVisitor::handleUnion(clang::RecordDecl *record, std::string name) {
     } else {
         alias = ir.addUnion(name, std::move(fields), maxSize);
     }
-
-    typeTranslator.addAlias("union " + name, alias);
 }
 
 void TreeVisitor::handleStruct(clang::RecordDecl *record, std::string name) {
@@ -176,8 +171,6 @@ void TreeVisitor::handleStruct(clang::RecordDecl *record, std::string name) {
     } else {
         alias = ir.addStruct(name, std::move(fields), sizeInBits / 8);
     }
-
-    typeTranslator.addAlias("struct " + name, alias);
 }
 
 bool TreeVisitor::VisitVarDecl(clang::VarDecl *varDecl) {

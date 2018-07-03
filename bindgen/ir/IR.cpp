@@ -322,6 +322,11 @@ std::shared_ptr<Variable> IR::addVariable(const std::string &name,
 }
 
 std::shared_ptr<TypeDef> IR::getTypeDefWithName(const std::string &name) {
+    /* nullptr is returned in 2 cases:
+     * 1. TypeTranslator translates opaque struct/union type for which TypeDef
+     *    was not created.
+     * 2. TreeVisitor visits struct/union declaration and it checks whether a
+     *    TypeDef already exists for it.*/
     return getDeclarationWithName(typeDefs, name);
 }
 

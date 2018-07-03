@@ -17,8 +17,6 @@ class TypeTranslator {
     std::shared_ptr<Type> translate(const clang::QualType &tpe,
                                     const std::string * = nullptr);
 
-    void addAlias(std::string cName, std::shared_ptr<Type> type);
-
     std::string getTypeFromTypeMap(std::string cType);
 
   private:
@@ -29,11 +27,6 @@ class TypeTranslator {
      * Primitive types
      */
     std::map<std::string, std::string> typeMap;
-
-    /**
-     * Maps C struct, union or enum name to Type alias
-     */
-    std::map<std::string, std::shared_ptr<Type>> aliasesMap;
 
     std::shared_ptr<Type>
     translateStructOrUnionOrEnum(const clang::QualType &qtpe);

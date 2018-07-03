@@ -87,22 +87,22 @@ TypeTranslator::translatePointer(const clang::QualType &pte,
 std::shared_ptr<Type>
 TypeTranslator::translateStructOrUnionOrEnum(const clang::QualType &qtpe) {
     std::string name = qtpe.getUnqualifiedType().getAsString();
+    std::string nameWithoutSpace = replaceChar(name, " ", "_");
 
-    auto it = aliasesMap.find(name);
-    if (it != aliasesMap.end()) {
-        /* name contains space: struct <name>.
-         * Use type alias instead struct type */
-        return (*it).second;
-    }
-    std::shared_ptr<TypeDef> typeDef = ir.getTypeDefWithName(name);
+    /* If the struct was already declared then there is a TypeDef instance
+     * with appropriate name.
+     *
+     * If there is no such TypeDef then the type is opaque and TypeDef with
+     * nullptr will be generated for the type. */
+
+    std::shared_ptr<TypeDef> typeDef = ir.getTypeDefWithName(nameWithoutSpace);
     if (typeDef) {
-        /* type has typedef alias */
         return typeDef;
     }
     /* type is not yet defined.
-     * nullptr will be replaced by actual type */
-    typeDef = ir.addTypeDef(replaceChar(name, " ", "_"), nullptr);
-    addAlias(name, typeDef);
+     * TypeDef with nullptr will be created.
+     * nullptr will be replaced by actual type when the type is declared. */
+    typeDef = ir.addTypeDef(nameWithoutSpace, nullptr);
     return typeDef;
 }
 
@@ -182,10 +182,6 @@ std::shared_ptr<Type> TypeTranslator::translate(const clang::QualType &qtpe,
                 qtpe.getUnqualifiedType().getAsString());
         }
     }
-}
-
-void TypeTranslator::addAlias(std::string cName, std::shared_ptr<Type> type) {
-    aliasesMap[cName] = type;
 }
 
 std::string TypeTranslator::getTypeFromTypeMap(std::string cType) {
