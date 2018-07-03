@@ -1,7 +1,8 @@
+typedef struct points points;
+
 struct point;
 struct point *move(struct point *point, int x, int y);
 
-typedef struct points points;
 typedef union u u;
 
 union u *processPoints(points *p);

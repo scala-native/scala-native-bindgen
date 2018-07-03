@@ -31,29 +31,11 @@ class IR {
     std::shared_ptr<Type> addEnum(std::string name, const std::string &type,
                                   std::vector<Enumerator> enumerators);
 
-    /**
-     * @return type alias for the struct
-     */
-    std::shared_ptr<Type>
-    addStruct(std::string name, std::vector<Field *> fields, uint64_t typeSize);
-
-    /**
-     * Add struct for which TypeDef already exists
-     */
     void addStruct(std::string name, std::vector<Field *> fields,
-                   uint64_t typeSize, const std::shared_ptr<TypeDef> &typeDef);
+                   uint64_t typeSize);
 
-    /**
-     * @return type alias for the union
-     */
-    std::shared_ptr<Type>
-    addUnion(std::string name, std::vector<Field *> fields, uint64_t maxSize);
-
-    /**
-     * Add union for which TypeDef already exists
-     */
     void addUnion(std::string name, std::vector<Field *> fields,
-                  uint64_t maxSize, const std::shared_ptr<TypeDef> &typeDef);
+                  uint64_t maxSize);
 
     void addLiteralDefine(std::string name, std::string literal,
                           std::shared_ptr<Type> type);

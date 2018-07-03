@@ -30,39 +30,32 @@ std::shared_ptr<Type> IR::addEnum(std::string name, const std::string &type,
     return nullptr;
 }
 
-std::shared_ptr<Type> IR::addStruct(std::string name,
-                                    std::vector<Field *> fields,
-                                    uint64_t typeSize) {
-    std::shared_ptr<Struct> s =
-        std::make_shared<Struct>(std::move(name), std::move(fields), typeSize);
-    structs.push_back(s);
-    typeDefs.push_back(s->generateTypeDef());
-    return typeDefs.back();
-}
-
 void IR::addStruct(std::string name, std::vector<Field *> fields,
-                   uint64_t typeSize, const std::shared_ptr<TypeDef> &typeDef) {
+                   uint64_t typeSize) {
     std::shared_ptr<Struct> s =
-        std::make_shared<Struct>(std::move(name), std::move(fields), typeSize);
+        std::make_shared<Struct>(name, std::move(fields), typeSize);
     structs.push_back(s);
-    typeDef.get()->setType(s);
-}
-
-std::shared_ptr<Type>
-IR::addUnion(std::string name, std::vector<Field *> fields, uint64_t maxSize) {
-    std::shared_ptr<Union> u =
-        std::make_shared<Union>(std::move(name), std::move(fields), maxSize);
-    unions.push_back(u);
-    typeDefs.push_back(u->generateTypeDef());
-    return typeDefs.back();
+    std::shared_ptr<TypeDef> typeDef = getTypeDefWithName("struct_" + name);
+    if (typeDef) {
+        /* the struct type used to be opaque type, typeDef contains nullptr */
+        typeDef.get()->setType(s);
+    } else {
+        typeDefs.push_back(s->generateTypeDef());
+    }
 }
 
 void IR::addUnion(std::string name, std::vector<Field *> fields,
-                  uint64_t maxSize, const std::shared_ptr<TypeDef> &typeDef) {
+                  uint64_t maxSize) {
     std::shared_ptr<Union> u =
-        std::make_shared<Union>(std::move(name), std::move(fields), maxSize);
+        std::make_shared<Union>(name, std::move(fields), maxSize);
     unions.push_back(u);
-    typeDef.get()->setType(u);
+    std::shared_ptr<TypeDef> typeDef = getTypeDefWithName("union_" + name);
+    if (typeDef) {
+        /* the union type used to be opaque type, typeDef contains nullptr */
+        typeDef.get()->setType(u);
+    } else {
+        typeDefs.push_back(u->generateTypeDef());
+    }
 }
 
 void IR::addLiteralDefine(std::string name, std::string literal,

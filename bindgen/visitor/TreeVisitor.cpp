@@ -114,16 +114,7 @@ void TreeVisitor::handleUnion(clang::RecordDecl *record, std::string name) {
         fields.push_back(new Field(fname, ftype));
     }
 
-    std::shared_ptr<Type> alias = nullptr;
-
-    std::shared_ptr<TypeDef> typeDef = ir.getTypeDefWithName("union_" + name);
-    if (typeDef) {
-        /* typedef for this union already exists */
-        ir.addUnion(name, std::move(fields), maxSize, typeDef);
-        alias = typeDef;
-    } else {
-        alias = ir.addUnion(name, std::move(fields), maxSize);
-    }
+    ir.addUnion(name, std::move(fields), maxSize);
 }
 
 void TreeVisitor::handleStruct(clang::RecordDecl *record, std::string name) {
@@ -161,16 +152,8 @@ void TreeVisitor::handleStruct(clang::RecordDecl *record, std::string name) {
 
     uint64_t sizeInBits = astContext->getTypeSize(record->getTypeForDecl());
     assert(sizeInBits % 8 == 0);
-    std::shared_ptr<Type> alias = nullptr;
 
-    std::shared_ptr<TypeDef> typeDef = ir.getTypeDefWithName(newName);
-    if (typeDef) {
-        /* typedef for this struct already exists */
-        alias = typeDef;
-        ir.addStruct(name, std::move(fields), sizeInBits / 8, typeDef);
-    } else {
-        alias = ir.addStruct(name, std::move(fields), sizeInBits / 8);
-    }
+    ir.addStruct(name, std::move(fields), sizeInBits / 8);
 }
 
 bool TreeVisitor::VisitVarDecl(clang::VarDecl *varDecl) {

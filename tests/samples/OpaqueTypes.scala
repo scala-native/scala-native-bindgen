@@ -6,9 +6,9 @@ import scala.scalanative.native._
 @native.link("bindgentests")
 @native.extern
 object OpaqueTypes {
-  type struct_point = native.CStruct2[native.CInt, native.CInt]
   type struct_points = native.CStruct2[native.Ptr[struct_point], native.Ptr[struct_point]]
   type points = struct_points
+  type struct_point = native.CStruct2[native.CInt, native.CInt]
   type union_u = native.CArray[Byte, native.Nat._4]
   type u = union_u
   def move(point: native.Ptr[struct_point], x: native.CInt, y: native.CInt): native.Ptr[struct_point] = native.extern
