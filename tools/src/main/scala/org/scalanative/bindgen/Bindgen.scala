@@ -58,15 +58,14 @@ sealed trait Bindgen {
 object Bindgen {
   def apply(): Bindgen = Impl()
 
-  private final case class Impl(
-      executable: Option[File] = None,
-      library: Option[String] = None,
-      header: Option[File] = None,
-      name: Option[String] = None,
-      packageName: Option[String] = None,
-      excludePrefix: Option[String] = None,
-      extraArg: Seq[String] = Seq.empty,
-      extraArgBefore: Seq[String] = Seq.empty)
+  private final case class Impl(executable: Option[File] = None,
+                                library: Option[String] = None,
+                                header: Option[File] = None,
+                                name: Option[String] = None,
+                                packageName: Option[String] = None,
+                                excludePrefix: Option[String] = None,
+                                extraArg: Seq[String] = Seq.empty,
+                                extraArgBefore: Seq[String] = Seq.empty)
       extends Bindgen {
 
     def bindgenExecutable(executable: File): Bindgen = {
@@ -112,18 +111,18 @@ object Bindgen {
     def generate(): Bindings = {
       require(executable.isDefined, "The executable must be specified")
       require(header.isDefined, "Header file must be specified")
-      require(library.isDefined, "Library name must be specified")
+
+      val nameOrLibrary = name.orElse(library)
+      require(nameOrLibrary.isDefined,
+              "Name must be specified when no library name is given")
 
       def withArgs(arg: String, values: Iterable[String]) =
         values.toSeq.flatMap(Seq(arg, _))
 
-      var cmd = Seq(
-        executable.get.getAbsolutePath,
-        "--name",
-        name.getOrElse(library.get),
-        "--link",
-        library.get
-      ) ++
+      var cmd = Seq(executable.get.getAbsolutePath) ++
+        withArgs("--name", nameOrLibrary) ++
+        withArgs("--link", library) ++
+        library.fold(Seq("--no-link"))(_ => Seq.empty) ++
         withArgs("--package", packageName) ++
         withArgs("--exclude-prefix", excludePrefix) ++
         withArgs("--extra-arg", extraArg) ++
