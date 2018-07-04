@@ -7,7 +7,7 @@ class ArrayType : public Type {
   public:
     ArrayType(std::shared_ptr<Type> elementsType, uint64_t size);
 
-    ~ArrayType() override;
+    ~ArrayType() override = default;
 
     bool usesType(std::shared_ptr<Type> type) const override;
 

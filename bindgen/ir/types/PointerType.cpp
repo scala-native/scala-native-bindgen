@@ -1,6 +1,6 @@
 #include "PointerType.h"
 
-PointerType::PointerType(std::shared_ptr<Type> type) : type(type) {}
+PointerType::PointerType(std::shared_ptr<Type> type) : type(std::move(type)) {}
 
 std::string PointerType::str() const {
     return "native.Ptr[" + type->str() + "]";
@@ -12,5 +12,3 @@ bool PointerType::usesType(std::shared_ptr<Type> type) const {
     }
     return this->type == type;
 }
-
-PointerType::~PointerType() {}

@@ -101,6 +101,16 @@ template <typename T, typename PT> static inline bool isInstanceOf(PT *type) {
     return p != nullptr;
 }
 
+static inline std::string replaceChar(const std::string &str,
+                                      const std::string &c1,
+                                      const std::string &c2) {
+    auto f = str.find(c1);
+    if (f != std::string::npos) {
+        return std::string(str).replace(f, c1.length(), c2);
+    }
+    return std::string(str);
+}
+
 /**
  * Types may be wrapper in a chain of typedefs.
  * @return true if given type is of type T or is an alias for type T.

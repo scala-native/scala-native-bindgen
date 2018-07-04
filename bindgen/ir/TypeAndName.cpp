@@ -2,7 +2,7 @@
 #include <clang/Tooling/Tooling.h>
 
 TypeAndName::TypeAndName(std::string name, std::shared_ptr<Type> type)
-    : name(std::move(name)), type(type) {}
+    : name(std::move(name)), type(std::move(type)) {}
 
 std::shared_ptr<Type> TypeAndName::getType() const { return type; }
 

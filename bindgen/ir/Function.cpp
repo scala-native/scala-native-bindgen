@@ -7,7 +7,7 @@ Parameter::Parameter(std::string name, std::shared_ptr<Type> type)
 Function::Function(const std::string &name, std::vector<Parameter *> parameters,
                    std::shared_ptr<Type> retType, bool isVariadic)
     : name(name), scalaName(name), parameters(std::move(parameters)),
-      retType(retType), isVariadic(isVariadic) {}
+      retType(std::move(retType)), isVariadic(isVariadic) {}
 
 llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const Function &func) {
     if (func.scalaName != func.name) {

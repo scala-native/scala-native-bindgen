@@ -12,8 +12,10 @@ void IR::addFunction(std::string name, std::vector<Parameter *> parameters,
                                                    retType, isVariadic));
 }
 
-void IR::addTypeDef(std::string name, std::shared_ptr<Type> type) {
+std::shared_ptr<TypeDef> IR::addTypeDef(std::string name,
+                                        std::shared_ptr<Type> type) {
     typeDefs.push_back(std::make_shared<TypeDef>(std::move(name), type));
+    return typeDefs.back();
 }
 
 std::shared_ptr<Type> IR::addEnum(std::string name, const std::string &type,
@@ -28,23 +30,32 @@ std::shared_ptr<Type> IR::addEnum(std::string name, const std::string &type,
     return nullptr;
 }
 
-std::shared_ptr<Type> IR::addStruct(std::string name,
-                                    std::vector<Field *> fields,
-                                    uint64_t typeSize) {
+void IR::addStruct(std::string name, std::vector<Field *> fields,
+                   uint64_t typeSize) {
     std::shared_ptr<Struct> s =
-        std::make_shared<Struct>(std::move(name), std::move(fields), typeSize);
+        std::make_shared<Struct>(name, std::move(fields), typeSize);
     structs.push_back(s);
-    typeDefs.push_back(s->generateTypeDef());
-    return typeDefs.back();
+    std::shared_ptr<TypeDef> typeDef = getTypeDefWithName("struct_" + name);
+    if (typeDef) {
+        /* the struct type used to be opaque type, typeDef contains nullptr */
+        typeDef.get()->setType(s);
+    } else {
+        typeDefs.push_back(s->generateTypeDef());
+    }
 }
 
-std::shared_ptr<Type>
-IR::addUnion(std::string name, std::vector<Field *> fields, uint64_t maxSize) {
+void IR::addUnion(std::string name, std::vector<Field *> fields,
+                  uint64_t maxSize) {
     std::shared_ptr<Union> u =
-        std::make_shared<Union>(std::move(name), std::move(fields), maxSize);
+        std::make_shared<Union>(name, std::move(fields), maxSize);
     unions.push_back(u);
-    typeDefs.push_back(u->generateTypeDef());
-    return typeDefs.back();
+    std::shared_ptr<TypeDef> typeDef = getTypeDefWithName("union_" + name);
+    if (typeDef) {
+        /* the union type used to be opaque type, typeDef contains nullptr */
+        typeDef.get()->setType(u);
+    } else {
+        typeDefs.push_back(u->generateTypeDef());
+    }
 }
 
 void IR::addLiteralDefine(std::string name, std::string literal,
@@ -304,6 +315,11 @@ std::shared_ptr<Variable> IR::addVariable(const std::string &name,
 }
 
 std::shared_ptr<TypeDef> IR::getTypeDefWithName(const std::string &name) {
+    /* nullptr is returned in 2 cases:
+     * 1. TypeTranslator translates opaque struct/union type for which TypeDef
+     *    was not created.
+     * 2. TreeVisitor visits struct/union declaration and it checks whether a
+     *    TypeDef already exists for it.*/
     return getDeclarationWithName(typeDefs, name);
 }
 
@@ -317,7 +333,6 @@ T IR::getDeclarationWithName(std::vector<T> &declarations,
             return declaration;
         }
     }
-    llvm::errs() << "Failed to get declaration for " << name << "\n";
     return nullptr;
 }
 

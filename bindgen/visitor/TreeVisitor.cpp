@@ -46,7 +46,9 @@ bool TreeVisitor::VisitTypedefDecl(clang::TypedefDecl *tpdef) {
 
     std::shared_ptr<Type> type =
         typeTranslator.translate(tpdef->getUnderlyingType());
-    ir.addTypeDef(name, type);
+    if (type) {
+        ir.addTypeDef(name, type);
+    }
     return true;
 }
 
@@ -69,9 +71,6 @@ bool TreeVisitor::VisitEnumDecl(clang::EnumDecl *enumdecl) {
 
     std::shared_ptr<Type> alias =
         ir.addEnum(name, scalaType, std::move(enumerators));
-    if (alias != nullptr) {
-        typeTranslator.addAlias("enum " + name, alias);
-    }
 
     return true;
 }
@@ -86,8 +85,8 @@ bool TreeVisitor::VisitRecordDecl(clang::RecordDecl *record) {
         name = record->getTypedefNameForAnonDecl()->getNameAsString();
     }
 
-    if (record->isUnion() && !record->isAnonymousStructOrUnion() &&
-        !name.empty()) {
+    if (record->isUnion() && record->isThisDeclarationADefinition() &&
+        !record->isAnonymousStructOrUnion() && !name.empty()) {
         handleUnion(record, name);
         return true;
 
@@ -115,9 +114,7 @@ void TreeVisitor::handleUnion(clang::RecordDecl *record, std::string name) {
         fields.push_back(new Field(fname, ftype));
     }
 
-    std::shared_ptr<Type> alias = ir.addUnion(name, std::move(fields), maxSize);
-
-    typeTranslator.addAlias("union " + name, alias);
+    ir.addUnion(name, std::move(fields), maxSize);
 }
 
 void TreeVisitor::handleStruct(clang::RecordDecl *record, std::string name) {
@@ -155,10 +152,8 @@ void TreeVisitor::handleStruct(clang::RecordDecl *record, std::string name) {
 
     uint64_t sizeInBits = astContext->getTypeSize(record->getTypeForDecl());
     assert(sizeInBits % 8 == 0);
-    std::shared_ptr<Type> alias =
-        ir.addStruct(name, std::move(fields), sizeInBits / 8);
 
-    typeTranslator.addAlias("struct " + name, alias);
+    ir.addStruct(name, std::move(fields), sizeInBits / 8);
 }
 
 bool TreeVisitor::VisitVarDecl(clang::VarDecl *varDecl) {
