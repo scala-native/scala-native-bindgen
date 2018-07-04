@@ -119,7 +119,7 @@ object Bindgen {
       def withArgs(arg: String, values: Iterable[String]) =
         values.toSeq.flatMap(Seq(arg, _))
 
-      var cmd = Seq(executable.get.getAbsolutePath) ++
+      val cmd = Seq(executable.get.getAbsolutePath) ++
         withArgs("--name", nameOrLibrary) ++
         withArgs("--link", library) ++
         library.fold(Seq("--no-link"))(_ => Seq.empty) ++
