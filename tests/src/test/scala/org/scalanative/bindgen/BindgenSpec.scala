@@ -22,7 +22,6 @@ class BindgenSpec extends FunSpec {
         .bindgenExecutable(new File(bindgenPath))
         .header(inputFile)
         .name(name)
-        .link("bindgentests")
         .packageName("org.scalanative.bindgen.samples")
         .excludePrefix("__")
         .generate()

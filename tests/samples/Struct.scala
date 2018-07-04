@@ -3,7 +3,6 @@ package org.scalanative.bindgen.samples
 import scala.scalanative._
 import scala.scalanative.native._
 
-@native.link("bindgentests")
 @native.extern
 object Struct {
   type struct_point = native.CStruct2[native.CInt, native.CInt]

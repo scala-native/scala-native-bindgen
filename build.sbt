@@ -44,8 +44,7 @@ lazy val samples = project
     Test / nativeLinkingOptions ++= {
       val rootDir = (ThisBuild / baseDirectory).value.getAbsoluteFile
       val cwd     = (Test / target).value.getAbsoluteFile / "bindgen"
-      val linker  = rootDir / "scripts" / "linker.sh"
-      Seq(s"-L$cwd", s"-fuse-ld=$linker")
+      cwd.*("*.o").get.map(_.getAbsolutePath)
     },
     Test / compile := {
       val log            = streams.value.log
@@ -64,7 +63,7 @@ lazy val samples = project
         Process(command, cwd) ! log
       }
 
-      val opaths = cpaths.map { cpath =>
+      cpaths.foreach { cpath =>
         val opath = abs(cwd / s"${cpath.getName}.o")
         val command = Seq(clangPath) ++ compileOptions ++ Seq("-c",
                                                               abs(cpath),
@@ -75,12 +74,6 @@ lazy val samples = project
           sys.error(s"Failed to compile $cpath")
         }
         opath
-      }
-
-      val archivePath = cwd / "libbindgentests.a"
-      val archive     = Seq("ar", "cr", abs(archivePath)) ++ opaths
-      if (run(archive) != 0) {
-        sys.error(s"Failed to create archive $archivePath")
       }
 
       (Test / compile).value
