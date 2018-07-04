@@ -18,13 +18,15 @@ docker run -v "$(pwd)":/src -v /usr/include:/usr/include \
 
 The docker image does not contain standard headers so it is important to
 mount all system include directories that are used by the header file
-passed to `scala-native-bindgen`. See the @github[docker-bindgen.sh](/scripts/docker-bindgen.sh) script for
-how to wrap the dockerized program. The `$CWD` of the container is
-`/src` which should be mounted from `$(pwd)` in case relative paths are
-used.
+passed to `scala-native-bindgen`.
+
+See the [docker-bindgen.sh] script for how to wrap the dockerized program.
+The `$CWD` of the container is `/src` which should be mounted from `$(pwd)`
+in case relative paths are used.
 
 Note, the `scalabindgen/scala-native-bindgen:latest` image is updated on
 each merge to the `master` branch.
 
  [Docker]: https://www.docker.com/
+ [docker-bindgen.sh]: https://github.com/kornilova-l/scala-native-bindgen/blob/master/scripts/docker-bindgen.sh
  
