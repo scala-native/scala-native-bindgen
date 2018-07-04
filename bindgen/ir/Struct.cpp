@@ -11,8 +11,8 @@ std::string Field::generateSetter(int fieldIndex) {
     std::string setter = handleReservedWords(getName(), "_=");
     std::string parameterType = type->str();
     std::string value = "value";
-    if (isInstanceOf<ArrayType>(type.get()) ||
-        isInstanceOf<Struct>(type.get())) {
+    if (isAliasForType<ArrayType>(type.get()) ||
+        isAliasForType<Struct>(type.get())) {
         parameterType = "native.Ptr[" + parameterType + "]";
         value = "!" + value;
     }
@@ -26,8 +26,8 @@ std::string Field::generateGetter(int fieldIndex) {
     std::string getter = handleReservedWords(getName());
     std::string returnType = type->str();
     std::string methodBody;
-    if (isInstanceOf<ArrayType>(type.get()) ||
-        isInstanceOf<Struct>(type.get())) {
+    if (isAliasForType<ArrayType>(type.get()) ||
+        isAliasForType<Struct>(type.get())) {
         returnType = "native.Ptr[" + returnType + "]";
         methodBody = "p._" + std::to_string(fieldIndex + 1);
     } else {

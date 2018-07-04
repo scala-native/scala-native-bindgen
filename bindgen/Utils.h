@@ -3,6 +3,7 @@
 
 #include <clang/AST/AST.h>
 
+#include "ir/TypeDef.h"
 #include "ir/types/Type.h"
 #include <algorithm>
 #include <cctype>
@@ -108,6 +109,17 @@ static inline std::string replaceChar(const std::string &str,
         return std::string(str).replace(f, c1.length(), c2);
     }
     return std::string(str);
+
+/**
+ * Types may be wrapper in a chain of typedefs.
+ * @return true if given type is of type T or is an alias for type T.
+ */
+template <typename T> static inline bool isAliasForType(Type *type) {
+    if (isInstanceOf<TypeDef>(type)) {
+        auto *typeDef = dynamic_cast<TypeDef *>(type);
+        return isAliasForType<T>(typeDef->getType().get());
+    }
+    return isInstanceOf<T>(type);
 }
 
 #endif // UTILS_H

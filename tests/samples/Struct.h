@@ -3,9 +3,22 @@ struct point {
     int y;
 };
 
+typedef struct point point;
+
+struct points {
+    struct point p1;
+    point p2;
+};
+
+enum pointIndex { X1, Y1, X2, Y2 };
+
+void setPoints(struct points *points, int x1, int y1, int x2, int y2);
+
+int getPoint(struct points *points, enum pointIndex pointIndex);
+
 typedef struct point *point_s;
 
-point_s getPoint();
+point_s createPoint();
 
 struct bigStruct {
     long one;
