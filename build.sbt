@@ -88,3 +88,13 @@ lazy val samples = project
   )
 
 lazy val tools = project in file("tools")
+
+lazy val docs = project
+  .in(file("docs"))
+  .enablePlugins(ParadoxPlugin)
+  .settings(
+    paradoxTheme := Some(builtinParadoxTheme("generic")),
+    paradoxProperties in Compile ++= Map(
+      "github.base_url" -> "https://github.com/kornilova-l/scala-native-bindgen/tree/master/"
+    )
+  )
