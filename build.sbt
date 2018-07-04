@@ -5,7 +5,7 @@ import java.nio.file.Path
 inThisBuild(
   Def.settings(
     organization := "org.scalanative.bindgen",
-    version := "0.1-SNAPSHOT",
+    version := "0.2-SNAPSHOT",
     scalaVersion := "2.11.12",
     scalacOptions ++= Seq(
       "-deprecation",
