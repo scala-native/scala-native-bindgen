@@ -3,6 +3,7 @@
 
 #include <clang/AST/AST.h>
 
+#include "ir/TypeDef.h"
 #include "ir/types/Type.h"
 #include <algorithm>
 #include <cctype>
@@ -98,6 +99,18 @@ static inline bool startsWith(const std::string &str,
 template <typename T, typename PT> static inline bool isInstanceOf(PT *type) {
     auto *p = dynamic_cast<T *>(type);
     return p != nullptr;
+}
+
+/**
+ * Types may be wrapper in a chain of typedefs.
+ * @return true if given type is of type T or is an alias for type T.
+ */
+template <typename T> static inline bool isAliasForType(Type *type) {
+    if (isInstanceOf<TypeDef>(type)) {
+        auto *typeDef = dynamic_cast<TypeDef *>(type);
+        return isAliasForType<T>(typeDef->getType().get());
+    }
+    return isInstanceOf<T>(type);
 }
 
 #endif // UTILS_H
