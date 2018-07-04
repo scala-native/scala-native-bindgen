@@ -109,6 +109,7 @@ static inline std::string replaceChar(const std::string &str,
         return std::string(str).replace(f, c1.length(), c2);
     }
     return std::string(str);
+}
 
 /**
  * Types may be wrapper in a chain of typedefs.
