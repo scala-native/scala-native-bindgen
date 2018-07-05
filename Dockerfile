@@ -13,6 +13,7 @@ RUN set -x \
             g++ openjdk-8-jdk-headless sbt cmake make curl git \
             zlib1g-dev \
             libgc-dev libunwind8-dev libre2-dev \
+            valgrind \
  && rm -rf /var/lib/apt/lists/*
 
 ARG LLVM_VERSION=6.0
