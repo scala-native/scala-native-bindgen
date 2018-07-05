@@ -98,7 +98,7 @@ lazy val docs = project
   .enablePlugins(GhpagesPlugin, ParadoxSitePlugin, ParadoxMaterialThemePlugin)
   .settings(
     paradoxProperties in Paradox ++= Map(
-      "github.base_url" -> s"${scmInfo.value.get.browseUrl}"
+      "github.base_url" -> scmInfo.value.get.browseUrl.toString
     ),
     ParadoxMaterialThemePlugin.paradoxMaterialThemeSettings(Paradox),
     paradoxMaterialTheme in Paradox := {
