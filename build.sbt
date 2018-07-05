@@ -13,7 +13,11 @@ inThisBuild(
       "-feature",
       "-encoding",
       "utf8"
-    )
+    ),
+    scmInfo := Some(
+      ScmInfo(url("https://github.com/kornilova-l/scala-native-bindgen"),
+              "scm:git:git@github.com:kornilova-l/scala-native-bindgen.git")),
+    git.remoteRepo := scmInfo.value.get.connection.replace("scm:git:", "")
   ))
 
 val tests = project
@@ -91,11 +95,15 @@ lazy val tools = project in file("tools")
 
 lazy val docs = project
   .in(file("docs"))
-  .enablePlugins(GhpagesPlugin, ParadoxSitePlugin)
+  .enablePlugins(GhpagesPlugin, ParadoxSitePlugin, ParadoxMaterialThemePlugin)
   .settings(
-    paradoxTheme := Some(builtinParadoxTheme("generic")),
     paradoxProperties in Paradox ++= Map(
-      "github.base_url" -> "https://github.com/kornilova-l/scala-native-bindgen/tree/master/"
+      "github.base_url" -> s"${scmInfo.value.get.browseUrl}"
     ),
-    git.remoteRepo := "git@github.com:kornilova-l/scala-native-bindgen.git"
+    ParadoxMaterialThemePlugin.paradoxMaterialThemeSettings(Paradox),
+    paradoxMaterialTheme in Paradox := {
+      (paradoxMaterialTheme in Paradox).value
+        .withRepository(scmInfo.value.get.browseUrl.toURI)
+        .withColor("indigo", "indigo")
+    }
   )
