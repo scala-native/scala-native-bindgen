@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+
+<head>
+<title>Using Generated Bindings · Scala Native Bindgen</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="description" content='docs'/>
+<link href="https://fonts.googleapis.com/css?family=Roboto:100normal,100italic,300normal,300italic,400normal,400italic,500normal,500italic,700normal,700italic,900normal,900italicc" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="../lib/jquery/jquery.min.js"></script>
+<script type="text/javascript" src="../js/page.js"></script>
+<script type="text/javascript" src="../js/groups.js"></script>
+<link rel="stylesheet" type="text/css" href="../lib/normalize.css/normalize.css"/>
+<link rel="stylesheet" type="text/css" href="../lib/foundation/dist/foundation.min.css"/>
+<link rel="stylesheet" type="text/css" href="../css/page.css"/>
+
+<!--
+<link rel="shortcut icon" href="../images/favicon.ico" />
+-->
+</head>
+
+<body>
+<div class="off-canvas-wrapper">
+<div class="off-canvas-wrapper-inner" data-off-canvas-wrapper>
+
+<div class="off-canvas position-left" id="off-canvas-menu" data-off-canvas>
+<nav class="off-canvas-nav">
+<div class="nav-home">
+<a href="../index.html" >
+<span class="home-icon">⌂</span>Scala Native Bindgen
+</a>
+<div class="version-number">
+0.1*
+</div>
+</div>
+<div class="nav-toc">
+<ul>
+  <li><a href="../obtaining-bindgen/index.html" class="page">Obtaining Bindgen</a>
+  <ul>
+    <li><a href="../obtaining-bindgen/docker-container.html" class="page">Using Docker Container</a></li>
+    <li><a href="../obtaining-bindgen/cmake.html" class="page">Building with <code>CMake</code></a></li>
+    <li><a href="../obtaining-bindgen/docker-compose.html" class="page">Building with <code>docker-compose</code></a></li>
+  </ul></li>
+  <li><a href="../command-line-usage/index.html" class="page">Command Line Usage</a></li>
+  <li><a href="../limitations/index.html" class="page">Limitations</a></li>
+  <li><a href="../using-generated-bindings/README.html" class="active page">Using Generated Bindings</a></li>
+</ul>
+</div>
+
+</nav>
+</div>
+
+<div class="off-canvas-content" data-off-canvas-content>
+
+<header class="site-header expanded row">
+<div class="small-12 column">
+<a href="#" class="off-canvas-toggle hide-for-medium" data-toggle="off-canvas-menu"><svg class="svg-icon svg-icon-menu" version="1.1" id="Menu" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 20 20" enable-background="new 0 0 20 20" xml:space="preserve"> <path class="svg-icon-menu-path" fill="#53CDEC" d="M16.4,9H3.6C3.048,9,3,9.447,3,10c0,0.553,0.048,1,0.6,1H16.4c0.552,0,0.6-0.447,0.6-1C17,9.447,16.952,9,16.4,9z M16.4,13
+H3.6C3.048,13,3,13.447,3,14c0,0.553,0.048,1,0.6,1H16.4c0.552,0,0.6-0.447,0.6-1C17,13.447,16.952,13,16.4,13z M3.6,7H16.4
+C16.952,7,17,6.553,17,6c0-0.553-0.048-1-0.6-1H3.6C3.048,5,3,5.447,3,6C3,6.553,3.048,7,3.6,7z"/></svg>
+</a>
+<div class="title"><a href="../index.html">Scala Native Bindgen</a></div>
+
+<!--
+<a href="https://www.example.com" class="logo show-for-medium">logo</a>
+-->
+</div>
+</header>
+
+<div class="expanded row">
+
+<div class="medium-3 large-2 show-for-medium column">
+<nav class="site-nav">
+<div class="nav-home">
+<a href="../index.html" >
+<span class="home-icon">⌂</span>Scala Native Bindgen
+</a>
+<div class="version-number">
+0.1*
+</div>
+</div>
+<div class="nav-toc">
+<ul>
+  <li><a href="../obtaining-bindgen/index.html" class="page">Obtaining Bindgen</a>
+  <ul>
+    <li><a href="../obtaining-bindgen/docker-container.html" class="page">Using Docker Container</a></li>
+    <li><a href="../obtaining-bindgen/cmake.html" class="page">Building with <code>CMake</code></a></li>
+    <li><a href="../obtaining-bindgen/docker-compose.html" class="page">Building with <code>docker-compose</code></a></li>
+  </ul></li>
+  <li><a href="../command-line-usage/index.html" class="page">Command Line Usage</a></li>
+  <li><a href="../limitations/index.html" class="page">Limitations</a></li>
+  <li><a href="../using-generated-bindings/README.html" class="active page">Using Generated Bindings</a></li>
+</ul>
+</div>
+
+</nav>
+</div>
+
+<div class="small-12 medium-9 large-10 column">
+<section class="site-content">
+
+<div class="page-header row">
+<div class="medium-12 show-for-medium column">
+<div class="nav-breadcrumbs">
+<ul>
+  <li><a href="../index.html">Scala Native Bindgen</a></li>
+  <li>Using Generated Bindings</li>
+</ul>
+</div>
+</div>
+</div>
+
+<div class="page-content row">
+<div class="small-12 large-9 column" id="docs">
+<h1><a href="#using-generated-bindings" name="using-generated-bindings" class="anchor"><span class="anchor-link"></span></a>Using Generated Bindings</h1>
+<p>Consider following header file:</p>
+<pre class="prettyprint"><code class="language-c">struct point {
+    float x;
+    float y;
+};
+
+struct vector {
+    struct point a;
+    struct point b;
+};
+
+struct vector *add(struct vector *v1, struct vector *v2);
+</code></pre>
+<p>Bindgen will generate type aliases for the structs, binding for function <code>add</code> and helper functions that make usage of structs easier.</p>
+<pre class="prettyprint"><code class="language-scala">import scala.scalanative._
+import scala.scalanative.native._
+
+@native.link(&quot;mylib&quot;)
+@native.extern
+object mylib {
+  type struct_point = native.CStruct2[native.CFloat, native.CFloat]
+  type struct_vector = native.CStruct2[struct_point, struct_point]
+  def add(v1: native.Ptr[struct_vector], v2: native.Ptr[struct_vector]): native.Ptr[struct_vector] = native.extern
+}
+
+import mylib._
+
+object mylibHelpers {
+
+  implicit class struct_point_ops(val p: native.Ptr[struct_point]) extends AnyVal {
+    def x: native.CFloat = !p._1
+    def x_=(value: native.CFloat): Unit = !p._1 = value
+    def y: native.CFloat = !p._2
+    def y_=(value: native.CFloat): Unit = !p._2 = value
+  }
+
+  def struct_point()(implicit z: native.Zone): native.Ptr[struct_point] = native.alloc[struct_point]
+
+  implicit class struct_vector_ops(val p: native.Ptr[struct_vector]) extends AnyVal {
+    def a: native.Ptr[struct_point] = p._1
+    def a_=(value: native.Ptr[struct_point]): Unit = !p._1 = !value
+    def b: native.Ptr[struct_point] = p._2
+    def b_=(value: native.Ptr[struct_point]): Unit = !p._2 = !value
+  }
+
+  def struct_vector()(implicit z: native.Zone): native.Ptr[struct_vector] = native.alloc[struct_vector]
+}
+</code></pre>
+<p>Let&rsquo;s write code that creates two vectors, adds them and prints resulting vector.</p>
+<p>First we need to create points for vectors. We will use <code>native.Zone</code> to allocate struct (more information on memory management can be found here: <a href="http://www.scala-native.org/en/latest/user/interop.html#memory-management">Scala Native memory management</a>).</p>
+<p>Helper object <code>mylibHelpers</code> contains function for struct allocation. To import it use <code>import mylibHelpers._</code></p>
+<p>Let&rsquo;s create points for first vector:</p>
+<pre class="prettyprint"><code class="language-scala">import mylibHelpers._
+import scala.scalanative.native.Zone
+
+object Hello extends App {
+  Zone { implicit zone =&gt;
+   val vec1p1 = struct_point()
+   val vec1p2 = struct_point()
+  }
+}
+</code></pre>
+<p>Now we want to set fields of created points. Scala Native provides access to fields by using <code>_N</code> methods where <code>N</code> is index of a field (see <a href="http://www.scala-native.org/en/latest/user/interop.html#memory-layout-types">Scala Native memory layout types</a>).</p>
+<p>Bindgen generates implicit helper classes that wrap calls to <code>_N</code> in functions with meaningful names. We already imported helper class, so we can use the functions:</p>
+<pre class="prettyprint"><code class="language-scala">vec1p1.x = 0
+vec1p1.y = 1
+
+vec1p2.x = 6
+vec1p2.y = 3
+</code></pre>
+<p>Lets create first vector. Note that <code>struct_vector</code> contains fields of type <code>struct_point</code> but setters accept variables of type <code>native.Ptr[struct_point]</code>. It helps to avoid Scala Native limitation that does not allow passing structs and arrays by value (see <a href="https://github.com/scala-native/scala-native/issues/555">scala-native/scala-native#555</a>).</p>
+<pre class="prettyprint"><code class="language-scala">val vec1 = struct_vector()
+vec1.a = vec1p1
+vec1.b = vec1p2
+</code></pre>
+<p>Repeat these steps to create second vector. Once both vectors are created we can call <code>add</code> function and print the result:</p>
+<pre class="prettyprint"><code class="language-scala">val vec3 = mylib.add(vec1, vec2)
+println(s&quot;(${vec3.a.x}, ${vec3.a.y}), (${vec3.b.x}, ${vec3.b.y})&quot;)
+</code></pre>
+<div class="source-github">
+The source code for this page can be found <a href="https://github.com/kornilova-l/scala-native-bindgen/tree/master/tree/master/docs/src/paradox/using-generated-bindings/README.md">here</a>.
+</div>
+
+</div>
+<div class="large-3 show-for-large column" data-sticky-container>
+</div>
+</div>
+
+</section>
+</div>
+
+</div>
+
+<footer class="site-footer">
+
+<section class="site-footer-nav">
+<div class="expanded row">
+<div class="small-12 large-offset-2 large-10 column">
+<div class="row site-footer-content">
+
+<div class="small-12 medium-4 large-3 text-center column">
+<div class="nav-links">
+<ul>
+<!-- <li><a href="https://www.example.com/products/">Products</a> -->
+</ul>
+</div>
+</div>
+
+</div>
+</div>
+</div>
+</section>
+
+<section class="site-footer-base">
+<div class="expanded row">
+<div class="small-12 large-offset-2 large-10 column">
+<div class="row site-footer-content">
+
+<div class="small-12 text-center large-9 column">
+
+<!--
+<div class="copyright">
+<span class="text">&copy; 2018</span>
+<a href="https://www.example.com" class="logo">logo</a>
+</div>
+-->
+</div>
+
+</div>
+</div>
+</div>
+</section>
+</footer>
+
+</div>
+</div>
+</div>
+</body>
+
+<script type="text/javascript" src="../lib/foundation/dist/foundation.min.js"></script>
+<script type="text/javascript">jQuery(document).foundation();</script>
+<script type="text/javascript" src="../js/magellan.js"></script>
+
+<style type="text/css">@import "../lib/prettify/prettify.css";</style>
+<script type="text/javascript" src="../lib/prettify/prettify.js"></script>
+<script type="text/javascript" src="../lib/prettify/lang-scala.js"></script>
+<script type="text/javascript">jQuery(function(){window.prettyPrint && prettyPrint()});</script>
+
+</html>
