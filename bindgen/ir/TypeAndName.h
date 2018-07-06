@@ -19,6 +19,10 @@ class TypeAndName {
 
     std::string getName() const;
 
+    bool operator==(const TypeAndName &other) const;
+
+    bool operator!=(const TypeAndName &other) const;
+
   protected:
     std::string name;
     std::shared_ptr<Type> type;

@@ -30,6 +30,8 @@ class StructOrUnion {
 
     std::string getName() const;
 
+    bool operator==(const StructOrUnion &other) const;
+
   protected:
     std::string name;
     std::vector<Field *> fields;
@@ -52,9 +54,11 @@ class Struct : public StructOrUnion,
      */
     bool hasHelperMethods() const;
 
-    bool usesType(std::shared_ptr<Type> type) const override;
+    bool usesType(const std::shared_ptr<Type> &type) const override;
 
     std::string str() const override;
+
+    using StructOrUnion::operator==;
 
   private:
     /* type size is needed if number of fields is bigger than 22 */
@@ -70,6 +74,8 @@ class Union : public StructOrUnion,
     std::shared_ptr<TypeDef> generateTypeDef() override;
 
     std::string generateHelperClass() const override;
+
+    using StructOrUnion::operator==;
 
   private:
     std::string getTypeAlias() const;
