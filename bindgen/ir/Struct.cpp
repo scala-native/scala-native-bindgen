@@ -49,6 +49,28 @@ StructOrUnion::~StructOrUnion() {
     }
 }
 
+bool StructOrUnion::operator==(const StructOrUnion &other) const {
+    if (this == &other) {
+        return true;
+    }
+    if (isInstanceOf<const Struct>(&other)) {
+        auto *s = dynamic_cast<const Struct *>(&other);
+        if (name != s->name) {
+            return false;
+        }
+        if (fields.size() != s->fields.size()) {
+            return false;
+        }
+        for (size_t i = 0; i < fields.size(); i++) {
+            if (!(*fields[i] == *s->fields[i])) {
+                return false;
+            }
+        }
+        return true;
+    }
+    return false;
+}
+
 Struct::Struct(std::string name, std::vector<Field *> fields, uint64_t typeSize)
     : StructOrUnion(std::move(name), std::move(fields)), typeSize(typeSize) {}
 
@@ -112,12 +134,9 @@ std::string Struct::str() const {
     return ss.str();
 }
 
-bool Struct::usesType(std::shared_ptr<Type> type) const {
-    if (this == type.get()) {
-        return true;
-    }
+bool Struct::usesType(const std::shared_ptr<Type> &type) const {
     for (const auto &field : fields) {
-        if (field->getType() == type) {
+        if (*field->getType() == *type) {
             return true;
         }
     }

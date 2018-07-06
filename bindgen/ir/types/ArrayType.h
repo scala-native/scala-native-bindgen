@@ -2,6 +2,7 @@
 #define SCALA_NATIVE_BINDGEN_ARRAYTYPE_H
 
 #include "Type.h"
+#include <stdint-gcc.h>
 
 class ArrayType : public Type {
   public:
@@ -9,9 +10,11 @@ class ArrayType : public Type {
 
     ~ArrayType() override = default;
 
-    bool usesType(std::shared_ptr<Type> type) const override;
+    bool usesType(const std::shared_ptr<Type> &type) const override;
 
     std::string str() const override;
+
+    bool operator==(const Type &other) const override;
 
   private:
     const uint64_t size;

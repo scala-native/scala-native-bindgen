@@ -7,9 +7,17 @@ std::string PrimitiveType::str() const { return handleReservedWords(type); }
 
 std::string PrimitiveType::getType() const { return type; }
 
-bool PrimitiveType::usesType(std::shared_ptr<Type> type) const {
-    if (this == type.get()) {
+bool PrimitiveType::usesType(const std::shared_ptr<Type> &type) const {
+    return false;
+}
+
+bool PrimitiveType::operator==(const Type &other) const {
+    if (this == &other) {
         return true;
     }
-    return str() == type->str();
+    if (isInstanceOf<const PrimitiveType>(&other)) {
+        auto *primitiveType = dynamic_cast<const PrimitiveType *>(&other);
+        return type == primitiveType->type;
+    }
+    return false;
 }
