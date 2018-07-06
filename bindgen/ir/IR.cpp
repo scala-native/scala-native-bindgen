@@ -230,9 +230,9 @@ void IR::replaceTypeInTypeDefs(std::shared_ptr<Type> oldType,
 
 template <typename T>
 bool IR::isTypeUsed(const std::vector<T> &declarations,
-                    std::shared_ptr<Type> type) {
-    for (const auto decl : declarations) {
-        if (decl->usesType(type)) {
+                    std::shared_ptr<Type> type, bool stopOnTypeDefs) {
+    for (const auto &decl : declarations) {
+        if (decl->usesType(type, stopOnTypeDefs)) {
             return true;
         }
     }
@@ -240,8 +240,12 @@ bool IR::isTypeUsed(const std::vector<T> &declarations,
 }
 
 bool IR::typeIsUsedOnlyInTypeDefs(std::shared_ptr<Type> type) {
-    return !(isTypeUsed(functions, type) || isTypeUsed(structs, type) ||
-             isTypeUsed(unions, type));
+    /* varDefines are not checked here because they are simply
+     * aliases for variables.*/
+    return !(
+        isTypeUsed(functions, type, true) || isTypeUsed(structs, type, true) ||
+        isTypeUsed(unions, type, true) || isTypeUsed(variables, type, true) ||
+        isTypeUsed(literalDefines, type, true));
 }
 
 void IR::setScalaNames() {

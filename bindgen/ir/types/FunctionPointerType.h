@@ -13,7 +13,8 @@ class FunctionPointerType : public Type {
 
     ~FunctionPointerType() override = default;
 
-    bool usesType(const std::shared_ptr<Type> &type) const override;
+    bool usesType(const std::shared_ptr<Type> &type,
+                  bool stopOnTypeDefs) const override;
 
     std::string str() const override;
 

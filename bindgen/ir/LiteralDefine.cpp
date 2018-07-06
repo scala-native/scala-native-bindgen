@@ -10,3 +10,9 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s,
       << " = " << literalDefine.literal << "\n";
     return s;
 }
+
+bool LiteralDefine::usesType(const std::shared_ptr<Type> &type,
+                             bool stopOnTypeDefs) const {
+    return *this->type == *type ||
+           this->type.get()->usesType(type, stopOnTypeDefs);
+}

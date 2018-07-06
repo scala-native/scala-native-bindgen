@@ -13,7 +13,15 @@ class Type {
 
     virtual std::string str() const;
 
-    virtual bool usesType(const std::shared_ptr<Type> &type) const;
+    /**
+     * @param stopOnTypeDefs if this parameter is true then TypeDefs instances
+     *                       will not be checked. This parameter is needed when
+     *                       usages of TypeDefs are checked, it helps to avoid
+     *                       false positives when usages if aliases for the
+     *                       typedef are found.
+     */
+    virtual bool usesType(const std::shared_ptr<Type> &type,
+                          bool stopOnTypeDefs) const;
 
     virtual bool operator==(const Type &other) const;
 
