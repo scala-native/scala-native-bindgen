@@ -1,4 +1,4 @@
-## Limitations
+# Limitations
 
 There are multiple unsupported cases that should be considered when generating bindings:
 
