@@ -16,6 +16,8 @@ class Type {
     virtual bool usesType(const std::shared_ptr<Type> &type) const;
 
     virtual bool operator==(const Type &other) const;
+
+    virtual bool operator!=(const Type &other) const;
 };
 
 #endif // SCALA_NATIVE_BINDGEN_TYPE_H

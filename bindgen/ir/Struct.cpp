@@ -62,7 +62,7 @@ bool StructOrUnion::operator==(const StructOrUnion &other) const {
             return false;
         }
         for (size_t i = 0; i < fields.size(); i++) {
-            if (!(*fields[i] == *s->fields[i])) {
+            if (*fields[i] != *s->fields[i]) {
                 return false;
             }
         }

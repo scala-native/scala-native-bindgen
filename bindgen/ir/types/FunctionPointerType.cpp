@@ -46,7 +46,7 @@ bool FunctionPointerType::operator==(const Type &other) const {
         if (isVariadic != functionPointerType->isVariadic) {
             return false;
         }
-        if (!(*returnType == *functionPointerType->returnType)) {
+        if (*returnType != *functionPointerType->returnType) {
             return false;
         }
         if (parametersTypes.size() !=
@@ -54,8 +54,8 @@ bool FunctionPointerType::operator==(const Type &other) const {
             return false;
         }
         for (size_t i = 0; i < parametersTypes.size(); i++) {
-            if (!(*parametersTypes[i] ==
-                  *functionPointerType->parametersTypes[i])) {
+            if (*parametersTypes[i] !=
+                *functionPointerType->parametersTypes[i]) {
                 return false;
             }
         }

@@ -13,3 +13,7 @@ void TypeAndName::setType(std::shared_ptr<Type> type) { this->type = type; }
 bool TypeAndName::operator==(const TypeAndName &other) const {
     return name == other.name && *type == *other.type;
 }
+
+bool TypeAndName::operator!=(const TypeAndName &other) const {
+    return !(*this == other);
+}
