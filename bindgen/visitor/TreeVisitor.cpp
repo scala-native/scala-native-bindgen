@@ -99,14 +99,9 @@ bool TreeVisitor::VisitRecordDecl(clang::RecordDecl *record) {
 }
 
 void TreeVisitor::handleUnion(clang::RecordDecl *record, std::string name) {
-    uint64_t maxSize = 0;
-
     std::vector<std::shared_ptr<Field>> fields;
 
     for (const clang::FieldDecl *field : record->fields()) {
-        uint64_t sizeInBits = astContext->getTypeSize(field->getType());
-        assert(sizeInBits % 8 == 0);
-        maxSize = std::max(maxSize, sizeInBits / 8);
         std::string fname = field->getNameAsString();
         std::shared_ptr<Type> ftype =
             typeTranslator.translate(field->getType(), &name);
@@ -114,7 +109,10 @@ void TreeVisitor::handleUnion(clang::RecordDecl *record, std::string name) {
         fields.push_back(std::make_shared<Field>(fname, ftype));
     }
 
-    ir.addUnion(name, std::move(fields), maxSize, getLocation(record));
+    uint64_t sizeInBits = astContext->getTypeSize(record->getTypeForDecl());
+    assert(sizeInBits % 8 == 0);
+
+    ir.addUnion(name, std::move(fields), sizeInBits / 8, getLocation(record));
 }
 
 void TreeVisitor::handleStruct(clang::RecordDecl *record, std::string name) {
