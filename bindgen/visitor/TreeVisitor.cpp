@@ -125,7 +125,6 @@ void TreeVisitor::handleStruct(clang::RecordDecl *record, std::string name) {
         llvm::errs().flush();
     }
 
-    int fieldCnt = 0;
     std::vector<std::shared_ptr<Field>> fields;
 
     for (const clang::FieldDecl *field : record->fields()) {
@@ -135,8 +134,6 @@ void TreeVisitor::handleStruct(clang::RecordDecl *record, std::string name) {
             std::make_shared<Field>(field->getNameAsString(), ftype));
 
         cycleDetection.AddDependency(newName, field->getType());
-
-        fieldCnt++;
     }
 
     if (cycleDetection.isCyclic(newName)) {
