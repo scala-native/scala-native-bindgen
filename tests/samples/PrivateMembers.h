@@ -41,3 +41,5 @@ __private_type *getPrivateType();
 void usesPrivateUnion(union __unionWithPrivateName);
 void usesPrivateStruct(struct structWithPrivateType *, struct normalStruct *);
 void usesPrivateEnum(enum __privateEnum *);
+
+extern int __private_var;

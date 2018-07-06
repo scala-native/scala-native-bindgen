@@ -201,6 +201,8 @@ void IR::filterDeclarations(const std::string &excludePrefix) {
     filterByPrefix(literalDefines, excludePrefix);
 
     filterByPrefix(varDefines, excludePrefix);
+
+    filterByPrefix(variables, excludePrefix);
 }
 
 void IR::filterTypeDefs(const std::string &excludePrefix) {
