@@ -5,6 +5,10 @@ HeaderManager headerMan;
 std::set<std::string> locations;
 
 bool TreeVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
+    if (!astContext->getSourceManager().isInMainFile(func->getLocation())) {
+        /* include functions only from the original header */
+        return true;
+    }
     std::string funcName = func->getNameInfo().getName().getAsString();
     std::shared_ptr<Type> retType =
         typeTranslator.translate(func->getReturnType());
@@ -157,6 +161,10 @@ void TreeVisitor::handleStruct(clang::RecordDecl *record, std::string name) {
 }
 
 bool TreeVisitor::VisitVarDecl(clang::VarDecl *varDecl) {
+    if (!astContext->getSourceManager().isInMainFile(varDecl->getLocation())) {
+        /* include variables only from the original header */
+        return true;
+    }
     if (!varDecl->isThisDeclarationADefinition()) {
         std::string variableName = varDecl->getName().str();
         std::shared_ptr<Type> type =
