@@ -79,7 +79,12 @@ int main(int argc, const char *argv[]) {
         return result;
     }
 
-    ScalaFrontendActionFactory actionFactory(ir);
+    assert(op.getSourcePathList().size() == 1);
+
+    char *resolved = realpath(op.getSourcePathList()[0].c_str(), nullptr);
+    LocationManager locationManager(resolved);
+
+    ScalaFrontendActionFactory actionFactory(ir, locationManager);
     result = Tool.run(&actionFactory);
 
     auto printLoc = PrintHeadersLocation.getValue();

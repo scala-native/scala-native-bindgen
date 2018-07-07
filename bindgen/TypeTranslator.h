@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ir/IR.h"
+#include "ir/location/LocationManager.h"
 #include <clang/Tooling/Tooling.h>
 
 class TypeTranslator {

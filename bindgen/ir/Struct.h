@@ -24,7 +24,8 @@ class StructOrUnion {
 
     ~StructOrUnion();
 
-    virtual std::shared_ptr<TypeDef> generateTypeDef() = 0;
+    virtual std::shared_ptr<TypeDef>
+    generateTypeDef(std::shared_ptr<Location> location) = 0;
 
     virtual std::string generateHelperClass() const = 0;
 
@@ -43,7 +44,8 @@ class Struct : public StructOrUnion,
   public:
     Struct(std::string name, std::vector<Field *> fields, uint64_t typeSize);
 
-    std::shared_ptr<TypeDef> generateTypeDef() override;
+    std::shared_ptr<TypeDef>
+    generateTypeDef(std::shared_ptr<Location> location) override;
 
     std::string generateHelperClass() const override;
 
@@ -72,7 +74,8 @@ class Union : public StructOrUnion,
   public:
     Union(std::string name, std::vector<Field *> fields, uint64_t maxSize);
 
-    std::shared_ptr<TypeDef> generateTypeDef() override;
+    std::shared_ptr<TypeDef>
+    generateTypeDef(std::shared_ptr<Location> location) override;
 
     std::string generateHelperClass() const override;
 

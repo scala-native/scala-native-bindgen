@@ -11,8 +11,10 @@ class TreeConsumer : public clang::ASTConsumer {
     clang::SourceManager &smanager;
 
   public:
-    TreeConsumer(clang::CompilerInstance *CI, IR &ir)
-        : visitor(CI, ir), smanager(CI->getASTContext().getSourceManager()) {}
+    TreeConsumer(clang::CompilerInstance *CI, IR &ir,
+                 LocationManager &locationManager)
+        : visitor(CI, ir, locationManager),
+          smanager(CI->getASTContext().getSourceManager()) {}
 
     bool HandleTopLevelDecl(clang::DeclGroupRef DG) override {
         // a DeclGroupRef may have multiple Decls, so we iterate through each

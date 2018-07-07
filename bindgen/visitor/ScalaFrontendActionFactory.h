@@ -13,12 +13,13 @@
 class ScalaFrontendActionFactory
     : public clang::tooling::FrontendActionFactory {
   public:
-    explicit ScalaFrontendActionFactory(IR &ir);
+    ScalaFrontendActionFactory(IR &ir, LocationManager &locationManager);
 
     clang::FrontendAction *create() override;
 
   private:
     IR &ir;
+    LocationManager &locationManager;
 };
 
 #endif // SCALA_NATIVE_BINDGEN_SCALAFRONTENDACTIONFACTORY_H

@@ -23,19 +23,21 @@ class IR {
                      std::shared_ptr<Type> retType, bool isVariadic);
 
     std::shared_ptr<TypeDef> addTypeDef(std::string name,
-                                        std::shared_ptr<Type> type);
+                                        std::shared_ptr<Type> type,
+                                        std::shared_ptr<Location> location);
 
     /**
      * @return type alias for the enum
      */
     std::shared_ptr<Type> addEnum(std::string name, const std::string &type,
-                                  std::vector<Enumerator> enumerators);
+                                  std::vector<Enumerator> enumerators,
+                                  std::shared_ptr<Location> location);
 
     void addStruct(std::string name, std::vector<Field *> fields,
-                   uint64_t typeSize);
+                   uint64_t typeSize, std::shared_ptr<Location> location);
 
     void addUnion(std::string name, std::vector<Field *> fields,
-                  uint64_t maxSize);
+                  uint64_t maxSize, std::shared_ptr<Location> location);
 
     void addLiteralDefine(std::string name, std::string literal,
                           std::shared_ptr<Type> type);
@@ -109,14 +111,19 @@ class IR {
     /**
      * @return true if given type is used only in typedefs.
      */
-    bool typeIsUsedOnlyInTypeDefs(std::shared_ptr<Type> type);
+    bool typeIsUsedOnlyInTypeDefs(const std::shared_ptr<Type> &type) const;
+
+    /**
+     * @return true if type is used in one of declarations
+     */
+    bool isTypeUsed(const std::shared_ptr<Type> &type) const;
 
     /**
      * @return true if type is used in one of given declarations.
      */
     template <typename T>
     bool isTypeUsed(const std::vector<T> &declarations,
-                    std::shared_ptr<Type> type, bool stopOnTypeDefs);
+                    std::shared_ptr<Type> type, bool stopOnTypeDefs) const;
 
     void setScalaNames();
 
@@ -132,6 +139,17 @@ class IR {
     template <typename T>
     T getDeclarationWithName(std::vector<T> &declarations,
                              const std::string &name);
+
+    void removeUnusedExternalTypes();
+
+    template <typename T>
+    void removeDeclaration(std::vector<std::shared_ptr<T>> &declarations,
+                           T *declaration);
+
+    /**
+     * remove declaration from IR if type is struct, union or enum
+     */
+    void removeStructOrUnionOrEnum(std::shared_ptr<Type> type);
 
     std::string libName;    // name of the library
     std::string linkName;   // name of the library to link with

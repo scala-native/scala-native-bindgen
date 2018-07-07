@@ -25,7 +25,8 @@ class Enum : public PrimitiveType, public std::enable_shared_from_this<Enum> {
 
     bool isAnonymous() const;
 
-    std::shared_ptr<TypeDef> generateTypeDef();
+    std::shared_ptr<TypeDef>
+    generateTypeDef(std::shared_ptr<Location> location);
 
     std::string getName() const;
 

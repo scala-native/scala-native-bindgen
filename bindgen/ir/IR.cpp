@@ -1,5 +1,6 @@
 #include "IR.h"
 #include "../Utils.h"
+#include "location/SourceLocation.h"
 
 IR::IR(std::string libName, std::string linkName, std::string objectName,
        std::string packageName)
@@ -13,25 +14,28 @@ void IR::addFunction(std::string name, std::vector<Parameter *> parameters,
 }
 
 std::shared_ptr<TypeDef> IR::addTypeDef(std::string name,
-                                        std::shared_ptr<Type> type) {
-    typeDefs.push_back(std::make_shared<TypeDef>(std::move(name), type));
+                                        std::shared_ptr<Type> type,
+                                        std::shared_ptr<Location> location) {
+    typeDefs.push_back(
+        std::make_shared<TypeDef>(std::move(name), type, std::move(location)));
     return typeDefs.back();
 }
 
 std::shared_ptr<Type> IR::addEnum(std::string name, const std::string &type,
-                                  std::vector<Enumerator> enumerators) {
+                                  std::vector<Enumerator> enumerators,
+                                  std::shared_ptr<Location> location) {
     std::shared_ptr<Enum> e =
         std::make_shared<Enum>(std::move(name), type, std::move(enumerators));
     enums.push_back(e);
     if (!e->isAnonymous()) {
-        typeDefs.push_back(e->generateTypeDef());
+        typeDefs.push_back(e->generateTypeDef(std::move(location)));
         return typeDefs.back();
     }
     return nullptr;
 }
 
 void IR::addStruct(std::string name, std::vector<Field *> fields,
-                   uint64_t typeSize) {
+                   uint64_t typeSize, std::shared_ptr<Location> location) {
     std::shared_ptr<Struct> s =
         std::make_shared<Struct>(name, std::move(fields), typeSize);
     structs.push_back(s);
@@ -39,13 +43,14 @@ void IR::addStruct(std::string name, std::vector<Field *> fields,
     if (typeDef) {
         /* the struct type used to be opaque type, typeDef contains nullptr */
         typeDef.get()->setType(s);
+        typeDef.get()->setLocation(location);
     } else {
-        typeDefs.push_back(s->generateTypeDef());
+        typeDefs.push_back(s->generateTypeDef(std::move(location)));
     }
 }
 
 void IR::addUnion(std::string name, std::vector<Field *> fields,
-                  uint64_t maxSize) {
+                  uint64_t maxSize, std::shared_ptr<Location> location) {
     std::shared_ptr<Union> u =
         std::make_shared<Union>(name, std::move(fields), maxSize);
     unions.push_back(u);
@@ -53,8 +58,9 @@ void IR::addUnion(std::string name, std::vector<Field *> fields,
     if (typeDef) {
         /* the union type used to be opaque type, typeDef contains nullptr */
         typeDef.get()->setType(u);
+        typeDef.get()->setLocation(location);
     } else {
-        typeDefs.push_back(u->generateTypeDef());
+        typeDefs.push_back(u->generateTypeDef(std::move(location)));
     }
 }
 
@@ -171,6 +177,7 @@ void IR::generate(const std::string &excludePrefix) {
     if (!generated) {
         setScalaNames();
         filterDeclarations(excludePrefix);
+        removeUnusedExternalTypes();
         generated = true;
     }
 }
@@ -230,7 +237,7 @@ void IR::replaceTypeInTypeDefs(std::shared_ptr<Type> oldType,
 
 template <typename T>
 bool IR::isTypeUsed(const std::vector<T> &declarations,
-                    std::shared_ptr<Type> type, bool stopOnTypeDefs) {
+                    std::shared_ptr<Type> type, bool stopOnTypeDefs) const {
     for (const auto &decl : declarations) {
         if (decl->usesType(type, stopOnTypeDefs)) {
             return true;
@@ -239,13 +246,18 @@ bool IR::isTypeUsed(const std::vector<T> &declarations,
     return false;
 }
 
-bool IR::typeIsUsedOnlyInTypeDefs(std::shared_ptr<Type> type) {
+bool IR::typeIsUsedOnlyInTypeDefs(const std::shared_ptr<Type> &type) const {
     /* varDefines are not checked here because they are simply
      * aliases for variables.*/
     return !(
         isTypeUsed(functions, type, true) || isTypeUsed(structs, type, true) ||
         isTypeUsed(unions, type, true) || isTypeUsed(variables, type, true) ||
         isTypeUsed(literalDefines, type, true));
+}
+
+bool IR::isTypeUsed(const std::shared_ptr<Type> &type) const {
+    return !(typeIsUsedOnlyInTypeDefs(type) &&
+             !isTypeUsed(typeDefs, type, false));
 }
 
 void IR::setScalaNames() {
@@ -352,4 +364,48 @@ IR::~IR() {
     possibleVarDefines.clear();
     variables.clear();
     varDefines.clear();
+}
+
+void IR::removeUnusedExternalTypes() {
+    for (auto it = typeDefs.begin(); it != typeDefs.end();) {
+        std::shared_ptr<TypeDef> typeDef = *it;
+        std::shared_ptr<Location> location = typeDef->getLocation();
+        auto *sourceLocation = dynamic_cast<SourceLocation *>(location.get());
+        if (sourceLocation && !sourceLocation->isMainFile()) {
+            if (!isTypeUsed(typeDef)) {
+                removeStructOrUnionOrEnum(typeDef->getType());
+                it = typeDefs.erase(it);
+            } else {
+                ++it;
+            }
+        } else {
+            ++it;
+        }
+    }
+}
+
+template <typename T>
+void IR::removeDeclaration(std::vector<std::shared_ptr<T>> &declarations,
+                           T *declaration) {
+    for (auto it = declarations.begin(); it != declarations.end();) {
+        T *decl = (*it).get();
+        if (decl == declaration) {
+            it = declarations.erase(it);
+        } else {
+            ++it;
+        }
+    }
+}
+
+void IR::removeStructOrUnionOrEnum(std::shared_ptr<Type> type) {
+    if (isInstanceOf<Struct>(type.get())) {
+        auto *s = dynamic_cast<Struct *>(type.get());
+        removeDeclaration(structs, s);
+    } else if (isInstanceOf<Union>(type.get())) {
+        auto *u = dynamic_cast<Union *>(type.get());
+        removeDeclaration(unions, u);
+    } else if (isInstanceOf<Enum>(type.get())) {
+        auto *e = dynamic_cast<Enum *>(type.get());
+        removeDeclaration(enums, e);
+    }
 }

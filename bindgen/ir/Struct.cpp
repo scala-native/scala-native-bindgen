@@ -74,9 +74,11 @@ bool StructOrUnion::operator==(const StructOrUnion &other) const {
 Struct::Struct(std::string name, std::vector<Field *> fields, uint64_t typeSize)
     : StructOrUnion(std::move(name), std::move(fields)), typeSize(typeSize) {}
 
-std::shared_ptr<TypeDef> Struct::generateTypeDef() {
+std::shared_ptr<TypeDef>
+Struct::generateTypeDef(std::shared_ptr<Location> location) {
     if (fields.size() < SCALA_NATIVE_MAX_STRUCT_FIELDS) {
-        return std::make_shared<TypeDef>(getAliasType(), shared_from_this());
+        return std::make_shared<TypeDef>(getAliasType(), shared_from_this(),
+                                         std::move(location));
     } else {
         // There is no easy way to represent it as a struct in scala native,
         // have to represent it as an array and then Add helpers to help with
@@ -84,7 +86,8 @@ std::shared_ptr<TypeDef> Struct::generateTypeDef() {
         return std::make_shared<TypeDef>(
             getAliasType(),
             std::make_shared<ArrayType>(std::make_shared<PrimitiveType>("Byte"),
-                                        typeSize));
+                                        typeSize),
+            std::move(location));
     }
 }
 
@@ -149,8 +152,10 @@ Union::Union(std::string name, std::vector<Field *> fields, uint64_t maxSize)
     : StructOrUnion(std::move(name), std::move(fields)),
       ArrayType(std::make_shared<PrimitiveType>("Byte"), maxSize) {}
 
-std::shared_ptr<TypeDef> Union::generateTypeDef() {
-    return std::make_shared<TypeDef>(getTypeAlias(), shared_from_this());
+std::shared_ptr<TypeDef>
+Union::generateTypeDef(std::shared_ptr<Location> location) {
+    return std::make_shared<TypeDef>(getTypeAlias(), shared_from_this(),
+                                     std::move(location));
 }
 
 std::string Union::generateHelperClass() const {

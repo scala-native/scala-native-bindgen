@@ -3,8 +3,10 @@
 #include "Enum.h"
 #include "Struct.h"
 
-TypeDef::TypeDef(std::string name, std::shared_ptr<Type> type)
-    : TypeAndName(std::move(name), std::move(type)) {}
+TypeDef::TypeDef(std::string name, std::shared_ptr<Type> type,
+                 std::shared_ptr<Location> location)
+    : TypeAndName(std::move(name), std::move(type)),
+      location(std::move(location)) {}
 
 llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const TypeDef &typeDef) {
     if (!typeDef.getType()) {
@@ -42,3 +44,9 @@ bool TypeDef::operator==(const Type &other) const {
     }
     return false;
 }
+
+void TypeDef::setLocation(std::shared_ptr<Location> location) {
+    this->location = std::move(location);
+}
+
+std::shared_ptr<Location> TypeDef::getLocation() { return location; }

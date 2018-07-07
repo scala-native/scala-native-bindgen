@@ -12,7 +12,7 @@
  */
 class ScalaFrontendAction : public clang::ASTFrontendAction {
   public:
-    explicit ScalaFrontendAction(IR &ir);
+    ScalaFrontendAction(IR &ir, LocationManager &locationManager);
 
     std::unique_ptr<clang::ASTConsumer>
     CreateASTConsumer(clang::CompilerInstance &CI,
@@ -20,6 +20,7 @@ class ScalaFrontendAction : public clang::ASTFrontendAction {
 
   private:
     IR &ir;
+    LocationManager &locationManager;
 };
 
 #endif // SCALA_NATIVE_BINDGEN_SCALAFRONTENDACTION_H
