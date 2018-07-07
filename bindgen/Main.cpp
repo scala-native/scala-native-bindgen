@@ -11,19 +11,7 @@ int main(int argc, const char *argv[]) {
 
     llvm::cl::opt<std::string> LibName("name", llvm::cl::cat(Category),
                                        llvm::cl::desc("Library name"));
-    llvm::cl::opt<std::string> StdHeaders(
-        "std-headers", llvm::cl::cat(Category),
-        llvm::cl::desc("Path to a file with the list of headers for which "
-                       "bindings\n"
-                       "will not be generated. "
-                       "The list contains header files names\n"
-                       "and package names that contain bindings for these "
-                       "headers.\nExample:\n"
-                       "math.h=scala.scalanative.native.math\n"
-                       "stdlib.h=scala.scalanative.native.stdlib"));
-    llvm::cl::opt<bool> PrintHeadersLocation(
-        "location", llvm::cl::cat(Category),
-        llvm::cl::desc("Print list of parsed headers"));
+
     llvm::cl::opt<std::string> ExcludePrefix(
         "exclude-prefix", llvm::cl::cat(Category),
         llvm::cl::desc("Functions and unused typedefs will be removed if their "
@@ -64,13 +52,6 @@ int main(int argc, const char *argv[]) {
         objectName = "nativeLib";
     }
 
-    auto stdhead = StdHeaders.getValue();
-    if (!stdhead.empty()) {
-        headerMan.LoadConfig(stdhead);
-    }
-
-    locations.clear();
-
     IR ir(libName, linkName, objectName, Package.getValue());
 
     DefineFinderActionFactory defineFinderActionFactory(ir);
@@ -87,15 +68,8 @@ int main(int argc, const char *argv[]) {
     ScalaFrontendActionFactory actionFactory(ir, locationManager);
     result = Tool.run(&actionFactory);
 
-    auto printLoc = PrintHeadersLocation.getValue();
-    if (printLoc) {
-        for (const auto &location : locations) {
-            llvm::outs() << location.c_str();
-        }
-    } else {
-        ir.generate(ExcludePrefix.getValue());
-        llvm::outs() << ir;
-    }
+    ir.generate(ExcludePrefix.getValue());
+    llvm::outs() << ir;
     llvm::outs().flush();
     return result;
 }

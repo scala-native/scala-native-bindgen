@@ -1,7 +1,5 @@
 #include "TreeVisitor.h"
 
-HeaderManager headerMan;
-
 std::set<std::string> locations;
 
 bool TreeVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {

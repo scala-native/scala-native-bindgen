@@ -1,16 +1,11 @@
 #pragma once
 
 #include "../CycleDetection.h"
-#include "../HeaderManager.h"
 #include "../TypeTranslator.h"
 #include "../ir/IR.h"
 #include "../ir/location/LocationManager.h"
 #include <clang/AST/RecursiveASTVisitor.h>
 #include <clang/Frontend/CompilerInstance.h>
-
-extern HeaderManager headerMan;
-
-extern std::set<std::string> locations;
 
 class TreeVisitor : public clang::RecursiveASTVisitor<TreeVisitor> {
   private:
