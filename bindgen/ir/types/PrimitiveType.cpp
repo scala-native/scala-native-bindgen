@@ -7,7 +7,8 @@ std::string PrimitiveType::str() const { return handleReservedWords(type); }
 
 std::string PrimitiveType::getType() const { return type; }
 
-bool PrimitiveType::usesType(const std::shared_ptr<Type> &type) const {
+bool PrimitiveType::usesType(const std::shared_ptr<Type> &type,
+                             bool stopOnTypeDefs) const {
     return false;
 }
 

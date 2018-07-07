@@ -18,8 +18,13 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const TypeDef &typeDef) {
     return s;
 }
 
-bool TypeDef::usesType(const std::shared_ptr<Type> &type) const {
-    return *this->type == *type;
+bool TypeDef::usesType(const std::shared_ptr<Type> &type,
+                       bool stopOnTypeDefs) const {
+    if (stopOnTypeDefs) {
+        return false;
+    }
+    return *this->type == *type ||
+           this->type.get()->usesType(type, stopOnTypeDefs);
 }
 
 std::string TypeDef::str() const { return handleReservedWords(name); }

@@ -9,8 +9,10 @@ std::string ArrayType::str() const {
            uint64ToScalaNat(size) + "]";
 }
 
-bool ArrayType::usesType(const std::shared_ptr<Type> &type) const {
-    return *elementsType == *type;
+bool ArrayType::usesType(const std::shared_ptr<Type> &type,
+                         bool stopOnTypeDefs) const {
+    return *elementsType == *type ||
+           elementsType.get()->usesType(type, stopOnTypeDefs);
 }
 
 bool ArrayType::operator==(const Type &other) const {

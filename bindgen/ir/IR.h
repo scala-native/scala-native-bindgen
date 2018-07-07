@@ -116,7 +116,7 @@ class IR {
      */
     template <typename T>
     bool isTypeUsed(const std::vector<T> &declarations,
-                    std::shared_ptr<Type> type);
+                    std::shared_ptr<Type> type, bool stopOnTypeDefs);
 
     void setScalaNames();
 

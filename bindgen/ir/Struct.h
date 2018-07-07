@@ -54,7 +54,8 @@ class Struct : public StructOrUnion,
      */
     bool hasHelperMethods() const;
 
-    bool usesType(const std::shared_ptr<Type> &type) const override;
+    bool usesType(const std::shared_ptr<Type> &type,
+                  bool stopOnTypeDefs) const override;
 
     std::string str() const override;
 

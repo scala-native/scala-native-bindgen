@@ -134,9 +134,11 @@ std::string Struct::str() const {
     return ss.str();
 }
 
-bool Struct::usesType(const std::shared_ptr<Type> &type) const {
+bool Struct::usesType(const std::shared_ptr<Type> &type,
+                      bool stopOnTypeDefs) const {
     for (const auto &field : fields) {
-        if (*field->getType() == *type) {
+        if (*field->getType() == *type ||
+            field->getType().get()->usesType(type, stopOnTypeDefs)) {
             return true;
         }
     }

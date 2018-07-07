@@ -23,13 +23,16 @@ std::string FunctionPointerType::str() const {
     return ss.str();
 }
 
-bool FunctionPointerType::usesType(const std::shared_ptr<Type> &type) const {
-    if (*returnType == *type) {
+bool FunctionPointerType::usesType(const std::shared_ptr<Type> &type,
+                                   bool stopOnTypeDefs) const {
+    if (*returnType == *type ||
+        returnType.get()->usesType(type, stopOnTypeDefs)) {
         return true;
     }
 
     for (const auto &parameterType : parametersTypes) {
-        if (*parameterType == *type) {
+        if (*parameterType == *type ||
+            parameterType.get()->usesType(type, stopOnTypeDefs)) {
             return true;
         }
     }

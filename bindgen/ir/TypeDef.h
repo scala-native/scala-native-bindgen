@@ -12,7 +12,8 @@ class TypeDef : public TypeAndName, public Type {
     friend llvm::raw_ostream &operator<<(llvm::raw_ostream &s,
                                          const TypeDef &type);
 
-    bool usesType(const std::shared_ptr<Type> &type) const override;
+    bool usesType(const std::shared_ptr<Type> &type,
+                  bool stopOnTypeDefs) const override;
 
     std::string str() const override;
 
