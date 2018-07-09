@@ -9,6 +9,8 @@ class Location {
 
     std::string getPath() const;
 
+    int getLineNumber() const;
+
   private:
     std::string path;
     int lineNumber;

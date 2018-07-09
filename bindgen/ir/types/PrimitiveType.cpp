@@ -1,5 +1,6 @@
 #include "PrimitiveType.h"
 #include "../../Utils.h"
+#include "../Enum.h"
 
 PrimitiveType::PrimitiveType(std::string type) : type(std::move(type)) {}
 
@@ -16,7 +17,8 @@ bool PrimitiveType::operator==(const Type &other) const {
     if (this == &other) {
         return true;
     }
-    if (isInstanceOf<const PrimitiveType>(&other)) {
+    if (isInstanceOf<const PrimitiveType>(&other) &&
+        !isInstanceOf<const Enum>(&other)) {
         auto *primitiveType = dynamic_cast<const PrimitiveType *>(&other);
         return type == primitiveType->type;
     }

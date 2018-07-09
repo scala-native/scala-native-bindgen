@@ -51,7 +51,7 @@ StructOrUnion::~StructOrUnion() {
     }
 }
 
-bool StructOrUnion::operator==(const StructOrUnion &other) const {
+bool StructOrUnion::equals(const StructOrUnion &other) const {
     if (this == &other) {
         return true;
     }
@@ -94,7 +94,7 @@ std::shared_ptr<TypeDef> Struct::generateTypeDef() {
             getTypeAlias(),
             std::make_shared<ArrayType>(std::make_shared<PrimitiveType>("Byte"),
                                         typeSize),
-            std::move(location));
+            location);
     }
 }
 
@@ -155,6 +155,14 @@ bool Struct::usesType(const std::shared_ptr<Type> &type,
     return false;
 }
 
+bool Struct::operator==(const Type &other) const {
+    auto *structOrUnion = dynamic_cast<const StructOrUnion *>(&other);
+    if (structOrUnion) {
+        return this->equals(*structOrUnion);
+    }
+    return false;
+}
+
 Union::Union(std::string name, std::vector<Field *> fields, uint64_t maxSize,
              std::shared_ptr<Location> location)
     : StructOrUnion(std::move(name), std::move(fields), std::move(location)),
@@ -188,3 +196,11 @@ std::string Union::generateHelperClass() const {
 }
 
 std::string Union::getTypeAlias() const { return "union_" + name; }
+
+bool Union::operator==(const Type &other) const {
+    auto *structOrUnion = dynamic_cast<const StructOrUnion *>(&other);
+    if (structOrUnion) {
+        return this->equals(*structOrUnion);
+    }
+    return false;
+}

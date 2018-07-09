@@ -78,7 +78,7 @@ void IR::addVarDefine(std::string name, std::shared_ptr<Variable> variable) {
 }
 
 bool IR::libObjEmpty() const {
-    return functions.empty() && !hasOutputtedTypeDefs() &&
+    return functions.empty() && !hasOutputtedDeclaration(typeDefs) &&
            !hasOutputtedDeclaration(structs) &&
            !hasOutputtedDeclaration(unions) && varDefines.empty() &&
            variables.empty();
@@ -91,7 +91,7 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir) {
         s << "package " << ir.packageName << "\n\n";
     }
 
-    if (!ir.libObjEmpty() || ir.hasOutputtedEnums() ||
+    if (!ir.libObjEmpty() || ir.hasOutputtedDeclaration(ir.enums) ||
         !ir.literalDefines.empty()) {
         s << "import scala.scalanative._\n"
           << "import scala.scalanative.native._\n\n";
@@ -108,7 +108,7 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir) {
           << "object " << objectName << " {\n";
 
         for (const auto &typeDef : ir.typeDefs) {
-            if (ir.typeDefInMainFile(*typeDef) || ir.isTypeUsed(typeDef)) {
+            if (ir.isOutputted(typeDef)) {
                 s << *typeDef;
             }
         }
@@ -136,18 +136,16 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir) {
         s << "}\n\n";
     }
 
-    if (ir.hasOutputtedEnums() || ir.hasHelperMethods()) {
+    if (ir.hasOutputtedDeclaration(ir.enums) || ir.hasHelperMethods()) {
         s << "import " << objectName << "._\n\n";
     }
 
-    if (ir.hasOutputtedEnums()) {
+    if (ir.hasOutputtedDeclaration(ir.enums)) {
         s << "object " << ir.libName << "Enums {\n";
 
         std::string sep = "";
         for (const auto &e : ir.enums) {
-            if (ir.inMainFile(*e) ||
-                (!e->isAnonymous() &&
-                 ir.isTypeUsed(ir.getTypeDefWithName(e->getTypeAlias())))) {
+            if (ir.isOutputted(e)) {
                 s << sep << *e;
                 sep = "\n";
             }
@@ -160,13 +158,13 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir) {
         s << "object " << ir.libName << "Helpers {\n";
 
         for (const auto &st : ir.structs) {
-            if (ir.isOutputted(st.get()) && st->hasHelperMethods()) {
+            if (ir.isOutputted(st) && st->hasHelperMethods()) {
                 s << "\n" << st->generateHelperClass();
             }
         }
 
         for (const auto &u : ir.unions) {
-            if (ir.isOutputted(u.get())) {
+            if (ir.isOutputted(u)) {
                 s << "\n" << u->generateHelperClass();
             }
         }
@@ -193,7 +191,7 @@ bool IR::hasHelperMethods() const {
     }
 
     for (const auto &s : structs) {
-        if (isOutputted(s.get()) && s->hasHelperMethods()) {
+        if (isOutputted(s) && s->hasHelperMethods()) {
             return true;
         }
     }
@@ -259,9 +257,46 @@ bool IR::typeIsUsedOnlyInTypeDefs(const std::shared_ptr<Type> &type) const {
         isTypeUsed(literalDefines, type, true));
 }
 
-bool IR::isTypeUsed(const std::shared_ptr<Type> &type) const {
-    return !(typeIsUsedOnlyInTypeDefs(type) &&
-             !isTypeUsed(typeDefs, type, false));
+bool IR::isTypeUsed(const std::shared_ptr<Type> &type,
+                    bool checkRecursively) const {
+    if (checkRecursively) {
+        if (isTypeUsed(functions, type, true) ||
+            isTypeUsed(variables, type, true) ||
+            isTypeUsed(literalDefines, type, true)) {
+            return true;
+        }
+        /* type is used if there exists another type that is used and that
+         * references this type */
+        for (const auto &typeDef : typeDefs) {
+            if (typeDef->usesType(type, false)) {
+                if (isOutputted(typeDef)) {
+                    return true;
+                }
+            }
+        }
+        for (const auto &s : structs) {
+            /* stopOnTypeDefs parameter is true because because typedefs were
+             * checked */
+            if (s->usesType(type, true)) {
+                if (isOutputted(s)) {
+                    return true;
+                }
+            }
+        }
+        for (const auto &u : unions) {
+            /* stopOnTypeDefs parameter is true because because typedefs were
+             * checked */
+            if (u->usesType(type, true)) {
+                if (isOutputted(u)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    } else {
+        return !(typeIsUsedOnlyInTypeDefs(type) &&
+                 !isTypeUsed(typeDefs, type, false));
+    }
 }
 
 void IR::setScalaNames() {
@@ -370,42 +405,31 @@ IR::~IR() {
     varDefines.clear();
 }
 
-bool IR::typeDefInMainFile(const TypeDef &typeDef) const {
-    if (inMainFile(typeDef)) {
-        return true;
-    }
-    Type *type = typeDef.getType().get();
-    if (isInstanceOf<Struct>(type)) {
-        return inMainFile(*dynamic_cast<Struct *>(type));
-    }
-    if (isInstanceOf<Union>(type)) {
-        return inMainFile(*dynamic_cast<Union *>(type));
-    }
-    if (isInstanceOf<Enum>(type)) {
-        return inMainFile(*dynamic_cast<Enum *>(type));
-    }
-    return false;
-}
-
 template <typename T> bool IR::inMainFile(const T &type) const {
     std::shared_ptr<Location> location = type.getLocation();
+    if (!location) {
+        /* generated TypeDef */
+        auto *typeDef = dynamic_cast<const TypeDef *>(&type);
+        assert(typeDef);
+        Type *innerType = typeDef->getType().get();
+        if (isInstanceOf<Struct>(innerType)) {
+            return inMainFile(*dynamic_cast<Struct *>(innerType));
+        }
+        if (isInstanceOf<Union>(innerType)) {
+            return inMainFile(*dynamic_cast<Union *>(innerType));
+        }
+        if (isInstanceOf<Enum>(innerType)) {
+            return inMainFile(*dynamic_cast<Enum *>(innerType));
+        }
+    }
     return location && locationManager.inMainFile(*location);
 }
 
-bool IR::hasOutputtedEnums() const {
-    for (const auto &e : enums) {
-        if (inMainFile(*e) ||
-            (!e->isAnonymous() &&
-             isTypeUsed(getTypeDefWithName(e->getTypeAlias())))) {
-            return true;
-        }
-    }
-    return false;
-}
-
-bool IR::hasOutputtedTypeDefs() const {
-    for (const auto &typeDef : typeDefs) {
-        if (inMainFile(*typeDef) || isTypeUsed(typeDef)) {
+template <typename T>
+bool IR::hasOutputtedDeclaration(
+    const std::vector<std::shared_ptr<T>> &declarations) const {
+    for (const auto &declaration : declarations) {
+        if (isOutputted(declaration)) {
             return true;
         }
     }
@@ -413,17 +437,6 @@ bool IR::hasOutputtedTypeDefs() const {
 }
 
 template <typename T>
-bool IR::hasOutputtedDeclaration(
-    const std::vector<std::shared_ptr<T>> &declarations) const {
-    for (const auto &declaration : declarations) {
-        if (isOutputted(declaration.get())) {
-            return true;
-        }
-    }
-    return false;
-}
-
-bool IR::isOutputted(const StructOrUnion *structOrUnion) const {
-    return inMainFile(*structOrUnion) ||
-           isTypeUsed(getTypeDefWithName(structOrUnion->getTypeAlias()));
+bool IR::isOutputted(const std::shared_ptr<T> &type) const {
+    return inMainFile(*type) || isTypeUsed(type, true);
 }

@@ -115,9 +115,12 @@ class IR {
     bool typeIsUsedOnlyInTypeDefs(const std::shared_ptr<Type> &type) const;
 
     /**
+     * @param checkRecursively if this parameter is true then the method will
+     * output false if the type is used only in unused types
      * @return true if type is used in one of declarations
      */
-    bool isTypeUsed(const std::shared_ptr<Type> &type) const;
+    bool isTypeUsed(const std::shared_ptr<Type> &type,
+                    bool checkRecursively = false) const;
 
     /**
      * @return true if type is used in one of given declarations.
@@ -141,15 +144,15 @@ class IR {
     T getDeclarationWithName(const std::vector<T> &declarations,
                              const std::string &name) const;
 
-    bool typeDefInMainFile(const TypeDef &typeDef) const;
-
     template <typename T> bool inMainFile(const T &type) const;
 
-    bool hasOutputtedEnums() const;
-
-    bool hasOutputtedTypeDefs() const;
-
-    bool isOutputted(const StructOrUnion *structOrUnion) const;
+    /**
+     * @tparam T Type subclass
+     * @return true if type is in main file or it is used by declaration from
+     *         main file.
+     */
+    template <typename T>
+    bool isOutputted(const std::shared_ptr<T> &type) const;
 
     /**
      * @tparam T Struct or Union

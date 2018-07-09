@@ -31,7 +31,7 @@ class StructOrUnion {
 
     std::string getName() const;
 
-    bool operator==(const StructOrUnion &other) const;
+    bool equals(const StructOrUnion &other) const;
 
     std::shared_ptr<Location> getLocation() const;
 
@@ -69,7 +69,7 @@ class Struct : public StructOrUnion,
 
     std::string str() const override;
 
-    using StructOrUnion::operator==;
+    bool operator==(const Type &other) const override;
 
   private:
     /* type size is needed if number of fields is bigger than 22 */
@@ -87,7 +87,7 @@ class Union : public StructOrUnion,
 
     std::string generateHelperClass() const override;
 
-    using StructOrUnion::operator==;
+    bool operator==(const Type &other) const override;
 
     std::string getTypeAlias() const override;
 };
