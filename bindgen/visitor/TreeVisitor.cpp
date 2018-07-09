@@ -1,4 +1,5 @@
 #include "TreeVisitor.h"
+#include "../ir/location/SourceLocation.h"
 
 bool TreeVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
     if (!astContext->getSourceManager().isInMainFile(func->getLocation())) {
@@ -59,6 +60,14 @@ bool TreeVisitor::VisitEnumDecl(clang::EnumDecl *enumdecl) {
         name = enumdecl->getTypedefNameForAnonDecl()->getNameAsString();
     }
 
+    std::shared_ptr<Location> location = getLocation(enumdecl);
+
+    auto *sourceLocation = dynamic_cast<SourceLocation *>(location.get());
+    if (sourceLocation && !sourceLocation->isMainFile() && name.empty()) {
+        /* bindings cannot reference anonymous enum from an included file */
+        return true;
+    }
+
     std::vector<Enumerator> enumerators;
 
     for (const clang::EnumConstantDecl *en : enumdecl->enumerators()) {
@@ -69,7 +78,7 @@ bool TreeVisitor::VisitEnumDecl(clang::EnumDecl *enumdecl) {
     std::string scalaType = typeTranslator.getTypeFromTypeMap(
         enumdecl->getIntegerType().getUnqualifiedType().getAsString());
 
-    ir.addEnum(name, scalaType, std::move(enumerators), getLocation(enumdecl));
+    ir.addEnum(name, scalaType, std::move(enumerators), location);
 
     return true;
 }

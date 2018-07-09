@@ -38,8 +38,10 @@ std::string Field::generateGetter(int fieldIndex) {
     return s.str();
 }
 
-StructOrUnion::StructOrUnion(std::string name, std::vector<Field *> fields)
-    : name(std::move(name)), fields(std::move(fields)) {}
+StructOrUnion::StructOrUnion(std::string name, std::vector<Field *> fields,
+                             std::shared_ptr<Location> location)
+    : name(std::move(name)), fields(std::move(fields)),
+      location(std::move(location)) {}
 
 std::string StructOrUnion::getName() const { return name; }
 
@@ -71,20 +73,23 @@ bool StructOrUnion::operator==(const StructOrUnion &other) const {
     return false;
 }
 
-Struct::Struct(std::string name, std::vector<Field *> fields, uint64_t typeSize)
-    : StructOrUnion(std::move(name), std::move(fields)), typeSize(typeSize) {}
+std::shared_ptr<Location> StructOrUnion::getLocation() { return location; }
 
-std::shared_ptr<TypeDef>
-Struct::generateTypeDef(std::shared_ptr<Location> location) {
+Struct::Struct(std::string name, std::vector<Field *> fields, uint64_t typeSize,
+               std::shared_ptr<Location> location)
+    : StructOrUnion(std::move(name), std::move(fields), std::move(location)),
+      typeSize(typeSize) {}
+
+std::shared_ptr<TypeDef> Struct::generateTypeDef() {
     if (fields.size() < SCALA_NATIVE_MAX_STRUCT_FIELDS) {
-        return std::make_shared<TypeDef>(getAliasType(), shared_from_this(),
-                                         std::move(location));
+        return std::make_shared<TypeDef>(getTypeAlias(), shared_from_this(),
+                                         nullptr);
     } else {
         // There is no easy way to represent it as a struct in scala native,
         // have to represent it as an array and then Add helpers to help with
         // its manipulation
         return std::make_shared<TypeDef>(
-            getAliasType(),
+            getTypeAlias(),
             std::make_shared<ArrayType>(std::make_shared<PrimitiveType>("Byte"),
                                         typeSize),
             std::move(location));
@@ -95,7 +100,7 @@ std::string Struct::generateHelperClass() const {
     assert(hasHelperMethods());
     /* struct is not empty and not represented as an array */
     std::stringstream s;
-    std::string type = getAliasType();
+    std::string type = getTypeAlias();
     s << "  implicit class " << type << "_ops(val p: native.Ptr[" << type
       << "])"
       << " extends AnyVal {\n";
@@ -121,7 +126,7 @@ bool Struct::hasHelperMethods() const {
     return !fields.empty() && fields.size() < SCALA_NATIVE_MAX_STRUCT_FIELDS;
 }
 
-std::string Struct::getAliasType() const { return "struct_" + name; }
+std::string Struct::getTypeAlias() const { return "struct_" + name; }
 
 std::string Struct::str() const {
     std::stringstream ss;
@@ -148,14 +153,14 @@ bool Struct::usesType(const std::shared_ptr<Type> &type,
     return false;
 }
 
-Union::Union(std::string name, std::vector<Field *> fields, uint64_t maxSize)
-    : StructOrUnion(std::move(name), std::move(fields)),
+Union::Union(std::string name, std::vector<Field *> fields, uint64_t maxSize,
+             std::shared_ptr<Location> location)
+    : StructOrUnion(std::move(name), std::move(fields), std::move(location)),
       ArrayType(std::make_shared<PrimitiveType>("Byte"), maxSize) {}
 
-std::shared_ptr<TypeDef>
-Union::generateTypeDef(std::shared_ptr<Location> location) {
+std::shared_ptr<TypeDef> Union::generateTypeDef() {
     return std::make_shared<TypeDef>(getTypeAlias(), shared_from_this(),
-                                     std::move(location));
+                                     nullptr);
 }
 
 std::string Union::generateHelperClass() const {

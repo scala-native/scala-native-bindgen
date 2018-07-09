@@ -24,41 +24,39 @@ std::shared_ptr<TypeDef> IR::addTypeDef(std::string name,
 void IR::addEnum(std::string name, const std::string &type,
                  std::vector<Enumerator> enumerators,
                  std::shared_ptr<Location> location) {
-    std::shared_ptr<Enum> e =
-        std::make_shared<Enum>(std::move(name), type, std::move(enumerators));
+    std::shared_ptr<Enum> e = std::make_shared<Enum>(
+        std::move(name), type, std::move(enumerators), std::move(location));
     enums.push_back(e);
     if (!e->isAnonymous()) {
-        typeDefs.push_back(e->generateTypeDef(std::move(location)));
+        typeDefs.push_back(e->generateTypeDef());
     }
 }
 
 void IR::addStruct(std::string name, std::vector<Field *> fields,
                    uint64_t typeSize, std::shared_ptr<Location> location) {
-    std::shared_ptr<Struct> s =
-        std::make_shared<Struct>(name, std::move(fields), typeSize);
+    std::shared_ptr<Struct> s = std::make_shared<Struct>(
+        name, std::move(fields), typeSize, std::move(location));
     structs.push_back(s);
     std::shared_ptr<TypeDef> typeDef = getTypeDefWithName("struct_" + name);
     if (typeDef) {
         /* the struct type used to be opaque type, typeDef contains nullptr */
         typeDef.get()->setType(s);
-        typeDef.get()->setLocation(location);
     } else {
-        typeDefs.push_back(s->generateTypeDef(std::move(location)));
+        typeDefs.push_back(s->generateTypeDef());
     }
 }
 
 void IR::addUnion(std::string name, std::vector<Field *> fields,
                   uint64_t maxSize, std::shared_ptr<Location> location) {
-    std::shared_ptr<Union> u =
-        std::make_shared<Union>(name, std::move(fields), maxSize);
+    std::shared_ptr<Union> u = std::make_shared<Union>(
+        name, std::move(fields), maxSize, std::move(location));
     unions.push_back(u);
     std::shared_ptr<TypeDef> typeDef = getTypeDefWithName("union_" + name);
     if (typeDef) {
         /* the union type used to be opaque type, typeDef contains nullptr */
         typeDef.get()->setType(u);
-        typeDef.get()->setLocation(location);
     } else {
-        typeDefs.push_back(u->generateTypeDef(std::move(location)));
+        typeDefs.push_back(u->generateTypeDef());
     }
 }
 
@@ -175,7 +173,7 @@ void IR::generate(const std::string &excludePrefix) {
     if (!generated) {
         setScalaNames();
         filterDeclarations(excludePrefix);
-        removeUnusedExternalTypes();
+        removeUnusedExternalTypedefs();
         generated = true;
     }
 }
@@ -364,14 +362,13 @@ IR::~IR() {
     varDefines.clear();
 }
 
-void IR::removeUnusedExternalTypes() {
+void IR::removeUnusedExternalTypedefs() {
     for (auto it = typeDefs.begin(); it != typeDefs.end();) {
         std::shared_ptr<TypeDef> typeDef = *it;
         std::shared_ptr<Location> location = typeDef->getLocation();
         auto *sourceLocation = dynamic_cast<SourceLocation *>(location.get());
         if (sourceLocation && !sourceLocation->isMainFile()) {
             if (!isTypeUsed(typeDef)) {
-                removeStructOrUnionOrEnum(typeDef->getType());
                 it = typeDefs.erase(it);
             } else {
                 ++it;
@@ -380,6 +377,9 @@ void IR::removeUnusedExternalTypes() {
             ++it;
         }
     }
+    removeUnusedExternalTypeAndTypedef(structs);
+    removeUnusedExternalTypeAndTypedef(unions);
+    removeUnusedExternalTypeAndTypedef(enums);
 }
 
 template <typename T>
@@ -395,15 +395,22 @@ void IR::removeDeclaration(std::vector<std::shared_ptr<T>> &declarations,
     }
 }
 
-void IR::removeStructOrUnionOrEnum(std::shared_ptr<Type> type) {
-    if (isInstanceOf<Struct>(type.get())) {
-        auto *s = dynamic_cast<Struct *>(type.get());
-        removeDeclaration(structs, s);
-    } else if (isInstanceOf<Union>(type.get())) {
-        auto *u = dynamic_cast<Union *>(type.get());
-        removeDeclaration(unions, u);
-    } else if (isInstanceOf<Enum>(type.get())) {
-        auto *e = dynamic_cast<Enum *>(type.get());
-        removeDeclaration(enums, e);
+template <typename T>
+void IR::removeUnusedExternalTypeAndTypedef(
+    std::vector<std::shared_ptr<T>> &types) {
+    for (auto it = types.begin(); it != types.end();) {
+        std::shared_ptr<T> t = *it;
+        auto *sourceLocation =
+            dynamic_cast<SourceLocation *>(t->getLocation().get());
+        if (sourceLocation && !sourceLocation->isMainFile()) {
+            std::shared_ptr<TypeDef> typeDef =
+                getTypeDefWithName(t->getTypeAlias());
+            if (!isTypeUsed(typeDef)) {
+                it = types.erase(it);
+                removeDeclaration(typeDefs, typeDef.get());
+            } else {
+                ++it;
+            }
+        }
     }
 }

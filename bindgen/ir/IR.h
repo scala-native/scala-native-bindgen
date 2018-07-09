@@ -140,16 +140,21 @@ class IR {
     T getDeclarationWithName(std::vector<T> &declarations,
                              const std::string &name);
 
-    void removeUnusedExternalTypes();
+    void removeUnusedExternalTypedefs();
 
     template <typename T>
     void removeDeclaration(std::vector<std::shared_ptr<T>> &declarations,
                            T *declaration);
 
     /**
-     * remove declaration from IR if type is struct, union or enum
+     * Go through types, find corresponding typedef, if the typedef is not used
+     * then the type and the typedef are removed
+     *
+     * @tparam T Struct, Union or Enum
      */
-    void removeStructOrUnionOrEnum(std::shared_ptr<Type> type);
+    template <typename T>
+    void
+    removeUnusedExternalTypeAndTypedef(std::vector<std::shared_ptr<T>> &types);
 
     std::string libName;    // name of the library
     std::string linkName;   // name of the library to link with

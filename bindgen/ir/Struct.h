@@ -20,12 +20,12 @@ class Field : public TypeAndName {
 
 class StructOrUnion {
   public:
-    StructOrUnion(std::string name, std::vector<Field *> fields);
+    StructOrUnion(std::string name, std::vector<Field *> fields,
+                  std::shared_ptr<Location> location);
 
     ~StructOrUnion();
 
-    virtual std::shared_ptr<TypeDef>
-    generateTypeDef(std::shared_ptr<Location> location) = 0;
+    virtual std::shared_ptr<TypeDef> generateTypeDef() = 0;
 
     virtual std::string generateHelperClass() const = 0;
 
@@ -33,23 +33,29 @@ class StructOrUnion {
 
     bool operator==(const StructOrUnion &other) const;
 
+    std::shared_ptr<Location> getLocation();
+
   protected:
     std::string name;
     std::vector<Field *> fields;
+    /**
+     * nullptr if type is generated.
+     */
+    std::shared_ptr<Location> location;
 };
 
 class Struct : public StructOrUnion,
                public Type,
                public std::enable_shared_from_this<Struct> {
   public:
-    Struct(std::string name, std::vector<Field *> fields, uint64_t typeSize);
+    Struct(std::string name, std::vector<Field *> fields, uint64_t typeSize,
+           std::shared_ptr<Location> location);
 
-    std::shared_ptr<TypeDef>
-    generateTypeDef(std::shared_ptr<Location> location) override;
+    std::shared_ptr<TypeDef> generateTypeDef() override;
 
     std::string generateHelperClass() const override;
 
-    std::string getAliasType() const;
+    std::string getTypeAlias() const;
 
     /**
      * @return true if helper methods will be generated for this struct
@@ -72,16 +78,15 @@ class Union : public StructOrUnion,
               public ArrayType,
               public std::enable_shared_from_this<Union> {
   public:
-    Union(std::string name, std::vector<Field *> fields, uint64_t maxSize);
+    Union(std::string name, std::vector<Field *> fields, uint64_t maxSize,
+          std::shared_ptr<Location> location);
 
-    std::shared_ptr<TypeDef>
-    generateTypeDef(std::shared_ptr<Location> location) override;
+    std::shared_ptr<TypeDef> generateTypeDef() override;
 
     std::string generateHelperClass() const override;
 
     using StructOrUnion::operator==;
 
-  private:
     std::string getTypeAlias() const;
 };
 

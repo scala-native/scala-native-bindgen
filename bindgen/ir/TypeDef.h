@@ -21,13 +21,11 @@ class TypeDef : public TypeAndName, public Type {
 
     bool operator==(const Type &other) const override;
 
-    void setLocation(std::shared_ptr<Location> location);
-
     std::shared_ptr<Location> getLocation();
 
   private:
     /**
-     * nullptr if type is located in main file or is generated.
+     * nullptr if type is generated.
      */
     std::shared_ptr<Location> location;
 };
