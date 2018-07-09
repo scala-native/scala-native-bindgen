@@ -29,9 +29,9 @@ class IR {
     /**
      * @return type alias for the enum
      */
-    std::shared_ptr<Type> addEnum(std::string name, const std::string &type,
-                                  std::vector<Enumerator> enumerators,
-                                  std::shared_ptr<Location> location);
+    void addEnum(std::string name, const std::string &type,
+                 std::vector<Enumerator> enumerators,
+                 std::shared_ptr<Location> location);
 
     void addStruct(std::string name, std::vector<Field *> fields,
                    uint64_t typeSize, std::shared_ptr<Location> location);

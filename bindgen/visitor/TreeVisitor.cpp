@@ -1,7 +1,5 @@
 #include "TreeVisitor.h"
 
-std::set<std::string> locations;
-
 bool TreeVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
     if (!astContext->getSourceManager().isInMainFile(func->getLocation())) {
         /* include functions only from the original header */
@@ -71,8 +69,7 @@ bool TreeVisitor::VisitEnumDecl(clang::EnumDecl *enumdecl) {
     std::string scalaType = typeTranslator.getTypeFromTypeMap(
         enumdecl->getIntegerType().getUnqualifiedType().getAsString());
 
-    std::shared_ptr<Type> alias = ir.addEnum(
-        name, scalaType, std::move(enumerators), getLocation(enumdecl));
+    ir.addEnum(name, scalaType, std::move(enumerators), getLocation(enumdecl));
 
     return true;
 }

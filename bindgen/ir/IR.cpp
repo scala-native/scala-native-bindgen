@@ -21,17 +21,15 @@ std::shared_ptr<TypeDef> IR::addTypeDef(std::string name,
     return typeDefs.back();
 }
 
-std::shared_ptr<Type> IR::addEnum(std::string name, const std::string &type,
-                                  std::vector<Enumerator> enumerators,
-                                  std::shared_ptr<Location> location) {
+void IR::addEnum(std::string name, const std::string &type,
+                 std::vector<Enumerator> enumerators,
+                 std::shared_ptr<Location> location) {
     std::shared_ptr<Enum> e =
         std::make_shared<Enum>(std::move(name), type, std::move(enumerators));
     enums.push_back(e);
     if (!e->isAnonymous()) {
         typeDefs.push_back(e->generateTypeDef(std::move(location)));
-        return typeDefs.back();
     }
-    return nullptr;
 }
 
 void IR::addStruct(std::string name, std::vector<Field *> fields,
