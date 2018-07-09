@@ -70,13 +70,10 @@ add_executable(bindgen
   ir/types/FunctionPointerType.h
   ir/types/ArrayType.cpp
   ir/types/ArrayType.h
-  ir/location/Location.h
-  ir/location/ScalaLocation.cpp
-  ir/location/ScalaLocation.h
-  ir/location/SourceLocation.cpp
-  ir/location/SourceLocation.h
-  ir/location/LocationManager.cpp
-  ir/location/LocationManager.h
+  ir/Location.h
+  ir/Location.cpp
+  ir/LocationManager.h
+  ir/LocationManager.cpp
 )
 
 if (STATIC_LINKING)

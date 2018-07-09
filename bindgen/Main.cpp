@@ -1,4 +1,5 @@
 #include "defines/DefineFinderActionFactory.h"
+#include "ir/LocationManager.h"
 #include "visitor/ScalaFrontendActionFactory.h"
 #include <clang/Tooling/CommonOptionsParser.h>
 
@@ -52,7 +53,11 @@ int main(int argc, const char *argv[]) {
         objectName = "nativeLib";
     }
 
-    IR ir(libName, linkName, objectName, Package.getValue());
+    assert(op.getSourcePathList().size() == 1);
+    char *resolved = realpath(op.getSourcePathList()[0].c_str(), nullptr);
+    LocationManager locationManager(resolved);
+
+    IR ir(libName, linkName, objectName, Package.getValue(), locationManager);
 
     DefineFinderActionFactory defineFinderActionFactory(ir);
     int result = Tool.run(&defineFinderActionFactory);
@@ -60,12 +65,7 @@ int main(int argc, const char *argv[]) {
         return result;
     }
 
-    assert(op.getSourcePathList().size() == 1);
-
-    char *resolved = realpath(op.getSourcePathList()[0].c_str(), nullptr);
-    LocationManager locationManager(resolved);
-
-    ScalaFrontendActionFactory actionFactory(ir, locationManager);
+    ScalaFrontendActionFactory actionFactory(ir);
     result = Tool.run(&actionFactory);
 
     ir.generate(ExcludePrefix.getValue());

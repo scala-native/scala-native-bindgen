@@ -4,6 +4,7 @@
 #include "Enum.h"
 #include "Function.h"
 #include "LiteralDefine.h"
+#include "LocationManager.h"
 #include "PossibleVarDefine.h"
 #include "Struct.h"
 #include "TypeDef.h"
@@ -15,7 +16,7 @@
 class IR {
   public:
     IR(std::string libName, std::string linkName, std::string objectName,
-       std::string packageName);
+       std::string packageName, const LocationManager &locationManager);
 
     ~IR();
 
@@ -68,7 +69,7 @@ class IR {
      */
     std::string getDefineForVar(const std::string &varName) const;
 
-    std::shared_ptr<TypeDef> getTypeDefWithName(const std::string &name);
+    std::shared_ptr<TypeDef> getTypeDefWithName(const std::string &name) const;
 
   private:
     /**
@@ -137,28 +138,30 @@ class IR {
     void filterByName(std::vector<T> &declarations, const std::string &name);
 
     template <typename T>
-    T getDeclarationWithName(std::vector<T> &declarations,
-                             const std::string &name);
+    T getDeclarationWithName(const std::vector<T> &declarations,
+                             const std::string &name) const;
 
-    void removeUnusedExternalTypedefs();
+    bool typeDefInMainFile(const TypeDef &typeDef) const;
 
-    template <typename T>
-    void removeDeclaration(std::vector<std::shared_ptr<T>> &declarations,
-                           T *declaration);
+    template <typename T> bool inMainFile(const T &type) const;
+
+    bool hasOutputtedEnums() const;
+
+    bool hasOutputtedTypeDefs() const;
+
+    bool isOutputted(const StructOrUnion *structOrUnion) const;
 
     /**
-     * Go through types, find corresponding typedef, if the typedef is not used
-     * then the type and the typedef are removed
-     *
-     * @tparam T Struct, Union or Enum
+     * @tparam T Struct or Union
      */
     template <typename T>
-    void
-    removeUnusedExternalTypeAndTypedef(std::vector<std::shared_ptr<T>> &types);
+    bool hasOutputtedDeclaration(
+        const std::vector<std::shared_ptr<T>> &declarations) const;
 
     std::string libName;    // name of the library
     std::string linkName;   // name of the library to link with
     std::string objectName; // name of Scala object
+    const LocationManager &locationManager;
     std::vector<std::shared_ptr<Function>> functions;
     std::vector<std::shared_ptr<TypeDef>> typeDefs;
     std::vector<std::shared_ptr<Struct>> structs;

@@ -1,8 +1,8 @@
 #ifndef SCALA_NATIVE_BINDGEN_TYPEDEF_H
 #define SCALA_NATIVE_BINDGEN_TYPEDEF_H
 
+#include "Location.h"
 #include "TypeAndName.h"
-#include "location/Location.h"
 #include <llvm/Support/raw_ostream.h>
 #include <string>
 
@@ -21,7 +21,7 @@ class TypeDef : public TypeAndName, public Type {
 
     bool operator==(const Type &other) const override;
 
-    std::shared_ptr<Location> getLocation();
+    std::shared_ptr<Location> getLocation() const;
 
   private:
     /**

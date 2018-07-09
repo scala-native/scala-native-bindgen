@@ -56,4 +56,4 @@ std::string Enum::getTypeAlias() const {
     return "enum_" + name;
 }
 
-std::shared_ptr<Location> Enum::getLocation() { return location; }
+std::shared_ptr<Location> Enum::getLocation() const { return location; }

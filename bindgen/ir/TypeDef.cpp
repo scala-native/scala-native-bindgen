@@ -45,4 +45,4 @@ bool TypeDef::operator==(const Type &other) const {
     return false;
 }
 
-std::shared_ptr<Location> TypeDef::getLocation() { return location; }
+std::shared_ptr<Location> TypeDef::getLocation() const { return location; }

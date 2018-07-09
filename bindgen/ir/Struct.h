@@ -33,7 +33,9 @@ class StructOrUnion {
 
     bool operator==(const StructOrUnion &other) const;
 
-    std::shared_ptr<Location> getLocation();
+    std::shared_ptr<Location> getLocation() const;
+
+    virtual std::string getTypeAlias() const = 0;
 
   protected:
     std::string name;
@@ -55,7 +57,7 @@ class Struct : public StructOrUnion,
 
     std::string generateHelperClass() const override;
 
-    std::string getTypeAlias() const;
+    std::string getTypeAlias() const override;
 
     /**
      * @return true if helper methods will be generated for this struct
@@ -87,7 +89,7 @@ class Union : public StructOrUnion,
 
     using StructOrUnion::operator==;
 
-    std::string getTypeAlias() const;
+    std::string getTypeAlias() const override;
 };
 
 #endif // SCALA_NATIVE_BINDGEN_STRUCT_H

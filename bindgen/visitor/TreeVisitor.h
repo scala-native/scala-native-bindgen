@@ -3,7 +3,6 @@
 #include "../CycleDetection.h"
 #include "../TypeTranslator.h"
 #include "../ir/IR.h"
-#include "../ir/location/LocationManager.h"
 #include <clang/AST/RecursiveASTVisitor.h>
 #include <clang/Frontend/CompilerInstance.h>
 
@@ -13,7 +12,6 @@ class TreeVisitor : public clang::RecursiveASTVisitor<TreeVisitor> {
     TypeTranslator typeTranslator;
     CycleDetection cycleDetection;
     IR &ir;
-    LocationManager &locationManager;
 
     void handleUnion(clang::RecordDecl *record, std::string name);
 
@@ -22,11 +20,9 @@ class TreeVisitor : public clang::RecursiveASTVisitor<TreeVisitor> {
     std::shared_ptr<Location> getLocation(clang::Decl *decl);
 
   public:
-    TreeVisitor(clang::CompilerInstance *CI, IR &ir,
-                LocationManager &locationManager)
+    TreeVisitor(clang::CompilerInstance *CI, IR &ir)
         : astContext(&(CI->getASTContext())), typeTranslator(astContext, ir),
-          cycleDetection(typeTranslator), ir(ir),
-          locationManager(locationManager) {}
+          cycleDetection(typeTranslator), ir(ir) {}
 
     virtual ~TreeVisitor() = default;
 

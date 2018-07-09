@@ -73,7 +73,9 @@ bool StructOrUnion::operator==(const StructOrUnion &other) const {
     return false;
 }
 
-std::shared_ptr<Location> StructOrUnion::getLocation() { return location; }
+std::shared_ptr<Location> StructOrUnion::getLocation() const {
+    return location;
+}
 
 Struct::Struct(std::string name, std::vector<Field *> fields, uint64_t typeSize,
                std::shared_ptr<Location> location)

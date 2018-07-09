@@ -34,7 +34,7 @@ class Enum : public PrimitiveType, public std::enable_shared_from_this<Enum> {
 
     std::string getTypeAlias() const;
 
-    std::shared_ptr<Location> getLocation();
+    std::shared_ptr<Location> getLocation() const;
 
   private:
     std::string name; // might be empty
