@@ -10,7 +10,7 @@ TypeDef::TypeDef(std::string name, std::shared_ptr<Type> type,
 
 llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const TypeDef &typeDef) {
     if (!typeDef.getType()) {
-        llvm::errs() << "Error: type declaration for " << typeDef.getName()
+        llvm::errs() << "Error: type definition for " << typeDef.getName()
                      << " was not found.\n";
         llvm::errs().flush();
         return s;
@@ -25,8 +25,10 @@ bool TypeDef::usesType(const std::shared_ptr<Type> &type,
     if (stopOnTypeDefs) {
         return false;
     }
-    return *this->type == *type ||
-           this->type.get()->usesType(type, stopOnTypeDefs);
+    if (!this->type) {
+        return false;
+    }
+    return *this->type == *type || this->type->usesType(type, stopOnTypeDefs);
 }
 
 std::string TypeDef::str() const { return handleReservedWords(name); }

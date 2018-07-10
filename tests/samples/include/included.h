@@ -31,7 +31,7 @@ enum unusedEnum { UNUSED }; // removed
 typedef enum unusedEnum unusedEnum; // removed
 
 struct unusedStruct {
-    enum unusedEnum e; // removed
-};
+    enum unusedEnum e;
+}; // removed
 
 enum semester { AUTUMN, SPRING };

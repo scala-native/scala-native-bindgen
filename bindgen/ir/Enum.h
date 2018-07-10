@@ -39,9 +39,6 @@ class Enum : public PrimitiveType, public std::enable_shared_from_this<Enum> {
   private:
     std::string name; // might be empty
     std::vector<Enumerator> enumerators;
-    /**
-     * nullptr if type is generated.
-     */
     std::shared_ptr<Location> location;
 };
 

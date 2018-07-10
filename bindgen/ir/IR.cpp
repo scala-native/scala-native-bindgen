@@ -108,7 +108,7 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir) {
           << "object " << objectName << " {\n";
 
         for (const auto &typeDef : ir.typeDefs) {
-            if (ir.isOutputted(typeDef)) {
+            if (ir.shouldOutput(typeDef)) {
                 s << *typeDef;
             }
         }
@@ -145,7 +145,7 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir) {
 
         std::string sep = "";
         for (const auto &e : ir.enums) {
-            if (ir.isOutputted(e)) {
+            if (ir.shouldOutput(e)) {
                 s << sep << *e;
                 sep = "\n";
             }
@@ -158,13 +158,13 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir) {
         s << "object " << ir.libName << "Helpers {\n";
 
         for (const auto &st : ir.structs) {
-            if (ir.isOutputted(st) && st->hasHelperMethods()) {
+            if (ir.shouldOutput(st) && st->hasHelperMethods()) {
                 s << "\n" << st->generateHelperClass();
             }
         }
 
         for (const auto &u : ir.unions) {
-            if (ir.isOutputted(u)) {
+            if (ir.shouldOutput(u)) {
                 s << "\n" << u->generateHelperClass();
             }
         }
@@ -179,7 +179,6 @@ void IR::generate(const std::string &excludePrefix) {
     if (!generated) {
         setScalaNames();
         filterDeclarations(excludePrefix);
-        //        removeUnusedExternalTypedefs();
         generated = true;
     }
 }
@@ -191,7 +190,7 @@ bool IR::hasHelperMethods() const {
     }
 
     for (const auto &s : structs) {
-        if (isOutputted(s) && s->hasHelperMethods()) {
+        if (shouldOutput(s) && s->hasHelperMethods()) {
             return true;
         }
     }
@@ -269,7 +268,7 @@ bool IR::isTypeUsed(const std::shared_ptr<Type> &type,
          * references this type */
         for (const auto &typeDef : typeDefs) {
             if (typeDef->usesType(type, false)) {
-                if (isOutputted(typeDef)) {
+                if (shouldOutput(typeDef)) {
                     return true;
                 }
             }
@@ -278,7 +277,7 @@ bool IR::isTypeUsed(const std::shared_ptr<Type> &type,
             /* stopOnTypeDefs parameter is true because because typedefs were
              * checked */
             if (s->usesType(type, true)) {
-                if (isOutputted(s)) {
+                if (shouldOutput(s)) {
                     return true;
                 }
             }
@@ -287,7 +286,7 @@ bool IR::isTypeUsed(const std::shared_ptr<Type> &type,
             /* stopOnTypeDefs parameter is true because because typedefs were
              * checked */
             if (u->usesType(type, true)) {
-                if (isOutputted(u)) {
+                if (shouldOutput(u)) {
                     return true;
                 }
             }
@@ -429,7 +428,7 @@ template <typename T>
 bool IR::hasOutputtedDeclaration(
     const std::vector<std::shared_ptr<T>> &declarations) const {
     for (const auto &declaration : declarations) {
-        if (isOutputted(declaration)) {
+        if (shouldOutput(declaration)) {
             return true;
         }
     }
@@ -437,6 +436,6 @@ bool IR::hasOutputtedDeclaration(
 }
 
 template <typename T>
-bool IR::isOutputted(const std::shared_ptr<T> &type) const {
+bool IR::shouldOutput(const std::shared_ptr<T> &type) const {
     return inMainFile(*type) || isTypeUsed(type, true);
 }

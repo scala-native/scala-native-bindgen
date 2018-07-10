@@ -40,9 +40,6 @@ class StructOrUnion {
   protected:
     std::string name;
     std::vector<Field *> fields;
-    /**
-     * nullptr if type is generated.
-     */
     std::shared_ptr<Location> location;
 };
 

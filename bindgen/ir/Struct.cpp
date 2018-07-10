@@ -156,9 +156,9 @@ bool Struct::usesType(const std::shared_ptr<Type> &type,
 }
 
 bool Struct::operator==(const Type &other) const {
-    auto *structOrUnion = dynamic_cast<const StructOrUnion *>(&other);
-    if (structOrUnion) {
-        return this->equals(*structOrUnion);
+    auto *s = dynamic_cast<const Struct *>(&other);
+    if (s) {
+        return this->equals(*s);
     }
     return false;
 }
@@ -198,9 +198,9 @@ std::string Union::generateHelperClass() const {
 std::string Union::getTypeAlias() const { return "union_" + name; }
 
 bool Union::operator==(const Type &other) const {
-    auto *structOrUnion = dynamic_cast<const StructOrUnion *>(&other);
-    if (structOrUnion) {
-        return this->equals(*structOrUnion);
+    auto *u = dynamic_cast<const Union *>(&other);
+    if (u) {
+        return this->equals(*u);
     }
     return false;
 }

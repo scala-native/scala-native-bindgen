@@ -152,7 +152,7 @@ class IR {
      *         main file.
      */
     template <typename T>
-    bool isOutputted(const std::shared_ptr<T> &type) const;
+    bool shouldOutput(const std::shared_ptr<T> &type) const;
 
     /**
      * @tparam T Struct or Union

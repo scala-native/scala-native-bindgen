@@ -30,6 +30,12 @@ int main(int argc, const char *argv[]) {
     clang::tooling::ClangTool Tool(op.getCompilations(),
                                    op.getSourcePathList());
 
+    if (op.getSourcePathList().size() != 1) {
+        llvm::errs() << "Error: Only one file may be processed at a time.\n";
+        llvm::errs().flush();
+        return -1;
+    }
+
     auto libName = LibName.getValue();
     if (libName.empty()) {
         llvm::errs()
@@ -53,7 +59,6 @@ int main(int argc, const char *argv[]) {
         objectName = "nativeLib";
     }
 
-    assert(op.getSourcePathList().size() == 1);
     char *resolved = realpath(op.getSourcePathList()[0].c_str(), nullptr);
     LocationManager locationManager(resolved);
 
