@@ -18,12 +18,7 @@ class TreeConsumer : public clang::ASTConsumer {
         // a DeclGroupRef may have multiple Decls, so we iterate through each
         // one
         for (auto D : DG) {
-            std::string fpath = smanager.getFilename(D->getLocation()).str();
-
-            if (!headerMan.IsStandard(basename(fpath)) && !fpath.empty()) {
-                locations.insert(basename(fpath) + "\n");
-                visitor.TraverseDecl(D);
-            }
+            visitor.TraverseDecl(D);
         }
         return true;
     }

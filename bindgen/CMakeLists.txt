@@ -36,8 +36,6 @@ add_executable(bindgen
   defines/DefineFinderActionFactory.h
   TypeTranslator.h
   TypeTranslator.cpp
-  HeaderManager.h
-  HeaderManager.cpp
   CycleDetection.h
   Utils.h
   ir/IR.h
@@ -72,6 +70,10 @@ add_executable(bindgen
   ir/types/FunctionPointerType.h
   ir/types/ArrayType.cpp
   ir/types/ArrayType.h
+  ir/Location.h
+  ir/Location.cpp
+  ir/LocationManager.h
+  ir/LocationManager.cpp
 )
 
 if (STATIC_LINKING)

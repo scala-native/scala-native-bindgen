@@ -1,10 +1,11 @@
 #include "TreeVisitor.h"
-
-HeaderManager headerMan;
-
-std::set<std::string> locations;
+#include <stdio.h>
 
 bool TreeVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
+    if (!astContext->getSourceManager().isInMainFile(func->getLocation())) {
+        /* include functions only from the original header */
+        return true;
+    }
     std::string funcName = func->getNameInfo().getName().getAsString();
     std::shared_ptr<Type> retType =
         typeTranslator.translate(func->getReturnType());
@@ -47,7 +48,7 @@ bool TreeVisitor::VisitTypedefDecl(clang::TypedefDecl *tpdef) {
     std::shared_ptr<Type> type =
         typeTranslator.translate(tpdef->getUnderlyingType());
     if (type) {
-        ir.addTypeDef(name, type);
+        ir.addTypeDef(name, type, getLocation(tpdef));
     }
     return true;
 }
@@ -69,8 +70,7 @@ bool TreeVisitor::VisitEnumDecl(clang::EnumDecl *enumdecl) {
     std::string scalaType = typeTranslator.getTypeFromTypeMap(
         enumdecl->getIntegerType().getUnqualifiedType().getAsString());
 
-    std::shared_ptr<Type> alias =
-        ir.addEnum(name, scalaType, std::move(enumerators));
+    ir.addEnum(name, scalaType, std::move(enumerators), getLocation(enumdecl));
 
     return true;
 }
@@ -114,7 +114,7 @@ void TreeVisitor::handleUnion(clang::RecordDecl *record, std::string name) {
         fields.push_back(new Field(fname, ftype));
     }
 
-    ir.addUnion(name, std::move(fields), maxSize);
+    ir.addUnion(name, std::move(fields), maxSize, getLocation(record));
 }
 
 void TreeVisitor::handleStruct(clang::RecordDecl *record, std::string name) {
@@ -153,10 +153,14 @@ void TreeVisitor::handleStruct(clang::RecordDecl *record, std::string name) {
     uint64_t sizeInBits = astContext->getTypeSize(record->getTypeForDecl());
     assert(sizeInBits % 8 == 0);
 
-    ir.addStruct(name, std::move(fields), sizeInBits / 8);
+    ir.addStruct(name, std::move(fields), sizeInBits / 8, getLocation(record));
 }
 
 bool TreeVisitor::VisitVarDecl(clang::VarDecl *varDecl) {
+    if (!astContext->getSourceManager().isInMainFile(varDecl->getLocation())) {
+        /* include variables only from the original header */
+        return true;
+    }
     if (!varDecl->isThisDeclarationADefinition()) {
         std::string variableName = varDecl->getName().str();
         std::shared_ptr<Type> type =
@@ -170,4 +174,13 @@ bool TreeVisitor::VisitVarDecl(clang::VarDecl *varDecl) {
         }
     }
     return true;
+}
+
+std::shared_ptr<Location> TreeVisitor::getLocation(clang::Decl *decl) {
+    clang::SourceManager &sm = astContext->getSourceManager();
+    std::string filename = std::string(sm.getFilename(decl->getLocation()));
+    std::string path = realpath(filename.c_str(), nullptr);
+
+    unsigned lineNumber = sm.getSpellingLineNumber(decl->getLocation());
+    return std::make_shared<Location>(path, lineNumber);
 }

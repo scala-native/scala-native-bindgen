@@ -1,5 +1,6 @@
 #include "ArrayType.h"
 #include "../../Utils.h"
+#include "../Struct.h"
 
 ArrayType::ArrayType(std::shared_ptr<Type> elementsType, uint64_t size)
     : size(size), elementsType(std::move(elementsType)) {}
@@ -12,19 +13,20 @@ std::string ArrayType::str() const {
 bool ArrayType::usesType(const std::shared_ptr<Type> &type,
                          bool stopOnTypeDefs) const {
     return *elementsType == *type ||
-           elementsType.get()->usesType(type, stopOnTypeDefs);
+           elementsType->usesType(type, stopOnTypeDefs);
 }
 
 bool ArrayType::operator==(const Type &other) const {
     if (this == &other) {
         return true;
     }
-    if (isInstanceOf<const ArrayType>(&other)) {
+    if (isInstanceOf<const ArrayType>(&other) &&
+        !isInstanceOf<const Union>(&other)) {
         auto *arrayType = dynamic_cast<const ArrayType *>(&other);
         if (size != arrayType->size) {
             return false;
         }
-        return *elementsType == *arrayType->elementsType.get();
+        return *elementsType == *arrayType->elementsType;
     }
     return false;
 }

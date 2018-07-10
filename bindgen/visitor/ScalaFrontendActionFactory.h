@@ -13,7 +13,7 @@
 class ScalaFrontendActionFactory
     : public clang::tooling::FrontendActionFactory {
   public:
-    explicit ScalaFrontendActionFactory(IR &ir);
+    ScalaFrontendActionFactory(IR &ir);
 
     clang::FrontendAction *create() override;
 

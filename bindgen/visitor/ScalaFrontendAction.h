@@ -12,7 +12,7 @@
  */
 class ScalaFrontendAction : public clang::ASTFrontendAction {
   public:
-    explicit ScalaFrontendAction(IR &ir);
+    ScalaFrontendAction(IR &ir);
 
     std::unique_ptr<clang::ASTConsumer>
     CreateASTConsumer(clang::CompilerInstance &CI,

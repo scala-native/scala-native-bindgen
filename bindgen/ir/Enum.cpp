@@ -8,15 +8,16 @@ std::string Enumerator::getName() { return name; }
 int64_t Enumerator::getValue() { return value; }
 
 Enum::Enum(std::string name, std::string type,
-           std::vector<Enumerator> enumerators)
+           std::vector<Enumerator> enumerators,
+           std::shared_ptr<Location> location)
     : PrimitiveType(std::move(type)), name(std::move(name)),
-      enumerators(std::move(enumerators)) {}
+      enumerators(std::move(enumerators)), location(std::move(location)) {}
 
 bool Enum::isAnonymous() const { return name.empty(); }
 
 std::shared_ptr<TypeDef> Enum::generateTypeDef() {
-    assert(!isAnonymous());
-    return std::make_shared<TypeDef>("enum_" + name, shared_from_this());
+    return std::make_shared<TypeDef>(getTypeAlias(), shared_from_this(),
+                                     nullptr);
 }
 
 llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const Enum &e) {
@@ -49,3 +50,10 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const Enum &e) {
 }
 
 std::string Enum::getName() const { return name; }
+
+std::string Enum::getTypeAlias() const {
+    assert(!isAnonymous());
+    return "enum_" + name;
+}
+
+std::shared_ptr<Location> Enum::getLocation() const { return location; }

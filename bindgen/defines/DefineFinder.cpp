@@ -11,6 +11,10 @@ DefineFinder::DefineFinder(IR &ir, const clang::CompilerInstance &compiler,
 void DefineFinder::MacroDefined(const clang::Token &macroNameTok,
                                 const clang::MacroDirective *md) {
     clang::SourceManager &sm = compiler.getSourceManager();
+    if (!sm.isInMainFile(md->getLocation())) {
+        /* include defines only from the original header */
+        return;
+    }
     if (sm.isWrittenInMainFile(macroNameTok.getLocation()) && md->isDefined() &&
         !md->getMacroInfo()->isFunctionLike()) {
         /* save defines only from the given header.
@@ -100,6 +104,9 @@ void DefineFinder::MacroUndefined(const clang::Token &macroNameTok,
                                   const clang::MacroDefinition &md,
                                   const clang::MacroDirective *undef) {
     clang::SourceManager &sm = compiler.getSourceManager();
+    if (!sm.isInMainFile(undef->getLocation())) {
+        return;
+    }
     if (sm.isWrittenInMainFile(macroNameTok.getLocation()) &&
         md.getMacroInfo() && !md.getMacroInfo()->isFunctionLike()) {
         std::string macroName = macroNameTok.getIdentifierInfo()->getName();

@@ -3,12 +3,14 @@
 #include "Enum.h"
 #include "Struct.h"
 
-TypeDef::TypeDef(std::string name, std::shared_ptr<Type> type)
-    : TypeAndName(std::move(name), std::move(type)) {}
+TypeDef::TypeDef(std::string name, std::shared_ptr<Type> type,
+                 std::shared_ptr<Location> location)
+    : TypeAndName(std::move(name), std::move(type)),
+      location(std::move(location)) {}
 
 llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const TypeDef &typeDef) {
     if (!typeDef.getType()) {
-        llvm::errs() << "Error: type declaration for " << typeDef.getName()
+        llvm::errs() << "Error: type definition for " << typeDef.getName()
                      << " was not found.\n";
         llvm::errs().flush();
         return s;
@@ -23,8 +25,10 @@ bool TypeDef::usesType(const std::shared_ptr<Type> &type,
     if (stopOnTypeDefs) {
         return false;
     }
-    return *this->type == *type ||
-           this->type.get()->usesType(type, stopOnTypeDefs);
+    if (!this->type) {
+        return false;
+    }
+    return *this->type == *type || this->type->usesType(type, stopOnTypeDefs);
 }
 
 std::string TypeDef::str() const { return handleReservedWords(name); }
@@ -42,3 +46,5 @@ bool TypeDef::operator==(const Type &other) const {
     }
     return false;
 }
+
+std::shared_ptr<Location> TypeDef::getLocation() const { return location; }

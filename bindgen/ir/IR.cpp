@@ -2,9 +2,10 @@
 #include "../Utils.h"
 
 IR::IR(std::string libName, std::string linkName, std::string objectName,
-       std::string packageName)
+       std::string packageName, const LocationManager &locationManager)
     : libName(std::move(libName)), linkName(std::move(linkName)),
-      objectName(std::move(objectName)), packageName(std::move(packageName)) {}
+      objectName(std::move(objectName)), locationManager(locationManager),
+      packageName(std::move(packageName)) {}
 
 void IR::addFunction(std::string name, std::vector<Parameter *> parameters,
                      std::shared_ptr<Type> retType, bool isVariadic) {
@@ -13,27 +14,28 @@ void IR::addFunction(std::string name, std::vector<Parameter *> parameters,
 }
 
 std::shared_ptr<TypeDef> IR::addTypeDef(std::string name,
-                                        std::shared_ptr<Type> type) {
-    typeDefs.push_back(std::make_shared<TypeDef>(std::move(name), type));
+                                        std::shared_ptr<Type> type,
+                                        std::shared_ptr<Location> location) {
+    typeDefs.push_back(
+        std::make_shared<TypeDef>(std::move(name), type, std::move(location)));
     return typeDefs.back();
 }
 
-std::shared_ptr<Type> IR::addEnum(std::string name, const std::string &type,
-                                  std::vector<Enumerator> enumerators) {
-    std::shared_ptr<Enum> e =
-        std::make_shared<Enum>(std::move(name), type, std::move(enumerators));
+void IR::addEnum(std::string name, const std::string &type,
+                 std::vector<Enumerator> enumerators,
+                 std::shared_ptr<Location> location) {
+    std::shared_ptr<Enum> e = std::make_shared<Enum>(
+        std::move(name), type, std::move(enumerators), std::move(location));
     enums.push_back(e);
     if (!e->isAnonymous()) {
         typeDefs.push_back(e->generateTypeDef());
-        return typeDefs.back();
     }
-    return nullptr;
 }
 
 void IR::addStruct(std::string name, std::vector<Field *> fields,
-                   uint64_t typeSize) {
-    std::shared_ptr<Struct> s =
-        std::make_shared<Struct>(name, std::move(fields), typeSize);
+                   uint64_t typeSize, std::shared_ptr<Location> location) {
+    std::shared_ptr<Struct> s = std::make_shared<Struct>(
+        name, std::move(fields), typeSize, std::move(location));
     structs.push_back(s);
     std::shared_ptr<TypeDef> typeDef = getTypeDefWithName("struct_" + name);
     if (typeDef) {
@@ -45,9 +47,9 @@ void IR::addStruct(std::string name, std::vector<Field *> fields,
 }
 
 void IR::addUnion(std::string name, std::vector<Field *> fields,
-                  uint64_t maxSize) {
-    std::shared_ptr<Union> u =
-        std::make_shared<Union>(name, std::move(fields), maxSize);
+                  uint64_t maxSize, std::shared_ptr<Location> location) {
+    std::shared_ptr<Union> u = std::make_shared<Union>(
+        name, std::move(fields), maxSize, std::move(location));
     unions.push_back(u);
     std::shared_ptr<TypeDef> typeDef = getTypeDefWithName("union_" + name);
     if (typeDef) {
@@ -76,8 +78,10 @@ void IR::addVarDefine(std::string name, std::shared_ptr<Variable> variable) {
 }
 
 bool IR::libObjEmpty() const {
-    return functions.empty() && typeDefs.empty() && structs.empty() &&
-           unions.empty() && varDefines.empty() && variables.empty();
+    return functions.empty() && !hasOutputtedDeclaration(typeDefs) &&
+           !hasOutputtedDeclaration(structs) &&
+           !hasOutputtedDeclaration(unions) && varDefines.empty() &&
+           variables.empty();
 }
 
 llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir) {
@@ -87,7 +91,8 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir) {
         s << "package " << ir.packageName << "\n\n";
     }
 
-    if (!ir.libObjEmpty() || !ir.enums.empty() || !ir.literalDefines.empty()) {
+    if (!ir.libObjEmpty() || ir.hasOutputtedDeclaration(ir.enums) ||
+        !ir.literalDefines.empty()) {
         s << "import scala.scalanative._\n"
           << "import scala.scalanative.native._\n\n";
     }
@@ -103,7 +108,9 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir) {
           << "object " << objectName << " {\n";
 
         for (const auto &typeDef : ir.typeDefs) {
-            s << *typeDef;
+            if (ir.shouldOutput(typeDef)) {
+                s << *typeDef;
+            }
         }
 
         for (const auto &variable : ir.variables) {
@@ -129,19 +136,18 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir) {
         s << "}\n\n";
     }
 
-    if (!ir.enums.empty() || ir.hasHelperMethods()) {
+    if (ir.hasOutputtedDeclaration(ir.enums) || ir.hasHelperMethods()) {
         s << "import " << objectName << "._\n\n";
     }
 
-    if (!ir.enums.empty()) {
+    if (ir.hasOutputtedDeclaration(ir.enums)) {
         s << "object " << ir.libName << "Enums {\n";
 
-        unsigned long enumeratorsCount = ir.enums.size();
-        for (unsigned long i = 0; i < enumeratorsCount; i++) {
-            auto e = ir.enums[i];
-            s << *e;
-            if (i < enumeratorsCount - 1) {
-                s << "\n"; // space between groups of enums
+        std::string sep = "";
+        for (const auto &e : ir.enums) {
+            if (ir.shouldOutput(e)) {
+                s << sep << *e;
+                sep = "\n";
             }
         }
 
@@ -152,13 +158,15 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir) {
         s << "object " << ir.libName << "Helpers {\n";
 
         for (const auto &st : ir.structs) {
-            if (st->hasHelperMethods()) {
+            if (ir.shouldOutput(st) && st->hasHelperMethods()) {
                 s << "\n" << st->generateHelperClass();
             }
         }
 
         for (const auto &u : ir.unions) {
-            s << "\n" << u->generateHelperClass();
+            if (ir.shouldOutput(u)) {
+                s << "\n" << u->generateHelperClass();
+            }
         }
 
         s << "}\n\n";
@@ -176,13 +184,13 @@ void IR::generate(const std::string &excludePrefix) {
 }
 
 bool IR::hasHelperMethods() const {
-    if (!unions.empty()) {
+    if (hasOutputtedDeclaration(unions)) {
         /* all unions have helper methods */
         return true;
     }
 
     for (const auto &s : structs) {
-        if (s->hasHelperMethods()) {
+        if (shouldOutput(s) && s->hasHelperMethods()) {
             return true;
         }
     }
@@ -230,7 +238,7 @@ void IR::replaceTypeInTypeDefs(std::shared_ptr<Type> oldType,
 
 template <typename T>
 bool IR::isTypeUsed(const std::vector<T> &declarations,
-                    std::shared_ptr<Type> type, bool stopOnTypeDefs) {
+                    std::shared_ptr<Type> type, bool stopOnTypeDefs) const {
     for (const auto &decl : declarations) {
         if (decl->usesType(type, stopOnTypeDefs)) {
             return true;
@@ -239,13 +247,55 @@ bool IR::isTypeUsed(const std::vector<T> &declarations,
     return false;
 }
 
-bool IR::typeIsUsedOnlyInTypeDefs(std::shared_ptr<Type> type) {
+bool IR::typeIsUsedOnlyInTypeDefs(const std::shared_ptr<Type> &type) const {
     /* varDefines are not checked here because they are simply
      * aliases for variables.*/
     return !(
         isTypeUsed(functions, type, true) || isTypeUsed(structs, type, true) ||
         isTypeUsed(unions, type, true) || isTypeUsed(variables, type, true) ||
         isTypeUsed(literalDefines, type, true));
+}
+
+bool IR::isTypeUsed(const std::shared_ptr<Type> &type,
+                    bool checkRecursively) const {
+    if (checkRecursively) {
+        if (isTypeUsed(functions, type, true) ||
+            isTypeUsed(variables, type, true) ||
+            isTypeUsed(literalDefines, type, true)) {
+            return true;
+        }
+        /* type is used if there exists another type that is used and that
+         * references this type */
+        for (const auto &typeDef : typeDefs) {
+            if (typeDef->usesType(type, false)) {
+                if (shouldOutput(typeDef)) {
+                    return true;
+                }
+            }
+        }
+        for (const auto &s : structs) {
+            /* stopOnTypeDefs parameter is true because because typedefs were
+             * checked */
+            if (s->usesType(type, true)) {
+                if (shouldOutput(s)) {
+                    return true;
+                }
+            }
+        }
+        for (const auto &u : unions) {
+            /* stopOnTypeDefs parameter is true because because typedefs were
+             * checked */
+            if (u->usesType(type, true)) {
+                if (shouldOutput(u)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    } else {
+        return !(typeIsUsedOnlyInTypeDefs(type) &&
+                 !isTypeUsed(typeDefs, type, false));
+    }
 }
 
 void IR::setScalaNames() {
@@ -320,7 +370,7 @@ std::shared_ptr<Variable> IR::addVariable(const std::string &name,
     return variable;
 }
 
-std::shared_ptr<TypeDef> IR::getTypeDefWithName(const std::string &name) {
+std::shared_ptr<TypeDef> IR::getTypeDefWithName(const std::string &name) const {
     /* nullptr is returned in 2 cases:
      * 1. TypeTranslator translates opaque struct/union type for which TypeDef
      *    was not created.
@@ -330,8 +380,8 @@ std::shared_ptr<TypeDef> IR::getTypeDefWithName(const std::string &name) {
 }
 
 template <typename T>
-T IR::getDeclarationWithName(std::vector<T> &declarations,
-                             const std::string &name) {
+T IR::getDeclarationWithName(const std::vector<T> &declarations,
+                             const std::string &name) const {
     for (auto it = declarations.begin(), end = declarations.end(); it != end;
          ++it) {
         T declaration = (*it);
@@ -352,4 +402,40 @@ IR::~IR() {
     possibleVarDefines.clear();
     variables.clear();
     varDefines.clear();
+}
+
+template <typename T> bool IR::inMainFile(const T &type) const {
+    std::shared_ptr<Location> location = type.getLocation();
+    if (!location) {
+        /* generated TypeDef */
+        auto *typeDef = dynamic_cast<const TypeDef *>(&type);
+        assert(typeDef);
+        Type *innerType = typeDef->getType().get();
+        if (isInstanceOf<Struct>(innerType)) {
+            return inMainFile(*dynamic_cast<Struct *>(innerType));
+        }
+        if (isInstanceOf<Union>(innerType)) {
+            return inMainFile(*dynamic_cast<Union *>(innerType));
+        }
+        if (isInstanceOf<Enum>(innerType)) {
+            return inMainFile(*dynamic_cast<Enum *>(innerType));
+        }
+    }
+    return location && locationManager.inMainFile(*location);
+}
+
+template <typename T>
+bool IR::hasOutputtedDeclaration(
+    const std::vector<std::shared_ptr<T>> &declarations) const {
+    for (const auto &declaration : declarations) {
+        if (shouldOutput(declaration)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+template <typename T>
+bool IR::shouldOutput(const std::shared_ptr<T> &type) const {
+    return inMainFile(*type) || isTypeUsed(type, true);
 }

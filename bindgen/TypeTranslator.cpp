@@ -102,7 +102,7 @@ TypeTranslator::translateStructOrUnionOrEnum(const clang::QualType &qtpe) {
     /* type is not yet defined.
      * TypeDef with nullptr will be created.
      * nullptr will be replaced by actual type when the type is declared. */
-    typeDef = ir.addTypeDef(nameWithoutSpace, nullptr);
+    typeDef = ir.addTypeDef(nameWithoutSpace, nullptr, nullptr);
     return typeDef;
 }
 
