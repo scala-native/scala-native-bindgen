@@ -1,12 +1,19 @@
-import scala.scalanative.sbtplugin.ScalaNativePluginInternal.nativeWorkdir
 import scala.sys.process._
-import java.nio.file.Path
+
+addCommandAlias("verify", "; ^test:compile ; ^test ; ^scripted ; docs/makeSite")
+
+val Versions = new {
+  val scala210 = "2.10.6"
+  val scala211 = "2.11.12"
+  val scala212 = "2.12.6"
+  val sbt013   = "0.13.17"
+  val sbt1     = "1.1.6"
+}
 
 inThisBuild(
   Def.settings(
     organization := "org.scalanative.bindgen",
     version := "0.2-SNAPSHOT",
-    scalaVersion := "2.11.12",
     scalacOptions ++= Seq(
       "-deprecation",
       "-unchecked",
@@ -20,10 +27,18 @@ inThisBuild(
     git.remoteRepo := scmInfo.value.get.connection.replace("scm:git:", "")
   ))
 
-val tests = project
-  .in(file("tests"))
+val root = project("scala-native-bindgen")
+  .in(file("."))
+  .aggregate(
+    tests,
+    samples,
+    tools,
+    sbtPlugin,
+    docs
+  )
+
+lazy val tests = project("tests")
   .dependsOn(tools)
-  .aggregate(samples)
   .settings(
     fork in Test := true,
     javaOptions in Test += {
@@ -38,10 +53,11 @@ val tests = project
     libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % Test
   )
 
-lazy val samples = project
+lazy val samples = project("samples")
   .in(file("tests/samples"))
   .enablePlugins(ScalaNativePlugin)
   .settings(
+    scalaVersion := Versions.scala211,
     libraryDependencies += "com.lihaoyi" %%% "utest" % "0.6.3" % "test",
     testFrameworks += new TestFramework("utest.runner.Framework"),
     nativeLinkStubs := true,
@@ -91,19 +107,45 @@ lazy val samples = project
     }
   )
 
-lazy val tools = project in file("tools")
+lazy val tools = project("tools")
 
-lazy val docs = project
-  .in(file("docs"))
+lazy val sbtPlugin = project("sbt-scala-native-bindgen", ScriptedPlugin)
+  .dependsOn(tools)
+  .settings(
+    Keys.sbtPlugin := true,
+    scriptedLaunchOpts += s"-Dplugin.version=${version.value}",
+    scriptedLaunchOpts += {
+      val rootDir = (ThisBuild / baseDirectory).value
+      s"-Dbindgen.path=$rootDir/bindgen/target/scala-native-bindgen"
+    },
+    publishLocal := publishLocal.dependsOn(tools / publishLocal).value
+  )
+
+lazy val docs = project("docs")
   .enablePlugins(GhpagesPlugin, ParadoxSitePlugin, ParadoxMaterialThemePlugin)
   .settings(
     paradoxProperties in Paradox ++= Map(
       "github.base_url" -> scmInfo.value.get.browseUrl.toString
     ),
     ParadoxMaterialThemePlugin.paradoxMaterialThemeSettings(Paradox),
-    paradoxMaterialTheme in Paradox := {
-      (paradoxMaterialTheme in Paradox).value
+    Paradox / paradoxMaterialTheme := {
+      (Paradox / paradoxMaterialTheme).value
         .withRepository(scmInfo.value.get.browseUrl.toURI)
         .withColor("indigo", "indigo")
     }
   )
+
+def project(name: String, plugged: AutoPlugin*) = {
+  val unplugged = Seq(ScriptedPlugin).filterNot(plugged.toSet)
+  Project(id = name, base = file(name))
+    .disablePlugins(unplugged: _*)
+    .settings(
+      crossSbtVersions := List(Versions.sbt013, Versions.sbt1),
+      scalaVersion := {
+        (pluginCrossBuild / sbtBinaryVersion).value match {
+          case "0.13" => Versions.scala210
+          case _      => Versions.scala212
+        }
+      }
+    )
+}

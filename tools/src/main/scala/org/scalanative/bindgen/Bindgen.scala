@@ -129,7 +129,7 @@ object Bindgen {
         withArgs("--extra-arg-before", extraArgBefore) ++
         Seq(header.get.getAbsolutePath, "--")
 
-      val output = Process(cmd).lineStream.mkString("\n")
+      val output = Process(cmd).!!
 
       new Bindings(output)
     }
