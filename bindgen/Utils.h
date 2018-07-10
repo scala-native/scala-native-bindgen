@@ -126,4 +126,20 @@ template <typename T> static inline bool isAliasForType(Type *type) {
     return false;
 }
 
+/**
+ * @return true if typedef references opaque type directly or through a
+ * chain of typedefs.
+ */
+static inline bool isAliasForOpaqueType(const Type *type) {
+    assert(type);
+    auto *typeDef = dynamic_cast<const TypeDef *>(type);
+    if (typeDef) {
+        if (!typeDef->getType()) {
+            return true;
+        }
+        return isAliasForOpaqueType(typeDef->getType().get());
+    }
+    return false;
+}
+
 #endif // UTILS_H

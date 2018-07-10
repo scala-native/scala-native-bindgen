@@ -72,12 +72,14 @@ bool Function::isLegalScalaNativeFunction() const {
     /* Return type and parameters types cannot be array types because array type
      * in this case is always represented as a pointer to element type */
     if (isAliasForType<Struct>(retType.get()) ||
-        isAliasForType<Union>(retType.get())) {
+        isAliasForType<Union>(retType.get()) ||
+        isAliasForOpaqueType(retType.get())) {
         return false;
     }
     for (const auto &parameter : parameters) {
         if (isAliasForType<Struct>(parameter->getType().get()) ||
-            isAliasForType<Union>(parameter->getType().get())) {
+            isAliasForType<Union>(parameter->getType().get()) ||
+            isAliasForOpaqueType(parameter->getType().get())) {
             return false;
         }
     }

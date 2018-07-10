@@ -102,40 +102,61 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir) {
 
     std::string objectName = handleReservedWords(ir.objectName);
 
-    if (!ir.libObjEmpty()) {
+    bool isLibObjectEmpty = ir.libObjEmpty();
+
+    if (!isLibObjectEmpty) {
         if (!ir.linkName.empty()) {
             s << "@native.link(\"" << ir.linkName << "\")\n";
         }
 
         s << "@native.extern\n"
           << "object " << objectName << " {\n";
+    }
 
-        for (const auto &typeDef : ir.typeDefs) {
-            if (ir.shouldOutput(typeDef)) {
-                s << *typeDef;
-            }
+    for (const auto &typeDef : ir.typeDefs) {
+        if (ir.shouldOutput(typeDef)) {
+            s << *typeDef;
+        } else if (isAliasForOpaqueType(typeDef.get()) &&
+                   ir.inMainFile(*typeDef)) {
+            llvm::errs() << "Warning: type alias " + typeDef->getName()
+                         << " is skipped because it is an unused alias for "
+                            "incomplete type."
+                         << "\n";
+            llvm::errs().flush();
         }
+    }
 
-        for (const auto &variable : ir.variables) {
+    for (const auto &variable : ir.variables) {
+        if (!variable->hasIllegalUsageOfOpaqueType()) {
             s << *variable;
+        } else {
+            llvm::errs() << "Error: Variable " << variable->getName()
+                         << " is skipped because it has incomplete type.\n";
         }
+    }
 
-        for (const auto &varDefine : ir.varDefines) {
+    for (const auto &varDefine : ir.varDefines) {
+        if (!varDefine->hasIllegalUsageOfOpaqueType()) {
             s << *varDefine;
+        } else {
+            llvm::errs() << "Error: Variable alias " << varDefine->getName()
+                         << " is skipped because it has incomplete type.\n";
+            llvm::errs().flush();
         }
+    }
 
-        for (const auto &func : ir.functions) {
-            if (func->isLegalScalaNativeFunction()) {
-                s << *func;
-            } else {
-                llvm::errs()
-                    << "Warning: Function " << func->getName()
-                    << " is skipped because Scala Native does not support "
-                       "passing structs and arrays by value.\n";
-                llvm::errs().flush();
-            }
+    for (const auto &func : ir.functions) {
+        if (!func->isLegalScalaNativeFunction()) {
+            llvm::errs() << "Warning: Function " << func->getName()
+                         << " is skipped because Scala Native does not support "
+                            "passing structs and arrays by value.\n";
+            llvm::errs().flush();
+        } else {
+            s << *func;
         }
+    }
 
+    if (!isLibObjectEmpty) {
         s << "}\n\n";
     }
 
@@ -449,5 +470,18 @@ bool IR::hasOutputtedDeclaration(
 
 template <typename T>
 bool IR::shouldOutput(const std::shared_ptr<T> &type) const {
-    return inMainFile(*type) || isTypeUsed(type, true);
+    if (isTypeUsed(type, true)) {
+        return true;
+    }
+    if (!inMainFile(*type)) {
+        /* remove unused types from included files */
+        return false;
+    }
+    auto *typeDef = dynamic_cast<TypeDef *>(type.get());
+    if (typeDef) {
+        /* unused typedefs from main file are printed only if they are not
+         * aliases for an opaque type. */
+        return !isAliasForOpaqueType(typeDef);
+    }
+    return true;
 }

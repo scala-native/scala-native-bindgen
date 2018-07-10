@@ -10,6 +10,8 @@ class Variable : public TypeAndName {
 
     friend llvm::raw_ostream &operator<<(llvm::raw_ostream &s,
                                          const Variable &variable);
+
+    bool hasIllegalUsageOfOpaqueType() const;
 };
 
 #endif // SCALA_NATIVE_BINDGEN_VARIABLE_H
