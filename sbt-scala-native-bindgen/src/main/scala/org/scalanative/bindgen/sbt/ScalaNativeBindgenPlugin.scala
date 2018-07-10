@@ -50,7 +50,7 @@ object ScalaNativeBindgenPlugin extends AutoPlugin {
     val nativeBindgenLink =
       settingKey[Option[String]]("Name of library to be linked")
     val nativeBindgenExclude = settingKey[Option[String]]("Exclude prefix")
-    val nativeBindgen        = taskKey[File]("Generate GraphQL API code")
+    val nativeBindgen        = taskKey[File]("Generate Scala Native bindings")
   }
   import autoImport._
 
