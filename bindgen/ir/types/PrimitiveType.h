@@ -13,12 +13,19 @@ class PrimitiveType : virtual public Type {
 
     std::string getType() const;
 
-    bool usesType(const std::shared_ptr<const Type> &type,
-                  bool stopOnTypeDefs) const override;
+    bool usesType(
+        const std::shared_ptr<const Type> &type, bool stopOnTypeDefs,
+        std::vector<std::shared_ptr<const Type>> &visitedTypes) const override;
 
     std::string str() const override;
 
     bool operator==(const Type &other) const override;
+
+    std::shared_ptr<const Type> unrollTypedefs() const override;
+
+    std::shared_ptr<const Type>
+    replaceType(const std::shared_ptr<const Type> &type,
+                const std::shared_ptr<const Type> &replacement) const override;
 
   private:
     std::string type;

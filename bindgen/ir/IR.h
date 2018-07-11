@@ -118,12 +118,11 @@ class IR {
     typeIsUsedOnlyInTypeDefs(const std::shared_ptr<const Type> &type) const;
 
     /**
-     * @param checkRecursively if this parameter is true then the method will
-     * output false if the type is used only in unused types
-     * @return true if type is used in one of declarations
+     * @return true if type is used in one of declarations.
      */
-    bool isTypeUsed(const std::shared_ptr<const Type> &type,
-                    bool checkRecursively = false) const;
+    bool
+    isTypeUsed(const std::shared_ptr<const Type> &type,
+               std::vector<std::shared_ptr<const Type>> &visitedTypes) const;
 
     /**
      * @return true if type is used in one of given declarations.
@@ -156,7 +155,9 @@ class IR {
      *           type (if such typedef is used then true is returned but error
      *           message is printed when bindings are generated)
      */
-    bool shouldOutput(const std::shared_ptr<const LocatableType> &type) const;
+    bool
+    shouldOutput(const std::shared_ptr<const LocatableType> &type,
+                 std::vector<std::shared_ptr<const Type>> &visitedTypes) const;
 
     /**
      * @tparam T Struct or Union

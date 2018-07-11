@@ -34,17 +34,6 @@ bool TreeVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
 bool TreeVisitor::VisitTypedefDecl(clang::TypedefDecl *tpdef) {
     std::string name = tpdef->getName();
 
-    cycleDetection.AddDependency(name, tpdef->getUnderlyingType());
-    if (cycleDetection.isCyclic(name)) {
-        llvm::errs() << "Error: " << name << " is cyclic\n";
-        llvm::errs() << name << "\n";
-        for (auto &s : cycleDetection.dependencies[name]) {
-            llvm::errs() << "\t" << s << "\n";
-        }
-        llvm::errs() << cycleDetection.isCyclic(name) << "\n";
-        llvm::errs().flush();
-    }
-
     std::shared_ptr<Type> type =
         typeTranslator.translate(tpdef->getUnderlyingType());
     if (type) {
@@ -104,7 +93,7 @@ void TreeVisitor::handleUnion(clang::RecordDecl *record, std::string name) {
     for (const clang::FieldDecl *field : record->fields()) {
         std::string fname = field->getNameAsString();
         std::shared_ptr<Type> ftype =
-            typeTranslator.translate(field->getType(), &name);
+            typeTranslator.translate(field->getType());
 
         fields.push_back(std::make_shared<Field>(fname, ftype));
     }
@@ -135,23 +124,11 @@ void TreeVisitor::handleStruct(clang::RecordDecl *record, std::string name) {
             isBitFieldStruct = true;
         }
         std::shared_ptr<Type> ftype =
-            typeTranslator.translate(field->getType(), &name);
+            typeTranslator.translate(field->getType());
         uint64_t recordOffsetInBits =
             recordLayout.getFieldOffset(field->getFieldIndex());
         fields.push_back(std::make_shared<Field>(field->getNameAsString(),
                                                  ftype, recordOffsetInBits));
-
-        cycleDetection.AddDependency(newName, field->getType());
-    }
-
-    if (cycleDetection.isCyclic(newName)) {
-        llvm::errs() << "Error: " << newName << " is cyclic\n";
-        llvm::errs() << newName << "\n";
-        for (auto &s : cycleDetection.dependencies[newName]) {
-            llvm::errs() << "\t" << s << "\n";
-        }
-        llvm::errs() << cycleDetection.isCyclic(newName) << "\n";
-        llvm::errs().flush();
     }
 
     uint64_t sizeInBits = astContext->getTypeSize(record->getTypeForDecl());

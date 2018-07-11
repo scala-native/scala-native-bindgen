@@ -10,10 +10,17 @@ std::string ArrayType::str() const {
            uint64ToScalaNat(size) + "]";
 }
 
-bool ArrayType::usesType(const std::shared_ptr<const Type> &type,
-                         bool stopOnTypeDefs) const {
-    return *elementsType == *type ||
-           elementsType->usesType(type, stopOnTypeDefs);
+bool ArrayType::usesType(
+    const std::shared_ptr<const Type> &type, bool stopOnTypeDefs,
+    std::vector<std::shared_ptr<const Type>> &visitedTypes) const {
+    if (contains(this, visitedTypes)) {
+        return false;
+    }
+    visitedTypes.push_back(shared_from_this());
+    bool result = *elementsType == *type ||
+                  elementsType->usesType(type, stopOnTypeDefs, visitedTypes);
+    visitedTypes.pop_back();
+    return result;
 }
 
 bool ArrayType::operator==(const Type &other) const {
@@ -28,4 +35,19 @@ bool ArrayType::operator==(const Type &other) const {
         return *elementsType == *arrayType->elementsType;
     }
     return false;
+}
+
+std::shared_ptr<const Type> ArrayType::unrollTypedefs() const {
+    return std::make_shared<ArrayType>(elementsType->unrollTypedefs(), size);
+}
+
+std::shared_ptr<const Type>
+ArrayType::replaceType(const std::shared_ptr<const Type> &type,
+                       const std::shared_ptr<const Type> &replacement) const {
+
+    if (*elementsType == *replacement) {
+        return std::make_shared<ArrayType>(replacement, size);
+    }
+    return std::make_shared<ArrayType>(
+        elementsType->replaceType(type, replacement), size);
 }

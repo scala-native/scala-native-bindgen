@@ -34,19 +34,17 @@ TypeTranslator::TypeTranslator(clang::ASTContext *ctx_, IR &ir)
 }
 
 std::shared_ptr<Type>
-TypeTranslator::translateFunctionPointer(const clang::QualType &qtpe,
-                                         const std::string *avoid) {
+TypeTranslator::translateFunctionPointer(const clang::QualType &qtpe) {
     const auto *ptr = qtpe.getTypePtr()->getAs<clang::PointerType>();
     const clang::QualType &inner = ptr->getPointeeType();
 
     if (inner->isFunctionProtoType()) {
         const auto *fc = inner->getAs<clang::FunctionProtoType>();
-        std::shared_ptr<Type> returnType =
-            translate(fc->getReturnType(), avoid);
+        std::shared_ptr<Type> returnType = translate(fc->getReturnType());
         std::vector<std::shared_ptr<const Type>> parametersTypes;
 
         for (const clang::QualType &param : fc->param_types()) {
-            parametersTypes.push_back(translate(param, avoid));
+            parametersTypes.push_back(translate(param));
         }
 
         return std::make_shared<FunctionPointerType>(
@@ -61,8 +59,7 @@ TypeTranslator::translateFunctionPointer(const clang::QualType &qtpe,
 }
 
 std::shared_ptr<Type>
-TypeTranslator::translatePointer(const clang::QualType &pte,
-                                 const std::string *avoid) {
+TypeTranslator::translatePointer(const clang::QualType &pte) {
 
     if (pte->isBuiltinType()) {
         const clang::BuiltinType *as = pte->getAs<clang::BuiltinType>();
@@ -81,7 +78,7 @@ TypeTranslator::translatePointer(const clang::QualType &pte,
         }
     }
 
-    return std::make_shared<PointerType>(translate(pte, avoid));
+    return std::make_shared<PointerType>(translate(pte));
 }
 
 std::shared_ptr<Type>
@@ -120,10 +117,9 @@ TypeTranslator::translateStructOrUnion(const clang::QualType &qtpe) {
 }
 
 std::shared_ptr<Type>
-TypeTranslator::translateConstantArray(const clang::ConstantArrayType *ar,
-                                       const std::string *avoid) {
+TypeTranslator::translateConstantArray(const clang::ConstantArrayType *ar) {
     const uint64_t size = ar->getSize().getZExtValue();
-    std::shared_ptr<Type> elementType = translate(ar->getElementType(), avoid);
+    std::shared_ptr<Type> elementType = translate(ar->getElementType());
     if (elementType == nullptr) {
         llvm::errs() << "Failed to translate array type "
                      << ar->getElementType().getAsString() << "\n";
@@ -133,30 +129,20 @@ TypeTranslator::translateConstantArray(const clang::ConstantArrayType *ar,
     return std::make_shared<ArrayType>(elementType, size);
 }
 
-std::shared_ptr<Type> TypeTranslator::translate(const clang::QualType &qtpe,
-                                                const std::string *avoid) {
+std::shared_ptr<Type> TypeTranslator::translate(const clang::QualType &qtpe) {
 
     const clang::Type *tpe = qtpe.getTypePtr();
-
-    if (typeEquals(tpe, avoid)) {
-        // This is a type that we want to avoid the usage.
-        // Êxample: A struct that has a pointer to itself
-        uint64_t sizeInBits = ctx->getTypeSize(tpe);
-        assert(sizeInBits % 8 == 0);
-        return std::make_shared<ArrayType>(
-            std::make_shared<PrimitiveType>("Byte"), sizeInBits / 8);
-    }
 
     if (tpe->isFunctionType()) {
         return nullptr;
     }
 
     if (tpe->isFunctionPointerType()) {
-        return translateFunctionPointer(qtpe, avoid);
+        return translateFunctionPointer(qtpe);
 
     } else if (tpe->isPointerType()) {
         return translatePointer(
-            tpe->getAs<clang::PointerType>()->getPointeeType(), avoid);
+            tpe->getAs<clang::PointerType>()->getPointeeType());
 
     } else if (qtpe->isStructureType()) {
         return translateStructOrUnion(qtpe);
@@ -168,10 +154,9 @@ std::shared_ptr<Type> TypeTranslator::translate(const clang::QualType &qtpe,
         return translateStructOrUnionOrEnum(qtpe);
 
     } else if (qtpe->isConstantArrayType()) {
-        return translateConstantArray(ctx->getAsConstantArrayType(qtpe), avoid);
+        return translateConstantArray(ctx->getAsConstantArrayType(qtpe));
     } else if (qtpe->isArrayType()) {
-        return translatePointer(ctx->getAsArrayType(qtpe)->getElementType(),
-                                avoid);
+        return translatePointer(ctx->getAsArrayType(qtpe)->getElementType());
     } else {
 
         auto found = typeMap.find(qtpe.getUnqualifiedType().getAsString());

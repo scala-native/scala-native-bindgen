@@ -8,8 +8,9 @@ std::string PrimitiveType::str() const { return handleReservedWords(type); }
 
 std::string PrimitiveType::getType() const { return type; }
 
-bool PrimitiveType::usesType(const std::shared_ptr<const Type> &type,
-                             bool stopOnTypeDefs) const {
+bool PrimitiveType::usesType(
+    const std::shared_ptr<const Type> &type, bool stopOnTypeDefs,
+    std::vector<std::shared_ptr<const Type>> &visitedTypes) const {
     return false;
 }
 
@@ -22,4 +23,14 @@ bool PrimitiveType::operator==(const Type &other) const {
         return type == primitiveType->type;
     }
     return false;
+}
+
+std::shared_ptr<const Type> PrimitiveType::unrollTypedefs() const {
+    return std::make_shared<PrimitiveType>(type);
+}
+
+std::shared_ptr<const Type> PrimitiveType::replaceType(
+    const std::shared_ptr<const Type> &type,
+    const std::shared_ptr<const Type> &replacement) const {
+    return shared_from_this();
 }

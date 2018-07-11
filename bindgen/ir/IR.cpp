@@ -113,8 +113,11 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir) {
           << "object " << objectName << " {\n";
     }
 
+    std::vector<std::shared_ptr<const Type>> visitedTypes;
+
     for (const auto &typeDef : ir.typeDefs) {
-        if (ir.shouldOutput(typeDef)) {
+        visitedTypes.clear();
+        if (ir.shouldOutput(typeDef, visitedTypes)) {
             s << *typeDef;
         } else if (typeDef->hasLocation() &&
                    isAliasForOpaqueType(typeDef.get()) &&
@@ -178,7 +181,8 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir) {
 
         std::string sep = "";
         for (const auto &e : ir.enums) {
-            if (ir.shouldOutput(e)) {
+            visitedTypes.clear();
+            if (ir.shouldOutput(e, visitedTypes)) {
                 s << sep << *e;
                 sep = "\n";
             }
@@ -191,13 +195,15 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir) {
         s << "object " << ir.libName << "Helpers {\n";
 
         for (const auto &st : ir.structs) {
-            if (ir.shouldOutput(st) && st->hasHelperMethods()) {
+            visitedTypes.clear();
+            if (ir.shouldOutput(st, visitedTypes) && st->hasHelperMethods()) {
                 s << "\n" << st->generateHelperClass();
             }
         }
 
         for (const auto &u : ir.unions) {
-            if (ir.shouldOutput(u) && u->hasHelperMethods()) {
+            visitedTypes.clear();
+            if (ir.shouldOutput(u, visitedTypes) && u->hasHelperMethods()) {
                 s << "\n" << u->generateHelperClass();
             }
         }
@@ -217,14 +223,17 @@ void IR::generate(const std::string &excludePrefix) {
 }
 
 bool IR::hasHelperMethods() const {
+    std::vector<std::shared_ptr<const Type>> visitedTypes;
     for (const auto &u : unions) {
-        if (shouldOutput(u) && u->hasHelperMethods()) {
+        visitedTypes.clear();
+        if (shouldOutput(u, visitedTypes) && u->hasHelperMethods()) {
             return true;
         }
     }
 
     for (const auto &s : structs) {
-        if (shouldOutput(s) && s->hasHelperMethods()) {
+        visitedTypes.clear();
+        if (shouldOutput(s, visitedTypes) && s->hasHelperMethods()) {
             return true;
         }
     }
@@ -274,8 +283,10 @@ template <typename T>
 bool IR::isTypeUsed(const std::vector<T> &declarations,
                     std::shared_ptr<const Type> type,
                     bool stopOnTypeDefs) const {
+    std::vector<std::shared_ptr<const Type>> visitedTypes;
     for (const auto &decl : declarations) {
-        if (decl->usesType(type, stopOnTypeDefs)) {
+        visitedTypes.clear();
+        if (decl->usesType(type, stopOnTypeDefs, visitedTypes)) {
             return true;
         }
     }
@@ -292,46 +303,50 @@ bool IR::typeIsUsedOnlyInTypeDefs(
         isTypeUsed(literalDefines, type, true));
 }
 
-bool IR::isTypeUsed(const std::shared_ptr<const Type> &type,
-                    bool checkRecursively) const {
-    if (checkRecursively) {
-        if (isTypeUsed(functions, type, true) ||
-            isTypeUsed(variables, type, true) ||
-            isTypeUsed(literalDefines, type, true)) {
-            return true;
-        }
-        /* type is used if there exists another type that is used and that
-         * references this type */
-        for (const auto &typeDef : typeDefs) {
-            if (typeDef->usesType(type, false)) {
-                if (shouldOutput(typeDef)) {
-                    return true;
-                }
-            }
-        }
-        for (const auto &s : structs) {
-            /* stopOnTypeDefs parameter is true because because typedefs were
-             * checked */
-            if (s->usesType(type, true)) {
-                if (shouldOutput(s)) {
-                    return true;
-                }
-            }
-        }
-        for (const auto &u : unions) {
-            /* stopOnTypeDefs parameter is true because because typedefs were
-             * checked */
-            if (u->usesType(type, true)) {
-                if (shouldOutput(u)) {
-                    return true;
-                }
-            }
-        }
+bool IR::isTypeUsed(
+    const std::shared_ptr<const Type> &type,
+    std::vector<std::shared_ptr<const Type>> &visitedTypes) const {
+    if (contains(type.get(), visitedTypes)) {
         return false;
-    } else {
-        return !(typeIsUsedOnlyInTypeDefs(type) &&
-                 !isTypeUsed(typeDefs, type, false));
     }
+    visitedTypes.push_back(type);
+    if (isTypeUsed(functions, type, true) ||
+        isTypeUsed(variables, type, true) ||
+        isTypeUsed(literalDefines, type, true)) {
+        return true;
+    }
+    /* type is used if there exists another type that is used and that
+     * references this type */
+    std::vector<std::shared_ptr<const Type>> visitedTypesInner;
+    for (const auto &typeDef : typeDefs) {
+        visitedTypesInner.clear();
+        if (typeDef->usesType(type, false, visitedTypesInner)) {
+            if (shouldOutput(typeDef, visitedTypes)) {
+                return true;
+            }
+        }
+    }
+    for (const auto &s : structs) {
+        /* stopOnTypeDefs parameter is true because because typedefs were
+         * checked */
+        visitedTypesInner.clear();
+        if (s->usesType(type, true, visitedTypesInner)) {
+            if (shouldOutput(s, visitedTypes)) {
+                return true;
+            }
+        }
+    }
+    for (const auto &u : unions) {
+        /* stopOnTypeDefs parameter is true because because typedefs were
+         * checked */
+        visitedTypesInner.clear();
+        if (u->usesType(type, true, visitedTypesInner)) {
+            if (shouldOutput(u, visitedTypes)) {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 void IR::setScalaNames() {
@@ -443,16 +458,20 @@ IR::~IR() {
 template <typename T>
 bool IR::hasOutputtedDeclaration(
     const std::vector<std::shared_ptr<T>> &declarations) const {
+    std::vector<std::shared_ptr<const Type>> visitedTypes;
     for (const auto &declaration : declarations) {
-        if (shouldOutput(declaration)) {
+        visitedTypes.clear();
+        if (shouldOutput(declaration, visitedTypes)) {
             return true;
         }
     }
     return false;
 }
 
-bool IR::shouldOutput(const std::shared_ptr<const LocatableType> &type) const {
-    if (isTypeUsed(type, true)) {
+bool IR::shouldOutput(
+    const std::shared_ptr<const LocatableType> &type,
+    std::vector<std::shared_ptr<const Type>> &visitedTypes) const {
+    if (isTypeUsed(type, visitedTypes)) {
         return true;
     }
     if (isAliasForOpaqueType(type.get())) {
