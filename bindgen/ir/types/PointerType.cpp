@@ -8,10 +8,21 @@ std::string PointerType::str() const {
     return "native.Ptr[" + type->str() + "]";
 }
 
-bool PointerType::usesType(const std::shared_ptr<Type> &type,
-                           bool stopOnTypeDefs) const {
-    return *this->type == *type ||
-           this->type.get()->usesType(type, stopOnTypeDefs);
+bool PointerType::usesType(
+    const std::shared_ptr<const Type> &type, bool stopOnTypeDefs,
+    std::vector<std::shared_ptr<const Type>> &visitedTypes) const {
+    if (contains(this, visitedTypes)) {
+        return false;
+    }
+    visitedTypes.push_back(shared_from_this());
+    bool result = *this->type == *type ||
+                  this->type->usesType(type, stopOnTypeDefs, visitedTypes);
+    if (!result) {
+        /* current PointerType instance should not be in the path to search
+         * type */
+        visitedTypes.pop_back();
+    }
+    return result;
 }
 
 bool PointerType::operator==(const Type &other) const {

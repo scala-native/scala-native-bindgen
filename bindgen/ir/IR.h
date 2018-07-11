@@ -121,8 +121,16 @@ class IR {
      * output false if the type is used only in unused types
      * @return true if type is used in one of declarations
      */
-    bool isTypeUsed(const std::shared_ptr<Type> &type,
-                    bool checkRecursively = false) const;
+    bool
+    isTypeUsed(const std::shared_ptr<Type> &type,
+               std::vector<std::shared_ptr<const Type>> &visitedTypes) const;
+
+    /**
+     * @param checkRecursively if this parameter is true then the method will
+     * output false if the type is used only in unused types
+     * @return true if type is used in one of declarations
+     */
+    bool isTypeUsed(const std::shared_ptr<Type> &type) const;
 
     /**
      * @return true if type is used in one of given declarations.
@@ -158,7 +166,9 @@ class IR {
      *           message is printed when bindings are generated)
      */
     template <typename T>
-    bool shouldOutput(const std::shared_ptr<T> &type) const;
+    bool
+    shouldOutput(const std::shared_ptr<T> &type,
+                 std::vector<std::shared_ptr<const Type>> &visitedTypes) const;
 
     /**
      * @tparam T Struct or Union

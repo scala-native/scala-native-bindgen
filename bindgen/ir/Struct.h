@@ -46,6 +46,9 @@ class StructOrUnion : public virtual Type {
     std::string name;
     std::vector<std::shared_ptr<Field>> fields;
     std::shared_ptr<Location> location;
+
+    bool usesType(const std::shared_ptr<const Type> &type, bool stopOnTypeDefs,
+                  std::vector<std::shared_ptr<const Type>> &visitedTypes) const;
 };
 
 class Struct : public StructOrUnion {
@@ -65,8 +68,9 @@ class Struct : public StructOrUnion {
      */
     bool hasHelperMethods() const override;
 
-    bool usesType(const std::shared_ptr<Type> &type,
-                  bool stopOnTypeDefs) const override;
+    bool usesType(
+        const std::shared_ptr<const Type> &type, bool stopOnTypeDefs,
+        std::vector<std::shared_ptr<const Type>> &visitedTypes) const override;
 
     std::string str() const override;
 
@@ -100,6 +104,8 @@ class Struct : public StructOrUnion {
     std::string generateSetterForArrayRepresentation(unsigned fieldIndex) const;
 
     std::string generateGetterForArrayRepresentation(unsigned fieldIndex) const;
+
+    bool isFieldCyclic(const std::shared_ptr<Field> &field) const;
 };
 
 class Union : public StructOrUnion, public ArrayType {
@@ -114,6 +120,10 @@ class Union : public StructOrUnion, public ArrayType {
     bool operator==(const Type &other) const override;
 
     std::string getTypeAlias() const override;
+
+    bool usesType(
+        const std::shared_ptr<const Type> &type, bool stopOnTypeDefs,
+        std::vector<std::shared_ptr<const Type>> &visitedTypes) const override;
 };
 
 #endif // SCALA_NATIVE_BINDGEN_STRUCT_H

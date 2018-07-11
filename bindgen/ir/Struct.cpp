@@ -35,6 +35,18 @@ Struct::Struct(std::string name, std::vector<std::shared_ptr<Field>> fields,
     : StructOrUnion(std::move(name), std::move(fields), std::move(location)),
       typeSize(typeSize), isPacked(isPacked), hasBitField(isBitField) {}
 
+bool StructOrUnion::usesType(
+    const std::shared_ptr<const Type> &type, bool stopOnTypeDefs,
+    std::vector<std::shared_ptr<const Type>> &visitedTypes) const {
+    for (const auto &field : fields) {
+        if (*field->getType() == *type ||
+            field->getType()->usesType(type, stopOnTypeDefs, visitedTypes)) {
+            return true;
+        }
+    }
+    return false;
+}
+
 std::shared_ptr<TypeDef> Struct::generateTypeDef() {
     if (isRepresentedAsStruct()) {
         return std::make_shared<TypeDef>(getTypeAlias(), shared_from_this(),
@@ -113,7 +125,14 @@ std::string Struct::str() const {
 
     std::string sep = "";
     for (const auto &field : fields) {
-        ss << sep << field->getType()->str();
+        ss << sep;
+        if (!isInstanceOf<PointerType>(field->getType().get()) ||
+            !isFieldCyclic(field)) {
+
+            ss << field->getType()->str();
+        } else {
+            ss << PointerType(std::make_shared<PrimitiveType>("Byte")).str();
+        }
         sep = ", ";
     }
 
@@ -121,15 +140,22 @@ std::string Struct::str() const {
     return ss.str();
 }
 
-bool Struct::usesType(const std::shared_ptr<Type> &type,
-                      bool stopOnTypeDefs) const {
-    for (const auto &field : fields) {
-        if (*field->getType() == *type ||
-            field->getType()->usesType(type, stopOnTypeDefs)) {
-            return true;
-        }
+bool Struct::usesType(
+    const std::shared_ptr<const Type> &type, bool stopOnTypeDefs,
+    std::vector<std::shared_ptr<const Type>> &visitedTypes) const {
+
+    if (contains(this, visitedTypes)) {
+        return false;
     }
-    return false;
+    visitedTypes.push_back(shared_from_this());
+
+    bool result = StructOrUnion::usesType(type, stopOnTypeDefs, visitedTypes);
+    if (!result) {
+        /* current Struct instance should not be in the path to search
+         * type */
+        visitedTypes.pop_back();
+    }
+    return result;
 }
 
 bool Struct::operator==(const Type &other) const {
@@ -144,6 +170,11 @@ bool Struct::operator==(const Type &other) const {
     return false;
 }
 
+bool Struct::isFieldCyclic(const std::shared_ptr<Field> &field) const {
+    std::vector<std::shared_ptr<const Type>> visitedTypes;
+    return field->getType()->usesType(shared_from_this(), false, visitedTypes);
+}
+
 std::string
 Struct::generateSetterForStructRepresentation(unsigned fieldIndex) const {
     std::shared_ptr<Field> field = fields[fieldIndex];
@@ -154,6 +185,9 @@ Struct::generateSetterForStructRepresentation(unsigned fieldIndex) const {
         isAliasForType<Struct>(field->getType().get())) {
         parameterType = "native.Ptr[" + parameterType + "]";
         value = "!" + value;
+    } else if (isInstanceOf<PointerType>(field->getType().get()) &&
+               isFieldCyclic(field)) {
+        value = value + ".cast[native.Ptr[Byte]]";
     }
     std::stringstream s;
     s << "    def " << setter << "(value: " + parameterType + "): Unit = !p._"
@@ -166,13 +200,16 @@ Struct::generateGetterForStructRepresentation(unsigned fieldIndex) const {
     std::shared_ptr<Field> field = fields[fieldIndex];
     std::string getter = handleReservedWords(field->getName());
     std::string returnType = field->getType()->str();
-    std::string methodBody;
+    std::string methodBody = "p._" + std::to_string(fieldIndex + 1);
     if (isAliasForType<ArrayType>(field->getType().get()) ||
         isAliasForType<Struct>(field->getType().get())) {
         returnType = "native.Ptr[" + returnType + "]";
-        methodBody = "p._" + std::to_string(fieldIndex + 1);
+    } else if (isInstanceOf<PointerType>(field->getType().get()) &&
+               isFieldCyclic(field)) {
+        methodBody =
+            "(!" + methodBody + ").cast[" + field->getType()->str() + "]";
     } else {
-        methodBody = "!p._" + std::to_string(fieldIndex + 1);
+        methodBody = "!" + methodBody;
     }
     std::stringstream s;
     s << "    def " << getter << ": " << returnType << " = " << methodBody
@@ -188,7 +225,7 @@ std::string
 Struct::generateSetterForArrayRepresentation(unsigned int fieldIndex) const {
     std::shared_ptr<Field> field = fields[fieldIndex];
     std::string setter = handleReservedWords(field->getName(), "_=");
-    std::string parameterType;
+    std::string parameterType = field->getType()->str();
     std::string value = "value";
     std::string castedField = "p._1";
 
@@ -203,8 +240,9 @@ Struct::generateSetterForArrayRepresentation(unsigned int fieldIndex) const {
         isAliasForType<Struct>(field->getType().get())) {
         parameterType = pointerToFieldType.str();
         value = "!" + value;
-    } else {
-        parameterType = field->getType()->str();
+    } else if (isInstanceOf<PointerType>(field->getType().get()) &&
+               isFieldCyclic(field)) {
+        value = value + ".cast[native.Ptr[Byte]]";
     }
     std::stringstream s;
     s << "    def " << setter
@@ -232,6 +270,11 @@ Struct::generateGetterForArrayRepresentation(unsigned fieldIndex) const {
     if (isAliasForType<ArrayType>(field->getType().get()) ||
         isAliasForType<Struct>(field->getType().get())) {
         returnType = pointerToFieldType.str();
+    } else if (isInstanceOf<PointerType>(field->getType().get()) &&
+               isFieldCyclic(field)) {
+        methodBody =
+            "(!" + methodBody + ").cast[" + field->getType()->str() + "]";
+        returnType = field->getType()->str();
     } else {
         methodBody = "!" + methodBody;
         returnType = field->getType()->str();
@@ -287,4 +330,26 @@ bool Union::operator==(const Type &other) const {
         return name == u->name;
     }
     return false;
+}
+
+bool Union::usesType(
+    const std::shared_ptr<const Type> &type, bool stopOnTypeDefs,
+    std::vector<std::shared_ptr<const Type>> &visitedTypes) const {
+
+    if (contains(this, visitedTypes)) {
+        return false;
+    }
+    visitedTypes.push_back(shared_from_this());
+
+    if (ArrayType::usesType(type, stopOnTypeDefs, visitedTypes)) {
+        return true;
+    }
+
+    bool result = StructOrUnion::usesType(type, stopOnTypeDefs, visitedTypes);
+    if (!result) {
+        /* current Union instance should not be in the path to search
+         * type */
+        visitedTypes.pop_back();
+    }
+    return result;
 }

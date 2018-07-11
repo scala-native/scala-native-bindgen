@@ -8,8 +8,9 @@ std::string PrimitiveType::str() const { return handleReservedWords(type); }
 
 std::string PrimitiveType::getType() const { return type; }
 
-bool PrimitiveType::usesType(const std::shared_ptr<Type> &type,
-                             bool stopOnTypeDefs) const {
+bool PrimitiveType::usesType(
+    const std::shared_ptr<const Type> &type, bool stopOnTypeDefs,
+    std::vector<std::shared_ptr<const Type>> &visitedTypes) const {
     return false;
 }
 

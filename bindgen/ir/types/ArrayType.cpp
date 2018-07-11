@@ -10,10 +10,21 @@ std::string ArrayType::str() const {
            uint64ToScalaNat(size) + "]";
 }
 
-bool ArrayType::usesType(const std::shared_ptr<Type> &type,
-                         bool stopOnTypeDefs) const {
-    return *elementsType == *type ||
-           elementsType->usesType(type, stopOnTypeDefs);
+bool ArrayType::usesType(
+    const std::shared_ptr<const Type> &type, bool stopOnTypeDefs,
+    std::vector<std::shared_ptr<const Type>> &visitedTypes) const {
+    if (contains(this, visitedTypes)) {
+        return false;
+    }
+    visitedTypes.push_back(shared_from_this());
+    bool result = *elementsType == *type ||
+                  elementsType->usesType(type, stopOnTypeDefs, visitedTypes);
+    if (!result) {
+        /* current ArrayType instance should not be in the path to search
+         * type */
+        visitedTypes.pop_back();
+    }
+    return result;
 }
 
 bool ArrayType::operator==(const Type &other) const {

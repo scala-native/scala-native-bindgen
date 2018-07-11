@@ -3,12 +3,14 @@
 
 #include "Type.h"
 
-class PointerType : public Type {
+class PointerType : public Type,
+                    public std::enable_shared_from_this<PointerType> {
   public:
     explicit PointerType(std::shared_ptr<const Type> type);
 
-    bool usesType(const std::shared_ptr<Type> &type,
-                  bool stopOnTypeDefs) const override;
+    bool usesType(
+        const std::shared_ptr<const Type> &type, bool stopOnTypeDefs,
+        std::vector<std::shared_ptr<const Type>> &visitedTypes) const override;
 
     std::string str() const override;
 

@@ -23,18 +23,28 @@ std::string FunctionPointerType::str() const {
     return ss.str();
 }
 
-bool FunctionPointerType::usesType(const std::shared_ptr<Type> &type,
-                                   bool stopOnTypeDefs) const {
-    if (*returnType == *type || returnType->usesType(type, stopOnTypeDefs)) {
+bool FunctionPointerType::usesType(
+    const std::shared_ptr<const Type> &type, bool stopOnTypeDefs,
+    std::vector<std::shared_ptr<const Type>> &visitedTypes) const {
+    if (contains(this, visitedTypes)) {
+        return false;
+    }
+    visitedTypes.push_back(shared_from_this());
+
+    if (*returnType == *type ||
+        returnType->usesType(type, stopOnTypeDefs, visitedTypes)) {
         return true;
     }
 
     for (const auto &parameterType : parametersTypes) {
         if (*parameterType == *type ||
-            parameterType->usesType(type, stopOnTypeDefs)) {
+            parameterType->usesType(type, stopOnTypeDefs, visitedTypes)) {
             return true;
         }
     }
+    /* current FunctionPointerType instance should not be in the path to search
+     * type */
+    visitedTypes.pop_back();
     return false;
 }
 
@@ -42,7 +52,7 @@ bool FunctionPointerType::operator==(const Type &other) const {
     if (this == &other) {
         return true;
     }
-    if (isInstanceOf<FunctionPointerType>(&other)) {
+    if (isInstanceOf<const FunctionPointerType>(&other)) {
         auto *functionPointerType =
             dynamic_cast<const FunctionPointerType *>(&other);
         if (isVariadic != functionPointerType->isVariadic) {

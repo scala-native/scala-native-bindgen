@@ -21,7 +21,8 @@ class Function {
     friend llvm::raw_ostream &operator<<(llvm::raw_ostream &s,
                                          const Function &func);
 
-    bool usesType(std::shared_ptr<Type> type, bool stopOnTypeDefs) const;
+    bool usesType(std::shared_ptr<Type> type, bool stopOnTypeDefs,
+                  std::vector<std::shared_ptr<const Type>> &visitedTypes) const;
 
     std::string getName() const;
 

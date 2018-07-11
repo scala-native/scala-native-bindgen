@@ -19,15 +19,27 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const TypeDef &typeDef) {
     return s;
 }
 
-bool TypeDef::usesType(const std::shared_ptr<Type> &type,
-                       bool stopOnTypeDefs) const {
+bool TypeDef::usesType(
+    const std::shared_ptr<const Type> &type, bool stopOnTypeDefs,
+    std::vector<std::shared_ptr<const Type>> &visitedTypes) const {
     if (stopOnTypeDefs) {
         return false;
     }
     if (!this->type) {
         return false;
     }
-    return *this->type == *type || this->type->usesType(type, stopOnTypeDefs);
+    if (contains(this, visitedTypes)) {
+        return false;
+    }
+    visitedTypes.push_back(shared_from_this());
+    bool result = *this->type == *type ||
+                  this->type->usesType(type, stopOnTypeDefs, visitedTypes);
+    if (!result) {
+        /* current TypeDef instance should not be in the path to search
+         * type */
+        visitedTypes.pop_back();
+    }
+    return result;
 }
 
 std::string TypeDef::str() const { return handleReservedWords(name); }

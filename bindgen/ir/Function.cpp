@@ -31,13 +31,19 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const Function &func) {
     return s;
 }
 
-bool Function::usesType(std::shared_ptr<Type> type, bool stopOnTypeDefs) const {
-    if (*retType == *type || retType->usesType(type, stopOnTypeDefs)) {
+bool Function::usesType(
+    std::shared_ptr<Type> type, bool stopOnTypeDefs,
+    std::vector<std::shared_ptr<const Type>> &visitedTypes) const {
+    visitedTypes.clear();
+    if (*retType == *type ||
+        retType.get()->usesType(type, stopOnTypeDefs, visitedTypes)) {
         return true;
     }
     for (const auto &parameter : parameters) {
+        visitedTypes.clear();
         if (*parameter->getType() == *type ||
-            parameter->getType()->usesType(type, stopOnTypeDefs)) {
+            parameter->getType().get()->usesType(type, stopOnTypeDefs,
+                                                 visitedTypes)) {
             return true;
         }
     }

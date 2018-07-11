@@ -7,8 +7,9 @@ class ArrayType : public virtual Type {
   public:
     ArrayType(std::shared_ptr<const Type> elementsType, uint64_t size);
 
-    bool usesType(const std::shared_ptr<Type> &type,
-                  bool stopOnTypeDefs) const override;
+    bool usesType(
+        const std::shared_ptr<const Type> &type, bool stopOnTypeDefs,
+        std::vector<std::shared_ptr<const Type>> &visitedTypes) const override;
 
     std::string str() const override;
 
