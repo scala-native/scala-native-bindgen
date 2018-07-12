@@ -122,7 +122,15 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir) {
         }
 
         for (const auto &func : ir.functions) {
-            s << *func;
+            if (func->isLegalScalaNativeFunction()) {
+                s << *func;
+            } else {
+                llvm::errs()
+                    << "Warning: Function " << func->getName()
+                    << " is skipped because Scala Native does not support "
+                       "passing structs and arrays by value.\n";
+                llvm::errs().flush();
+            }
         }
 
         s << "}\n\n";

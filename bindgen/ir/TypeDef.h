@@ -23,6 +23,27 @@ class TypeDef : public TypeAndName, public Type {
 
     std::shared_ptr<Location> getLocation() const;
 
+    /**
+     * @tparam T Type
+     * @return true if the typedef is an alias for give type directly or through
+     * a chain of typedefs
+     */
+    template <typename T> bool isAliasFor() const {
+        /* if body is moved to cpp file then linker gives undefined symbols
+         * error */
+        if (!type) {
+            return false;
+        }
+        if (dynamic_cast<T *>(type.get())) {
+            return true;
+        }
+        auto *typeDef = dynamic_cast<TypeDef *>(type.get());
+        if (typeDef) {
+            return typeDef->isAliasFor<T>();
+        }
+        return false;
+    }
+
   private:
     /**
      * nullptr if type is generated.

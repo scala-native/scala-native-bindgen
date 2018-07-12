@@ -20,7 +20,7 @@ union lazy {
 
 typedef union lazy lazy;
 
-type with(match sealed, var implicit, lazy forSome);
+type *with(match sealed, var implicit, lazy *forSome);
 
 typedef match def;
 typedef struct {

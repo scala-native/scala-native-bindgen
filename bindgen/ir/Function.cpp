@@ -1,5 +1,6 @@
 #include "Function.h"
 #include "../Utils.h"
+#include "Struct.h"
 
 Parameter::Parameter(std::string name, std::shared_ptr<Type> type)
     : TypeAndName(std::move(name), type) {}
@@ -70,4 +71,24 @@ Function::~Function() {
     for (const auto &parameter : parameters) {
         delete parameter;
     }
+}
+
+bool Function::isLegalScalaNativeFunction() const {
+    /* structs and unions are used only through corresponding TypeDefs so it's
+     * okay to cast only to TypeDef.
+     * Return type and parameters types cannot be array types because array type
+     * in this case is always represented as a pointer to element type */
+    auto *typeDef = dynamic_cast<TypeDef *>(retType.get());
+    if (typeDef &&
+        (typeDef->isAliasFor<Struct>() || typeDef->isAliasFor<ArrayType>())) {
+        return false;
+    }
+    for (const auto &parameter : parameters) {
+        typeDef = dynamic_cast<TypeDef *>(parameter->getType().get());
+        if (typeDef && (typeDef->isAliasFor<Struct>() ||
+                        typeDef->isAliasFor<ArrayType>())) {
+            return false;
+        }
+    }
+    return true;
 }

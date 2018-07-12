@@ -16,7 +16,7 @@ object ReservedWords {
   type `def` = `match`
   type struct_finally = native.CStruct2[`def`, `lazy`]
   type `finally` = struct_finally
-  def `with`(`sealed`: `match`, `implicit`: native.Ptr[`match`], `forSome`: `lazy`): `type` = native.extern
+  def `with`(`sealed`: `match`, `implicit`: native.Ptr[`match`], `forSome`: native.Ptr[`lazy`]): native.Ptr[`type`] = native.extern
   def `implicit`(`type`: native.Ptr[`finally`]): `match` = native.extern
   def _1(): Unit = native.extern
 }
