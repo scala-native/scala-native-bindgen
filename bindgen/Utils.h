@@ -116,11 +116,14 @@ static inline std::string replaceChar(const std::string &str,
  * @return true if given type is of type T or is an alias for type T.
  */
 template <typename T> static inline bool isAliasForType(Type *type) {
-    if (isInstanceOf<TypeDef>(type)) {
-        auto *typeDef = dynamic_cast<TypeDef *>(type);
+    if (isInstanceOf<T>(type)) {
+        return true;
+    }
+    auto *typeDef = dynamic_cast<TypeDef *>(type);
+    if (typeDef) {
         return isAliasForType<T>(typeDef->getType().get());
     }
-    return isInstanceOf<T>(type);
+    return false;
 }
 
 #endif // UTILS_H

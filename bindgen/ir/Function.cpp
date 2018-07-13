@@ -74,19 +74,15 @@ Function::~Function() {
 }
 
 bool Function::isLegalScalaNativeFunction() const {
-    /* structs and unions are used only through corresponding TypeDefs so it's
-     * okay to cast only to TypeDef.
-     * Return type and parameters types cannot be array types because array type
+    /* Return type and parameters types cannot be array types because array type
      * in this case is always represented as a pointer to element type */
-    auto *typeDef = dynamic_cast<TypeDef *>(retType.get());
-    if (typeDef &&
-        (typeDef->isAliasFor<Struct>() || typeDef->isAliasFor<ArrayType>())) {
+    if (isAliasForType<Struct>(retType.get()) ||
+        isAliasForType<Union>(retType.get())) {
         return false;
     }
     for (const auto &parameter : parameters) {
-        typeDef = dynamic_cast<TypeDef *>(parameter->getType().get());
-        if (typeDef && (typeDef->isAliasFor<Struct>() ||
-                        typeDef->isAliasFor<ArrayType>())) {
+        if (isAliasForType<Struct>(parameter->getType().get()) ||
+            isAliasForType<Union>(parameter->getType().get())) {
             return false;
         }
     }
