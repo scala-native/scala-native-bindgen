@@ -7,37 +7,6 @@
 Field::Field(std::string name, std::shared_ptr<Type> type)
     : TypeAndName(std::move(name), std::move(type)) {}
 
-std::string Field::generateSetter(int fieldIndex) {
-    std::string setter = handleReservedWords(getName(), "_=");
-    std::string parameterType = type->str();
-    std::string value = "value";
-    if (isAliasForType<ArrayType>(type.get()) ||
-        isAliasForType<Struct>(type.get())) {
-        parameterType = "native.Ptr[" + parameterType + "]";
-        value = "!" + value;
-    }
-    std::stringstream s;
-    s << "    def " << setter << "(value: " + parameterType + "): Unit = !p._"
-      << std::to_string(fieldIndex + 1) << " = " << value;
-    return s.str();
-}
-
-std::string Field::generateGetter(int fieldIndex) {
-    std::string getter = handleReservedWords(getName());
-    std::string returnType = type->str();
-    std::string methodBody;
-    if (isAliasForType<ArrayType>(type.get()) ||
-        isAliasForType<Struct>(type.get())) {
-        returnType = "native.Ptr[" + returnType + "]";
-        methodBody = "p._" + std::to_string(fieldIndex + 1);
-    } else {
-        methodBody = "!p._" + std::to_string(fieldIndex + 1);
-    }
-    std::stringstream s;
-    s << "    def " << getter << ": " << returnType << " = " << methodBody;
-    return s.str();
-}
-
 StructOrUnion::StructOrUnion(std::string name,
                              std::vector<std::shared_ptr<Field>> fields,
                              std::shared_ptr<Location> location)
@@ -101,11 +70,11 @@ std::string Struct::generateHelperClass() const {
     s << "  implicit class " << type << "_ops(val p: native.Ptr[" << type
       << "])"
       << " extends AnyVal {\n";
-    int fieldIndex = 0;
+    unsigned fieldIndex = 0;
     for (const auto &field : fields) {
         if (!field->getName().empty()) {
-            s << field->generateGetter(fieldIndex) << "\n";
-            s << field->generateSetter(fieldIndex) << "\n";
+            s << generateGetter(fieldIndex) << "\n";
+            s << generateSetter(fieldIndex) << "\n";
         }
         fieldIndex++;
     }
@@ -156,6 +125,39 @@ bool Struct::operator==(const Type &other) const {
         return this->equals(*s);
     }
     return false;
+}
+
+std::string Struct::generateSetter(unsigned fieldIndex) const {
+    std::shared_ptr<Field> field = fields[fieldIndex];
+    std::string setter = handleReservedWords(field->getName(), "_=");
+    std::string parameterType = field->getType()->str();
+    std::string value = "value";
+    if (isAliasForType<ArrayType>(field->getType().get()) ||
+        isAliasForType<Struct>(field->getType().get())) {
+        parameterType = "native.Ptr[" + parameterType + "]";
+        value = "!" + value;
+    }
+    std::stringstream s;
+    s << "    def " << setter << "(value: " + parameterType + "): Unit = !p._"
+      << std::to_string(fieldIndex + 1) << " = " << value;
+    return s.str();
+}
+
+std::string Struct::generateGetter(unsigned fieldIndex) const {
+    std::shared_ptr<Field> field = fields[fieldIndex];
+    std::string getter = handleReservedWords(field->getName());
+    std::string returnType = field->getType()->str();
+    std::string methodBody;
+    if (isAliasForType<ArrayType>(field->getType().get()) ||
+        isAliasForType<Struct>(field->getType().get())) {
+        returnType = "native.Ptr[" + returnType + "]";
+        methodBody = "p._" + std::to_string(fieldIndex + 1);
+    } else {
+        methodBody = "!p._" + std::to_string(fieldIndex + 1);
+    }
+    std::stringstream s;
+    s << "    def " << getter << ": " << returnType << " = " << methodBody;
+    return s.str();
 }
 
 Union::Union(std::string name, std::vector<std::shared_ptr<Field>> fields,

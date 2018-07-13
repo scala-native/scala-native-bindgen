@@ -12,10 +12,6 @@
 class Field : public TypeAndName {
   public:
     Field(std::string name, std::shared_ptr<Type> type);
-
-    std::string generateSetter(int fieldIndex);
-
-    std::string generateGetter(int fieldIndex);
 };
 
 class StructOrUnion {
@@ -65,6 +61,10 @@ class Struct : public StructOrUnion,
     std::string str() const override;
 
     bool operator==(const Type &other) const override;
+
+    std::string generateSetter(unsigned fieldIndex) const;
+
+    std::string generateGetter(unsigned fieldIndex) const;
 
   private:
     /* type size is needed if number of fields is bigger than 22 */
