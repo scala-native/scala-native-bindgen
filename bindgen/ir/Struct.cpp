@@ -199,7 +199,30 @@ bool Struct::isRepresentedAsStruct() const {
 
 std::string
 Struct::generateSetterForArrayRepresentation(unsigned int fieldIndex) const {
-    return std::string();
+    std::shared_ptr<Field> field = fields[fieldIndex];
+    std::string setter = handleReservedWords(field->getName(), "_=");
+    std::string parameterType;
+    std::string value = "value";
+    std::string castedField = "p._1";
+
+    PointerType pointerToFieldType = PointerType(field->getType());
+    if (field->getOffset() > 0) {
+        castedField = "(" + castedField + " + " +
+                      std::to_string(field->getOffset()) + ")";
+    }
+    castedField = "!" + castedField + ".cast[" + pointerToFieldType.str() + "]";
+    if (isAliasForType<ArrayType>(field->getType().get()) ||
+        isAliasForType<Struct>(field->getType().get())) {
+        parameterType = pointerToFieldType.str();
+        value = "!" + value;
+    } else {
+        parameterType = field->getType()->str();
+    }
+    std::stringstream s;
+    s << "    def " << setter
+      << "(value: " + parameterType + "): Unit = " << castedField << " = "
+      << value << "\n";
+    return s.str();
 }
 
 std::string
@@ -210,7 +233,7 @@ Struct::generateGetterForArrayRepresentation(unsigned fieldIndex) const {
     std::string methodBody;
 
     PointerType pointerToFieldType = PointerType(field->getType());
-    if (field->getOffset() != 0) {
+    if (field->getOffset() > 0) {
         methodBody = "(p._1 + " + std::to_string(field->getOffset()) + ")";
     } else {
         methodBody = "p._1";
