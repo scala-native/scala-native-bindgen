@@ -1,6 +1,12 @@
 import scala.sys.process._
 
 addCommandAlias("verify", "; ^test:compile ; ^test ; ^scripted ; docs/makeSite")
+addCommandAlias(
+  "verifyWithoutMemoryChecks",
+  "; ^test:compile ; " +
+    "^testOnly -- -z \"should exist\" -z \"correct bindings\" ; " +
+    "^scripted ; " +
+    "docs/makeSite")
 
 val Versions = new {
   val scala210 = "2.10.6"

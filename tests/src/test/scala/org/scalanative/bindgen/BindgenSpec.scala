@@ -51,7 +51,7 @@ class BindgenSpec extends FunSpec {
     }
 
     for (input <- inputDirectory.listFiles() if input.getName.endsWith(".h")) {
-      it(s"should generate bindings for ${input.getName}") {
+      it(s"should generate correct bindings for ${input.getName}") {
         val testName = input.getName.replace(".h", "")
         val expected = new File(inputDirectory, testName + ".scala")
         val output   = new File(outputDir, testName + ".scala")
