@@ -15,7 +15,7 @@ class TypeTranslator {
      * @return the type translated or nullptr if type is function type.
      */
     std::shared_ptr<Type> translate(const clang::QualType &tpe,
-                                    const std::string * = nullptr);
+                                    const std::string *avoid = nullptr);
 
     std::string getTypeFromTypeMap(std::string cType);
 
