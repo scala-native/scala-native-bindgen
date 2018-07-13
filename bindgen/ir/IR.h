@@ -34,10 +34,10 @@ class IR {
                  std::vector<Enumerator> enumerators,
                  std::shared_ptr<Location> location);
 
-    void addStruct(std::string name, std::vector<Field *> fields,
+    void addStruct(std::string name, std::vector<std::shared_ptr<Field>> fields,
                    uint64_t typeSize, std::shared_ptr<Location> location);
 
-    void addUnion(std::string name, std::vector<Field *> fields,
+    void addUnion(std::string name, std::vector<std::shared_ptr<Field>> fields,
                   uint64_t maxSize, std::shared_ptr<Location> location);
 
     void addLiteralDefine(std::string name, std::string literal,
