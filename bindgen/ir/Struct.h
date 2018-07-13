@@ -12,6 +12,16 @@
 class Field : public TypeAndName {
   public:
     Field(std::string name, std::shared_ptr<Type> type);
+
+    Field(std::string name, std::shared_ptr<Type> type, uint64_t offset);
+
+    uint64_t getOffset() const;
+
+  protected:
+    /**
+     * Offset in bytes from address of struct/union.
+     */
+    uint64_t offset = 0;
 };
 
 class StructOrUnion {
@@ -30,6 +40,8 @@ class StructOrUnion {
     std::shared_ptr<Location> getLocation() const;
 
     virtual std::string getTypeAlias() const = 0;
+
+    virtual bool hasHelperMethods() const;
 
   protected:
     std::string name;
@@ -54,7 +66,7 @@ class Struct : public StructOrUnion,
     /**
      * @return true if helper methods will be generated for this struct
      */
-    bool hasHelperMethods() const;
+    bool hasHelperMethods() const override;
 
     bool usesType(const std::shared_ptr<Type> &type,
                   bool stopOnTypeDefs) const override;
@@ -63,16 +75,32 @@ class Struct : public StructOrUnion,
 
     bool operator==(const Type &other) const override;
 
-    std::string generateSetter(unsigned fieldIndex) const;
-
-    std::string generateGetter(unsigned fieldIndex) const;
-
   private:
     /* type size is needed if number of fields is bigger than 22 */
     uint64_t typeSize;
     bool isPacked;
 
     bool isRepresentedAsStruct() const;
+
+    /**
+     * @return implicit helper class for struct that is represented as CStruct.
+     */
+    std::string generateHelperClassMethodsForStructRepresentation() const;
+
+    /**
+     * @return implicit helper class for struct that is represented as CArray.
+     */
+    std::string generateHelperClassMethodsForArrayRepresentation() const;
+
+    std::string
+    generateSetterForStructRepresentation(unsigned fieldIndex) const;
+
+    std::string
+    generateGetterForStructRepresentation(unsigned fieldIndex) const;
+
+    std::string generateSetterForArrayRepresentation(unsigned fieldIndex) const;
+
+    std::string generateGetterForArrayRepresentation(unsigned fieldIndex) const;
 };
 
 class Union : public StructOrUnion,

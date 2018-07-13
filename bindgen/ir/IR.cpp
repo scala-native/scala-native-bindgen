@@ -173,7 +173,7 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir) {
         }
 
         for (const auto &u : ir.unions) {
-            if (ir.shouldOutput(u)) {
+            if (ir.shouldOutput(u) && u->hasHelperMethods()) {
                 s << "\n" << u->generateHelperClass();
             }
         }
@@ -193,9 +193,10 @@ void IR::generate(const std::string &excludePrefix) {
 }
 
 bool IR::hasHelperMethods() const {
-    if (hasOutputtedDeclaration(unions)) {
-        /* all unions have helper methods */
-        return true;
+    for (const auto &u : unions) {
+        if (shouldOutput(u) && u->hasHelperMethods()) {
+            return true;
+        }
     }
 
     for (const auto &s : structs) {
