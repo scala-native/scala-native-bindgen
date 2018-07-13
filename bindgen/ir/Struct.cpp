@@ -1,11 +1,17 @@
 #include "Struct.h"
 #include "../Utils.h"
 #include "types/ArrayType.h"
+#include "types/PointerType.h"
 #include "types/PrimitiveType.h"
 #include <sstream>
 
 Field::Field(std::string name, std::shared_ptr<Type> type)
     : TypeAndName(std::move(name), std::move(type)) {}
+
+Field::Field(std::string name, std::shared_ptr<Type> type, uint64_t offset)
+    : TypeAndName(std::move(name), std::move(type)), offset(offset) {}
+
+uint64_t Field::getOffset() const { return offset; }
 
 StructOrUnion::StructOrUnion(std::string name,
                              std::vector<std::shared_ptr<Field>> fields,
@@ -41,6 +47,8 @@ std::shared_ptr<Location> StructOrUnion::getLocation() const {
     return location;
 }
 
+bool StructOrUnion::hasHelperMethods() const { return !fields.empty(); }
+
 Struct::Struct(std::string name, std::vector<std::shared_ptr<Field>> fields,
                uint64_t typeSize, std::shared_ptr<Location> location)
     : StructOrUnion(std::move(name), std::move(fields), std::move(location)),
@@ -64,19 +72,15 @@ std::shared_ptr<TypeDef> Struct::generateTypeDef() {
 
 std::string Struct::generateHelperClass() const {
     assert(hasHelperMethods());
-    /* struct is not empty and not represented as an array */
     std::stringstream s;
     std::string type = getTypeAlias();
     s << "  implicit class " << type << "_ops(val p: native.Ptr[" << type
       << "])"
       << " extends AnyVal {\n";
-    unsigned fieldIndex = 0;
-    for (const auto &field : fields) {
-        if (!field->getName().empty()) {
-            s << generateGetter(fieldIndex) << "\n";
-            s << generateSetter(fieldIndex) << "\n";
-        }
-        fieldIndex++;
+    if (fields.size() <= SCALA_NATIVE_MAX_STRUCT_FIELDS) {
+        s << generateHelperClassMethodsForStructRepresentation();
+    } else {
+        s << generateHelperClassMethodsForArrayRepresentation();
     }
     s << "  }\n\n";
 
@@ -88,8 +92,26 @@ std::string Struct::generateHelperClass() const {
     return s.str();
 }
 
-bool Struct::hasHelperMethods() const {
-    return !fields.empty() && fields.size() < SCALA_NATIVE_MAX_STRUCT_FIELDS;
+std::string Struct::generateHelperClassMethodsForStructRepresentation() const {
+    std::stringstream s;
+    for (unsigned fieldIndex = 0; fieldIndex < fields.size(); fieldIndex++) {
+        if (!fields[fieldIndex]->getName().empty()) {
+            s << generateGetterForStructRepresentation(fieldIndex);
+            s << generateSetterForStructRepresentation(fieldIndex);
+        }
+    }
+    return s.str();
+}
+
+std::string Struct::generateHelperClassMethodsForArrayRepresentation() const {
+    std::stringstream s;
+    for (unsigned fieldIndex = 0; fieldIndex < fields.size(); fieldIndex++) {
+        if (!fields[fieldIndex]->getName().empty()) {
+            s << generateGetterForArrayRepresentation(fieldIndex);
+            s << generateSetterForArrayRepresentation(fieldIndex);
+        }
+    }
+    return s.str();
 }
 
 std::string Struct::getTypeAlias() const { return "struct_" + name; }
@@ -127,7 +149,8 @@ bool Struct::operator==(const Type &other) const {
     return false;
 }
 
-std::string Struct::generateSetter(unsigned fieldIndex) const {
+std::string
+Struct::generateSetterForStructRepresentation(unsigned fieldIndex) const {
     std::shared_ptr<Field> field = fields[fieldIndex];
     std::string setter = handleReservedWords(field->getName(), "_=");
     std::string parameterType = field->getType()->str();
@@ -139,11 +162,12 @@ std::string Struct::generateSetter(unsigned fieldIndex) const {
     }
     std::stringstream s;
     s << "    def " << setter << "(value: " + parameterType + "): Unit = !p._"
-      << std::to_string(fieldIndex + 1) << " = " << value;
+      << std::to_string(fieldIndex + 1) << " = " << value << "\n";
     return s.str();
 }
 
-std::string Struct::generateGetter(unsigned fieldIndex) const {
+std::string
+Struct::generateGetterForStructRepresentation(unsigned fieldIndex) const {
     std::shared_ptr<Field> field = fields[fieldIndex];
     std::string getter = handleReservedWords(field->getName());
     std::string returnType = field->getType()->str();
@@ -156,8 +180,43 @@ std::string Struct::generateGetter(unsigned fieldIndex) const {
         methodBody = "!p._" + std::to_string(fieldIndex + 1);
     }
     std::stringstream s;
-    s << "    def " << getter << ": " << returnType << " = " << methodBody;
+    s << "    def " << getter << ": " << returnType << " = " << methodBody
+      << "\n";
     return s.str();
+}
+
+std::string
+Struct::generateSetterForArrayRepresentation(unsigned int fieldIndex) const {
+    return std::string();
+}
+
+std::string
+Struct::generateGetterForArrayRepresentation(unsigned fieldIndex) const {
+    std::shared_ptr<Field> field = fields[fieldIndex];
+    std::string getter = handleReservedWords(field->getName());
+    std::string returnType;
+    std::string methodBody;
+
+    PointerType pointerToFieldType = PointerType(field->getType());
+    if (field->getOffset() != 0) {
+        methodBody = "(p._1 + " + std::to_string(field->getOffset()) + ")";
+    } else {
+        methodBody = "p._1";
+    }
+    methodBody = methodBody + ".cast[" + pointerToFieldType.str() + "]";
+
+    if (isAliasForType<ArrayType>(field->getType().get()) ||
+        isAliasForType<Struct>(field->getType().get())) {
+        returnType = pointerToFieldType.str();
+    } else {
+        methodBody = "!" + methodBody;
+        returnType = field->getType()->str();
+    }
+    std::stringstream s;
+    s << "    def " << getter << ": " << returnType << " = " << methodBody
+      << "\n";
+    return s.str();
+    return "";
 }
 
 Union::Union(std::string name, std::vector<std::shared_ptr<Field>> fields,
@@ -171,6 +230,7 @@ std::shared_ptr<TypeDef> Union::generateTypeDef() {
 }
 
 std::string Union::generateHelperClass() const {
+    assert(hasHelperMethods());
     std::stringstream s;
     std::string type = getTypeAlias();
     s << "  implicit class " << type << "_pos"

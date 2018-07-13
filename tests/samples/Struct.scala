@@ -50,6 +50,34 @@ object StructHelpers {
 
   def struct_points()(implicit z: native.Zone): native.Ptr[struct_points] = native.alloc[struct_points]
 
+  implicit class struct_bigStruct_ops(val p: native.Ptr[struct_bigStruct]) extends AnyVal {
+    def one: native.CLong = !p._1.cast[native.Ptr[native.CLong]]
+    def two: native.CChar = !(p._1 + 8).cast[native.Ptr[native.CChar]]
+    def three: native.CInt = !(p._1 + 12).cast[native.Ptr[native.CInt]]
+    def four: native.CFloat = !(p._1 + 16).cast[native.Ptr[native.CFloat]]
+    def five: native.CDouble = !(p._1 + 24).cast[native.Ptr[native.CDouble]]
+    def six: native.Ptr[struct_point] = !(p._1 + 32).cast[native.Ptr[native.Ptr[struct_point]]]
+    def seven: native.CInt = !(p._1 + 40).cast[native.Ptr[native.CInt]]
+    def eight: native.CInt = !(p._1 + 44).cast[native.Ptr[native.CInt]]
+    def nine: native.CInt = !(p._1 + 48).cast[native.Ptr[native.CInt]]
+    def ten: native.CInt = !(p._1 + 52).cast[native.Ptr[native.CInt]]
+    def eleven: native.CInt = !(p._1 + 56).cast[native.Ptr[native.CInt]]
+    def twelve: native.CInt = !(p._1 + 60).cast[native.Ptr[native.CInt]]
+    def thirteen: native.CInt = !(p._1 + 64).cast[native.Ptr[native.CInt]]
+    def fourteen: native.CInt = !(p._1 + 68).cast[native.Ptr[native.CInt]]
+    def fifteen: native.CInt = !(p._1 + 72).cast[native.Ptr[native.CInt]]
+    def sixteen: native.CInt = !(p._1 + 76).cast[native.Ptr[native.CInt]]
+    def seventeen: native.CInt = !(p._1 + 80).cast[native.Ptr[native.CInt]]
+    def eighteen: native.CInt = !(p._1 + 84).cast[native.Ptr[native.CInt]]
+    def nineteen: native.CInt = !(p._1 + 88).cast[native.Ptr[native.CInt]]
+    def twenty: native.CInt = !(p._1 + 92).cast[native.Ptr[native.CInt]]
+    def twentyOne: native.CInt = !(p._1 + 96).cast[native.Ptr[native.CInt]]
+    def twentyTwo: native.CInt = !(p._1 + 100).cast[native.Ptr[native.CInt]]
+    def twentyThree: native.CInt = !(p._1 + 104).cast[native.Ptr[native.CInt]]
+  }
+
+  def struct_bigStruct()(implicit z: native.Zone): native.Ptr[struct_bigStruct] = native.alloc[struct_bigStruct]
+
   implicit class struct_structWithAnonymousStruct_ops(val p: native.Ptr[struct_structWithAnonymousStruct]) extends AnyVal {
     def a: native.CInt = !p._1
     def a_=(value: native.CInt): Unit = !p._1 = value

@@ -1,4 +1,5 @@
 #include "TreeVisitor.h"
+#include "clang/AST/RecordLayout.h"
 #include <stdio.h>
 
 bool TreeVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
@@ -127,18 +128,20 @@ void TreeVisitor::handleStruct(clang::RecordDecl *record, std::string name) {
         llvm::errs().flush();
     }
 
-    int fieldCnt = 0;
     std::vector<std::shared_ptr<Field>> fields;
+    const clang::ASTRecordLayout &recordLayout =
+        astContext->getASTRecordLayout(record);
 
     for (const clang::FieldDecl *field : record->fields()) {
         std::shared_ptr<Type> ftype =
             typeTranslator.translate(field->getType(), &name);
-        fields.push_back(
-            std::make_shared<Field>(field->getNameAsString(), ftype));
+        uint64_t recordOffsetInBits =
+            recordLayout.getFieldOffset(field->getFieldIndex());
+        assert(recordOffsetInBits % 8 == 0);
+        fields.push_back(std::make_shared<Field>(
+            field->getNameAsString(), ftype, recordOffsetInBits / 8));
 
         cycleDetection.AddDependency(newName, field->getType());
-
-        fieldCnt++;
     }
 
     if (cycleDetection.isCyclic(newName)) {
