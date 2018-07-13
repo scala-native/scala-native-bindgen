@@ -32,7 +32,7 @@ void IR::addEnum(std::string name, const std::string &type,
     }
 }
 
-void IR::addStruct(std::string name, std::vector<Field *> fields,
+void IR::addStruct(std::string name, std::vector<std::shared_ptr<Field>> fields,
                    uint64_t typeSize, std::shared_ptr<Location> location) {
     std::shared_ptr<Struct> s = std::make_shared<Struct>(
         name, std::move(fields), typeSize, std::move(location));
@@ -46,7 +46,7 @@ void IR::addStruct(std::string name, std::vector<Field *> fields,
     }
 }
 
-void IR::addUnion(std::string name, std::vector<Field *> fields,
+void IR::addUnion(std::string name, std::vector<std::shared_ptr<Field>> fields,
                   uint64_t maxSize, std::shared_ptr<Location> location) {
     std::shared_ptr<Union> u = std::make_shared<Union>(
         name, std::move(fields), maxSize, std::move(location));

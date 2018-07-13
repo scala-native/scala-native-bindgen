@@ -38,18 +38,13 @@ std::string Field::generateGetter(int fieldIndex) {
     return s.str();
 }
 
-StructOrUnion::StructOrUnion(std::string name, std::vector<Field *> fields,
+StructOrUnion::StructOrUnion(std::string name,
+                             std::vector<std::shared_ptr<Field>> fields,
                              std::shared_ptr<Location> location)
     : name(std::move(name)), fields(std::move(fields)),
       location(std::move(location)) {}
 
 std::string StructOrUnion::getName() const { return name; }
-
-StructOrUnion::~StructOrUnion() {
-    for (const auto &field : fields) {
-        delete field;
-    }
-}
 
 bool StructOrUnion::equals(const StructOrUnion &other) const {
     if (this == &other) {
@@ -77,8 +72,8 @@ std::shared_ptr<Location> StructOrUnion::getLocation() const {
     return location;
 }
 
-Struct::Struct(std::string name, std::vector<Field *> fields, uint64_t typeSize,
-               std::shared_ptr<Location> location)
+Struct::Struct(std::string name, std::vector<std::shared_ptr<Field>> fields,
+               uint64_t typeSize, std::shared_ptr<Location> location)
     : StructOrUnion(std::move(name), std::move(fields), std::move(location)),
       typeSize(typeSize) {}
 
@@ -163,8 +158,8 @@ bool Struct::operator==(const Type &other) const {
     return false;
 }
 
-Union::Union(std::string name, std::vector<Field *> fields, uint64_t maxSize,
-             std::shared_ptr<Location> location)
+Union::Union(std::string name, std::vector<std::shared_ptr<Field>> fields,
+             uint64_t maxSize, std::shared_ptr<Location> location)
     : StructOrUnion(std::move(name), std::move(fields), std::move(location)),
       ArrayType(std::make_shared<PrimitiveType>("Byte"), maxSize) {}
 

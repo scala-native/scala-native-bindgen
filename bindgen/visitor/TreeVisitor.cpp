@@ -101,7 +101,7 @@ bool TreeVisitor::VisitRecordDecl(clang::RecordDecl *record) {
 void TreeVisitor::handleUnion(clang::RecordDecl *record, std::string name) {
     uint64_t maxSize = 0;
 
-    std::vector<Field *> fields;
+    std::vector<std::shared_ptr<Field>> fields;
 
     for (const clang::FieldDecl *field : record->fields()) {
         uint64_t sizeInBits = astContext->getTypeSize(field->getType());
@@ -111,7 +111,7 @@ void TreeVisitor::handleUnion(clang::RecordDecl *record, std::string name) {
         std::shared_ptr<Type> ftype =
             typeTranslator.translate(field->getType(), &name);
 
-        fields.push_back(new Field(fname, ftype));
+        fields.push_back(std::make_shared<Field>(fname, ftype));
     }
 
     ir.addUnion(name, std::move(fields), maxSize, getLocation(record));
@@ -128,12 +128,13 @@ void TreeVisitor::handleStruct(clang::RecordDecl *record, std::string name) {
     }
 
     int fieldCnt = 0;
-    std::vector<Field *> fields;
+    std::vector<std::shared_ptr<Field>> fields;
 
     for (const clang::FieldDecl *field : record->fields()) {
         std::shared_ptr<Type> ftype =
             typeTranslator.translate(field->getType(), &name);
-        fields.push_back(new Field(field->getNameAsString(), ftype));
+        fields.push_back(
+            std::make_shared<Field>(field->getNameAsString(), ftype));
 
         cycleDetection.AddDependency(newName, field->getType());
 
