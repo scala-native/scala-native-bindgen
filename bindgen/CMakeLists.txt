@@ -3,10 +3,19 @@ project(scala-native-bindgen)
 
 option(STATIC_LINKING "Statically link the executable" OFF)
 
+if (STATIC_LINKING)
+  set(Protobuf_USE_STATIC_LIBS ON)
+endif()
+
+find_package(Protobuf REQUIRED)
+message(STATUS "Found protobuf ${Protobuf_VERSION}")
+
+message(STATUS "Using protobuf include dirs: ${Protobuf_INCLUDE_DIRS}")
+include_directories(SYSTEM ${Protobuf_INCLUDE_DIRS})
+
 # Locate LLVMConfig.cmake
 find_package(LLVM REQUIRED CONFIG)
 message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
-message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
 
 message(STATUS "Using LLVM include dirs: ${LLVM_INCLUDE_DIRS}")
 include_directories(SYSTEM ${LLVM_INCLUDE_DIRS})
@@ -18,6 +27,9 @@ message(STATUS "Using LLVM library directories: ${LLVM_LIBRARY_DIRS}")
 link_directories(${LLVM_LIBRARY_DIRS})
 
 add_compile_options(-fexceptions -std=c++11 -Wall -Wconversion -Werror)
+
+protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS "${CMAKE_CURRENT_SOURCE_DIR}/../proto/ir.proto")
+include_directories(SYSTEM ${CMAKE_CURRENT_BINARY_DIR})
 
 add_executable(bindgen
   Main.cpp
@@ -74,6 +86,8 @@ add_executable(bindgen
   ir/Location.cpp
   ir/LocationManager.h
   ir/LocationManager.cpp
+  ${PROTO_SRCS}
+  ${PROTO_HDRS}
 )
 
 if (STATIC_LINKING)
@@ -113,4 +127,5 @@ target_link_libraries(bindgen
   clangLex
   clangBasic
   ${LLVM_LIBS}
+  ${Protobuf_LIBRARIES}
 )

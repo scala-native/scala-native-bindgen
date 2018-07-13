@@ -1,0 +1,162 @@
+syntax = "proto3";
+
+package org.scalanative.bindgen;
+
+option optimize_for = LITE_RUNTIME;
+
+message IR {
+  repeated EnumType enums = 1;
+  repeated StructType structs = 2;
+  repeated UnionType unions = 3;
+  repeated TypedefType typedefs = 4;
+  repeated Decl.FunctionDecl functions = 5;
+  repeated Decl.VariableDecl variables = 6;
+  //std::vector<std::shared_ptr<LiteralDefine>> literalDefines;
+  //std::vector<std::shared_ptr<PossibleVarDefine>> possibleVarDefines;
+  //std::vector<std::shared_ptr<VarDefine>> varDefines;
+}
+
+message Range {
+  int32 start_line = 1;
+  int32 start_character = 2;
+  int32 end_line = 3;
+  int32 end_character = 4;
+}
+
+message Location {
+  string uri = 1;
+  Range range = 2;
+}
+
+message Type {
+  /*
+  enum Kind {
+    UNKNOWN = 0;
+    PRIMITIVE = 1;
+    ENUM = 2;
+    POINTER = 3;
+    ARRAY = 4;
+    FUNCTION_POINTER = 5;
+    UNION = 6;
+    STRUCT = 7;
+    TYPEDEF = 8;
+  }
+  */
+
+  //Kind kind = 1; // FIXME: remove?
+  Location location = 2;
+
+  oneof kind {
+    PrimitiveType primitiveType = 3;
+    EnumType enumType = 4;
+    PointerType pointerType = 5;
+    ArrayType arrayType = 6;
+    FunctionPointerType functionPointerType = 7;
+    UnionType unionType = 8;
+    StructType structType = 9;
+    TypedefType typedefType = 10;
+  }
+}
+
+message PrimitiveType {
+  enum Modifier {
+    NONE = 0;
+    CONST = 0x1;
+  }
+
+  string type = 1;
+  uint64 modifiers = 2;
+}
+
+message EnumType {
+  message Enumerator {
+    string name = 1;
+    // Have both int64 and uint64?
+    int64 value = 2;
+  }
+
+  string name = 1;
+  repeated Enumerator enumerators = 2;
+}
+
+message PointerType {
+  Type type = 1;
+}
+
+message ArrayType {
+  Type type = 1;
+  uint64 size = 2;
+}
+
+message FunctionPointerType {
+  // FIXME: Include parameter name in doc string?
+  Type returnType = 1;
+  repeated Type parameterTypes = 2;
+  bool isVariadic = 3;
+}
+
+message Field {
+  string name = 1;
+  Type type = 2;
+}
+
+message UnionType {
+  string name = 1;
+  repeated Field fields = 2;
+  uint64 size = 3;
+}
+
+message StructType {
+  // FIXME: packed attr
+  string name = 1;
+  repeated Field fields = 2;
+  uint64 size = 3;
+}
+
+message TypedefType {
+  string name = 1;
+  Type type = 2;
+}
+
+message Decl {
+  /*
+  enum Kind {
+    UNKNOWN = 0;
+    FUNCTION = 1;
+    VARIABLE = 2;
+    VARIABLE_DEFINE = 3;
+    LITERAL_DEFINE = 4;
+  }
+  */
+
+  //Kind kind = 1;
+  Location location = 2;
+
+  oneof kind {
+    FunctionDecl functionDecl = 11;
+    VariableDecl variableDecl = 12;  
+  }
+
+  message FunctionDecl {
+    message Parameter {
+      string name = 1;
+      Type type = 2;
+    }
+    
+    string name = 1;
+    Type returnType = 2;
+    repeated Parameter parameters = 3;
+    bool isVariadic = 4;
+  }
+  
+  message VariableDecl {
+    enum Modifier {
+      NONE = 0;
+      VOLATILE = 1;
+    }
+  
+    string name = 1;
+    Type type = 2;
+    repeated Modifier modifiers = 3;
+  }
+}
