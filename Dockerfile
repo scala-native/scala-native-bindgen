@@ -11,6 +11,7 @@ RUN set -x \
  && apt update \
  && apt install -y --no-install-recommends \
             g++ openjdk-8-jdk-headless sbt cmake make curl git \
+            protobuf-compiler libprotobuf-dev \
             zlib1g-dev \
             libgc-dev libunwind8-dev libre2-dev \
  && rm -rf /var/lib/apt/lists/*
