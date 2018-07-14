@@ -95,7 +95,7 @@ std::string Struct::generateHelperClass() const {
 
 bool Struct::hasHelperMethods() const {
     if (!isRepresentedAsStruct()) {
-        return false;
+        return !fields.empty();
     }
     return !isPacked && !fields.empty();
 }

@@ -83,12 +83,12 @@ class Struct : public StructOrUnion,
     bool isRepresentedAsStruct() const;
 
     /**
-     * @return implicit helper class for struct that is represented as CStruct.
+     * @return helper class methods for struct that is represented as CStruct.
      */
     std::string generateHelperClassMethodsForStructRepresentation() const;
 
     /**
-     * @return implicit helper class for struct that is represented as CArray.
+     * @return helper class methods for struct that is represented as CArray.
      */
     std::string generateHelperClassMethodsForArrayRepresentation() const;
 
