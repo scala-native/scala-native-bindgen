@@ -26,8 +26,8 @@ struct bigStruct {
     int three;
     float four;
     double five;
-    point_s six;
-    int seven;
+    struct point six;
+    struct point *seven;
     int eight;
     int nine;
     int ten;
@@ -59,3 +59,10 @@ struct structWithAnonymousStruct {
 char getCharFromAnonymousStruct(struct structWithAnonymousStruct *s);
 
 char getIntFromAnonymousStruct(struct structWithAnonymousStruct *s);
+
+enum struct_op { STRUCT_SET, STRUCT_TEST };
+
+int struct_test_long(struct bigStruct *s, enum struct_op op, long value);
+int struct_test_double(struct bigStruct *s, enum struct_op op, double value);
+int struct_test_point(struct bigStruct *s, enum struct_op op,
+                      struct point *value);
