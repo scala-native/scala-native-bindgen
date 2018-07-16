@@ -2,6 +2,7 @@
 #define SCALA_NATIVE_BINDGEN_FUNCTION_H
 
 #include "TypeAndName.h"
+#include "TypeDef.h"
 #include <llvm/Support/raw_ostream.h>
 #include <string>
 #include <vector>
@@ -26,6 +27,12 @@ class Function {
     std::string getName() const;
 
     void setScalaName(std::string scalaName);
+
+    /**
+     * @return true if the function does not use values of structs or arrays
+     * (note: unions are represented as arrays)
+     */
+    bool isLegalScalaNativeFunction() const;
 
   private:
     std::string getVarargsParameterName() const;

@@ -1,5 +1,6 @@
 #include "Function.h"
 #include "../Utils.h"
+#include "Struct.h"
 
 Parameter::Parameter(std::string name, std::shared_ptr<Type> type)
     : TypeAndName(std::move(name), type) {}
@@ -70,4 +71,20 @@ Function::~Function() {
     for (const auto &parameter : parameters) {
         delete parameter;
     }
+}
+
+bool Function::isLegalScalaNativeFunction() const {
+    /* Return type and parameters types cannot be array types because array type
+     * in this case is always represented as a pointer to element type */
+    if (isAliasForType<Struct>(retType.get()) ||
+        isAliasForType<Union>(retType.get())) {
+        return false;
+    }
+    for (const auto &parameter : parameters) {
+        if (isAliasForType<Struct>(parameter->getType().get()) ||
+            isAliasForType<Union>(parameter->getType().get())) {
+            return false;
+        }
+    }
+    return true;
 }
