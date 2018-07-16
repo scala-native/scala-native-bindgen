@@ -146,6 +146,17 @@ kornilova-l/scala-native-bindgen
   <li><a href="../using-generated-bindings/README.html" class="page">Using Generated Bindings</a></li>
 </ul>
 <nav class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="toc">Table of contents</label>
+<ul>
+  <li><a href="../limitations/index.html#limitations" class="header">Limitations</a>
+  <ul>
+    <li><a href="../limitations/index.html#passing-structs-by-value" class="header">Passing structs by value</a></li>
+    <li><a href="../limitations/index.html#limited-support-of-defines" class="header">Limited support of <code>#define</code>s</a></li>
+    <li><a href="../limitations/index.html#reusing-generated-bindings" class="header">Reusing generated bindings</a></li>
+    <li><a href="../limitations/index.html#type-qualifiers" class="header">Type qualifiers</a></li>
+    <li><a href="../limitations/index.html#updating-extern-variables" class="header">Updating extern variables</a></li>
+  </ul></li>
+</ul>
 </nav>
 
 <div class="md-nav__title--site md-version" title="Version">
@@ -156,39 +167,59 @@ kornilova-l/scala-native-bindgen
 </div>
 </div>
 </div>
+<div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="toc">Table of contents</label>
+<ul>
+  <li><a href="../limitations/index.html#limitations" class="header">Limitations</a>
+  <ul>
+    <li><a href="../limitations/index.html#passing-structs-by-value" class="header">Passing structs by value</a></li>
+    <li><a href="../limitations/index.html#limited-support-of-defines" class="header">Limited support of <code>#define</code>s</a></li>
+    <li><a href="../limitations/index.html#reusing-generated-bindings" class="header">Reusing generated bindings</a></li>
+    <li><a href="../limitations/index.html#type-qualifiers" class="header">Type qualifiers</a></li>
+    <li><a href="../limitations/index.html#updating-extern-variables" class="header">Updating extern variables</a></li>
+  </ul></li>
+</ul>
+</nav>
+
+</div>
+</div>
+</div>
 <div class="md-content">
 <article class="md-content__inner md-typeset">
 <div class="md-content__searchable">
 <h1><a href="#limitations" name="limitations" class="anchor"><span class="anchor-link"></span></a>Limitations</h1>
-<p>There are multiple unsupported cases that should be considered when generating bindings:</p>
-<ol>
-  <li>Currently bindgen does not support passing structs by value.<br/>For example, it will not be possible to call these two functions from Scala Native code:
-    <pre class="prettyprint"><code class="language-c">struct MyStruct {
+<p>There are multiple unsupported cases that should be considered when generating bindings.</p>
+<h2><a href="#passing-structs-by-value" name="passing-structs-by-value" class="anchor"><span class="anchor-link"></span></a>Passing structs by value</h2>
+<p>Scala Native does not support passing structs by value, bindgen skips such functions.</p>
+<pre class="prettyprint"><code class="language-c">struct MyStruct {
     int a;
 };
 
-struct MyStruct returnStruct();
+struct MyStruct returnStruct(); // skipped
 
-void handleStruct(struct MyStruct mystr);
+void handleStruct(struct MyStruct mystr); // skipped
 </code></pre>
-    <p>To support such cases one should generate bindings for C wrapper functions that use pointers to structs instead of actual structs.</p>
-  </li>
-  <li><code>#define</code>s for literals and variables are supported. For other types of <code>#define</code>s, write wrapper functions that return defined values.
-    <pre class="prettyprint"><code class="language-c">// Supported
+<p>To support such cases one should generate bindings for C wrapper functions that use pointers to structs instead of actual structs.</p>
+<h2><a href="#limited-support-of-defines" name="limited-support-of-defines" class="anchor"><span class="anchor-link"></span></a>Limited support of <code>#define</code>s</h2>
+<p><code>#define</code>s for literals and variables are supported. For other types of <code>#define</code>s, write wrapper functions that return defined values.</p>
+<pre class="prettyprint"><code class="language-c">// Supported
 #define ESC 0x1b            /* Defines for numerical and string literals. */
 extern const int pi_const;
 #define PI pi_const         /* Defines aliasing extern variables. */
 
 // Not supported (non-exhaustive list)
-#define COLS      (getenv(&quot;COLS&quot;) ? atoi(getenv(&quot;COLS&quot;)) : 80)
+#define COLS  (getenv(&quot;COLS&quot;) ? atoi(getenv(&quot;COLS&quot;)) : 80)
 #define MAX(a, b) (a &gt; b ? a : b)
 </code></pre>
-  </li>
-  <li>
-  <p>There is no way to reuse already generated bindings.<br/>Bindgen outputs bindings also for headers that were included in a given header. See <a href="https://github.com/kornilova-l/scala-native-bindgen/issues/2">#2</a>.</p></li>
-  <li>Type qualifiers <code>const</code>, <code>volatile</code> and <code>restrict</code> are not supported.</li>
-  <li>Extern variables are read-only. See <a href="https://github.com/scala-native/scala-native/issues/202">scala-native/scala-native#202</a>.</li>
-</ol>
+<h2><a href="#reusing-generated-bindings" name="reusing-generated-bindings" class="anchor"><span class="anchor-link"></span></a>Reusing generated bindings</h2>
+<p>There is no way to reuse already generated bindings.<br/>Bindgen outputs bindings also for headers that were included in a given header. See <a href="https://github.com/kornilova-l/scala-native-bindgen/issues/2">#2</a>.</p>
+<h2><a href="#type-qualifiers" name="type-qualifiers" class="anchor"><span class="anchor-link"></span></a>Type qualifiers</h2>
+<p>Type qualifiers <code>const</code>, <code>volatile</code> and <code>restrict</code> are not supported.</p>
+<h2><a href="#updating-extern-variables" name="updating-extern-variables" class="anchor"><span class="anchor-link"></span></a>Updating extern variables</h2>
+<p>Extern variables are read-only. See <a href="https://github.com/scala-native/scala-native/issues/202">scala-native/scala-native#202</a>.</p>
 </div>
 <div>
 <a href="https://github.com/kornilova-l/scala-native-bindgen/tree/master/docs/src/paradox/limitations/index.md" title="Edit this page" class="md-source-file md-edit">
