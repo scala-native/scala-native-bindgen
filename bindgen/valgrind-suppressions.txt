@@ -1,0 +1,17 @@
+{
+   syscall_param_suppression
+   Memcheck:Param
+   __pthread_sigmask(set)
+   fun:__pthread_sigmask
+   fun:pthread_sigmask
+   fun:_ZN4llvm3sys7Process25SafelyCloseFileDescriptorEi
+   fun:_ZN12_GLOBAL__N_18RealFileD1Ev
+   fun:_ZN12_GLOBAL__N_18RealFileD0Ev
+   fun:_ZN5clang3vfs10FileSystem16getBufferForFileERKN4llvm5TwineExbb
+   fun:_ZN5clang11FileManager16getBufferForFileEPKNS_9FileEntryEbb
+   fun:_ZNK5clang6SrcMgr12ContentCache9getBufferERNS_17DiagnosticsEngineERKNS_13SourceManagerENS_14SourceLocationEPb
+   fun:_ZNK5clang13SourceManager9getBufferENS_6FileIDENS_14SourceLocationEPb
+   fun:_ZN5clang12Preprocessor15EnterSourceFileENS_6FileIDEPKNS_15DirectoryLookupENS_14SourceLocationE
+   fun:_ZN5clang12Preprocessor19EnterMainSourceFileEv
+   fun:_ZN5clang8ParseASTERNS_4SemaEbb
+}

@@ -61,6 +61,7 @@ int main(int argc, const char *argv[]) {
 
     char *resolved = realpath(op.getSourcePathList()[0].c_str(), nullptr);
     LocationManager locationManager(resolved);
+    delete [] resolved;
 
     IR ir(libName, linkName, objectName, Package.getValue(), locationManager);
 

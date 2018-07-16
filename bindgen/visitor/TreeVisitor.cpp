@@ -175,7 +175,9 @@ bool TreeVisitor::VisitVarDecl(clang::VarDecl *varDecl) {
 std::shared_ptr<Location> TreeVisitor::getLocation(clang::Decl *decl) {
     clang::SourceManager &sm = astContext->getSourceManager();
     std::string filename = std::string(sm.getFilename(decl->getLocation()));
-    std::string path = realpath(filename.c_str(), nullptr);
+    char *resolved = realpath(filename.c_str(), nullptr);
+    std::string path = resolved;
+    delete [] resolved;
 
     unsigned lineNumber = sm.getSpellingLineNumber(decl->getLocation());
     return std::make_shared<Location>(path, lineNumber);

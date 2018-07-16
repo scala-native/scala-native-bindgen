@@ -13,4 +13,8 @@ if [[ ! -e bindgen/target/.llvm-version ]] || [[ "$(<bindgen/target/.llvm-versio
 fi
 
 make -C bindgen/target
-sbt "${@:-verify}"
+if [[ "${LLVM_VERSION}" == "5.0" ]]; then
+  sbt "${@:-verify}"
+else
+  sbt "${@:-verifyWithoutMemoryChecks}"
+fi
