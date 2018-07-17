@@ -6,6 +6,12 @@ This tool generates Scala Native bindings from C headers. It's built upon clang 
 
 [Documentation](https://kornilova-l.github.io/scala-native-bindgen/)
 
+## Releasing
+
+To release version `x.y.z` run:
+
+    > sbt -Dproject.version=x.y.z release
+
 ## License
 
 This project is distributed under the Scala license.

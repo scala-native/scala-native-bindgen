@@ -1,5 +1,5 @@
 name := "test"
-organization := "org.scalanative.bindgen.sbt.test"
+organization := "org.scala-native.bindgen.sbt.test"
 enablePlugins(ScalaNativeBindgenPlugin)
 scalaVersion := "2.11.12"
 
