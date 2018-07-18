@@ -149,7 +149,8 @@ void TreeVisitor::handleStruct(clang::RecordDecl *record, std::string name) {
     uint64_t sizeInBits = astContext->getTypeSize(record->getTypeForDecl());
     assert(sizeInBits % 8 == 0);
 
-    ir.addStruct(name, std::move(fields), sizeInBits / 8, getLocation(record));
+    ir.addStruct(name, std::move(fields), sizeInBits / 8, getLocation(record),
+                 record->hasAttr<clang::PackedAttr>());
 }
 
 bool TreeVisitor::VisitVarDecl(clang::VarDecl *varDecl) {

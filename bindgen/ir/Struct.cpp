@@ -42,9 +42,10 @@ std::shared_ptr<Location> StructOrUnion::getLocation() const {
 }
 
 Struct::Struct(std::string name, std::vector<std::shared_ptr<Field>> fields,
-               uint64_t typeSize, std::shared_ptr<Location> location)
+               uint64_t typeSize, std::shared_ptr<Location> location,
+               bool isPacked)
     : StructOrUnion(std::move(name), std::move(fields), std::move(location)),
-      typeSize(typeSize) {}
+      typeSize(typeSize), isPacked(isPacked) {}
 
 std::shared_ptr<TypeDef> Struct::generateTypeDef() {
     if (fields.size() < SCALA_NATIVE_MAX_STRUCT_FIELDS) {
@@ -89,7 +90,10 @@ std::string Struct::generateHelperClass() const {
 }
 
 bool Struct::hasHelperMethods() const {
-    return !fields.empty() && fields.size() < SCALA_NATIVE_MAX_STRUCT_FIELDS;
+    if (!isRepresentedAsStruct()) {
+        return false;
+    }
+    return !isPacked && !fields.empty();
 }
 
 std::string Struct::getTypeAlias() const { return "struct_" + name; }
@@ -158,6 +162,10 @@ std::string Struct::generateGetter(unsigned fieldIndex) const {
     std::stringstream s;
     s << "    def " << getter << ": " << returnType << " = " << methodBody;
     return s.str();
+}
+
+bool Struct::isRepresentedAsStruct() const {
+    return fields.size() <= SCALA_NATIVE_MAX_STRUCT_FIELDS;
 }
 
 Union::Union(std::string name, std::vector<std::shared_ptr<Field>> fields,

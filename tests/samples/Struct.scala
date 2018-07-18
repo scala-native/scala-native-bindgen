@@ -13,6 +13,7 @@ object Struct {
   type point_s = native.Ptr[struct_point]
   type struct_bigStruct = native.CArray[Byte, native.Nat.Digit[native.Nat._1, native.Nat.Digit[native.Nat._1, native.Nat._2]]]
   type struct_structWithAnonymousStruct = native.CStruct2[native.CInt, native.CArray[Byte, native.Nat._8]]
+  type struct_packedStruct = native.CStruct1[native.CChar]
   def setPoints(points: native.Ptr[struct_points], x1: native.CInt, y1: native.CInt, x2: native.CInt, y2: native.CInt): Unit = native.extern
   def getPoint(points: native.Ptr[struct_points], pointIndex: enum_pointIndex): native.CInt = native.extern
   def createPoint(): native.Ptr[struct_point] = native.extern

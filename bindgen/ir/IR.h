@@ -35,7 +35,8 @@ class IR {
                  std::shared_ptr<Location> location);
 
     void addStruct(std::string name, std::vector<std::shared_ptr<Field>> fields,
-                   uint64_t typeSize, std::shared_ptr<Location> location);
+                   uint64_t typeSize, std::shared_ptr<Location> location,
+                   bool isPacked);
 
     void addUnion(std::string name, std::vector<std::shared_ptr<Field>> fields,
                   uint64_t maxSize, std::shared_ptr<Location> location);
