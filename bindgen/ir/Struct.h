@@ -42,7 +42,8 @@ class Struct : public StructOrUnion,
                public std::enable_shared_from_this<Struct> {
   public:
     Struct(std::string name, std::vector<std::shared_ptr<Field>> fields,
-           uint64_t typeSize, std::shared_ptr<Location> location);
+           uint64_t typeSize, std::shared_ptr<Location> location,
+           bool isPacked);
 
     std::shared_ptr<TypeDef> generateTypeDef() override;
 
@@ -69,6 +70,9 @@ class Struct : public StructOrUnion,
   private:
     /* type size is needed if number of fields is bigger than 22 */
     uint64_t typeSize;
+    bool isPacked;
+
+    bool isRepresentedAsStruct() const;
 };
 
 class Union : public StructOrUnion,

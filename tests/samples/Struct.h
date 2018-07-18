@@ -56,6 +56,10 @@ struct structWithAnonymousStruct {
     } anonymousStruct;
 };
 
+struct __attribute__((__packed__)) packedStruct { // no helper methods
+    char a;
+};
+
 char getCharFromAnonymousStruct(struct structWithAnonymousStruct *s);
 
 char getIntFromAnonymousStruct(struct structWithAnonymousStruct *s);
