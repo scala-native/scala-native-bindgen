@@ -103,6 +103,10 @@ bool DefineFinder::isFunctionLikeMacro(const clang::Token &token) {
 void DefineFinder::MacroUndefined(const clang::Token &macroNameTok,
                                   const clang::MacroDefinition &md,
                                   const clang::MacroDirective *undef) {
+    if (!undef) {
+        /* macro was not defined */
+        return;
+    }
     clang::SourceManager &sm = compiler.getSourceManager();
     if (!sm.isInMainFile(undef->getLocation())) {
         return;
