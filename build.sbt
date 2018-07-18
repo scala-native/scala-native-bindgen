@@ -61,11 +61,8 @@ lazy val samples = project("samples")
     libraryDependencies += "com.lihaoyi" %%% "utest" % "0.6.3" % "test",
     testFrameworks += new TestFramework("utest.runner.Framework"),
     nativeLinkStubs := true,
-    Test / nativeLinkingOptions ++= {
-      val rootDir = (ThisBuild / baseDirectory).value.getAbsoluteFile
-      val cwd     = (Test / target).value.getAbsoluteFile / "bindgen"
-      val linker  = rootDir / "scripts" / "linker.sh"
-      Seq(s"-L$cwd", s"-fuse-ld=$linker")
+    Test / nativeLinkingOptions += {
+      Seq("-L", (Test / target).value.getAbsoluteFile / "bindgen").mkString
     },
     Test / compile := {
       val log            = streams.value.log
