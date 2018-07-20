@@ -35,8 +35,6 @@ class StructOrUnion {
 
     std::string getName() const;
 
-    bool equals(const StructOrUnion &other) const;
-
     std::shared_ptr<Location> getLocation() const;
 
     virtual std::string getTypeAlias() const = 0;

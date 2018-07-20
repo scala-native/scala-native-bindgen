@@ -21,28 +21,6 @@ StructOrUnion::StructOrUnion(std::string name,
 
 std::string StructOrUnion::getName() const { return name; }
 
-bool StructOrUnion::equals(const StructOrUnion &other) const {
-    if (this == &other) {
-        return true;
-    }
-    if (isInstanceOf<const Struct>(&other)) {
-        auto *s = dynamic_cast<const Struct *>(&other);
-        if (name != s->name) {
-            return false;
-        }
-        if (fields.size() != s->fields.size()) {
-            return false;
-        }
-        for (size_t i = 0; i < fields.size(); i++) {
-            if (*fields[i] != *s->fields[i]) {
-                return false;
-            }
-        }
-        return true;
-    }
-    return false;
-}
-
 std::shared_ptr<Location> StructOrUnion::getLocation() const {
     return location;
 }
@@ -142,7 +120,7 @@ bool Struct::usesType(const std::shared_ptr<Type> &type,
                       bool stopOnTypeDefs) const {
     for (const auto &field : fields) {
         if (*field->getType() == *type ||
-            field->getType().get()->usesType(type, stopOnTypeDefs)) {
+            field->getType()->usesType(type, stopOnTypeDefs)) {
             return true;
         }
     }
@@ -150,9 +128,13 @@ bool Struct::usesType(const std::shared_ptr<Type> &type,
 }
 
 bool Struct::operator==(const Type &other) const {
+    if (this == &other) {
+        return true;
+    }
     auto *s = dynamic_cast<const Struct *>(&other);
     if (s) {
-        return this->equals(*s);
+        /* structs have unique names */
+        return name == s->name;
     }
     return false;
 }
@@ -290,9 +272,13 @@ std::string Union::generateHelperClass() const {
 std::string Union::getTypeAlias() const { return "union_" + name; }
 
 bool Union::operator==(const Type &other) const {
+    if (this == &other) {
+        return true;
+    }
     auto *u = dynamic_cast<const Union *>(&other);
     if (u) {
-        return this->equals(*u);
+        /* unions have unique names */
+        return name == u->name;
     }
     return false;
 }
