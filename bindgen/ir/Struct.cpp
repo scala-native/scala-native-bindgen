@@ -33,7 +33,7 @@ Struct::Struct(std::string name, std::vector<std::shared_ptr<Field>> fields,
                uint64_t typeSize, std::shared_ptr<Location> location,
                bool isPacked, bool isBitField)
     : StructOrUnion(std::move(name), std::move(fields), std::move(location)),
-      typeSize(typeSize), isPacked(isPacked), isBitField(isBitField) {}
+      typeSize(typeSize), isPacked(isPacked), hasBitField(isBitField) {}
 
 std::shared_ptr<TypeDef> Struct::generateTypeDef() {
     if (isRepresentedAsStruct()) {
@@ -74,7 +74,7 @@ std::string Struct::generateHelperClass() const {
 }
 
 bool Struct::hasHelperMethods() const {
-    if (isBitField) {
+    if (hasBitField) {
         return false;
     }
     if (!isRepresentedAsStruct()) {
@@ -181,7 +181,7 @@ Struct::generateGetterForStructRepresentation(unsigned fieldIndex) const {
 }
 
 bool Struct::isRepresentedAsStruct() const {
-    return fields.size() <= SCALA_NATIVE_MAX_STRUCT_FIELDS && !isBitField;
+    return fields.size() <= SCALA_NATIVE_MAX_STRUCT_FIELDS && !hasBitField;
 }
 
 std::string

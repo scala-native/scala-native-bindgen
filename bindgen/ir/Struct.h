@@ -78,7 +78,7 @@ class Struct : public StructOrUnion,
     uint64_t typeSize;
     bool isPacked;
     /** true if at least one field is bit field */
-    bool isBitField;
+    bool hasBitField;
 
     bool isRepresentedAsStruct() const;
 
