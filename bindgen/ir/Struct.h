@@ -13,15 +13,15 @@ class Field : public TypeAndName {
   public:
     Field(std::string name, std::shared_ptr<Type> type);
 
-    Field(std::string name, std::shared_ptr<Type> type, uint64_t offset);
+    Field(std::string name, std::shared_ptr<Type> type, uint64_t offsetInBits);
 
-    uint64_t getOffset() const;
+    uint64_t getOffsetInBits() const;
 
   protected:
     /**
      * Offset in bytes from address of struct/union.
      */
-    uint64_t offset = 0;
+    uint64_t offsetInBits = 0;
 };
 
 class StructOrUnion {
@@ -99,6 +99,8 @@ class Struct : public StructOrUnion,
     std::string generateSetterForArrayRepresentation(unsigned fieldIndex) const;
 
     std::string generateGetterForArrayRepresentation(unsigned fieldIndex) const;
+
+    bool isBitField() const;
 };
 
 class Union : public StructOrUnion,

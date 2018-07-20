@@ -8,10 +8,12 @@
 Field::Field(std::string name, std::shared_ptr<Type> type)
     : TypeAndName(std::move(name), std::move(type)) {}
 
-Field::Field(std::string name, std::shared_ptr<Type> type, uint64_t offset)
-    : TypeAndName(std::move(name), std::move(type)), offset(offset) {}
+Field::Field(std::string name, std::shared_ptr<Type> type,
+             uint64_t offsetInBits)
+    : TypeAndName(std::move(name), std::move(type)),
+      offsetInBits(offsetInBits) {}
 
-uint64_t Field::getOffset() const { return offset; }
+uint64_t Field::getOffsetInBits() const { return offsetInBits; }
 
 StructOrUnion::StructOrUnion(std::string name,
                              std::vector<std::shared_ptr<Field>> fields,
@@ -34,7 +36,7 @@ Struct::Struct(std::string name, std::vector<std::shared_ptr<Field>> fields,
       typeSize(typeSize), isPacked(isPacked) {}
 
 std::shared_ptr<TypeDef> Struct::generateTypeDef() {
-    if (fields.size() < SCALA_NATIVE_MAX_STRUCT_FIELDS) {
+    if (isRepresentedAsStruct()) {
         return std::make_shared<TypeDef>(getTypeAlias(), shared_from_this(),
                                          nullptr);
     } else {
@@ -56,7 +58,7 @@ std::string Struct::generateHelperClass() const {
     s << "  implicit class " << type << "_ops(val p: native.Ptr[" << type
       << "])"
       << " extends AnyVal {\n";
-    if (fields.size() <= SCALA_NATIVE_MAX_STRUCT_FIELDS) {
+    if (isRepresentedAsStruct()) {
         s << generateHelperClassMethodsForStructRepresentation();
     } else {
         s << generateHelperClassMethodsForArrayRepresentation();
@@ -72,6 +74,9 @@ std::string Struct::generateHelperClass() const {
 }
 
 bool Struct::hasHelperMethods() const {
+    if (isBitField()) {
+        return false;
+    }
     if (!isRepresentedAsStruct()) {
         return !fields.empty();
     }
@@ -176,7 +181,7 @@ Struct::generateGetterForStructRepresentation(unsigned fieldIndex) const {
 }
 
 bool Struct::isRepresentedAsStruct() const {
-    return fields.size() <= SCALA_NATIVE_MAX_STRUCT_FIELDS;
+    return fields.size() <= SCALA_NATIVE_MAX_STRUCT_FIELDS && !isBitField();
 }
 
 std::string
@@ -188,9 +193,10 @@ Struct::generateSetterForArrayRepresentation(unsigned int fieldIndex) const {
     std::string castedField = "p._1";
 
     PointerType pointerToFieldType = PointerType(field->getType());
-    if (field->getOffset() > 0) {
-        castedField = "(" + castedField + " + " +
-                      std::to_string(field->getOffset()) + ")";
+    uint64_t offsetInBytes = field->getOffsetInBits() / 8;
+    if (offsetInBytes > 0) {
+        castedField =
+            "(" + castedField + " + " + std::to_string(offsetInBytes) + ")";
     }
     castedField = "!" + castedField + ".cast[" + pointerToFieldType.str() + "]";
     if (isAliasForType<ArrayType>(field->getType().get()) ||
@@ -215,8 +221,9 @@ Struct::generateGetterForArrayRepresentation(unsigned fieldIndex) const {
     std::string methodBody;
 
     PointerType pointerToFieldType = PointerType(field->getType());
-    if (field->getOffset() > 0) {
-        methodBody = "(p._1 + " + std::to_string(field->getOffset()) + ")";
+    uint64_t offsetInBytes = field->getOffsetInBits() / 8;
+    if (offsetInBytes > 0) {
+        methodBody = "(p._1 + " + std::to_string(offsetInBytes) + ")";
     } else {
         methodBody = "p._1";
     }
@@ -233,7 +240,16 @@ Struct::generateGetterForArrayRepresentation(unsigned fieldIndex) const {
     s << "    def " << getter << ": " << returnType << " = " << methodBody
       << "\n";
     return s.str();
-    return "";
+}
+
+bool Struct::isBitField() const {
+    // TODO: find proper way to check it
+    for (const auto &field : fields) {
+        if (field->getOffsetInBits() % 8 != 0) {
+            return true;
+        }
+    }
+    return false;
 }
 
 Union::Union(std::string name, std::vector<std::shared_ptr<Field>> fields,

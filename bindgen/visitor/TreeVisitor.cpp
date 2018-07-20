@@ -135,9 +135,8 @@ void TreeVisitor::handleStruct(clang::RecordDecl *record, std::string name) {
             typeTranslator.translate(field->getType(), &name);
         uint64_t recordOffsetInBits =
             recordLayout.getFieldOffset(field->getFieldIndex());
-        assert(recordOffsetInBits % 8 == 0);
-        fields.push_back(std::make_shared<Field>(
-            field->getNameAsString(), ftype, recordOffsetInBits / 8));
+        fields.push_back(std::make_shared<Field>(field->getNameAsString(),
+                                                 ftype, recordOffsetInBits));
 
         cycleDetection.AddDependency(newName, field->getType());
     }
