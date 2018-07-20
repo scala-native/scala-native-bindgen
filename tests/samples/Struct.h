@@ -67,6 +67,12 @@ struct bitFieldStruct { // no helper methods
     unsigned char b3 : 2;
 };
 
+struct bitFieldOffsetDivByEight { // no helper methods
+    unsigned b1 : 8;
+    unsigned b2 : 8;
+    unsigned char b3 : 8;
+};
+
 char getCharFromAnonymousStruct(struct structWithAnonymousStruct *s);
 
 char getIntFromAnonymousStruct(struct structWithAnonymousStruct *s);

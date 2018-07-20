@@ -15,6 +15,7 @@ object Struct {
   type struct_structWithAnonymousStruct = native.CStruct2[native.CInt, native.CArray[Byte, native.Nat._8]]
   type struct_packedStruct = native.CStruct1[native.CChar]
   type struct_bitFieldStruct = native.CArray[Byte, native.Nat._2]
+  type struct_bitFieldOffsetDivByEight = native.CArray[Byte, native.Nat._4]
   type enum_struct_op = native.CUnsignedInt
   def setPoints(points: native.Ptr[struct_points], x1: native.CInt, y1: native.CInt, x2: native.CInt, y2: native.CInt): Unit = native.extern
   def getPoint(points: native.Ptr[struct_points], pointIndex: enum_pointIndex): native.CInt = native.extern

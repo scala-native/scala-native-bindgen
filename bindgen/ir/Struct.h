@@ -52,8 +52,8 @@ class Struct : public StructOrUnion,
                public std::enable_shared_from_this<Struct> {
   public:
     Struct(std::string name, std::vector<std::shared_ptr<Field>> fields,
-           uint64_t typeSize, std::shared_ptr<Location> location,
-           bool isPacked);
+           uint64_t typeSize, std::shared_ptr<Location> location, bool isPacked,
+           bool isBitField);
 
     std::shared_ptr<TypeDef> generateTypeDef() override;
 
@@ -74,9 +74,11 @@ class Struct : public StructOrUnion,
     bool operator==(const Type &other) const override;
 
   private:
-    /* type size is needed if number of fields is bigger than 22 */
+    /** type size is needed if number of fields is bigger than 22 */
     uint64_t typeSize;
     bool isPacked;
+    /** true if at least one field is bit field */
+    bool isBitField;
 
     bool isRepresentedAsStruct() const;
 
@@ -99,8 +101,6 @@ class Struct : public StructOrUnion,
     std::string generateSetterForArrayRepresentation(unsigned fieldIndex) const;
 
     std::string generateGetterForArrayRepresentation(unsigned fieldIndex) const;
-
-    bool isBitField() const;
 };
 
 class Union : public StructOrUnion,
