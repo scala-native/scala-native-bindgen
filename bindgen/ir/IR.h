@@ -20,7 +20,8 @@ class IR {
 
     ~IR();
 
-    void addFunction(std::string name, std::vector<Parameter *> parameters,
+    void addFunction(std::string name,
+                     std::vector<std::shared_ptr<Parameter>> parameters,
                      std::shared_ptr<Type> retType, bool isVariadic);
 
     std::shared_ptr<TypeDef> addTypeDef(std::string name,
