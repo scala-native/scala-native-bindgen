@@ -1,6 +1,5 @@
 #include "TreeVisitor.h"
 #include "clang/AST/RecordLayout.h"
-#include <stdio.h>
 
 bool TreeVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
     if (!astContext->getSourceManager().isInMainFile(func->getLocation())) {
@@ -10,7 +9,7 @@ bool TreeVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
     std::string funcName = func->getNameInfo().getName().getAsString();
     std::shared_ptr<Type> retType =
         typeTranslator.translate(func->getReturnType());
-    std::vector<Parameter *> parameters;
+    std::vector<std::shared_ptr<Parameter>> parameters;
 
     int anonCounter = 0;
 
@@ -23,7 +22,7 @@ bool TreeVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
         }
 
         std::shared_ptr<Type> ptype = typeTranslator.translate(parm->getType());
-        parameters.emplace_back(new Parameter(pname, ptype));
+        parameters.emplace_back(std::make_shared<Parameter>(pname, ptype));
     }
 
     ir.addFunction(funcName, std::move(parameters), retType,

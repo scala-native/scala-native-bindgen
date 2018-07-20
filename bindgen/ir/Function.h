@@ -14,10 +14,9 @@ class Parameter : public TypeAndName {
 
 class Function {
   public:
-    Function(const std::string &name, std::vector<Parameter *> parameters,
+    Function(const std::string &name,
+             std::vector<std::shared_ptr<Parameter>> parameters,
              std::shared_ptr<Type> retType, bool isVariadic);
-
-    ~Function();
 
     friend llvm::raw_ostream &operator<<(llvm::raw_ostream &s,
                                          const Function &func);
@@ -41,7 +40,7 @@ class Function {
 
     std::string name;      // real name of the function
     std::string scalaName; // not empty
-    std::vector<Parameter *> parameters;
+    std::vector<std::shared_ptr<Parameter>> parameters;
     std::shared_ptr<Type> retType;
     bool isVariadic;
 };

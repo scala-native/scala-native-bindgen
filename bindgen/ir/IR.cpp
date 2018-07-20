@@ -7,7 +7,8 @@ IR::IR(std::string libName, std::string linkName, std::string objectName,
       objectName(std::move(objectName)), locationManager(locationManager),
       packageName(std::move(packageName)) {}
 
-void IR::addFunction(std::string name, std::vector<Parameter *> parameters,
+void IR::addFunction(std::string name,
+                     std::vector<std::shared_ptr<Parameter>> parameters,
                      std::shared_ptr<Type> retType, bool isVariadic) {
     functions.push_back(std::make_shared<Function>(name, std::move(parameters),
                                                    retType, isVariadic));

@@ -5,7 +5,8 @@
 Parameter::Parameter(std::string name, std::shared_ptr<Type> type)
     : TypeAndName(std::move(name), type) {}
 
-Function::Function(const std::string &name, std::vector<Parameter *> parameters,
+Function::Function(const std::string &name,
+                   std::vector<std::shared_ptr<Parameter>> parameters,
                    std::shared_ptr<Type> retType, bool isVariadic)
     : name(name), scalaName(name), parameters(std::move(parameters)),
       retType(std::move(retType)), isVariadic(isVariadic) {}
@@ -31,12 +32,12 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const Function &func) {
 }
 
 bool Function::usesType(std::shared_ptr<Type> type, bool stopOnTypeDefs) const {
-    if (*retType == *type || retType.get()->usesType(type, stopOnTypeDefs)) {
+    if (*retType == *type || retType->usesType(type, stopOnTypeDefs)) {
         return true;
     }
     for (const auto &parameter : parameters) {
         if (*parameter->getType() == *type ||
-            parameter->getType().get()->usesType(type, stopOnTypeDefs)) {
+            parameter->getType()->usesType(type, stopOnTypeDefs)) {
             return true;
         }
     }
@@ -65,12 +66,6 @@ bool Function::existsParameterWithName(const std::string &parameterName) const {
 
 void Function::setScalaName(std::string scalaName) {
     this->scalaName = std::move(scalaName);
-}
-
-Function::~Function() {
-    for (const auto &parameter : parameters) {
-        delete parameter;
-    }
 }
 
 bool Function::isLegalScalaNativeFunction() const {
