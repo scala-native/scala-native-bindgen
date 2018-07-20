@@ -13,15 +13,15 @@ class Field : public TypeAndName {
   public:
     Field(std::string name, std::shared_ptr<Type> type);
 
-    Field(std::string name, std::shared_ptr<Type> type, uint64_t offset);
+    Field(std::string name, std::shared_ptr<Type> type, uint64_t offsetInBits);
 
-    uint64_t getOffset() const;
+    uint64_t getOffsetInBits() const;
 
   protected:
     /**
      * Offset in bytes from address of struct/union.
      */
-    uint64_t offset = 0;
+    uint64_t offsetInBits = 0;
 };
 
 class StructOrUnion {
@@ -52,8 +52,8 @@ class Struct : public StructOrUnion,
                public std::enable_shared_from_this<Struct> {
   public:
     Struct(std::string name, std::vector<std::shared_ptr<Field>> fields,
-           uint64_t typeSize, std::shared_ptr<Location> location,
-           bool isPacked);
+           uint64_t typeSize, std::shared_ptr<Location> location, bool isPacked,
+           bool isBitField);
 
     std::shared_ptr<TypeDef> generateTypeDef() override;
 
@@ -74,9 +74,11 @@ class Struct : public StructOrUnion,
     bool operator==(const Type &other) const override;
 
   private:
-    /* type size is needed if number of fields is bigger than 22 */
+    /** type size is needed if number of fields is bigger than 22 */
     uint64_t typeSize;
     bool isPacked;
+    /** true if at least one field is bit field */
+    bool isBitField;
 
     bool isRepresentedAsStruct() const;
 

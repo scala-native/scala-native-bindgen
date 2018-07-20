@@ -60,6 +60,19 @@ struct __attribute__((__packed__)) packedStruct { // no helper methods
     char a;
 };
 
+struct bitFieldStruct { // no helper methods
+    unsigned char b1 : 3;
+    unsigned char : 0; // start a new byte
+    unsigned char b2 : 6;
+    unsigned char b3 : 2;
+};
+
+struct bitFieldOffsetDivByEight { // no helper methods
+    unsigned b1 : 8;
+    unsigned b2 : 8;
+    unsigned char b3 : 8;
+};
+
 char getCharFromAnonymousStruct(struct structWithAnonymousStruct *s);
 
 char getIntFromAnonymousStruct(struct structWithAnonymousStruct *s);

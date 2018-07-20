@@ -34,9 +34,10 @@ void IR::addEnum(std::string name, const std::string &type,
 
 void IR::addStruct(std::string name, std::vector<std::shared_ptr<Field>> fields,
                    uint64_t typeSize, std::shared_ptr<Location> location,
-                   bool isPacked) {
-    std::shared_ptr<Struct> s = std::make_shared<Struct>(
-        name, std::move(fields), typeSize, std::move(location), isPacked);
+                   bool isPacked, bool isBitField) {
+    std::shared_ptr<Struct> s =
+        std::make_shared<Struct>(name, std::move(fields), typeSize,
+                                 std::move(location), isPacked, isBitField);
     structs.push_back(s);
     std::shared_ptr<TypeDef> typeDef = getTypeDefWithName("struct_" + name);
     if (typeDef) {

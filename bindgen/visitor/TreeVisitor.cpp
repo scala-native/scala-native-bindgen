@@ -130,14 +130,17 @@ void TreeVisitor::handleStruct(clang::RecordDecl *record, std::string name) {
     const clang::ASTRecordLayout &recordLayout =
         astContext->getASTRecordLayout(record);
 
+    bool isBitFieldStruct = false;
     for (const clang::FieldDecl *field : record->fields()) {
+        if (field->isBitField()) {
+            isBitFieldStruct = true;
+        }
         std::shared_ptr<Type> ftype =
             typeTranslator.translate(field->getType(), &name);
         uint64_t recordOffsetInBits =
             recordLayout.getFieldOffset(field->getFieldIndex());
-        assert(recordOffsetInBits % 8 == 0);
-        fields.push_back(std::make_shared<Field>(
-            field->getNameAsString(), ftype, recordOffsetInBits / 8));
+        fields.push_back(std::make_shared<Field>(field->getNameAsString(),
+                                                 ftype, recordOffsetInBits));
 
         cycleDetection.AddDependency(newName, field->getType());
     }
@@ -156,7 +159,7 @@ void TreeVisitor::handleStruct(clang::RecordDecl *record, std::string name) {
     assert(sizeInBits % 8 == 0);
 
     ir.addStruct(name, std::move(fields), sizeInBits / 8, getLocation(record),
-                 record->hasAttr<clang::PackedAttr>());
+                 record->hasAttr<clang::PackedAttr>(), isBitFieldStruct);
 }
 
 bool TreeVisitor::VisitVarDecl(clang::VarDecl *varDecl) {
