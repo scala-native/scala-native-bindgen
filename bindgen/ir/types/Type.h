@@ -11,7 +11,7 @@ class Type {
   public:
     virtual ~Type() = default;
 
-    virtual std::string str() const;
+    virtual std::string str() const = 0;
 
     /**
      * @param stopOnTypeDefs if this parameter is true then TypeDefs instances
@@ -21,9 +21,9 @@ class Type {
      *                       typedef are found.
      */
     virtual bool usesType(const std::shared_ptr<Type> &type,
-                          bool stopOnTypeDefs) const;
+                          bool stopOnTypeDefs) const = 0;
 
-    virtual bool operator==(const Type &other) const;
+    virtual bool operator==(const Type &other) const = 0;
 
     virtual bool operator!=(const Type &other) const;
 };
