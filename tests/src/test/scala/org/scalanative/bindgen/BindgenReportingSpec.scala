@@ -58,5 +58,26 @@ class BindgenReportingSpec extends FunSpec {
             |Warning: Function returnUnion is skipped because Scala Native does not support passing structs and arrays by value.""".stripMargin
       )
     }
+
+    it("Skips variable with opaque type") {
+      val bindings =
+        bindgen(input = """struct undefinedStruct;
+                          |extern struct undefinedStruct removedExtern;
+                          |#define removedExternAlias removedExtern
+                          |""".stripMargin)
+      assert(
+        bindings.errs == """Error: Variable removedExtern is skipped because it has incomplete type.
+                           |Error: Variable alias removedExternAlias is skipped because it has incomplete type.""".stripMargin)
+
+    }
+
+    it("Skips unused alias for opaque type") {
+      val bindings =
+        bindgen(input = """union undefinedUnion;
+                          |typedef union undefinedUnion aliasForUndefinedUnion;
+                          |""".stripMargin)
+      assert(
+        bindings.errs == "Warning: type alias aliasForUndefinedUnion is skipped because it is an unused alias for incomplete type.")
+    }
   }
 }

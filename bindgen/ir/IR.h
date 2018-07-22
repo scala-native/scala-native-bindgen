@@ -149,9 +149,13 @@ class IR {
     template <typename T> bool inMainFile(const T &type) const;
 
     /**
-     * @tparam T Type subclass
-     * @return true if type is in main file or it is used by declaration from
-     *         main file.
+     * @tparam T Enum, Struct, Union or TypeDef
+     * @return true if the type will be printed.
+     *         Following types are not printed:
+     *         - Unused types from included headers
+     *         - Unused typedefs from main header if they reference an opaque
+     *           type (if such typedef is used then true is returned but error
+     *           message is printed when bindings are generated)
      */
     template <typename T>
     bool shouldOutput(const std::shared_ptr<T> &type) const;

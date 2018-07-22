@@ -9,14 +9,13 @@ TypeDef::TypeDef(std::string name, std::shared_ptr<Type> type,
       location(std::move(location)) {}
 
 llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const TypeDef &typeDef) {
-    if (!typeDef.getType()) {
-        llvm::errs() << "Error: type definition for " << typeDef.getName()
-                     << " was not found.\n";
-        llvm::errs().flush();
-        return s;
+    s << "  type " << handleReservedWords(typeDef.name) << " = ";
+    if (typeDef.type) {
+        s << typeDef.getType()->str();
+    } else {
+        s << "native.CStruct0 // incomplete type";
     }
-    s << "  type " + handleReservedWords(typeDef.name) + " = " +
-             typeDef.getType()->str() + "\n";
+    s << "\n";
     return s;
 }
 
