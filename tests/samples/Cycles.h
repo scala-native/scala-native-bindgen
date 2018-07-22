@@ -6,7 +6,7 @@ struct a {
 };
 
 struct b {
-    struct c *cc;
+    struct c *cc; // type will be replace by Ptr[Byte]
 };
 
 struct c {

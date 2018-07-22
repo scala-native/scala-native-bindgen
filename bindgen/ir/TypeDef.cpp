@@ -59,3 +59,16 @@ bool TypeDef::operator==(const Type &other) const {
 }
 
 std::shared_ptr<Location> TypeDef::getLocation() const { return location; }
+
+bool TypeDef::findAllCycles(
+    const StructOrUnion *startStructOrUnion, CycleNode &cycleNode,
+    std::vector<std::shared_ptr<const Type>> &visitedTypes) const {
+    if (contains(this, visitedTypes) || !type) {
+        return false;
+    }
+    visitedTypes.push_back(shared_from_this());
+    bool result =
+        type->findAllCycles(startStructOrUnion, cycleNode, visitedTypes);
+    visitedTypes.pop_back();
+    return result;
+}

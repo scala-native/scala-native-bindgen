@@ -17,6 +17,10 @@ class FunctionPointerType
         const std::shared_ptr<const Type> &type, bool stopOnTypeDefs,
         std::vector<std::shared_ptr<const Type>> &visitedTypes) const override;
 
+    bool findAllCycles(
+        const StructOrUnion *startStructOrUnion, CycleNode &cycleNode,
+        std::vector<std::shared_ptr<const Type>> &visitedTypes) const override;
+
     std::string str() const override;
 
     bool operator==(const Type &other) const override;

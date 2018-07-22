@@ -75,3 +75,29 @@ bool FunctionPointerType::operator==(const Type &other) const {
     }
     return false;
 }
+
+bool FunctionPointerType::findAllCycles(
+    const StructOrUnion *startStructOrUnion, CycleNode &cycleNode,
+    std::vector<std::shared_ptr<const Type>> &visitedTypes) const {
+
+    if (contains(this, visitedTypes)) {
+        return false;
+    }
+    visitedTypes.push_back(shared_from_this());
+
+    if (returnType->findAllCycles(startStructOrUnion, cycleNode,
+                                  visitedTypes)) {
+        visitedTypes.pop_back();
+        return true;
+    }
+
+    for (const auto &parameterType : parametersTypes) {
+        if (parameterType->findAllCycles(startStructOrUnion, cycleNode,
+                                         visitedTypes)) {
+            visitedTypes.pop_back();
+            return true;
+        }
+    }
+    visitedTypes.pop_back();
+    return false;
+}

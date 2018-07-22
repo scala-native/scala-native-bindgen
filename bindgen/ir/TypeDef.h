@@ -26,6 +26,10 @@ class TypeDef : public TypeAndName,
 
     std::shared_ptr<Location> getLocation() const;
 
+    bool findAllCycles(
+        const StructOrUnion *startStructOrUnion, CycleNode &cycleNode,
+        std::vector<std::shared_ptr<const Type>> &visitedTypes) const override;
+
   private:
     /**
      * nullptr if type is generated.

@@ -1,6 +1,7 @@
 #ifndef SCALA_NATIVE_BINDGEN_STRUCT_H
 #define SCALA_NATIVE_BINDGEN_STRUCT_H
 
+#include "CycleNode.h"
 #include "TypeAndName.h"
 #include "TypeDef.h"
 #include "types/ArrayType.h"
@@ -47,8 +48,55 @@ class StructOrUnion : public virtual Type {
     std::vector<std::shared_ptr<Field>> fields;
     std::shared_ptr<Location> location;
 
-    bool usesType(const std::shared_ptr<const Type> &type, bool stopOnTypeDefs,
+    virtual bool
+    usesType(const std::shared_ptr<const Type> &type, bool stopOnTypeDefs,
+             std::vector<std::shared_ptr<const Type>> &visitedTypes) const;
+
+    /**
+     * Scala Native does not support cyclic types.
+     * Cycles may contain structs, unions, typedefs, pointer types and function
+     * pointer types.
+     * Cycle cannot be broken on value type. There exist at least one field in
+     * cycle of pointer type / function pointer type (or typedef alias to one of
+     * these types) because otherwise cycle produces structs / unions of
+     * infinite size.
+     *
+     * Type of the field may contain a pointer to a struct / union (or typedef
+     * alias to this type).
+     * The pointer should be replaced with a pointer to Byte if:
+     * - field belongs to a cycle
+     * - name of the struct/union is the biggest among all structs/unions in the
+     *   cycle that also have fields of non-value type.
+     *
+     * Note: a field may belong to one or more cycles. It is not enough to check
+     *       only one of them.
+     *
+     * @return true if field type should be replaces
+     */
+    bool shouldFieldBreakCycle(const std::shared_ptr<Field> &field) const;
+
+    /**
+     * If the struct/union belongs to one or more cycles that contain
+     * startStructOrUnion then field(s) that causes cycle(s) will be added to
+     * cycleNode.cycleNodes (as well as all other fields further in this cycle).
+     * @param startStructOrUnion struct or union that should belong to found
+     *                           cycles.
+     * @param visitedTypes is used to avoid endless cycle of function calls in
+     *                     the case of cyclic types.
+     * @return true if the struct/union belongs to one or more cycles that
+     *         contain startStructOrUnion.
+     */
+    virtual bool
+    findAllCycles(const StructOrUnion *startStructOrUnion, CycleNode &cycleNode,
                   std::vector<std::shared_ptr<const Type>> &visitedTypes) const;
+
+    /**
+     * @return true if current struct/union has the biggest name among all
+     *         structs/unions in the cycle that also have fields of non-value
+     *         type.
+     */
+    bool hasBiggestName(const CycleNode &node,
+                        std::vector<std::string> vector) const;
 };
 
 class Struct : public StructOrUnion {
@@ -75,6 +123,10 @@ class Struct : public StructOrUnion {
     std::string str() const override;
 
     bool operator==(const Type &other) const override;
+
+    bool findAllCycles(
+        const StructOrUnion *startStructOrUnion, CycleNode &cycleNode,
+        std::vector<std::shared_ptr<const Type>> &visitedTypes) const override;
 
   private:
     /** type size is needed if number of fields is bigger than 22 */
@@ -104,8 +156,6 @@ class Struct : public StructOrUnion {
     std::string generateSetterForArrayRepresentation(unsigned fieldIndex) const;
 
     std::string generateGetterForArrayRepresentation(unsigned fieldIndex) const;
-
-    bool isFieldCyclic(const std::shared_ptr<Field> &field) const;
 };
 
 class Union : public StructOrUnion, public ArrayType {
@@ -123,6 +173,10 @@ class Union : public StructOrUnion, public ArrayType {
 
     bool usesType(
         const std::shared_ptr<const Type> &type, bool stopOnTypeDefs,
+        std::vector<std::shared_ptr<const Type>> &visitedTypes) const override;
+
+    bool findAllCycles(
+        const StructOrUnion *startStructOrUnion, CycleNode &cycleNode,
         std::vector<std::shared_ptr<const Type>> &visitedTypes) const override;
 };
 

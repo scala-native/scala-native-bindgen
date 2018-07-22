@@ -35,3 +35,16 @@ bool PointerType::operator==(const Type &other) const {
     }
     return false;
 }
+
+bool PointerType::findAllCycles(
+    const StructOrUnion *startStructOrUnion, CycleNode &cycleNode,
+    std::vector<std::shared_ptr<const Type>> &visitedTypes) const {
+    if (contains(this, visitedTypes)) {
+        return false;
+    }
+    visitedTypes.push_back(shared_from_this());
+    bool result =
+        this->type->findAllCycles(startStructOrUnion, cycleNode, visitedTypes);
+    visitedTypes.pop_back();
+    return result;
+}

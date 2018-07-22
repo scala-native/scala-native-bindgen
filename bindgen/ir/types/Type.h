@@ -1,6 +1,7 @@
 #ifndef SCALA_NATIVE_BINDGEN_TYPE_H
 #define SCALA_NATIVE_BINDGEN_TYPE_H
 
+#include "../CycleNode.h"
 #include <memory>
 #include <string>
 #include <vector>
@@ -31,6 +32,19 @@ class Type : public std::enable_shared_from_this<Type> {
     virtual bool operator==(const Type &other) const = 0;
 
     virtual bool operator!=(const Type &other) const;
+
+    /**
+     * @param startStructOrUnion struct or union that should belong to found
+     *                           cycles.
+     * @param visitedTypes is used to avoid endless cycle of function calls in
+     *                     the case of cyclic types.
+     * @return true if current type belongs to one or more cycles that contain
+     *         startStructOrUnion. If current type is struct or union then
+     *         cycleNode is updated (see StructOrUnion::findAllCycles)
+     */
+    virtual bool
+    findAllCycles(const StructOrUnion *startStructOrUnion, CycleNode &cycleNode,
+                  std::vector<std::shared_ptr<const Type>> &visitedTypes) const;
 };
 
 #endif // SCALA_NATIVE_BINDGEN_TYPE_H
