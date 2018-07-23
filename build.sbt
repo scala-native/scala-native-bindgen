@@ -53,14 +53,14 @@ val root = project("scala-native-bindgen")
   )
   .enablePlugins(ReleasePlugin)
   .settings(
-    skip in publish := true,
+    publish / skip := true,
     releaseCrossBuild := false,
     releaseVersionFile := target.value / "unused-version.sbt",
     releaseProcess := {
       import ReleaseTransformations._
       Seq[ReleaseStep](
         checkSnapshotDependencies,
-        setReleaseVersions(version.in(ThisBuild).value),
+        setReleaseVersions(version.value),
         runClean,
         releaseStepCommandAndRemaining("verify"),
         setReleaseVersion,
@@ -75,9 +75,9 @@ val root = project("scala-native-bindgen")
 lazy val tests = project("tests")
   .dependsOn(tools)
   .settings(
-    skip in publish := true,
-    fork in Test := true,
-    javaOptions in Test += {
+    publish / skip := true,
+    Test / fork := true,
+    Test / javaOptions += {
       val rootDir = (ThisBuild / baseDirectory).value
       s"-Dbindgen.path=$rootDir/bindgen/target/scala-native-bindgen"
     },
@@ -93,7 +93,7 @@ lazy val samples = project("samples")
   .in(file("tests/samples"))
   .enablePlugins(ScalaNativePlugin)
   .settings(
-    skip in publish := true,
+    publish / skip := true,
     scalaVersion := Versions.scala211,
     libraryDependencies += "com.lihaoyi" %%% "utest" % "0.6.3" % "test",
     testFrameworks += new TestFramework("utest.runner.Framework"),
@@ -158,8 +158,8 @@ lazy val sbtPlugin = project("sbt-scala-native-bindgen", ScriptedPlugin)
 lazy val docs = project("docs")
   .enablePlugins(GhpagesPlugin, ParadoxSitePlugin, ParadoxMaterialThemePlugin)
   .settings(
-    skip in publish := true,
-    paradoxProperties in Paradox ++= Map(
+    publish / skip := true,
+    Paradox / paradoxProperties ++= Map(
       "github.base_url" -> scmInfo.value.get.browseUrl.toString
     ),
     ParadoxMaterialThemePlugin.paradoxMaterialThemeSettings(Paradox),
@@ -194,7 +194,7 @@ def project(name: String, plugged: AutoPlugin*) = {
         else "maven"
       },
       publishMavenStyle := Keys.sbtPlugin.value == false,
-      publishArtifact in Test := false
+      Test / publishArtifact := false
     )
 }
 
