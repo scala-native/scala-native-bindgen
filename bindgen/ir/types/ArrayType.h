@@ -15,6 +15,12 @@ class ArrayType : public virtual Type {
 
     bool operator==(const Type &other) const override;
 
+    std::shared_ptr<const Type> unrollTypedefs() const override;
+
+    std::shared_ptr<const Type>
+    replaceType(const std::shared_ptr<const Type> &type,
+                const std::shared_ptr<const Type> &replacement) const override;
+
   private:
     const uint64_t size;
     std::shared_ptr<const Type> elementsType;

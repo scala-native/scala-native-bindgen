@@ -40,3 +40,18 @@ bool ArrayType::operator==(const Type &other) const {
     }
     return false;
 }
+
+std::shared_ptr<const Type> ArrayType::unrollTypedefs() const {
+    return std::make_shared<ArrayType>(elementsType->unrollTypedefs(), size);
+}
+
+std::shared_ptr<const Type>
+ArrayType::replaceType(const std::shared_ptr<const Type> &type,
+                       const std::shared_ptr<const Type> &replacement) const {
+
+    if (*elementsType == *replacement) {
+        return std::make_shared<ArrayType>(replacement, size);
+    }
+    return std::make_shared<ArrayType>(
+        elementsType->replaceType(type, replacement), size);
+}

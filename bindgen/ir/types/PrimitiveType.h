@@ -21,6 +21,12 @@ class PrimitiveType : public Type {
 
     bool operator==(const Type &other) const override;
 
+    std::shared_ptr<const Type> unrollTypedefs() const override;
+
+    std::shared_ptr<const Type>
+    replaceType(const std::shared_ptr<const Type> &type,
+                const std::shared_ptr<const Type> &replacement) const override;
+
   private:
     std::string type;
 };

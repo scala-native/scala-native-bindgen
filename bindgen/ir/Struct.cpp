@@ -1,6 +1,7 @@
 #include "Struct.h"
 #include "../Utils.h"
 #include "types/ArrayType.h"
+#include "types/FunctionPointerType.h"
 #include "types/PointerType.h"
 #include "types/PrimitiveType.h"
 #include <sstream>
@@ -38,74 +39,19 @@ Struct::Struct(std::string name, std::vector<std::shared_ptr<Field>> fields,
 bool StructOrUnion::usesType(
     const std::shared_ptr<const Type> &type, bool stopOnTypeDefs,
     std::vector<std::shared_ptr<const Type>> &visitedTypes) const {
+
+    if (contains(this, visitedTypes)) {
+        return false;
+    }
+    visitedTypes.push_back(shared_from_this());
+
     for (const auto &field : fields) {
         if (*field->getType() == *type ||
             field->getType()->usesType(type, stopOnTypeDefs, visitedTypes)) {
             return true;
         }
     }
-    return false;
-}
-
-bool StructOrUnion::findAllCycles(
-    const StructOrUnion *startStructOrUnion, CycleNode &cycleNode,
-    std::vector<std::shared_ptr<const Type>> &visitedTypes) const {
-    if (this == startStructOrUnion) {
-        return true;
-    }
-    /* visitedTypes check is ignored because it is not necessary to save Struct
-     * and Union types in visitedTypes if it is done for TypeDefs (Struct and
-     * Union types can be references only through TypeDefs) */
-    bool belongsToCycle = false;
-    for (const auto &field : fields) {
-        CycleNode newCycleNode(this, field.get());
-        if (field->getType()->findAllCycles(startStructOrUnion, newCycleNode,
-                                            visitedTypes)) {
-            if (isAliasForType<Struct>(field->getType().get()) ||
-                isAliasForType<Union>(field->getType().get())) {
-                /* cycles cannot be broken on value type fields */
-                newCycleNode.isValueType = true;
-            }
-            belongsToCycle = true;
-            cycleNode.cycleNodes.push_back(newCycleNode);
-        }
-    }
-    return belongsToCycle;
-}
-
-bool StructOrUnion::hasBiggestName(
-    const CycleNode &node, std::vector<std::string> namesInCycle) const {
-    if (!node.isValueType) {
-        namesInCycle.push_back(node.structOrUnion->getTypeAlias());
-    }
-    if (node.cycleNodes.empty()) {
-        std::sort(namesInCycle.begin(), namesInCycle.end());
-        return getTypeAlias() == namesInCycle.back();
-    }
-    for (const auto &cycleNode : node.cycleNodes) {
-        if (hasBiggestName(cycleNode, namesInCycle)) {
-            return true;
-        }
-    }
-    return false;
-}
-
-bool StructOrUnion::shouldFieldBreakCycle(
-    const std::shared_ptr<Field> &field) const {
-    if (isAliasForType<Struct>(field->getType().get()) ||
-        isAliasForType<Union>(field->getType().get())) {
-        return false;
-    }
-    CycleNode baseNode(this, field.get());
-    std::vector<std::shared_ptr<const Type>> visitedTypes;
-    if (field->getType()->findAllCycles(this, baseNode, visitedTypes)) {
-        /* one or more cycles were found but type of the filed should be changed
-         * if this struct/union has the biggest name compared to other
-         * structs/unions in cycle that have fields of non-value type. */
-        std::vector<std::string> namesInCycle;
-        bool res = hasBiggestName(baseNode, namesInCycle);
-        return res;
-    }
+    visitedTypes.pop_back();
     return false;
 }
 
@@ -188,36 +134,21 @@ std::string Struct::str() const {
     std::string sep = "";
     for (const auto &field : fields) {
         ss << sep;
-        if (!isInstanceOf<PointerType>(field->getType().get()) ||
-            !shouldFieldBreakCycle(field)) {
-
+        std::vector<std::shared_ptr<const Struct>>
+            structTypesThatShouldBeReplaced = shouldFieldBreakCycle(field);
+        if (structTypesThatShouldBeReplaced.empty()) {
             ss << field->getType()->str();
         } else {
-            ss << PointerType(std::make_shared<PrimitiveType>("Byte")).str();
+            /* field type is changed to avoid cyclic types in generated code */
+            std::shared_ptr<const Type> typeReplacement = getTypeReplacement(
+                field->getType(), structTypesThatShouldBeReplaced);
+            ss << typeReplacement->str();
         }
         sep = ", ";
     }
 
     ss << "]";
     return ss.str();
-}
-
-bool Struct::usesType(
-    const std::shared_ptr<const Type> &type, bool stopOnTypeDefs,
-    std::vector<std::shared_ptr<const Type>> &visitedTypes) const {
-
-    if (contains(this, visitedTypes)) {
-        return false;
-    }
-    visitedTypes.push_back(shared_from_this());
-
-    bool result = StructOrUnion::usesType(type, stopOnTypeDefs, visitedTypes);
-    if (!result) {
-        /* current Struct instance should not be in the path to search
-         * type */
-        visitedTypes.pop_back();
-    }
-    return result;
 }
 
 bool Struct::operator==(const Type &other) const {
@@ -238,13 +169,17 @@ Struct::generateSetterForStructRepresentation(unsigned fieldIndex) const {
     std::string setter = handleReservedWords(field->getName(), "_=");
     std::string parameterType = field->getType()->str();
     std::string value = "value";
-    if (isAliasForType<ArrayType>(field->getType().get()) ||
-        isAliasForType<Struct>(field->getType().get())) {
+    std::vector<std::shared_ptr<const Struct>> structTypesThatShouldBeReplaced =
+        shouldFieldBreakCycle(field);
+    if (!structTypesThatShouldBeReplaced.empty()) {
+        /* field type is changed to avoid cyclic types in generated code */
+        std::shared_ptr<const Type> typeReplacement = getTypeReplacement(
+            field->getType(), structTypesThatShouldBeReplaced);
+        value = value + ".cast[" + typeReplacement->str() + "]";
+    } else if (isAliasForType<ArrayType>(field->getType().get()) ||
+               isAliasForType<Struct>(field->getType().get())) {
         parameterType = "native.Ptr[" + parameterType + "]";
         value = "!" + value;
-    } else if (isInstanceOf<PointerType>(field->getType().get()) &&
-               shouldFieldBreakCycle(field)) {
-        value = value + ".cast[native.Ptr[Byte]]";
     }
     std::stringstream s;
     s << "    def " << setter << "(value: " + parameterType + "): Unit = !p._"
@@ -261,8 +196,8 @@ Struct::generateGetterForStructRepresentation(unsigned fieldIndex) const {
     if (isAliasForType<ArrayType>(field->getType().get()) ||
         isAliasForType<Struct>(field->getType().get())) {
         returnType = "native.Ptr[" + returnType + "]";
-    } else if (isInstanceOf<PointerType>(field->getType().get()) &&
-               shouldFieldBreakCycle(field)) {
+    } else if (!shouldFieldBreakCycle(field).empty()) {
+        /* field type is changed to avoid cyclic types in generated code */
         methodBody =
             "(!" + methodBody + ").cast[" + field->getType()->str() + "]";
     } else {
@@ -293,13 +228,17 @@ Struct::generateSetterForArrayRepresentation(unsigned int fieldIndex) const {
             "(" + castedField + " + " + std::to_string(offsetInBytes) + ")";
     }
     castedField = "!" + castedField + ".cast[" + pointerToFieldType.str() + "]";
-    if (isAliasForType<ArrayType>(field->getType().get()) ||
-        isAliasForType<Struct>(field->getType().get())) {
+    std::vector<std::shared_ptr<const Struct>> structTypesThatShouldBeReplaced =
+        shouldFieldBreakCycle(field);
+    if (!structTypesThatShouldBeReplaced.empty()) {
+        /* field type is changed to avoid cyclic types in generated code */
+        std::shared_ptr<const Type> typeReplacement = getTypeReplacement(
+            field->getType(), structTypesThatShouldBeReplaced);
+        value = value + ".cast[" + typeReplacement->str() + "]";
+    } else if (isAliasForType<ArrayType>(field->getType().get()) ||
+               isAliasForType<Struct>(field->getType().get())) {
         parameterType = pointerToFieldType.str();
         value = "!" + value;
-    } else if (isInstanceOf<PointerType>(field->getType().get()) &&
-               shouldFieldBreakCycle(field)) {
-        value = value + ".cast[native.Ptr[Byte]]";
     }
     std::stringstream s;
     s << "    def " << setter
@@ -327,8 +266,8 @@ Struct::generateGetterForArrayRepresentation(unsigned fieldIndex) const {
     if (isAliasForType<ArrayType>(field->getType().get()) ||
         isAliasForType<Struct>(field->getType().get())) {
         returnType = pointerToFieldType.str();
-    } else if (isInstanceOf<PointerType>(field->getType().get()) &&
-               shouldFieldBreakCycle(field)) {
+    } else if (!shouldFieldBreakCycle(field).empty()) {
+        /* field type is changed to avoid cyclic types in generated code */
         methodBody =
             "(!" + methodBody + ").cast[" + field->getType()->str() + "]";
         returnType = field->getType()->str();
@@ -342,11 +281,103 @@ Struct::generateGetterForArrayRepresentation(unsigned fieldIndex) const {
     return s.str();
 }
 
+std::shared_ptr<const Type>
+Struct::getTypeReplacement(std::shared_ptr<const Type> type,
+                           std::vector<std::shared_ptr<const Struct>>
+                               structTypesThatShouldBeReplaced) const {
+    std::shared_ptr<const Type> replacementType = type->unrollTypedefs();
+    std::shared_ptr<PointerType> pointerToByte =
+        std::make_shared<PointerType>(std::make_shared<PrimitiveType>("Byte"));
+    for (const auto &recordType : structTypesThatShouldBeReplaced) {
+        std::shared_ptr<TypeDef> recordTypeDef = std::make_shared<TypeDef>(
+            recordType->getTypeAlias(), recordType, nullptr);
+        std::shared_ptr<Type> pointerToRecord =
+            std::make_shared<PointerType>(recordTypeDef);
+        if (*replacementType == *pointerToRecord) {
+            replacementType = pointerToByte;
+        } else {
+            replacementType =
+                replacementType->replaceType(pointerToRecord, pointerToByte);
+        }
+        std::vector<std::shared_ptr<const Type>> visitedTypes;
+        if (replacementType->usesType(recordType, false, visitedTypes)) {
+            assert(isInstanceOf<FunctionPointerType>(replacementType.get()));
+            /* function pointer types may have return value or a parameter of
+             * value type */
+            replacementType = replacementType->replaceType(
+                recordTypeDef,
+                std::make_shared<PrimitiveType>("native.CStruct0"));
+        }
+    }
+    return replacementType;
+}
+
+std::vector<std::shared_ptr<const Struct>>
+Struct::shouldFieldBreakCycle(const std::shared_ptr<Field> &field) const {
+    std::vector<std::shared_ptr<const Struct>> structTypesThatShouldBeReplaced;
+    if (isAliasForType<Struct>(field->getType().get()) ||
+        isAliasForType<Union>(field->getType().get())) {
+        return structTypesThatShouldBeReplaced;
+    }
+    CycleNode baseNode(shared_from_base<Struct>(), field.get());
+    std::vector<std::shared_ptr<const Type>> visitedTypes;
+    if (field->getType()->findAllCycles(shared_from_base<Struct>(), baseNode,
+                                        visitedTypes)) {
+        /* one or more cycles were found but type of the filed should be
+         * changed if this struct has the biggest name compared to other structs
+         * in cycle that have fields of non-value type.
+         */
+        for (const auto &nextCycleNode : baseNode.cycleNodes) {
+            std::vector<std::string> namesInCycle;
+            if (hasBiggestName(nextCycleNode, namesInCycle)) {
+                structTypesThatShouldBeReplaced.push_back(nextCycleNode.s);
+            }
+        }
+    }
+    return structTypesThatShouldBeReplaced;
+}
+
 bool Struct::findAllCycles(
-    const StructOrUnion *startStructOrUnion, CycleNode &cycleNode,
+    const std::shared_ptr<const Struct> &startStruct, CycleNode &cycleNode,
     std::vector<std::shared_ptr<const Type>> &visitedTypes) const {
-    return StructOrUnion::findAllCycles(startStructOrUnion, cycleNode,
-                                        visitedTypes);
+    if (this == startStruct.get()) {
+        return true;
+    }
+    /* visitedTypes check is ignored because it is not necessary to save Struct
+     * and Union types in visitedTypes if it is done for TypeDefs (Struct and
+     * Union types can be references only through TypeDefs) */
+    bool belongsToCycle = false;
+    for (const auto &field : fields) {
+        CycleNode newCycleNode(shared_from_base<Struct>(), field.get());
+        if (field->getType()->findAllCycles(startStruct, newCycleNode,
+                                            visitedTypes)) {
+            if (isAliasForType<Struct>(field->getType().get()) ||
+                isAliasForType<Union>(field->getType().get())) {
+                /* cycles cannot be broken on value type fields */
+                newCycleNode.isValueType = true;
+            }
+            belongsToCycle = true;
+            cycleNode.cycleNodes.push_back(newCycleNode);
+        }
+    }
+    return belongsToCycle;
+}
+
+bool Struct::hasBiggestName(const CycleNode &node,
+                            std::vector<std::string> namesInCycle) const {
+    if (!node.isValueType) {
+        namesInCycle.push_back(node.s->getTypeAlias());
+    }
+    if (node.cycleNodes.empty()) {
+        std::sort(namesInCycle.begin(), namesInCycle.end());
+        return getTypeAlias() >= namesInCycle.back();
+    }
+    for (const auto &cycleNode : node.cycleNodes) {
+        if (hasBiggestName(cycleNode, namesInCycle)) {
+            return true;
+        }
+    }
+    return false;
 }
 
 Union::Union(std::string name, std::vector<std::shared_ptr<Field>> fields,
@@ -408,19 +439,7 @@ bool Union::usesType(
     if (ArrayType::usesType(type, stopOnTypeDefs, visitedTypes)) {
         return true;
     }
+    visitedTypes.pop_back();
 
-    bool result = StructOrUnion::usesType(type, stopOnTypeDefs, visitedTypes);
-    if (!result) {
-        /* current Union instance should not be in the path to search
-         * type */
-        visitedTypes.pop_back();
-    }
-    return result;
-}
-
-bool Union::findAllCycles(
-    const StructOrUnion *startStructOrUnion, CycleNode &cycleNode,
-    std::vector<std::shared_ptr<const Type>> &visitedTypes) const {
-    return StructOrUnion::findAllCycles(startStructOrUnion, cycleNode,
-                                        visitedTypes);
+    return StructOrUnion::usesType(type, stopOnTypeDefs, visitedTypes);
 }

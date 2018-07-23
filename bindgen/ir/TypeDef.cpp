@@ -61,14 +61,36 @@ bool TypeDef::operator==(const Type &other) const {
 std::shared_ptr<Location> TypeDef::getLocation() const { return location; }
 
 bool TypeDef::findAllCycles(
-    const StructOrUnion *startStructOrUnion, CycleNode &cycleNode,
+    const std::shared_ptr<const Struct> &startStruct, CycleNode &cycleNode,
     std::vector<std::shared_ptr<const Type>> &visitedTypes) const {
     if (contains(this, visitedTypes) || !type) {
         return false;
     }
     visitedTypes.push_back(shared_from_this());
-    bool result =
-        type->findAllCycles(startStructOrUnion, cycleNode, visitedTypes);
+    bool result = type->findAllCycles(startStruct, cycleNode, visitedTypes);
     visitedTypes.pop_back();
     return result;
+}
+
+std::shared_ptr<const Type> TypeDef::unrollTypedefs() const {
+    if (!type || isInstanceOf<Struct>(type.get()) ||
+        isInstanceOf<Union>(type.get()) || isInstanceOf<Enum>(type.get())) {
+        return std::make_shared<TypeDef>(name, type, nullptr);
+    }
+    return type->unrollTypedefs();
+}
+
+std::shared_ptr<const Type>
+TypeDef::replaceType(const std::shared_ptr<const Type> &type,
+                     const std::shared_ptr<const Type> &replacement) const {
+    if (!this->type || isInstanceOf<Struct>(this->type.get()) ||
+        isInstanceOf<Union>(this->type.get()) ||
+        isInstanceOf<Enum>(this->type.get())) {
+        return std::make_shared<TypeDef>(name, this->type, nullptr);
+    }
+    if (*this->type == *type) {
+        return std::make_shared<TypeDef>(name, replacement, nullptr);
+    }
+    return std::make_shared<TypeDef>(
+        name, this->type->replaceType(type, replacement), nullptr);
 }

@@ -37,14 +37,28 @@ bool PointerType::operator==(const Type &other) const {
 }
 
 bool PointerType::findAllCycles(
-    const StructOrUnion *startStructOrUnion, CycleNode &cycleNode,
+    const std::shared_ptr<const Struct> &startStruct, CycleNode &cycleNode,
     std::vector<std::shared_ptr<const Type>> &visitedTypes) const {
     if (contains(this, visitedTypes)) {
         return false;
     }
     visitedTypes.push_back(shared_from_this());
     bool result =
-        this->type->findAllCycles(startStructOrUnion, cycleNode, visitedTypes);
+        this->type->findAllCycles(startStruct, cycleNode, visitedTypes);
     visitedTypes.pop_back();
     return result;
+}
+
+std::shared_ptr<const Type> PointerType::unrollTypedefs() const {
+    return std::make_shared<PointerType>(type->unrollTypedefs());
+}
+
+std::shared_ptr<const Type>
+PointerType::replaceType(const std::shared_ptr<const Type> &type,
+                         const std::shared_ptr<const Type> &replacement) const {
+    if (*this->type == *type) {
+        return std::make_shared<PointerType>(replacement);
+    }
+    return std::make_shared<PointerType>(
+        this->type->replaceType(type, replacement));
 }

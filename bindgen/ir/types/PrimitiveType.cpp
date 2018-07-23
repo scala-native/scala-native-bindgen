@@ -24,3 +24,13 @@ bool PrimitiveType::operator==(const Type &other) const {
     }
     return false;
 }
+
+std::shared_ptr<const Type> PrimitiveType::unrollTypedefs() const {
+    return std::make_shared<PrimitiveType>(type);
+}
+
+std::shared_ptr<const Type> PrimitiveType::replaceType(
+    const std::shared_ptr<const Type> &type,
+    const std::shared_ptr<const Type> &replacement) const {
+    return shared_from_this();
+}

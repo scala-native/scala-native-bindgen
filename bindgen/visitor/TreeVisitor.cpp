@@ -93,7 +93,7 @@ void TreeVisitor::handleUnion(clang::RecordDecl *record, std::string name) {
     for (const clang::FieldDecl *field : record->fields()) {
         std::string fname = field->getNameAsString();
         std::shared_ptr<Type> ftype =
-            typeTranslator.translate(field->getType(), &name);
+            typeTranslator.translate(field->getType());
 
         fields.push_back(std::make_shared<Field>(fname, ftype));
     }
@@ -124,7 +124,7 @@ void TreeVisitor::handleStruct(clang::RecordDecl *record, std::string name) {
             isBitFieldStruct = true;
         }
         std::shared_ptr<Type> ftype =
-            typeTranslator.translate(field->getType(), &name);
+            typeTranslator.translate(field->getType());
         uint64_t recordOffsetInBits =
             recordLayout.getFieldOffset(field->getFieldIndex());
         fields.push_back(std::make_shared<Field>(field->getNameAsString(),

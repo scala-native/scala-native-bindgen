@@ -73,8 +73,6 @@ add_executable(bindgen
   ir/Location.cpp
   ir/LocationManager.h
   ir/LocationManager.cpp
-  ir/CycleNode.cpp
-  ir/CycleNode.h
 )
 
 if (STATIC_LINKING)

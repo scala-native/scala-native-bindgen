@@ -6,9 +6,7 @@
 #include <llvm/Support/raw_ostream.h>
 #include <string>
 
-class TypeDef : public TypeAndName,
-                public Type,
-                public std::enable_shared_from_this<TypeDef> {
+class TypeDef : public TypeAndName, public Type {
   public:
     TypeDef(std::string name, std::shared_ptr<const Type> type,
             std::shared_ptr<Location> location);
@@ -27,8 +25,14 @@ class TypeDef : public TypeAndName,
     std::shared_ptr<Location> getLocation() const;
 
     bool findAllCycles(
-        const StructOrUnion *startStructOrUnion, CycleNode &cycleNode,
+        const std::shared_ptr<const Struct> &startStruct, CycleNode &cycleNode,
         std::vector<std::shared_ptr<const Type>> &visitedTypes) const override;
+
+    std::shared_ptr<const Type> unrollTypedefs() const override;
+
+    std::shared_ptr<const Type>
+    replaceType(const std::shared_ptr<const Type> &type,
+                const std::shared_ptr<const Type> &replacement) const override;
 
   private:
     /**
