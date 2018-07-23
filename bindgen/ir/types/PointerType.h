@@ -7,8 +7,6 @@ class PointerType : public Type {
   public:
     explicit PointerType(std::shared_ptr<Type> type);
 
-    ~PointerType() override = default;
-
     bool usesType(const std::shared_ptr<Type> &type,
                   bool stopOnTypeDefs) const override;
 

@@ -24,7 +24,7 @@ class Field : public TypeAndName {
     uint64_t offsetInBits = 0;
 };
 
-class StructOrUnion {
+class StructOrUnion : public virtual Type {
   public:
     StructOrUnion(std::string name, std::vector<std::shared_ptr<Field>> fields,
                   std::shared_ptr<Location> location);
@@ -47,9 +47,7 @@ class StructOrUnion {
     std::shared_ptr<Location> location;
 };
 
-class Struct : public StructOrUnion,
-               public Type,
-               public std::enable_shared_from_this<Struct> {
+class Struct : public StructOrUnion {
   public:
     Struct(std::string name, std::vector<std::shared_ptr<Field>> fields,
            uint64_t typeSize, std::shared_ptr<Location> location, bool isPacked,
@@ -103,9 +101,7 @@ class Struct : public StructOrUnion,
     std::string generateGetterForArrayRepresentation(unsigned fieldIndex) const;
 };
 
-class Union : public StructOrUnion,
-              public ArrayType,
-              public std::enable_shared_from_this<Union> {
+class Union : public StructOrUnion, public ArrayType {
   public:
     Union(std::string name, std::vector<std::shared_ptr<Field>> fields,
           uint64_t maxSize, std::shared_ptr<Location> location);
