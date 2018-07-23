@@ -145,6 +145,7 @@ lazy val tools = project("tools")
 
 lazy val sbtPlugin = project("sbt-scala-native-bindgen", ScriptedPlugin)
   .dependsOn(tools)
+  .enablePlugins(BuildInfoPlugin)
   .settings(
     Keys.sbtPlugin := true,
     scriptedLaunchOpts += s"-Dplugin.version=${version.value}",
@@ -152,6 +153,14 @@ lazy val sbtPlugin = project("sbt-scala-native-bindgen", ScriptedPlugin)
       val rootDir = (ThisBuild / baseDirectory).value
       s"-Dbindgen.path=$rootDir/bindgen/target/scala-native-bindgen"
     },
+    buildInfoPackage := "org.scalanative.bindgen.sbt",
+    buildInfoKeys := Seq[BuildInfoKey](
+      version,
+      organization,
+      BuildInfoKey.map(scmInfo) {
+        case (k, v) => "projectUrl" -> v.get.browseUrl
+      }
+    ),
     publishLocal := publishLocal.dependsOn(tools / publishLocal).value
   )
 
