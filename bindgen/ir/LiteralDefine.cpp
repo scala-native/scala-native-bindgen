@@ -1,7 +1,7 @@
 #include "LiteralDefine.h"
 
 LiteralDefine::LiteralDefine(std::string name, std::string literal,
-                             std::shared_ptr<Type> type)
+                             std::shared_ptr<const Type> type)
     : Define(std::move(name)), literal(std::move(literal)), type(type) {}
 
 llvm::raw_ostream &operator<<(llvm::raw_ostream &s,

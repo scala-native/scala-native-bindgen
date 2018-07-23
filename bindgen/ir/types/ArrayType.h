@@ -5,7 +5,7 @@
 
 class ArrayType : public virtual Type {
   public:
-    ArrayType(std::shared_ptr<Type> elementsType, uint64_t size);
+    ArrayType(std::shared_ptr<const Type> elementsType, uint64_t size);
 
     bool usesType(const std::shared_ptr<Type> &type,
                   bool stopOnTypeDefs) const override;
@@ -16,7 +16,7 @@ class ArrayType : public virtual Type {
 
   private:
     const uint64_t size;
-    std::shared_ptr<Type> elementsType;
+    std::shared_ptr<const Type> elementsType;
 };
 
 #endif // SCALA_NATIVE_BINDGEN_ARRAYTYPE_H

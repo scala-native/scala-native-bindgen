@@ -64,7 +64,7 @@ static inline bool startsWith(const std::string &str,
 }
 
 template <typename T, typename PT> static inline bool isInstanceOf(PT *type) {
-    auto *p = dynamic_cast<T *>(type);
+    auto *p = dynamic_cast<const T *>(type);
     return p != nullptr;
 }
 
@@ -82,13 +82,13 @@ static inline std::string replaceChar(const std::string &str,
  * Types may be wrapper in a chain of typedefs.
  * @return true if given type is of type T or is an alias for type T.
  */
-template <typename T> static inline bool isAliasForType(Type *type) {
+template <typename T> static inline bool isAliasForType(const Type *type) {
     if (isInstanceOf<T>(type)) {
         return true;
     }
-    auto *typeDef = dynamic_cast<TypeDef *>(type);
+    auto *typeDef = dynamic_cast<const TypeDef *>(type);
     if (typeDef) {
-        return isAliasForType<T>(typeDef->getType().get());
+        return isAliasForType<const T>(typeDef->getType().get());
     }
     return false;
 }

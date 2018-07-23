@@ -43,7 +43,7 @@ TypeTranslator::translateFunctionPointer(const clang::QualType &qtpe,
         const auto *fc = inner->getAs<clang::FunctionProtoType>();
         std::shared_ptr<Type> returnType =
             translate(fc->getReturnType(), avoid);
-        std::vector<std::shared_ptr<Type>> parametersTypes;
+        std::vector<std::shared_ptr<const Type>> parametersTypes;
 
         for (const clang::QualType &param : fc->param_types()) {
             parametersTypes.push_back(translate(param, avoid));

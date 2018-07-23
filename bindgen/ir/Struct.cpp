@@ -5,10 +5,10 @@
 #include "types/PrimitiveType.h"
 #include <sstream>
 
-Field::Field(std::string name, std::shared_ptr<Type> type)
+Field::Field(std::string name, std::shared_ptr<const Type> type)
     : TypeAndName(std::move(name), std::move(type)) {}
 
-Field::Field(std::string name, std::shared_ptr<Type> type,
+Field::Field(std::string name, std::shared_ptr<const Type> type,
              uint64_t offsetInBits)
     : TypeAndName(std::move(name), std::move(type)),
       offsetInBits(offsetInBits) {}
@@ -262,7 +262,7 @@ std::string Union::generateHelperClass() const {
         if (!field->getName().empty()) {
             std::string getter = handleReservedWords(field->getName());
             std::string setter = handleReservedWords(field->getName(), "_=");
-            std::shared_ptr<Type> ftype = field->getType();
+            std::shared_ptr<const Type> ftype = field->getType();
             s << "    def " << getter << ": native.Ptr[" << ftype->str()
               << "] = p.cast[native.Ptr[" << ftype->str() << "]]\n";
 

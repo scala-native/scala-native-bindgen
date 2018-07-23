@@ -8,7 +8,7 @@
 class LiteralDefine : public Define {
   public:
     LiteralDefine(std::string name, std::string literal,
-                  std::shared_ptr<Type> type);
+                  std::shared_ptr<const Type> type);
 
     friend llvm::raw_ostream &operator<<(llvm::raw_ostream &s,
                                          const LiteralDefine &literalDefine);
@@ -17,7 +17,7 @@ class LiteralDefine : public Define {
 
   private:
     std::string literal;
-    std::shared_ptr<Type> type;
+    std::shared_ptr<const Type> type;
 };
 
 #endif // SCALA_NATIVE_BINDGEN_LITERALDEFINE_H
