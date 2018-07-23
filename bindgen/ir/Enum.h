@@ -18,7 +18,7 @@ class Enumerator {
     int64_t value;
 };
 
-class Enum : public PrimitiveType, public std::enable_shared_from_this<Enum> {
+class Enum : public PrimitiveType {
   public:
     Enum(std::string name, std::string type,
          std::vector<Enumerator> enumerators,

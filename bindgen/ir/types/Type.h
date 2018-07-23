@@ -7,10 +7,8 @@
 /**
  * Base class for types.
  */
-class Type {
+class Type : public std::enable_shared_from_this<Type> {
   public:
-    virtual ~Type() = default;
-
     virtual std::string str() const = 0;
 
     /**

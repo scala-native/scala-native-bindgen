@@ -3,11 +3,9 @@
 
 #include "Type.h"
 
-class ArrayType : public Type {
+class ArrayType : public virtual Type {
   public:
     ArrayType(std::shared_ptr<Type> elementsType, uint64_t size);
-
-    ~ArrayType() override = default;
 
     bool usesType(const std::shared_ptr<Type> &type,
                   bool stopOnTypeDefs) const override;
