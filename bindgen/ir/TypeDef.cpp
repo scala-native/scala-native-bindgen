@@ -3,7 +3,7 @@
 #include "Enum.h"
 #include "Struct.h"
 
-TypeDef::TypeDef(std::string name, std::shared_ptr<Type> type,
+TypeDef::TypeDef(std::string name, std::shared_ptr<const Type> type,
                  std::shared_ptr<Location> location)
     : TypeAndName(std::move(name), std::move(type)),
       location(std::move(location)) {}
@@ -36,7 +36,7 @@ bool TypeDef::operator==(const Type &other) const {
     if (this == &other) {
         return true;
     }
-    if (isInstanceOf<const TypeDef>(&other)) {
+    if (isInstanceOf<TypeDef>(&other)) {
         auto *typDef = dynamic_cast<const TypeDef *>(&other);
         if (name != typDef->name) {
             return false;

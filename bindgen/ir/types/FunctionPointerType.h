@@ -7,8 +7,8 @@
 class FunctionPointerType : public Type {
   public:
     FunctionPointerType(
-        std::shared_ptr<Type> returnType,
-        const std::vector<std::shared_ptr<Type>> &parametersTypes,
+        std::shared_ptr<const Type> returnType,
+        std::vector<std::shared_ptr<const Type>> &parametersTypes,
         bool isVariadic);
 
     bool usesType(const std::shared_ptr<Type> &type,
@@ -19,8 +19,8 @@ class FunctionPointerType : public Type {
     bool operator==(const Type &other) const override;
 
   private:
-    std::shared_ptr<Type> returnType;
-    std::vector<std::shared_ptr<Type>> parametersTypes;
+    std::shared_ptr<const Type> returnType;
+    std::vector<std::shared_ptr<const Type>> parametersTypes;
     bool isVariadic;
 };
 

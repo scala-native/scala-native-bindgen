@@ -11,11 +11,11 @@
  */
 class TypeAndName {
   public:
-    TypeAndName(std::string name, std::shared_ptr<Type> type);
+    TypeAndName(std::string name, std::shared_ptr<const Type> type);
 
-    std::shared_ptr<Type> getType() const;
+    std::shared_ptr<const Type> getType() const;
 
-    void setType(std::shared_ptr<Type> name);
+    void setType(std::shared_ptr<const Type> name);
 
     std::string getName() const;
 
@@ -27,7 +27,7 @@ class TypeAndName {
 
   protected:
     std::string name;
-    std::shared_ptr<Type> type;
+    std::shared_ptr<const Type> type;
 };
 
 #endif // SCALA_NATIVE_BINDGEN_TYPEANDNAME_H

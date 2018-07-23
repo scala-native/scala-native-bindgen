@@ -3,8 +3,8 @@
 #include <sstream>
 
 FunctionPointerType::FunctionPointerType(
-    std::shared_ptr<Type> returnType,
-    const std::vector<std::shared_ptr<Type>> &parametersTypes, bool isVariadic)
+    std::shared_ptr<const Type> returnType,
+    std::vector<std::shared_ptr<const Type>> &parametersTypes, bool isVariadic)
     : returnType(std::move(returnType)), parametersTypes(parametersTypes),
       isVariadic(isVariadic) {}
 
@@ -25,14 +25,13 @@ std::string FunctionPointerType::str() const {
 
 bool FunctionPointerType::usesType(const std::shared_ptr<Type> &type,
                                    bool stopOnTypeDefs) const {
-    if (*returnType == *type ||
-        returnType.get()->usesType(type, stopOnTypeDefs)) {
+    if (*returnType == *type || returnType->usesType(type, stopOnTypeDefs)) {
         return true;
     }
 
     for (const auto &parameterType : parametersTypes) {
         if (*parameterType == *type ||
-            parameterType.get()->usesType(type, stopOnTypeDefs)) {
+            parameterType->usesType(type, stopOnTypeDefs)) {
             return true;
         }
     }
@@ -43,7 +42,7 @@ bool FunctionPointerType::operator==(const Type &other) const {
     if (this == &other) {
         return true;
     }
-    if (isInstanceOf<const FunctionPointerType>(&other)) {
+    if (isInstanceOf<FunctionPointerType>(&other)) {
         auto *functionPointerType =
             dynamic_cast<const FunctionPointerType *>(&other);
         if (isVariadic != functionPointerType->isVariadic) {

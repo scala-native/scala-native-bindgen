@@ -260,8 +260,8 @@ void IR::filterTypeDefs(const std::string &excludePrefix) {
     }
 }
 
-void IR::replaceTypeInTypeDefs(std::shared_ptr<Type> oldType,
-                               std::shared_ptr<Type> newType) {
+void IR::replaceTypeInTypeDefs(std::shared_ptr<const Type> oldType,
+                               std::shared_ptr<const Type> newType) {
     for (auto &typeDef : typeDefs) {
         if (typeDef->getType() == oldType) {
             typeDef->setType(newType);
@@ -443,15 +443,15 @@ template <typename T> bool IR::inMainFile(const T &type) const {
         /* generated TypeDef */
         auto *typeDef = dynamic_cast<const TypeDef *>(&type);
         assert(typeDef);
-        Type *innerType = typeDef->getType().get();
+        const Type *innerType = typeDef->getType().get();
         if (isInstanceOf<Struct>(innerType)) {
-            return inMainFile(*dynamic_cast<Struct *>(innerType));
+            return inMainFile(*dynamic_cast<const Struct *>(innerType));
         }
         if (isInstanceOf<Union>(innerType)) {
-            return inMainFile(*dynamic_cast<Union *>(innerType));
+            return inMainFile(*dynamic_cast<const Union *>(innerType));
         }
         if (isInstanceOf<Enum>(innerType)) {
-            return inMainFile(*dynamic_cast<Enum *>(innerType));
+            return inMainFile(*dynamic_cast<const Enum *>(innerType));
         }
     }
     return location && locationManager.inMainFile(*location);

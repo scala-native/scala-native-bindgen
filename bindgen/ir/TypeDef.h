@@ -8,7 +8,7 @@
 
 class TypeDef : public TypeAndName, public Type {
   public:
-    TypeDef(std::string name, std::shared_ptr<Type> type,
+    TypeDef(std::string name, std::shared_ptr<const Type> type,
             std::shared_ptr<Location> location);
 
     friend llvm::raw_ostream &operator<<(llvm::raw_ostream &s,

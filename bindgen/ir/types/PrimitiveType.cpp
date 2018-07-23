@@ -17,8 +17,7 @@ bool PrimitiveType::operator==(const Type &other) const {
     if (this == &other) {
         return true;
     }
-    if (isInstanceOf<const PrimitiveType>(&other) &&
-        !isInstanceOf<const Enum>(&other)) {
+    if (isInstanceOf<PrimitiveType>(&other) && !isInstanceOf<Enum>(&other)) {
         auto *primitiveType = dynamic_cast<const PrimitiveType *>(&other);
         return type == primitiveType->type;
     }

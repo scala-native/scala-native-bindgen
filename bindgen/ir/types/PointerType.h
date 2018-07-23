@@ -5,7 +5,7 @@
 
 class PointerType : public Type {
   public:
-    explicit PointerType(std::shared_ptr<Type> type);
+    explicit PointerType(std::shared_ptr<const Type> type);
 
     bool usesType(const std::shared_ptr<Type> &type,
                   bool stopOnTypeDefs) const override;
@@ -15,7 +15,7 @@ class PointerType : public Type {
     bool operator==(const Type &other) const override;
 
   private:
-    std::shared_ptr<Type> type;
+    std::shared_ptr<const Type> type;
 };
 
 #endif // SCALA_NATIVE_BINDGEN_POINTERTYPE_H

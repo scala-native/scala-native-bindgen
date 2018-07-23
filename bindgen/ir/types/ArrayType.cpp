@@ -2,7 +2,7 @@
 #include "../../Utils.h"
 #include "../Struct.h"
 
-ArrayType::ArrayType(std::shared_ptr<Type> elementsType, uint64_t size)
+ArrayType::ArrayType(std::shared_ptr<const Type> elementsType, uint64_t size)
     : size(size), elementsType(std::move(elementsType)) {}
 
 std::string ArrayType::str() const {
@@ -20,8 +20,7 @@ bool ArrayType::operator==(const Type &other) const {
     if (this == &other) {
         return true;
     }
-    if (isInstanceOf<const ArrayType>(&other) &&
-        !isInstanceOf<const Union>(&other)) {
+    if (isInstanceOf<ArrayType>(&other) && !isInstanceOf<Union>(&other)) {
         auto *arrayType = dynamic_cast<const ArrayType *>(&other);
         if (size != arrayType->size) {
             return false;

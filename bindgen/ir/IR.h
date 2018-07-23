@@ -108,8 +108,8 @@ class IR {
     /**
      * Find all typedefs that use oldType and replace it with newType.
      */
-    void replaceTypeInTypeDefs(std::shared_ptr<Type> oldType,
-                               std::shared_ptr<Type> newType);
+    void replaceTypeInTypeDefs(std::shared_ptr<const Type> oldType,
+                               std::shared_ptr<const Type> newType);
 
     /**
      * @return true if given type is used only in typedefs.

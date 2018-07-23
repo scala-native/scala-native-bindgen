@@ -2,12 +2,12 @@
 #include "../Utils.h"
 #include "Struct.h"
 
-Parameter::Parameter(std::string name, std::shared_ptr<Type> type)
+Parameter::Parameter(std::string name, std::shared_ptr<const Type> type)
     : TypeAndName(std::move(name), type) {}
 
 Function::Function(const std::string &name,
                    std::vector<std::shared_ptr<Parameter>> parameters,
-                   std::shared_ptr<Type> retType, bool isVariadic)
+                   std::shared_ptr<const Type> retType, bool isVariadic)
     : name(name), scalaName(name), parameters(std::move(parameters)),
       retType(std::move(retType)), isVariadic(isVariadic) {}
 

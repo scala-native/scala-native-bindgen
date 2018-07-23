@@ -11,9 +11,10 @@
 
 class Field : public TypeAndName {
   public:
-    Field(std::string name, std::shared_ptr<Type> type);
+    Field(std::string name, std::shared_ptr<const Type> type);
 
-    Field(std::string name, std::shared_ptr<Type> type, uint64_t offsetInBits);
+    Field(std::string name, std::shared_ptr<const Type> type,
+          uint64_t offsetInBits);
 
     uint64_t getOffsetInBits() const;
 
