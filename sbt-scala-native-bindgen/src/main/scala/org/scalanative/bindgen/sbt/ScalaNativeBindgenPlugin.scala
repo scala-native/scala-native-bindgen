@@ -28,12 +28,20 @@ import org.scalanative.bindgen.Bindgen
  *
  * Keys are defined in [[ScalaNativeBindgenPlugin.autoImport]].
  *
+ *  - `nativeBindgenPath`: Path to the `scala-native-bindgen` executable.
  *  - `nativeBindgenHeader`: The C header file to read.
  *
  *  - `nativeBindgenPackage`: Package of the enclosing object.
  *    No package by default.
  *
  *  - `name in nativeBindgen`: Name of the enclosing object.
+ *
+ *  - `version in nativeBindgen`: Version of the `scala-native-bindgen`
+ *    to use when automatically downloading the executable.
+ *
+ *  - `nativeBindgenLink`: Name of library to be linked.
+ *
+ *  - `nativeBindgen`: Generate Scala Native bindings.
  *
  * @example
  * {{{
