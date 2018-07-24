@@ -12,6 +12,10 @@ To release version `x.y.z` run:
 
     > sbt -Dproject.version=x.y.z release
 
+Then build the `scala-native-bindgen` executable for both macOS and
+Linux and upload them to the GitHub release page with the suffix
+`-darwin` and `-linux`, respectively.
+
 ## License
 
 This project is distributed under the Scala license.
