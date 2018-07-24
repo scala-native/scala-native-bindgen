@@ -12,8 +12,10 @@ val Versions = new {
 
 inThisBuild(
   Def.settings(
-    organization := "org.scalanative.bindgen",
-    version := "0.2-SNAPSHOT",
+    organization := "org.scala-native.bindgen",
+    licenses := Seq(
+      "BSD 3-Clause" -> url("https://www.scala-lang.org/license/")),
+    homepage := Some(url("https://kornilova-l.github.io/scala-native-bindgen")),
     scalacOptions ++= Seq(
       "-deprecation",
       "-unchecked",
@@ -24,7 +26,20 @@ inThisBuild(
     scmInfo := Some(
       ScmInfo(url("https://github.com/kornilova-l/scala-native-bindgen"),
               "scm:git:git@github.com:kornilova-l/scala-native-bindgen.git")),
-    git.remoteRepo := scmInfo.value.get.connection.replace("scm:git:", "")
+    developers := List(
+      Developer(
+        id = "kornilova-l",
+        name = "Liudmila Kornilova",
+        email = "kornilova-l@users.noreply.github.com",
+        url = url("https://github.com/kornilova-l")
+      ),
+      Developer(
+        id = "jonas",
+        name = "Jonas Fonseca",
+        email = "jonas@users.noreply.github.com",
+        url = url("https://github.com/jonas")
+      )
+    )
   ))
 
 val root = project("scala-native-bindgen")
@@ -36,12 +51,33 @@ val root = project("scala-native-bindgen")
     sbtPlugin,
     docs
   )
+  .enablePlugins(ReleasePlugin)
+  .settings(
+    publish / skip := true,
+    releaseCrossBuild := false,
+    releaseVersionFile := target.value / "unused-version.sbt",
+    releaseProcess := {
+      import ReleaseTransformations._
+      Seq[ReleaseStep](
+        checkSnapshotDependencies,
+        setReleaseVersions(version.value),
+        runClean,
+        releaseStepCommandAndRemaining("verify"),
+        setReleaseVersion,
+        tagRelease,
+        releaseStepCommandAndRemaining("^publish"),
+        pushChanges,
+        releaseStepTask(docs / ghpagesPushSite)
+      )
+    }
+  )
 
 lazy val tests = project("tests")
   .dependsOn(tools)
   .settings(
-    fork in Test := true,
-    javaOptions in Test += {
+    publish / skip := true,
+    Test / fork := true,
+    Test / javaOptions += {
       val rootDir = (ThisBuild / baseDirectory).value
       s"-Dbindgen.path=$rootDir/bindgen/target/scala-native-bindgen"
     },
@@ -57,6 +93,7 @@ lazy val samples = project("samples")
   .in(file("tests/samples"))
   .enablePlugins(ScalaNativePlugin)
   .settings(
+    publish / skip := true,
     scalaVersion := Versions.scala211,
     libraryDependencies += "com.lihaoyi" %%% "utest" % "0.6.3" % "test",
     testFrameworks += new TestFramework("utest.runner.Framework"),
@@ -108,6 +145,7 @@ lazy val tools = project("tools")
 
 lazy val sbtPlugin = project("sbt-scala-native-bindgen", ScriptedPlugin)
   .dependsOn(tools)
+  .enablePlugins(BuildInfoPlugin)
   .settings(
     Keys.sbtPlugin := true,
     scriptedLaunchOpts += s"-Dplugin.version=${version.value}",
@@ -115,13 +153,22 @@ lazy val sbtPlugin = project("sbt-scala-native-bindgen", ScriptedPlugin)
       val rootDir = (ThisBuild / baseDirectory).value
       s"-Dbindgen.path=$rootDir/bindgen/target/scala-native-bindgen"
     },
+    buildInfoPackage := "org.scalanative.bindgen.sbt",
+    buildInfoKeys := Seq[BuildInfoKey](
+      version,
+      organization,
+      BuildInfoKey.map(scmInfo) {
+        case (k, v) => "projectUrl" -> v.get.browseUrl
+      }
+    ),
     publishLocal := publishLocal.dependsOn(tools / publishLocal).value
   )
 
 lazy val docs = project("docs")
   .enablePlugins(GhpagesPlugin, ParadoxSitePlugin, ParadoxMaterialThemePlugin)
   .settings(
-    paradoxProperties in Paradox ++= Map(
+    publish / skip := true,
+    Paradox / paradoxProperties ++= Map(
       "github.base_url" -> scmInfo.value.get.browseUrl.toString
     ),
     ParadoxMaterialThemePlugin.paradoxMaterialThemeSettings(Paradox),
@@ -134,15 +181,31 @@ lazy val docs = project("docs")
 
 def project(name: String, plugged: AutoPlugin*) = {
   val unplugged = Seq(ScriptedPlugin).filterNot(plugged.toSet)
+
   Project(id = name, base = file(name))
     .disablePlugins(unplugged: _*)
+    .enablePlugins(GitPlugin)
+    .enablePlugins(GitVersioning)
     .settings(
+      versionWithGit,
+      git.useGitDescribe := true,
+      git.remoteRepo := scmInfo.value.get.connection.replace("scm:git:", ""),
       crossSbtVersions := List(Versions.sbt013, Versions.sbt1),
       scalaVersion := {
         (pluginCrossBuild / sbtBinaryVersion).value match {
           case "0.13" => Versions.scala210
           case _      => Versions.scala212
         }
-      }
+      },
+      bintrayOrganization := Some("scala-native-bindgen"),
+      bintrayRepository := {
+        if (Keys.sbtPlugin.value) "sbt-plugins"
+        else "maven"
+      },
+      publishMavenStyle := Keys.sbtPlugin.value == false,
+      Test / publishArtifact := false
     )
 }
+
+lazy val setReleaseVersions: String => State => State =
+  v => _.put(ReleaseKeys.versions, (v, v))

@@ -1,11 +1,11 @@
 name := "test"
-organization := "org.scalanative.bindgen.sbt.test"
+organization := "org.scala-native.bindgen.sbt.test"
 enablePlugins(ScalaNativeBindgenPlugin)
 scalaVersion := "2.11.12"
 
 inConfig(Compile)(
   Def.settings(
-    nativeBindgenPath := Option(System.getProperty("bindgen.path")).map(file),
+    nativeBindgenPath := file(System.getProperty("bindgen.path")),
     nativeBindgenHeader := (resourceDirectory in Compile).value / "header.h",
     nativeBindgenPackage := Some("org.example.app"),
     nativeBindgenLink := Some("app"),
