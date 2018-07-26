@@ -33,9 +33,10 @@ void IR::addEnum(std::string name, const std::string &type,
     }
 }
 
-void IR::addStruct(std::string name, std::vector<std::shared_ptr<Field>> fields,
-                   uint64_t typeSize, std::shared_ptr<Location> location,
-                   bool isPacked, bool isBitField) {
+std::shared_ptr<TypeDef>
+IR::addStruct(std::string name, std::vector<std::shared_ptr<Field>> fields,
+              uint64_t typeSize, std::shared_ptr<Location> location,
+              bool isPacked, bool isBitField) {
     std::shared_ptr<Struct> s =
         std::make_shared<Struct>(name, std::move(fields), typeSize,
                                  std::move(location), isPacked, isBitField);
@@ -44,13 +45,16 @@ void IR::addStruct(std::string name, std::vector<std::shared_ptr<Field>> fields,
     if (typeDef) {
         /* the struct type used to be opaque type, typeDef contains nullptr */
         typeDef.get()->setType(s);
+        return typeDef;
     } else {
         typeDefs.push_back(s->generateTypeDef());
+        return typeDefs.back();
     }
 }
 
-void IR::addUnion(std::string name, std::vector<std::shared_ptr<Field>> fields,
-                  uint64_t maxSize, std::shared_ptr<Location> location) {
+std::shared_ptr<TypeDef>
+IR::addUnion(std::string name, std::vector<std::shared_ptr<Field>> fields,
+             uint64_t maxSize, std::shared_ptr<Location> location) {
     std::shared_ptr<Union> u = std::make_shared<Union>(
         name, std::move(fields), maxSize, std::move(location));
     unions.push_back(u);
@@ -58,8 +62,10 @@ void IR::addUnion(std::string name, std::vector<std::shared_ptr<Field>> fields,
     if (typeDef) {
         /* the union type used to be opaque type, typeDef contains nullptr */
         typeDef.get()->setType(u);
+        return typeDef;
     } else {
         typeDefs.push_back(u->generateTypeDef());
+        return typeDefs.back();
     }
 }
 

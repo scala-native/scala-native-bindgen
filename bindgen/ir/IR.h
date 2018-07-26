@@ -35,12 +35,14 @@ class IR {
                  std::vector<Enumerator> enumerators,
                  std::shared_ptr<Location> location);
 
-    void addStruct(std::string name, std::vector<std::shared_ptr<Field>> fields,
-                   uint64_t typeSize, std::shared_ptr<Location> location,
-                   bool isPacked, bool isBitField);
+    std::shared_ptr<TypeDef>
+    addStruct(std::string name, std::vector<std::shared_ptr<Field>> fields,
+              uint64_t typeSize, std::shared_ptr<Location> location,
+              bool isPacked, bool isBitField);
 
-    void addUnion(std::string name, std::vector<std::shared_ptr<Field>> fields,
-                  uint64_t maxSize, std::shared_ptr<Location> location);
+    std::shared_ptr<TypeDef>
+    addUnion(std::string name, std::vector<std::shared_ptr<Field>> fields,
+             uint64_t maxSize, std::shared_ptr<Location> location);
 
     void addLiteralDefine(std::string name, std::string literal,
                           std::shared_ptr<Type> type);
