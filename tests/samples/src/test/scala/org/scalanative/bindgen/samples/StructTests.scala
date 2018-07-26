@@ -53,8 +53,7 @@ object StructTests extends TestSuite {
         !anonymousStruct._2 = 42
 
         val structWithAnonymousStruct = struct_structWithAnonymousStruct()
-        val array = anonymousStruct.cast[Ptr[CArray[Byte, Nat._8]]]
-        structWithAnonymousStruct.anonymousStruct = array
+        structWithAnonymousStruct.anonymousStruct = anonymousStruct
 
         assert('a' == Struct.getCharFromAnonymousStruct(structWithAnonymousStruct))
         assert(42 == Struct.getIntFromAnonymousStruct(structWithAnonymousStruct))

@@ -11,12 +11,6 @@ class TreeVisitor : public clang::RecursiveASTVisitor<TreeVisitor> {
     TypeTranslator typeTranslator;
     IR &ir;
 
-    void handleUnion(clang::RecordDecl *record, std::string name);
-
-    void handleStruct(clang::RecordDecl *record, std::string name);
-
-    std::shared_ptr<Location> getLocation(clang::Decl *decl);
-
   public:
     TreeVisitor(clang::CompilerInstance *CI, IR &ir)
         : astContext(&(CI->getASTContext())), typeTranslator(astContext, ir),
