@@ -30,17 +30,13 @@ import org.scalanative.bindgen.Bindgen
  *
  *  - `nativeBindgenPath`: Path to the `scala-native-bindgen` executable.
  *  - `nativeBindgenHeader`: The C header file to read.
- *
  *  - `nativeBindgenPackage`: Package of the enclosing object.
  *    No package by default.
- *
  *  - `name in nativeBindgen`: Name of the enclosing object.
- *
+ *  - `target in nativeBindgen`: Output folder of the generated code.
  *  - `version in nativeBindgen`: Version of the `scala-native-bindgen`
  *    to use when automatically downloading the executable.
- *
  *  - `nativeBindgenLink`: Name of library to be linked.
- *
  *  - `nativeBindgen`: Generate Scala Native bindings.
  *
  * @example
@@ -134,8 +130,10 @@ object ScalaNativeBindgenPlugin extends AutoPlugin {
         nativeBindgenExclude := None,
         sourceGenerators += Def.task { Seq(nativeBindgen.value) },
         name in nativeBindgen := "ScalaNativeBindgen",
+        target in nativeBindgen := sourceManaged.value / "sbt-scala-native-bindgen",
         nativeBindgen := {
-          val output = sourceManaged.value / "sbt-scala-native-bindgen" / "ScalaNativeBindgen.scala"
+          val fileName = (name in nativeBindgen).value + ".scala"
+          val output = (target in nativeBindgen).value / fileName
 
           Bindgen()
             .bindgenExecutable(nativeBindgenPath.value)

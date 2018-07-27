@@ -1,1 +1,5 @@
 > check
+$ exists target/scala-2.11/src_managed/main/sbt-scala-native-bindgen/AppAPI.scala
+> set target in (Compile, nativeBindgen) := natigeBindgenCustomTarget.value
+> check
+$ exists src/main/scala/org/example/AppAPI.scala

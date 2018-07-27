@@ -13,6 +13,9 @@ inConfig(Compile)(
     name in nativeBindgen := "AppAPI"
   ))
 
+val natigeBindgenCustomTarget = SettingKey[File]("natigeBindgenCustomTarget")
+SettingKey[File]("natigeBindgenCustomTarget") := baseDirectory.value / "src/main/scala/org/example"
+
 TaskKey[Unit]("check") := {
   val file = (nativeBindgen in Compile).value
   val expected =
