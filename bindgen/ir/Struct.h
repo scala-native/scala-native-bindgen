@@ -114,6 +114,11 @@ class Union : public StructOrUnion, public ArrayType {
     bool operator==(const Type &other) const override;
 
     std::string getTypeAlias() const override;
+
+  private:
+    std::string generateGetter(const std::shared_ptr<Field> &field) const;
+
+    std::string generateSetter(const std::shared_ptr<Field> &field) const;
 };
 
 #endif // SCALA_NATIVE_BINDGEN_STRUCT_H

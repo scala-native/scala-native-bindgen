@@ -56,6 +56,13 @@ object UnionTests extends TestSuite {
                                 UnionEnums.enum_union_op_UNION_SET,
                                 null)
         assert(!unionPtr.s == null)
+
+        val struct = alloc[Union.struct_s]
+        struct.a = 10
+        Union.union_test_struct(unionPtr,
+          UnionEnums.enum_union_op_UNION_SET,
+          struct)
+        assert(unionPtr.structInUnion.a == 10)
       }
     }
 
@@ -112,6 +119,14 @@ object UnionTests extends TestSuite {
           Union.union_test_string(unionPtr,
                                   UnionEnums.enum_union_op_UNION_TEST,
                                   null) == 1)
+
+        val struct = alloc[Union.struct_s]
+        struct.a = 10
+        unionPtr.structInUnion = struct
+        assert(
+          Union.union_test_struct(unionPtr,
+            UnionEnums.enum_union_op_UNION_TEST,
+            struct) == 1)
       }
     }
   }

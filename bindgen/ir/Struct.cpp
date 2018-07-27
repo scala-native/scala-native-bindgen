@@ -260,15 +260,8 @@ std::string Union::generateHelperClass() const {
       << "(val p: native.Ptr[" << type << "]) extends AnyVal {\n";
     for (const auto &field : fields) {
         if (!field->getName().empty()) {
-            std::string getter = handleReservedWords(field->getName());
-            std::string setter = handleReservedWords(field->getName(), "_=");
-            std::shared_ptr<const Type> ftype = field->getType();
-            s << "    def " << getter << ": native.Ptr[" << ftype->str()
-              << "] = p.cast[native.Ptr[" << ftype->str() << "]]\n";
-
-            s << "    def " << setter << "(value: " << ftype->str()
-              << "): Unit = !p.cast[native.Ptr[" << ftype->str()
-              << "]] = value\n";
+            s << generateGetter(field);
+            s << generateSetter(field);
         }
     }
     s << "  }\n";
@@ -287,4 +280,23 @@ bool Union::operator==(const Type &other) const {
         return name == u->name;
     }
     return false;
+}
+
+std::string Union::generateGetter(const std::shared_ptr<Field> &field) const {
+    std::string getter = handleReservedWords(field->getName());
+    std::string ftype = field->getType()->str();
+    return "    def " + getter + ": native.Ptr[" + ftype +
+           "] = p.cast[native.Ptr[" + ftype + "]]\n";
+}
+
+std::string Union::generateSetter(const std::shared_ptr<Field> &field) const {
+    std::string setter = handleReservedWords(field->getName(), "_=");
+    std::string ftype = field->getType()->str();
+    if (isAliasForType<ArrayType>(field->getType().get()) ||
+        isAliasForType<Struct>(field->getType().get())) {
+        return "    def " + setter + "(value: native.Ptr[" + ftype +
+               "]): Unit = !p.cast[native.Ptr[" + ftype + "]] = !value\n";
+    }
+    return "    def " + setter + "(value: " + ftype +
+           "): Unit = !p.cast[native.Ptr[" + ftype + "]] = value\n";
 }
