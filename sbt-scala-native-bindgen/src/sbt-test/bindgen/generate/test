@@ -1,5 +1,10 @@
-> check
-$ exists target/scala-2.11/src_managed/main/sbt-scala-native-bindgen/AppAPI.scala
-> set target in (Compile, nativeBindgen) := natigeBindgenCustomTarget.value
-> check
-$ exists src/main/scala/org/example/AppAPI.scala
+> checkSingle
+$ exists target/scala-2.11/src_managed/main/sbt-scala-native-bindgen/stdlib.scala
+> set target in (Compile, nativeBindgen) := nativeBindgenCustomTarget.value
+> checkSingle
+$ exists src/main/scala/org/example/stdlib.scala
+> clean
+> set nativeBindings in Compile += nativeBindgenCoreBinding.value
+> checkMultiple
+$ exists src/main/scala/org/example/core.scala
+$ exists src/main/scala/org/example/stdlib.scala
