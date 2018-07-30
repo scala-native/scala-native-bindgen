@@ -19,7 +19,7 @@ class FunctionPointerType : public Type {
         const std::shared_ptr<const Struct> &startStruct, CycleNode &cycleNode,
         std::vector<std::shared_ptr<const Type>> &visitedTypes) const override;
 
-    std::string str() const override;
+    std::string str(const LocationManager &locationManager) const override;
 
     bool operator==(const Type &other) const override;
 

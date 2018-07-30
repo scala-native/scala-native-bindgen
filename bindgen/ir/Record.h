@@ -30,7 +30,8 @@ class Record : public LocatableType {
 
     virtual std::shared_ptr<TypeDef> generateTypeDef() = 0;
 
-    virtual std::string generateHelperClass() const = 0;
+    virtual std::string
+    generateHelperClass(const LocationManager &locationManager) const = 0;
 
     std::string getName() const;
 

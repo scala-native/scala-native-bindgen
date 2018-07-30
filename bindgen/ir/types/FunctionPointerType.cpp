@@ -8,18 +8,19 @@ FunctionPointerType::FunctionPointerType(
     : returnType(std::move(returnType)), parametersTypes(parametersTypes),
       isVariadic(isVariadic) {}
 
-std::string FunctionPointerType::str() const {
+std::string
+FunctionPointerType::str(const LocationManager &locationManager) const {
     std::stringstream ss;
     ss << "native.CFunctionPtr" << parametersTypes.size() << "[";
 
     for (const auto &parameterType : parametersTypes) {
-        ss << parameterType->str() << ", ";
+        ss << parameterType->str(locationManager) << ", ";
     }
 
     if (isVariadic) {
         ss << "native.CVararg, ";
     }
-    ss << returnType->str() << "]";
+    ss << returnType->str(locationManager) << "]";
     return ss.str();
 }
 

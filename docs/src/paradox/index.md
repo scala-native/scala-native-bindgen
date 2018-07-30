@@ -4,6 +4,7 @@
 
 * [Obtaining Bindgen](obtaining-bindgen/index.md)
 * [Command Line Usage](command-line-usage/index.md)
+* [Integrating Bindings](integrating-bindings/index.md)
 * [Limitations](limitations/index.md)
 * [Using Generated Bindings](using-generated-bindings/README.md)
 

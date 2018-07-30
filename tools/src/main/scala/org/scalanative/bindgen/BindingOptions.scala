@@ -36,6 +36,12 @@ sealed trait BindingOptions {
    */
   def extraArgsBefore(args: String*): BindingOptions
 
+  /**
+   * Reuse types from already generated bindings.
+   * @param config file that contains information about generated bindings.
+   */
+  def bindingConfig(config: File): BindingOptions
+
 }
 
 object BindingOptions {
@@ -51,7 +57,8 @@ object BindingOptions {
                                          excludePrefix: Option[String] = None,
                                          extraArgs: Seq[String] = Seq.empty,
                                          extraArgsBefore: Seq[String] =
-                                           Seq.empty)
+                                           Seq.empty,
+                                         bindingConfig: Option[File] = None)
       extends BindingOptions {
 
     override def link(library: String): BindingOptions = {
@@ -83,6 +90,11 @@ object BindingOptions {
       require(args.forall(_.nonEmpty),
               "All extra-args-before must be non-empty")
       copy(extraArgsBefore = extraArgsBefore ++ args)
+    }
+
+    override def bindingConfig(config: File): BindingOptions = {
+      require(config.exists(), s"Config file must exist: $config")
+      copy(bindingConfig = Some(config))
     }
 
   }

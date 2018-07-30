@@ -12,7 +12,7 @@ class Location {
     int getLineNumber() const;
 
   private:
-    std::string path;
+    std::string path; // may be empty
     int lineNumber;
 };
 

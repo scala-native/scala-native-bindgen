@@ -26,6 +26,10 @@ int main(int argc, const char *argv[]) {
     llvm::cl::opt<std::string> LinkName(
         "link", llvm::cl::cat(Category),
         llvm::cl::desc("Library to link with, e.g. -luv for libuv"));
+    llvm::cl::opt<std::string> ReuseBindingsConfig(
+        "binding-config", llvm::cl::cat(Category),
+        llvm::cl::desc("Path to a config file that contains the information "
+                       "about bindings that should be reused"));
     clang::tooling::CommonOptionsParser op(argc, argv, Category);
     clang::tooling::ClangTool Tool(op.getCompilations(),
                                    op.getSourcePathList());
@@ -61,6 +65,11 @@ int main(int argc, const char *argv[]) {
 
     std::string resolved = getRealPath(op.getSourcePathList()[0].c_str());
     LocationManager locationManager(resolved);
+
+    auto reuseBindingsConfig = ReuseBindingsConfig.getValue();
+    if (!reuseBindingsConfig.empty()) {
+        locationManager.loadConfig(reuseBindingsConfig);
+    }
 
     IR ir(libName, linkName, objectName, Package.getValue(), locationManager);
 

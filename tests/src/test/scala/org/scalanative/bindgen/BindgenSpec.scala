@@ -24,11 +24,16 @@ class BindgenSpec extends FunSpec {
       it(s"should generate bindings for ${input.getName}") {
         val testName = input.getName.replace(".h", "")
         val expected = new File(inputDirectory, testName + ".scala")
-        val options = BindingOptions(input)
+        val config   = new File(inputDirectory, testName + ".json")
+        var options = BindingOptions(input)
           .name(testName)
           .link("bindgentests")
           .packageName("org.scalanative.bindgen.samples")
           .excludePrefix("__")
+
+        if (config.exists()) {
+          options = options.bindingConfig(config)
+        }
 
         bindgen.generate(options) match {
           case Right(binding) =>

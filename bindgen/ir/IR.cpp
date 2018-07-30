@@ -87,10 +87,9 @@ void IR::addVarDefine(std::string name, std::shared_ptr<Variable> variable) {
 }
 
 bool IR::libObjEmpty() const {
-    return functions.empty() && !hasOutputtedDeclaration(typeDefs) &&
-           !hasOutputtedDeclaration(structs) &&
-           !hasOutputtedDeclaration(unions) && varDefines.empty() &&
-           variables.empty();
+    return functions.empty() && !shouldOutputType(typeDefs) &&
+           !shouldOutputType(structs) && !shouldOutputType(unions) &&
+           varDefines.empty() && variables.empty();
 }
 
 llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir) {
@@ -100,7 +99,7 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir) {
         s << "package " << ir.packageName << "\n\n";
     }
 
-    if (!ir.libObjEmpty() || ir.hasOutputtedDeclaration(ir.enums) ||
+    if (!ir.libObjEmpty() || ir.shouldOutputType(ir.enums) ||
         !ir.literalDefines.empty()) {
         s << "import scala.scalanative._\n"
           << "import scala.scalanative.native._\n\n";
@@ -123,8 +122,8 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir) {
 
     for (const auto &typeDef : ir.typeDefs) {
         visitedTypes.clear();
-        if (ir.shouldOutput(typeDef, visitedTypes)) {
-            s << *typeDef;
+        if (ir.shouldOutputTypeDef(typeDef, visitedTypes)) {
+            s << typeDef->getDefinition(ir.locationManager);
         } else if (typeDef->hasLocation() &&
                    isAliasForOpaqueType(typeDef.get()) &&
                    ir.locationManager.inMainFile(*typeDef->getLocation())) {
@@ -138,7 +137,7 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir) {
 
     for (const auto &variable : ir.variables) {
         if (!variable->hasIllegalUsageOfOpaqueType()) {
-            s << *variable;
+            s << variable->getDefinition(ir.locationManager);
         } else {
             llvm::errs() << "Error: Variable " << variable->getName()
                          << " is skipped because it has incomplete type.\n";
@@ -147,7 +146,7 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir) {
 
     for (const auto &varDefine : ir.varDefines) {
         if (!varDefine->hasIllegalUsageOfOpaqueType()) {
-            s << *varDefine;
+            s << varDefine->getDefinition(ir.locationManager);
         } else {
             llvm::errs() << "Error: Variable alias " << varDefine->getName()
                          << " is skipped because it has incomplete type.\n";
@@ -162,7 +161,7 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir) {
                             "passing structs and arrays by value.\n";
             llvm::errs().flush();
         } else {
-            s << *func;
+            s << func->getDefinition(ir.locationManager);
         }
     }
 
@@ -173,16 +172,16 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir) {
     if (!ir.literalDefines.empty()) {
         s << "object " << ir.libName << "Defines {\n";
         for (const auto &literalDefine : ir.literalDefines) {
-            s << *literalDefine;
+            s << literalDefine->getDefinition(ir.locationManager);
         }
         s << "}\n\n";
     }
 
-    if (ir.hasOutputtedDeclaration(ir.enums) || ir.hasHelperMethods()) {
+    if (ir.shouldOutputType(ir.enums) || ir.hasHelperMethods()) {
         s << "import " << objectName << "._\n\n";
     }
 
-    if (ir.hasOutputtedDeclaration(ir.enums)) {
+    if (ir.shouldOutputType(ir.enums)) {
         s << "object " << ir.libName << "Enums {\n";
 
         std::string sep = "";
@@ -203,14 +202,14 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir) {
         for (const auto &st : ir.structs) {
             visitedTypes.clear();
             if (ir.shouldOutput(st, visitedTypes) && st->hasHelperMethods()) {
-                s << "\n" << st->generateHelperClass();
+                s << "\n" << st->generateHelperClass(ir.locationManager);
             }
         }
 
         for (const auto &u : ir.unions) {
             visitedTypes.clear();
             if (ir.shouldOutput(u, visitedTypes) && u->hasHelperMethods()) {
-                s << "\n" << u->generateHelperClass();
+                s << "\n" << u->generateHelperClass(ir.locationManager);
             }
         }
 
@@ -327,7 +326,7 @@ bool IR::isTypeUsed(
     for (const auto &typeDef : typeDefs) {
         visitedTypesInner.clear();
         if (typeDef->usesType(type, false, visitedTypesInner)) {
-            if (shouldOutput(typeDef, visitedTypes)) {
+            if (shouldOutputTypeDef(typeDef, visitedTypes)) {
                 return true;
             }
         }
@@ -462,13 +461,21 @@ IR::~IR() {
 }
 
 template <typename T>
-bool IR::hasOutputtedDeclaration(
+bool IR::shouldOutputType(
     const std::vector<std::shared_ptr<T>> &declarations) const {
     std::vector<std::shared_ptr<const Type>> visitedTypes;
     for (const auto &declaration : declarations) {
         visitedTypes.clear();
-        if (shouldOutput(declaration, visitedTypes)) {
-            return true;
+        auto typeDefPointer =
+            std::dynamic_pointer_cast<const TypeDef>(declaration);
+        if (typeDefPointer) {
+            if (shouldOutputTypeDef(typeDefPointer, visitedTypes)) {
+                return true;
+            }
+        } else {
+            if (shouldOutput(declaration, visitedTypes)) {
+                return true;
+            }
         }
     }
     return false;
@@ -477,12 +484,31 @@ bool IR::hasOutputtedDeclaration(
 bool IR::shouldOutput(
     const std::shared_ptr<const LocatableType> &type,
     std::vector<std::shared_ptr<const Type>> &visitedTypes) const {
+    if (locationManager.isImported(*type->getLocation())) {
+        return false;
+    }
     if (isTypeUsed(type, visitedTypes)) {
         return true;
     }
-    if (isAliasForOpaqueType(type.get())) {
+    /* remove unused types from included files */
+    return locationManager.inMainFile(*type->getLocation());
+}
+
+bool IR::shouldOutputTypeDef(
+    const std::shared_ptr<const TypeDef> &typeDef,
+    std::vector<std::shared_ptr<const Type>> &visitedTypes) const {
+    if (isTypeUsed(typeDef, visitedTypes)) {
+        if (typeDef->wrapperForOpaqueType()) {
+            /* it is not possible to get location of this typedef
+             * so the typedef cannot be imported from other bindings */
+            return true;
+        }
+        return !locationManager.isImported(*typeDef->getLocation());
+    }
+    if (isAliasForOpaqueType(typeDef.get())) {
+        /* it does not matter where unused alias for opaque type is located */
         return false;
     }
     /* remove unused types from included files */
-    return locationManager.inMainFile(*type->getLocation());
+    return locationManager.inMainFile(*typeDef->getLocation());
 }

@@ -15,14 +15,13 @@ class TypeDef : public TypeAndName, public LocatableType {
     TypeDef(std::string name, std::shared_ptr<const Type> type,
             std::shared_ptr<Location> location);
 
-    friend llvm::raw_ostream &operator<<(llvm::raw_ostream &s,
-                                         const TypeDef &type);
+    std::string getDefinition(const LocationManager &locationManager) const;
 
     bool usesType(
         const std::shared_ptr<const Type> &type, bool stopOnTypeDefs,
         std::vector<std::shared_ptr<const Type>> &visitedTypes) const override;
 
-    std::string str() const override;
+    std::string str(const LocationManager &locationManager) const override;
 
     bool operator==(const Type &other) const override;
 
@@ -30,6 +29,11 @@ class TypeDef : public TypeAndName, public LocatableType {
      * @return true if the typedef is not generated alias for opaque type.
      */
     bool hasLocation() const;
+
+    /**
+     * @return true if typedef directly references an opaque type
+     */
+    bool wrapperForOpaqueType() const;
 
     bool findAllCycles(
         const std::shared_ptr<const Struct> &startStruct, CycleNode &cycleNode,

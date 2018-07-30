@@ -10,8 +10,7 @@ class LiteralDefine : public Define {
     LiteralDefine(std::string name, std::string literal,
                   std::shared_ptr<const Type> type);
 
-    friend llvm::raw_ostream &operator<<(llvm::raw_ostream &s,
-                                         const LiteralDefine &literalDefine);
+    std::string getDefinition(const LocationManager &locationManager) const;
 
     bool usesType(const std::shared_ptr<const Type> &type, bool stopOnTypeDefs,
                   std::vector<std::shared_ptr<const Type>> &visitedTypes) const;

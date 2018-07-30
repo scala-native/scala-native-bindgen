@@ -2,6 +2,7 @@
 #include "../Utils.h"
 #include "Struct.h"
 #include "Union.h"
+#include <sstream>
 
 Parameter::Parameter(std::string name, std::shared_ptr<const Type> type)
     : TypeAndName(std::move(name), type) {}
@@ -12,24 +13,26 @@ Function::Function(const std::string &name,
     : name(name), scalaName(name), parameters(std::move(parameters)),
       retType(std::move(retType)), isVariadic(isVariadic) {}
 
-llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const Function &func) {
-    if (func.scalaName != func.name) {
-        s << "  @native.link(\"" << func.name << "\")\n";
+std::string
+Function::getDefinition(const LocationManager &locationManager) const {
+    std::stringstream s;
+    if (scalaName != name) {
+        s << "  @native.link(\"" << name << "\")\n";
     }
-    s << "  def " << handleReservedWords(func.scalaName) << "(";
+    s << "  def " << handleReservedWords(scalaName) << "(";
     std::string sep = "";
-    for (const auto &param : func.parameters) {
+    for (const auto &param : parameters) {
         s << sep << handleReservedWords(param->getName()) << ": "
-          << param->getType()->str();
+          << param->getType()->str(locationManager);
         sep = ", ";
     }
-    if (func.isVariadic) {
+    if (isVariadic) {
         /* the C Iso require at least one argument in a variadic function, so
          * the comma is fine */
-        s << ", " << func.getVarargsParameterName() << ": native.CVararg*";
+        s << ", " << getVarargsParameterName() << ": native.CVararg*";
     }
-    s << "): " << func.retType->str() << " = native.extern\n";
-    return s;
+    s << "): " << retType->str(locationManager) << " = native.extern\n";
+    return s.str();
 }
 
 bool Function::usesType(

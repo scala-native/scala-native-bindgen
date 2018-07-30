@@ -11,6 +11,8 @@ class VarDefine : public Define {
   public:
     VarDefine(std::string name, std::shared_ptr<Variable> variable);
 
+    std::string getDefinition(const LocationManager &locationManager) const;
+
     friend llvm::raw_ostream &operator<<(llvm::raw_ostream &s,
                                          const VarDefine &varDefine);
 

@@ -18,8 +18,7 @@ class Function {
              std::vector<std::shared_ptr<Parameter>> parameters,
              std::shared_ptr<const Type> retType, bool isVariadic);
 
-    friend llvm::raw_ostream &operator<<(llvm::raw_ostream &s,
-                                         const Function &func);
+    std::string getDefinition(const LocationManager &locationManager) const;
 
     bool usesType(std::shared_ptr<const Type> type, bool stopOnTypeDefs,
                   std::vector<std::shared_ptr<const Type>> &visitedTypes) const;
