@@ -31,7 +31,8 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const Function &func) {
     return s;
 }
 
-bool Function::usesType(std::shared_ptr<Type> type, bool stopOnTypeDefs) const {
+bool Function::usesType(std::shared_ptr<const Type> type,
+                        bool stopOnTypeDefs) const {
     if (*retType == *type || retType->usesType(type, stopOnTypeDefs)) {
         return true;
     }

@@ -10,8 +10,8 @@ int64_t Enumerator::getValue() { return value; }
 Enum::Enum(std::string name, std::string type,
            std::vector<Enumerator> enumerators,
            std::shared_ptr<Location> location)
-    : PrimitiveType(std::move(type)), name(std::move(name)),
-      enumerators(std::move(enumerators)), location(std::move(location)) {}
+    : PrimitiveType(std::move(type)), LocatableType(std::move(location)),
+      name(std::move(name)), enumerators(std::move(enumerators)) {}
 
 bool Enum::isAnonymous() const { return name.empty(); }
 
@@ -55,5 +55,3 @@ std::string Enum::getTypeAlias() const {
     assert(!isAnonymous());
     return "enum_" + name;
 }
-
-std::shared_ptr<Location> Enum::getLocation() const { return location; }

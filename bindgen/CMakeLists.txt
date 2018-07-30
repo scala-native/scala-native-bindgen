@@ -74,6 +74,8 @@ add_executable(bindgen
   ir/Location.cpp
   ir/LocationManager.h
   ir/LocationManager.cpp
+  ir/LocatableType.cpp
+  ir/LocatableType.h
 )
 
 if (STATIC_LINKING)

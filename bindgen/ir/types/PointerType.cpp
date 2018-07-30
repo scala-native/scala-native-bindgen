@@ -8,7 +8,7 @@ std::string PointerType::str() const {
     return "native.Ptr[" + type->str() + "]";
 }
 
-bool PointerType::usesType(const std::shared_ptr<Type> &type,
+bool PointerType::usesType(const std::shared_ptr<const Type> &type,
                            bool stopOnTypeDefs) const {
     return *this->type == *type ||
            this->type.get()->usesType(type, stopOnTypeDefs);

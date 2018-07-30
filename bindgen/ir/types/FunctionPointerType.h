@@ -11,7 +11,7 @@ class FunctionPointerType : public Type {
         std::vector<std::shared_ptr<const Type>> &parametersTypes,
         bool isVariadic);
 
-    bool usesType(const std::shared_ptr<Type> &type,
+    bool usesType(const std::shared_ptr<const Type> &type,
                   bool stopOnTypeDefs) const override;
 
     std::string str() const override;

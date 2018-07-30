@@ -18,7 +18,7 @@ class Type : public std::enable_shared_from_this<Type> {
      *                       false positives when usages if aliases for the
      *                       typedef are found.
      */
-    virtual bool usesType(const std::shared_ptr<Type> &type,
+    virtual bool usesType(const std::shared_ptr<const Type> &type,
                           bool stopOnTypeDefs) const = 0;
 
     virtual bool operator==(const Type &other) const = 0;
