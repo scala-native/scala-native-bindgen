@@ -6,7 +6,7 @@
 TypeDef::TypeDef(std::string name, std::shared_ptr<const Type> type,
                  std::shared_ptr<Location> location)
     : TypeAndName(std::move(name), std::move(type)),
-      location(std::move(location)) {}
+      LocatableType(std::move(location)) {}
 
 llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const TypeDef &typeDef) {
     s << "  type " << handleReservedWords(typeDef.name) << " = ";
@@ -19,7 +19,7 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const TypeDef &typeDef) {
     return s;
 }
 
-bool TypeDef::usesType(const std::shared_ptr<Type> &type,
+bool TypeDef::usesType(const std::shared_ptr<const Type> &type,
                        bool stopOnTypeDefs) const {
     if (stopOnTypeDefs) {
         return false;
@@ -46,4 +46,27 @@ bool TypeDef::operator==(const Type &other) const {
     return false;
 }
 
-std::shared_ptr<Location> TypeDef::getLocation() const { return location; }
+std::shared_ptr<Location> TypeDef::getLocation() const {
+    if (!type) {
+        assert(false && "This method should not be called on typedef that "
+                        "references an opaque type because location cannot be "
+                        "defined.");
+    }
+    if (location) {
+        /* if typedef is not generated */
+        return location;
+    }
+    auto structOrUnionPointer =
+        std::dynamic_pointer_cast<const StructOrUnion>(type);
+    if (structOrUnionPointer) {
+        return structOrUnionPointer->getLocation();
+    }
+    auto enumPointer = std::dynamic_pointer_cast<const Enum>(type);
+    if (enumPointer) {
+        return enumPointer->getLocation();
+    }
+    assert(false &&
+           "Generated typedef may reference only struct, union or enum");
+}
+
+bool TypeDef::hasLocation() const { return location || type; }

@@ -18,14 +18,10 @@ uint64_t Field::getOffsetInBits() const { return offsetInBits; }
 StructOrUnion::StructOrUnion(std::string name,
                              std::vector<std::shared_ptr<Field>> fields,
                              std::shared_ptr<Location> location)
-    : name(std::move(name)), fields(std::move(fields)),
-      location(std::move(location)) {}
+    : LocatableType(std::move(location)), name(std::move(name)),
+      fields(std::move(fields)) {}
 
 std::string StructOrUnion::getName() const { return name; }
-
-std::shared_ptr<Location> StructOrUnion::getLocation() const {
-    return location;
-}
 
 bool StructOrUnion::hasHelperMethods() const { return !fields.empty(); }
 
@@ -121,7 +117,7 @@ std::string Struct::str() const {
     return ss.str();
 }
 
-bool Struct::usesType(const std::shared_ptr<Type> &type,
+bool Struct::usesType(const std::shared_ptr<const Type> &type,
                       bool stopOnTypeDefs) const {
     for (const auto &field : fields) {
         if (*field->getType() == *type ||

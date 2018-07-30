@@ -116,8 +116,9 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir) {
     for (const auto &typeDef : ir.typeDefs) {
         if (ir.shouldOutput(typeDef)) {
             s << *typeDef;
-        } else if (isAliasForOpaqueType(typeDef.get()) &&
-                   ir.inMainFile(*typeDef)) {
+        } else if (typeDef->hasLocation() &&
+                   isAliasForOpaqueType(typeDef.get()) &&
+                   ir.locationManager.inMainFile(*typeDef->getLocation())) {
             llvm::errs() << "Warning: type alias " + typeDef->getName()
                          << " is skipped because it is an unused alias for "
                             "incomplete type."
@@ -271,7 +272,8 @@ void IR::replaceTypeInTypeDefs(std::shared_ptr<const Type> oldType,
 
 template <typename T>
 bool IR::isTypeUsed(const std::vector<T> &declarations,
-                    std::shared_ptr<Type> type, bool stopOnTypeDefs) const {
+                    std::shared_ptr<const Type> type,
+                    bool stopOnTypeDefs) const {
     for (const auto &decl : declarations) {
         if (decl->usesType(type, stopOnTypeDefs)) {
             return true;
@@ -280,7 +282,8 @@ bool IR::isTypeUsed(const std::vector<T> &declarations,
     return false;
 }
 
-bool IR::typeIsUsedOnlyInTypeDefs(const std::shared_ptr<Type> &type) const {
+bool IR::typeIsUsedOnlyInTypeDefs(
+    const std::shared_ptr<const Type> &type) const {
     /* varDefines are not checked here because they are simply
      * aliases for variables.*/
     return !(
@@ -289,7 +292,7 @@ bool IR::typeIsUsedOnlyInTypeDefs(const std::shared_ptr<Type> &type) const {
         isTypeUsed(literalDefines, type, true));
 }
 
-bool IR::isTypeUsed(const std::shared_ptr<Type> &type,
+bool IR::isTypeUsed(const std::shared_ptr<const Type> &type,
                     bool checkRecursively) const {
     if (checkRecursively) {
         if (isTypeUsed(functions, type, true) ||
@@ -437,26 +440,6 @@ IR::~IR() {
     varDefines.clear();
 }
 
-template <typename T> bool IR::inMainFile(const T &type) const {
-    std::shared_ptr<Location> location = type.getLocation();
-    if (!location) {
-        /* generated TypeDef */
-        auto *typeDef = dynamic_cast<const TypeDef *>(&type);
-        assert(typeDef);
-        const Type *innerType = typeDef->getType().get();
-        if (isInstanceOf<Struct>(innerType)) {
-            return inMainFile(*dynamic_cast<const Struct *>(innerType));
-        }
-        if (isInstanceOf<Union>(innerType)) {
-            return inMainFile(*dynamic_cast<const Union *>(innerType));
-        }
-        if (isInstanceOf<Enum>(innerType)) {
-            return inMainFile(*dynamic_cast<const Enum *>(innerType));
-        }
-    }
-    return location && locationManager.inMainFile(*location);
-}
-
 template <typename T>
 bool IR::hasOutputtedDeclaration(
     const std::vector<std::shared_ptr<T>> &declarations) const {
@@ -468,20 +451,13 @@ bool IR::hasOutputtedDeclaration(
     return false;
 }
 
-template <typename T>
-bool IR::shouldOutput(const std::shared_ptr<T> &type) const {
+bool IR::shouldOutput(const std::shared_ptr<const LocatableType> &type) const {
     if (isTypeUsed(type, true)) {
         return true;
     }
-    if (!inMainFile(*type)) {
-        /* remove unused types from included files */
+    if (isAliasForOpaqueType(type.get())) {
         return false;
     }
-    auto *typeDef = dynamic_cast<TypeDef *>(type.get());
-    if (typeDef) {
-        /* unused typedefs from main file are printed only if they are not
-         * aliases for an opaque type. */
-        return !isAliasForOpaqueType(typeDef);
-    }
-    return true;
+    /* remove unused types from included files */
+    return locationManager.inMainFile(*type->getLocation());
 }

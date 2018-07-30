@@ -1,6 +1,7 @@
 #ifndef SCALA_NATIVE_BINDGEN_STRUCT_H
 #define SCALA_NATIVE_BINDGEN_STRUCT_H
 
+#include "LocatableType.h"
 #include "TypeAndName.h"
 #include "TypeDef.h"
 #include "types/ArrayType.h"
@@ -25,7 +26,7 @@ class Field : public TypeAndName {
     uint64_t offsetInBits = 0;
 };
 
-class StructOrUnion : public virtual Type {
+class StructOrUnion : public LocatableType {
   public:
     StructOrUnion(std::string name, std::vector<std::shared_ptr<Field>> fields,
                   std::shared_ptr<Location> location);
@@ -36,8 +37,6 @@ class StructOrUnion : public virtual Type {
 
     std::string getName() const;
 
-    std::shared_ptr<Location> getLocation() const;
-
     virtual std::string getTypeAlias() const = 0;
 
     virtual bool hasHelperMethods() const;
@@ -45,7 +44,6 @@ class StructOrUnion : public virtual Type {
   protected:
     std::string name;
     std::vector<std::shared_ptr<Field>> fields;
-    std::shared_ptr<Location> location;
 };
 
 class Struct : public StructOrUnion {
@@ -65,7 +63,7 @@ class Struct : public StructOrUnion {
      */
     bool hasHelperMethods() const override;
 
-    bool usesType(const std::shared_ptr<Type> &type,
+    bool usesType(const std::shared_ptr<const Type> &type,
                   bool stopOnTypeDefs) const override;
 
     std::string str() const override;

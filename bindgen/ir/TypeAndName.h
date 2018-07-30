@@ -23,7 +23,8 @@ class TypeAndName {
 
     bool operator!=(const TypeAndName &other) const;
 
-    bool usesType(const std::shared_ptr<Type> &type, bool stopOnTypeDefs) const;
+    bool usesType(const std::shared_ptr<const Type> &type,
+                  bool stopOnTypeDefs) const;
 
   protected:
     std::string name;

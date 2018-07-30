@@ -7,13 +7,13 @@
 /**
  * For example native.CInt
  */
-class PrimitiveType : public Type {
+class PrimitiveType : virtual public Type {
   public:
     explicit PrimitiveType(std::string type);
 
     std::string getType() const;
 
-    bool usesType(const std::shared_ptr<Type> &type,
+    bool usesType(const std::shared_ptr<const Type> &type,
                   bool stopOnTypeDefs) const override;
 
     std::string str() const override;

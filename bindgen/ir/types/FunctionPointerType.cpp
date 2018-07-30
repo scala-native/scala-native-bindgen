@@ -23,7 +23,7 @@ std::string FunctionPointerType::str() const {
     return ss.str();
 }
 
-bool FunctionPointerType::usesType(const std::shared_ptr<Type> &type,
+bool FunctionPointerType::usesType(const std::shared_ptr<const Type> &type,
                                    bool stopOnTypeDefs) const {
     if (*returnType == *type || returnType->usesType(type, stopOnTypeDefs)) {
         return true;

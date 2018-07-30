@@ -10,7 +10,7 @@ std::string ArrayType::str() const {
            uint64ToScalaNat(size) + "]";
 }
 
-bool ArrayType::usesType(const std::shared_ptr<Type> &type,
+bool ArrayType::usesType(const std::shared_ptr<const Type> &type,
                          bool stopOnTypeDefs) const {
     return *elementsType == *type ||
            elementsType->usesType(type, stopOnTypeDefs);

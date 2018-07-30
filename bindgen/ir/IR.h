@@ -114,14 +114,15 @@ class IR {
     /**
      * @return true if given type is used only in typedefs.
      */
-    bool typeIsUsedOnlyInTypeDefs(const std::shared_ptr<Type> &type) const;
+    bool
+    typeIsUsedOnlyInTypeDefs(const std::shared_ptr<const Type> &type) const;
 
     /**
      * @param checkRecursively if this parameter is true then the method will
      * output false if the type is used only in unused types
      * @return true if type is used in one of declarations
      */
-    bool isTypeUsed(const std::shared_ptr<Type> &type,
+    bool isTypeUsed(const std::shared_ptr<const Type> &type,
                     bool checkRecursively = false) const;
 
     /**
@@ -129,7 +130,8 @@ class IR {
      */
     template <typename T>
     bool isTypeUsed(const std::vector<T> &declarations,
-                    std::shared_ptr<Type> type, bool stopOnTypeDefs) const;
+                    std::shared_ptr<const Type> type,
+                    bool stopOnTypeDefs) const;
 
     void setScalaNames();
 
@@ -146,10 +148,7 @@ class IR {
     T getDeclarationWithName(const std::vector<T> &declarations,
                              const std::string &name) const;
 
-    template <typename T> bool inMainFile(const T &type) const;
-
     /**
-     * @tparam T Enum, Struct, Union or TypeDef
      * @return true if the type will be printed.
      *         Following types are not printed:
      *         - Unused types from included headers
@@ -157,8 +156,7 @@ class IR {
      *           type (if such typedef is used then true is returned but error
      *           message is printed when bindings are generated)
      */
-    template <typename T>
-    bool shouldOutput(const std::shared_ptr<T> &type) const;
+    bool shouldOutput(const std::shared_ptr<const LocatableType> &type) const;
 
     /**
      * @tparam T Struct or Union
