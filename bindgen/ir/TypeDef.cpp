@@ -2,6 +2,7 @@
 #include "../Utils.h"
 #include "Enum.h"
 #include "Struct.h"
+#include <stdexcept>
 
 TypeDef::TypeDef(std::string name, std::shared_ptr<const Type> type,
                  std::shared_ptr<Location> location)
@@ -48,9 +49,10 @@ bool TypeDef::operator==(const Type &other) const {
 
 std::shared_ptr<Location> TypeDef::getLocation() const {
     if (!type) {
-        assert(false && "This method should not be called on typedef that "
-                        "references an opaque type because location cannot be "
-                        "defined.");
+        throw std::logic_error(
+            "TypeDef::getLocation method should not be called on typedef that "
+            "references an opaque type because location cannot be "
+            "defined.");
     }
     if (location) {
         /* if typedef is not generated */
@@ -65,8 +67,8 @@ std::shared_ptr<Location> TypeDef::getLocation() const {
     if (enumPointer) {
         return enumPointer->getLocation();
     }
-    assert(false &&
-           "Generated typedef may reference only struct, union or enum");
+    throw std::logic_error(
+        "Generated typedef may reference only struct, union or enum");
 }
 
 bool TypeDef::hasLocation() const { return location || type; }
