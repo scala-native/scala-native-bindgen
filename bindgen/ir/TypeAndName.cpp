@@ -23,8 +23,12 @@ bool TypeAndName::operator!=(const TypeAndName &other) const {
     return !(*this == other);
 }
 
-bool TypeAndName::usesType(const std::shared_ptr<const Type> &type,
-                           bool stopOnTypeDefs) const {
-    return *this->type == *type ||
-           this->type.get()->usesType(type, stopOnTypeDefs);
+bool TypeAndName::usesType(
+    const std::shared_ptr<const Type> &type, bool stopOnTypeDefs,
+    std::vector<std::shared_ptr<const Type>> &visitedTypes) const {
+    if (*this->type == *type) {
+        return true;
+    }
+    visitedTypes.clear();
+    return this->type->usesType(type, stopOnTypeDefs, visitedTypes);
 }

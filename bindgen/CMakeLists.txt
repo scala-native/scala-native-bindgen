@@ -36,7 +36,6 @@ add_executable(bindgen
   defines/DefineFinderActionFactory.h
   TypeTranslator.h
   TypeTranslator.cpp
-  CycleDetection.h
   Utils.h
   ir/IR.h
   ir/IR.cpp

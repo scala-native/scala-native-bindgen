@@ -13,8 +13,8 @@ class LiteralDefine : public Define {
     friend llvm::raw_ostream &operator<<(llvm::raw_ostream &s,
                                          const LiteralDefine &literalDefine);
 
-    bool usesType(const std::shared_ptr<const Type> &type,
-                  bool stopOnTypeDefs) const;
+    bool usesType(const std::shared_ptr<const Type> &type, bool stopOnTypeDefs,
+                  std::vector<std::shared_ptr<const Type>> &visitedTypes) const;
 
   private:
     std::string literal;

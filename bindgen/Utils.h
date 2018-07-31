@@ -109,4 +109,14 @@ static inline bool isAliasForOpaqueType(const Type *type) {
     return false;
 }
 
+static inline bool contains(const Type *type,
+                            std::vector<std::shared_ptr<const Type>> &types) {
+    for (const auto &t : types) {
+        if (*type == *t) {
+            return true;
+        }
+    }
+    return false;
+}
+
 #endif // UTILS_H

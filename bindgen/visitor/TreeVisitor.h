@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../CycleDetection.h"
 #include "../TypeTranslator.h"
 #include "../ir/IR.h"
 #include <clang/AST/RecursiveASTVisitor.h>
@@ -10,7 +9,6 @@ class TreeVisitor : public clang::RecursiveASTVisitor<TreeVisitor> {
   private:
     clang::ASTContext *astContext;
     TypeTranslator typeTranslator;
-    CycleDetection cycleDetection;
     IR &ir;
 
     void handleUnion(clang::RecordDecl *record, std::string name);
@@ -22,7 +20,7 @@ class TreeVisitor : public clang::RecursiveASTVisitor<TreeVisitor> {
   public:
     TreeVisitor(clang::CompilerInstance *CI, IR &ir)
         : astContext(&(CI->getASTContext())), typeTranslator(astContext, ir),
-          cycleDetection(typeTranslator), ir(ir) {}
+          ir(ir) {}
 
     virtual ~TreeVisitor() = default;
 
