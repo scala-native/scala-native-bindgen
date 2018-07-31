@@ -12,7 +12,8 @@ object Struct {
   type enum_pointIndex = native.CUnsignedInt
   type point_s = native.Ptr[struct_point]
   type struct_bigStruct = native.CArray[Byte, native.Nat.Digit[native.Nat._1, native.Nat.Digit[native.Nat._1, native.Nat._2]]]
-  type struct_structWithAnonymousStruct = native.CStruct2[native.CInt, native.CArray[Byte, native.Nat._8]]
+  type struct_anonymous_0 = native.CStruct2[native.CChar, native.CInt]
+  type struct_structWithAnonymousStruct = native.CStruct2[native.CInt, struct_anonymous_0]
   type struct_packedStruct = native.CStruct1[native.CChar]
   type struct_bitFieldStruct = native.CArray[Byte, native.Nat._2]
   type struct_bitFieldOffsetDivByEight = native.CArray[Byte, native.Nat._4]
@@ -111,12 +112,22 @@ object StructHelpers {
 
   def struct_bigStruct()(implicit z: native.Zone): native.Ptr[struct_bigStruct] = native.alloc[struct_bigStruct]
 
+  implicit class struct_anonymous_0_ops(val p: native.Ptr[struct_anonymous_0]) extends AnyVal {
+    def c: native.CChar = !p._1
+    def c_=(value: native.CChar): Unit = !p._1 = value
+    def i: native.CInt = !p._2
+    def i_=(value: native.CInt): Unit = !p._2 = value
+  }
+
+  def struct_anonymous_0()(implicit z: native.Zone): native.Ptr[struct_anonymous_0] = native.alloc[struct_anonymous_0]
+
   implicit class struct_structWithAnonymousStruct_ops(val p: native.Ptr[struct_structWithAnonymousStruct]) extends AnyVal {
     def a: native.CInt = !p._1
     def a_=(value: native.CInt): Unit = !p._1 = value
-    def anonymousStruct: native.Ptr[native.CArray[Byte, native.Nat._8]] = p._2
-    def anonymousStruct_=(value: native.Ptr[native.CArray[Byte, native.Nat._8]]): Unit = !p._2 = !value
+    def anonymousStruct: native.Ptr[struct_anonymous_0] = p._2
+    def anonymousStruct_=(value: native.Ptr[struct_anonymous_0]): Unit = !p._2 = !value
   }
 
   def struct_structWithAnonymousStruct()(implicit z: native.Zone): native.Ptr[struct_structWithAnonymousStruct] = native.alloc[struct_structWithAnonymousStruct]
 }
+

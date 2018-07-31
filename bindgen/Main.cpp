@@ -59,7 +59,7 @@ int main(int argc, const char *argv[]) {
         objectName = "nativeLib";
     }
 
-    char *resolved = realpath(op.getSourcePathList()[0].c_str(), nullptr);
+    std::string resolved = getRealPath(op.getSourcePathList()[0].c_str());
     LocationManager locationManager(resolved);
 
     IR ir(libName, linkName, objectName, Package.getValue(), locationManager);

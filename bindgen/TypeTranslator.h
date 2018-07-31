@@ -16,9 +16,19 @@ class TypeTranslator {
 
     std::string getTypeFromTypeMap(std::string cType);
 
+    std::shared_ptr<TypeDef> addUnionDefinition(clang::RecordDecl *record,
+                                                std::string name);
+
+    std::shared_ptr<TypeDef> addStructDefinition(clang::RecordDecl *record,
+                                                 std::string name);
+
+    std::shared_ptr<Location> getLocation(clang::Decl *decl);
+
   private:
     clang::ASTContext *ctx;
     IR &ir;
+    int anonymousStructId = 0;
+    int anonymousUnionId = 0;
 
     /**
      * Primitive types
@@ -36,4 +46,6 @@ class TypeTranslator {
 
     std::shared_ptr<Type>
     translateConstantArray(const clang::ConstantArrayType *ar);
+
+    std::shared_ptr<Type> translateEnum(const clang::QualType &type);
 };

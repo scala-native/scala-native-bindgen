@@ -1,7 +1,7 @@
 #include "TypeTranslator.h"
 #include "Utils.h"
 #include "ir/types/FunctionPointerType.h"
-#include "ir/types/PointerType.h"
+#include "clang/AST/RecordLayout.h"
 
 TypeTranslator::TypeTranslator(clang::ASTContext *ctx_, IR &ir)
     : ctx(ctx_), ir(ir), typeMap() {
@@ -106,13 +106,19 @@ TypeTranslator::translateStructOrUnionOrEnum(const clang::QualType &qtpe) {
 std::shared_ptr<Type>
 TypeTranslator::translateStructOrUnion(const clang::QualType &qtpe) {
     if (qtpe->hasUnnamedOrLocalType()) {
-        // TODO: Verify that the local part is not a problem
-        uint64_t sizeInBits = ctx->getTypeSize(qtpe);
-        assert(sizeInBits % 8 == 0);
-        return std::make_shared<ArrayType>(
-            std::make_shared<PrimitiveType>("Byte"), sizeInBits / 8);
+        if (qtpe->isStructureType()) {
+            std::string name =
+                "anonymous_" + std::to_string(anonymousStructId++);
+            clang::RecordDecl *record = qtpe->getAsStructureType()->getDecl();
+            return addStructDefinition(record, name);
+        } else if (qtpe->isUnionType()) {
+            std::string name =
+                "anonymous_" + std::to_string(anonymousUnionId++);
+            clang::RecordDecl *record = qtpe->getAsUnionType()->getDecl();
+            return addUnionDefinition(record, name);
+        }
+        return nullptr;
     }
-
     return translateStructOrUnionOrEnum(qtpe);
 }
 
@@ -144,14 +150,11 @@ std::shared_ptr<Type> TypeTranslator::translate(const clang::QualType &qtpe) {
         return translatePointer(
             tpe->getAs<clang::PointerType>()->getPointeeType());
 
-    } else if (qtpe->isStructureType()) {
-        return translateStructOrUnion(qtpe);
-
-    } else if (qtpe->isUnionType()) {
+    } else if (qtpe->isStructureType() || qtpe->isUnionType()) {
         return translateStructOrUnion(qtpe);
 
     } else if (qtpe->isEnumeralType()) {
-        return translateStructOrUnionOrEnum(qtpe);
+        return translateEnum(qtpe);
 
     } else if (qtpe->isConstantArrayType()) {
         return translateConstantArray(ctx->getAsConstantArrayType(qtpe));
@@ -175,4 +178,78 @@ std::string TypeTranslator::getTypeFromTypeMap(std::string cType) {
         return (*it).second;
     }
     return "";
+}
+
+std::shared_ptr<Location> TypeTranslator::getLocation(clang::Decl *decl) {
+    clang::SourceManager &sm = ctx->getSourceManager();
+    std::string filename = std::string(sm.getFilename(decl->getLocation()));
+    std::string path = getRealPath(filename.c_str());
+
+    unsigned lineNumber = sm.getSpellingLineNumber(decl->getLocation());
+    return std::make_shared<Location>(path, lineNumber);
+}
+
+std::shared_ptr<TypeDef>
+TypeTranslator::addUnionDefinition(clang::RecordDecl *record,
+                                   std::string name) {
+    std::vector<std::shared_ptr<Field>> fields;
+
+    for (const clang::FieldDecl *field : record->fields()) {
+        std::string fname = field->getNameAsString();
+        std::shared_ptr<Type> ftype = translate(field->getType());
+
+        fields.push_back(std::make_shared<Field>(fname, ftype));
+    }
+
+    uint64_t sizeInBits = ctx->getTypeSize(record->getTypeForDecl());
+    assert(sizeInBits % 8 == 0);
+
+    return ir.addUnion(name, std::move(fields), sizeInBits / 8,
+                       getLocation(record));
+}
+
+std::shared_ptr<TypeDef>
+TypeTranslator::addStructDefinition(clang::RecordDecl *record,
+                                    std::string name) {
+    std::string newName = "struct_" + name;
+
+    if (record->hasAttr<clang::PackedAttr>()) {
+        llvm::errs() << "Warning: struct " << name << " is packed. "
+                     << "Packed structs are not supported by Scala Native. "
+                     << "Access to fields will not work correctly.\n";
+        llvm::errs().flush();
+    }
+
+    std::vector<std::shared_ptr<Field>> fields;
+    const clang::ASTRecordLayout &recordLayout =
+        ctx->getASTRecordLayout(record);
+
+    bool isBitFieldStruct = false;
+    for (const clang::FieldDecl *field : record->fields()) {
+        if (field->isBitField()) {
+            isBitFieldStruct = true;
+        }
+        std::shared_ptr<Type> ftype = translate(field->getType());
+        uint64_t recordOffsetInBits =
+            recordLayout.getFieldOffset(field->getFieldIndex());
+        fields.push_back(std::make_shared<Field>(field->getNameAsString(),
+                                                 ftype, recordOffsetInBits));
+    }
+
+    uint64_t sizeInBits = ctx->getTypeSize(record->getTypeForDecl());
+    assert(sizeInBits % 8 == 0);
+
+    return ir.addStruct(name, std::move(fields), sizeInBits / 8,
+                        getLocation(record),
+                        record->hasAttr<clang::PackedAttr>(), isBitFieldStruct);
+}
+
+std::shared_ptr<Type>
+TypeTranslator::translateEnum(const clang::QualType &type) {
+    if (type->hasUnnamedOrLocalType()) {
+        clang::EnumDecl *enumDecl = type->getAs<clang::EnumType>()->getDecl();
+        return std::make_shared<PrimitiveType>(getTypeFromTypeMap(
+            enumDecl->getIntegerType().getUnqualifiedType().getAsString()));
+    }
+    return translateStructOrUnionOrEnum(type);
 }

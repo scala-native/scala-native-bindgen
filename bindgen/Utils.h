@@ -22,20 +22,6 @@ inline std::string uint64ToScalaNat(uint64_t v, std::string accumulator = "") {
     }
 }
 
-inline bool typeEquals(const clang::Type *tpe1, const std::string *tpe2) {
-    if (tpe1 == nullptr && tpe2 == nullptr) {
-        return true;
-    }
-    if (tpe1 == nullptr || tpe2 == nullptr) {
-        return false;
-    }
-    // TODO: What is the proper way ?
-    if (tpe1->getAsTagDecl()) {
-        return tpe1->getAsTagDecl()->getNameAsString() == *tpe2;
-    }
-    return false;
-}
-
 static std::array<std::string, 39> reserved_words = {
     {"abstract",  "case",    "catch",    "class",    "def",     "do",
      "else",      "extends", "false",    "final",    "finally", "for",
@@ -117,6 +103,19 @@ static inline bool contains(const Type *type,
         }
     }
     return false;
+}
+
+static inline std::string getRealPath(const char *filename) {
+    char *p = realpath(filename, nullptr);
+    std::string path;
+    if (p) {
+        path = p;
+        delete[] p;
+    } else {
+        // TODO: check when it happens
+        path = "";
+    }
+    return path;
 }
 
 #endif // UTILS_H
