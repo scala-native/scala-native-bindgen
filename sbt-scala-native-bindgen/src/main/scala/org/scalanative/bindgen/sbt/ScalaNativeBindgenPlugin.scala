@@ -129,12 +129,12 @@ object ScalaNativeBindgenPlugin extends AutoPlugin {
           val bindgenPath     = nativeBindgenPath.value
           val bindings        = nativeBindings.value
           val outputDirectory = (target in nativeBindgen).value
+          val logger          = streams.value.log
 
           bindings.map {
             binding =>
               val output = outputDirectory / s"${binding.name}.scala"
-
-              Bindgen()
+              val result = Bindgen()
                 .bindgenExecutable(bindgenPath)
                 .header(binding.header)
                 .name(binding.name)
@@ -142,7 +142,16 @@ object ScalaNativeBindgenPlugin extends AutoPlugin {
                 .maybe(binding.packageName, _.packageName)
                 .maybe(binding.excludePrefix, _.excludePrefix)
                 .generate()
-                .writeToFile(output)
+
+              result match {
+                case Right(bindings) =>
+                  bindings.writeToFile(output)
+                  bindings.errors.foreach(error => logger.error(error))
+                case Left(errors) =>
+                  errors.foreach(error => logger.error(error))
+                  sys.error(
+                    "scala-native-bindgen failed with non-zero exit code")
+              }
 
               output
           }
