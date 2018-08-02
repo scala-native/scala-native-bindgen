@@ -3,7 +3,8 @@ package org.scalanative.bindgen
 import java.io.File
 
 import scala.collection.immutable.Seq
-import scala.sys.process.{Process, ProcessLogger}
+import scala.io.Source
+import scala.sys.process.{Process, ProcessIO}
 
 sealed trait Bindgen {
 
@@ -65,7 +66,8 @@ object Bindgen {
                                 packageName: Option[String] = None,
                                 excludePrefix: Option[String] = None,
                                 extraArg: Seq[String] = Seq.empty,
-                                extraArgBefore: Seq[String] = Seq.empty)
+                                extraArgBefore: Seq[String] = Seq.empty,
+                                config: Option[File] = None)
       extends Bindgen {
 
     def bindgenExecutable(executable: File): Bindgen = {
@@ -129,13 +131,28 @@ object Bindgen {
         withArgs("--extra-arg-before", extraArgBefore) ++
         Seq(header.get.getAbsolutePath, "--")
 
-      var errs = Seq[String]()
+      var output = ""
+      var errs   = ""
+      val io = new ProcessIO(
+        _ => {},
+        stdout => {
+          output = Source.fromInputStream(stdout).mkString("")
+          stdout.close()
+        },
+        stderr => {
+          errs = Source.fromInputStream(stderr).mkString("")
+          stderr.close()
+        }
+      )
+      val process   = Process(cmd).run(io)
+      val exitValue = process.exitValue()
 
-      val output = Process(cmd).!!(ProcessLogger { err: String =>
-        errs :+= err
-      })
+      if (exitValue != 0) {
+        System.err.println(
+          s"Bindgen finished with exit code $exitValue.\n$errs")
+      }
 
-      new Bindings(output, errs.mkString("\n"))
+      new Bindings(output, errs)
     }
   }
 }
