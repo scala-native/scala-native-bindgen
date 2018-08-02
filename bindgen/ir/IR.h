@@ -20,7 +20,8 @@ class IR {
 
     ~IR();
 
-    void addFunction(std::string name, std::vector<Parameter *> parameters,
+    void addFunction(std::string name,
+                     std::vector<std::shared_ptr<Parameter>> parameters,
                      std::shared_ptr<Type> retType, bool isVariadic);
 
     std::shared_ptr<TypeDef> addTypeDef(std::string name,
@@ -34,12 +35,14 @@ class IR {
                  std::vector<Enumerator> enumerators,
                  std::shared_ptr<Location> location);
 
-    void addStruct(std::string name, std::vector<std::shared_ptr<Field>> fields,
-                   uint64_t typeSize, std::shared_ptr<Location> location,
-                   bool isPacked);
+    std::shared_ptr<TypeDef>
+    addStruct(std::string name, std::vector<std::shared_ptr<Field>> fields,
+              uint64_t typeSize, std::shared_ptr<Location> location,
+              bool isPacked, bool isBitField);
 
-    void addUnion(std::string name, std::vector<std::shared_ptr<Field>> fields,
-                  uint64_t maxSize, std::shared_ptr<Location> location);
+    std::shared_ptr<TypeDef>
+    addUnion(std::string name, std::vector<std::shared_ptr<Field>> fields,
+             uint64_t maxSize, std::shared_ptr<Location> location);
 
     void addLiteralDefine(std::string name, std::string literal,
                           std::shared_ptr<Type> type);
@@ -107,28 +110,29 @@ class IR {
     /**
      * Find all typedefs that use oldType and replace it with newType.
      */
-    void replaceTypeInTypeDefs(std::shared_ptr<Type> oldType,
-                               std::shared_ptr<Type> newType);
+    void replaceTypeInTypeDefs(std::shared_ptr<const Type> oldType,
+                               std::shared_ptr<const Type> newType);
 
     /**
      * @return true if given type is used only in typedefs.
      */
-    bool typeIsUsedOnlyInTypeDefs(const std::shared_ptr<Type> &type) const;
+    bool
+    typeIsUsedOnlyInTypeDefs(const std::shared_ptr<const Type> &type) const;
 
     /**
-     * @param checkRecursively if this parameter is true then the method will
-     * output false if the type is used only in unused types
-     * @return true if type is used in one of declarations
+     * @return true if type is used in one of declarations.
      */
-    bool isTypeUsed(const std::shared_ptr<Type> &type,
-                    bool checkRecursively = false) const;
+    bool
+    isTypeUsed(const std::shared_ptr<const Type> &type,
+               std::vector<std::shared_ptr<const Type>> &visitedTypes) const;
 
     /**
      * @return true if type is used in one of given declarations.
      */
     template <typename T>
     bool isTypeUsed(const std::vector<T> &declarations,
-                    std::shared_ptr<Type> type, bool stopOnTypeDefs) const;
+                    std::shared_ptr<const Type> type,
+                    bool stopOnTypeDefs) const;
 
     void setScalaNames();
 
@@ -145,15 +149,17 @@ class IR {
     T getDeclarationWithName(const std::vector<T> &declarations,
                              const std::string &name) const;
 
-    template <typename T> bool inMainFile(const T &type) const;
-
     /**
-     * @tparam T Type subclass
-     * @return true if type is in main file or it is used by declaration from
-     *         main file.
+     * @return true if the type will be printed.
+     *         Following types are not printed:
+     *         - Unused types from included headers
+     *         - Unused typedefs from main header if they reference an opaque
+     *           type (if such typedef is used then true is returned but error
+     *           message is printed when bindings are generated)
      */
-    template <typename T>
-    bool shouldOutput(const std::shared_ptr<T> &type) const;
+    bool
+    shouldOutput(const std::shared_ptr<const LocatableType> &type,
+                 std::vector<std::shared_ptr<const Type>> &visitedTypes) const;
 
     /**
      * @tparam T Struct or Union

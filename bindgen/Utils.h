@@ -1,22 +1,9 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-#include <clang/AST/AST.h>
-
 #include "ir/TypeDef.h"
 #include "ir/types/Type.h"
-#include <algorithm>
-#include <cctype>
-#include <cinttypes>
-#include <locale>
-#include <string>
-
-inline std::string basename(const std::string &pathname) {
-    return {std::find_if(pathname.rbegin(), pathname.rend(),
-                         [](char c) { return c == '/'; })
-                .base(),
-            pathname.end()};
-}
+#include <clang/AST/AST.h>
 
 inline std::string uint64ToScalaNat(uint64_t v, std::string accumulator = "") {
     if (v == 0)
@@ -35,20 +22,6 @@ inline std::string uint64ToScalaNat(uint64_t v, std::string accumulator = "") {
     }
 }
 
-inline bool typeEquals(const clang::Type *tpe1, const std::string *tpe2) {
-    if (tpe1 == nullptr && tpe2 == nullptr) {
-        return true;
-    }
-    if (tpe1 == nullptr || tpe2 == nullptr) {
-        return false;
-    }
-    // TODO: What is the proper way ?
-    if (tpe1->getAsTagDecl() && tpe2) {
-        return tpe1->getAsTagDecl()->getNameAsString() == *tpe2;
-    }
-    return false;
-}
-
 static std::array<std::string, 39> reserved_words = {
     {"abstract",  "case",    "catch",    "class",    "def",     "do",
      "else",      "extends", "false",    "final",    "finally", "for",
@@ -58,34 +31,14 @@ static std::array<std::string, 39> reserved_words = {
      "trait",     "try",     "true",     "type",     "val",     "var",
      "while",     "with",    "yield"}};
 
-inline std::string handleReservedWords(std::string name,
-                                       std::string suffix = "") {
+inline std::string handleReservedWords(const std::string &name,
+                                       const std::string &suffix = "") {
     auto found = std::find(reserved_words.begin(), reserved_words.end(), name);
     if (found != reserved_words.end()) {
         return "`" + name + suffix + "`";
     } else {
         return name + suffix;
     }
-}
-
-// trim from start (in place)
-static inline void ltrim(std::string &s) {
-    s.erase(s.begin(), std::find_if(s.begin(), s.end(),
-                                    [](int ch) { return !std::isspace(ch); }));
-}
-
-// trim from end (in place)
-static inline void rtrim(std::string &s) {
-    s.erase(std::find_if(s.rbegin(), s.rend(),
-                         [](int ch) { return !std::isspace(ch); })
-                .base(),
-            s.end());
-}
-
-// trim from both ends (in place)
-static inline void trim(std::string &s) {
-    ltrim(s);
-    rtrim(s);
 }
 
 /**
@@ -97,7 +50,7 @@ static inline bool startsWith(const std::string &str,
 }
 
 template <typename T, typename PT> static inline bool isInstanceOf(PT *type) {
-    auto *p = dynamic_cast<T *>(type);
+    auto *p = dynamic_cast<const T *>(type);
     return p != nullptr;
 }
 
@@ -115,15 +68,54 @@ static inline std::string replaceChar(const std::string &str,
  * Types may be wrapper in a chain of typedefs.
  * @return true if given type is of type T or is an alias for type T.
  */
-template <typename T> static inline bool isAliasForType(Type *type) {
+template <typename T> static inline bool isAliasForType(const Type *type) {
     if (isInstanceOf<T>(type)) {
         return true;
     }
-    auto *typeDef = dynamic_cast<TypeDef *>(type);
+    auto *typeDef = dynamic_cast<const TypeDef *>(type);
     if (typeDef) {
-        return isAliasForType<T>(typeDef->getType().get());
+        return isAliasForType<const T>(typeDef->getType().get());
     }
     return false;
+}
+
+/**
+ * @return true if typedef references opaque type directly or through a
+ * chain of typedefs.
+ */
+static inline bool isAliasForOpaqueType(const Type *type) {
+    assert(type);
+    auto *typeDef = dynamic_cast<const TypeDef *>(type);
+    if (typeDef) {
+        if (!typeDef->getType()) {
+            return true;
+        }
+        return isAliasForOpaqueType(typeDef->getType().get());
+    }
+    return false;
+}
+
+static inline bool contains(const Type *type,
+                            std::vector<std::shared_ptr<const Type>> &types) {
+    for (const auto &t : types) {
+        if (*type == *t) {
+            return true;
+        }
+    }
+    return false;
+}
+
+static inline std::string getRealPath(const char *filename) {
+    char *p = realpath(filename, nullptr);
+    std::string path;
+    if (p) {
+        path = p;
+        delete[] p;
+    } else {
+        // TODO: check when it happens
+        path = "";
+    }
+    return path;
 }
 
 #endif // UTILS_H

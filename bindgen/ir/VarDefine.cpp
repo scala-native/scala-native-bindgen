@@ -10,3 +10,7 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s,
       << varDefine.variable->getType()->str() << " = native.extern\n";
     return s;
 }
+
+bool VarDefine::hasIllegalUsageOfOpaqueType() const {
+    return variable->hasIllegalUsageOfOpaqueType();
+}

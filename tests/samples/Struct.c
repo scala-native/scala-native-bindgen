@@ -37,3 +37,34 @@ char getCharFromAnonymousStruct(struct structWithAnonymousStruct *s) {
 char getIntFromAnonymousStruct(struct structWithAnonymousStruct *s) {
     return s->anonymousStruct.i;
 }
+
+int struct_test_long(struct bigStruct *s, enum struct_op op, long value) {
+    switch (op) {
+    case STRUCT_SET:
+        s->one = value;
+        return 1;
+    case STRUCT_TEST:
+        return s->one == value;
+    }
+}
+
+int struct_test_double(struct bigStruct *s, enum struct_op op, double value) {
+    switch (op) {
+    case STRUCT_SET:
+        s->five = value;
+        return 1;
+    case STRUCT_TEST:
+        return s->five == value;
+    }
+}
+
+int struct_test_point(struct bigStruct *s, enum struct_op op,
+                      struct point *value) {
+    switch (op) {
+    case STRUCT_SET:
+        s->six = *value;
+        return 1;
+    case STRUCT_TEST:
+        return (s->six.x == value->x) && (s->six.y == value->y);
+    }
+}

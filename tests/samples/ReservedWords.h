@@ -15,7 +15,7 @@ union lazy {
     struct {
         char def;
         type *super;
-    } implicit;
+    } * implicit;
 };
 
 typedef union lazy lazy;

@@ -14,6 +14,8 @@ class VarDefine : public Define {
     friend llvm::raw_ostream &operator<<(llvm::raw_ostream &s,
                                          const VarDefine &varDefine);
 
+    bool hasIllegalUsageOfOpaqueType() const;
+
   private:
     std::shared_ptr<Variable> variable;
 };

@@ -1,5 +1,4 @@
 #include "TreeVisitor.h"
-#include <stdio.h>
 
 bool TreeVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
     if (!astContext->getSourceManager().isInMainFile(func->getLocation())) {
@@ -9,7 +8,7 @@ bool TreeVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
     std::string funcName = func->getNameInfo().getName().getAsString();
     std::shared_ptr<Type> retType =
         typeTranslator.translate(func->getReturnType());
-    std::vector<Parameter *> parameters;
+    std::vector<std::shared_ptr<Parameter>> parameters;
 
     int anonCounter = 0;
 
@@ -22,7 +21,7 @@ bool TreeVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
         }
 
         std::shared_ptr<Type> ptype = typeTranslator.translate(parm->getType());
-        parameters.emplace_back(new Parameter(pname, ptype));
+        parameters.emplace_back(std::make_shared<Parameter>(pname, ptype));
     }
 
     ir.addFunction(funcName, std::move(parameters), retType,
@@ -34,21 +33,10 @@ bool TreeVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
 bool TreeVisitor::VisitTypedefDecl(clang::TypedefDecl *tpdef) {
     std::string name = tpdef->getName();
 
-    cycleDetection.AddDependency(name, tpdef->getUnderlyingType());
-    if (cycleDetection.isCyclic(name)) {
-        llvm::errs() << "Error: " << name << " is cyclic\n";
-        llvm::errs() << name << "\n";
-        for (auto &s : cycleDetection.dependencies[name]) {
-            llvm::errs() << "\t" << s << "\n";
-        }
-        llvm::errs() << cycleDetection.isCyclic(name) << "\n";
-        llvm::errs().flush();
-    }
-
     std::shared_ptr<Type> type =
         typeTranslator.translate(tpdef->getUnderlyingType());
     if (type) {
-        ir.addTypeDef(name, type, getLocation(tpdef));
+        ir.addTypeDef(name, type, typeTranslator.getLocation(tpdef));
     }
     return true;
 }
@@ -70,7 +58,8 @@ bool TreeVisitor::VisitEnumDecl(clang::EnumDecl *enumdecl) {
     std::string scalaType = typeTranslator.getTypeFromTypeMap(
         enumdecl->getIntegerType().getUnqualifiedType().getAsString());
 
-    ir.addEnum(name, scalaType, std::move(enumerators), getLocation(enumdecl));
+    ir.addEnum(name, scalaType, std::move(enumerators),
+               typeTranslator.getLocation(enumdecl));
 
     return true;
 }
@@ -87,70 +76,15 @@ bool TreeVisitor::VisitRecordDecl(clang::RecordDecl *record) {
 
     if (record->isUnion() && record->isThisDeclarationADefinition() &&
         !record->isAnonymousStructOrUnion() && !name.empty()) {
-        handleUnion(record, name);
+        typeTranslator.addUnionDefinition(record, name);
         return true;
 
     } else if (record->isStruct() && record->isThisDeclarationADefinition() &&
                !record->isAnonymousStructOrUnion() && !name.empty()) {
-        handleStruct(record, name);
+        typeTranslator.addStructDefinition(record, name);
         return true;
     }
     return false;
-}
-
-void TreeVisitor::handleUnion(clang::RecordDecl *record, std::string name) {
-    std::vector<std::shared_ptr<Field>> fields;
-
-    for (const clang::FieldDecl *field : record->fields()) {
-        std::string fname = field->getNameAsString();
-        std::shared_ptr<Type> ftype =
-            typeTranslator.translate(field->getType(), &name);
-
-        fields.push_back(std::make_shared<Field>(fname, ftype));
-    }
-
-    uint64_t sizeInBits = astContext->getTypeSize(record->getTypeForDecl());
-    assert(sizeInBits % 8 == 0);
-
-    ir.addUnion(name, std::move(fields), sizeInBits / 8, getLocation(record));
-}
-
-void TreeVisitor::handleStruct(clang::RecordDecl *record, std::string name) {
-    std::string newName = "struct_" + name;
-
-    if (record->hasAttr<clang::PackedAttr>()) {
-        llvm::errs() << "Warning: struct " << name << " is packed. "
-                     << "Packed structs are not supported by Scala Native. "
-                     << "Access to fields will not work correctly.\n";
-        llvm::errs().flush();
-    }
-
-    std::vector<std::shared_ptr<Field>> fields;
-
-    for (const clang::FieldDecl *field : record->fields()) {
-        std::shared_ptr<Type> ftype =
-            typeTranslator.translate(field->getType(), &name);
-        fields.push_back(
-            std::make_shared<Field>(field->getNameAsString(), ftype));
-
-        cycleDetection.AddDependency(newName, field->getType());
-    }
-
-    if (cycleDetection.isCyclic(newName)) {
-        llvm::errs() << "Error: " << newName << " is cyclic\n";
-        llvm::errs() << newName << "\n";
-        for (auto &s : cycleDetection.dependencies[newName]) {
-            llvm::errs() << "\t" << s << "\n";
-        }
-        llvm::errs() << cycleDetection.isCyclic(newName) << "\n";
-        llvm::errs().flush();
-    }
-
-    uint64_t sizeInBits = astContext->getTypeSize(record->getTypeForDecl());
-    assert(sizeInBits % 8 == 0);
-
-    ir.addStruct(name, std::move(fields), sizeInBits / 8, getLocation(record),
-                 record->hasAttr<clang::PackedAttr>());
 }
 
 bool TreeVisitor::VisitVarDecl(clang::VarDecl *varDecl) {
@@ -171,21 +105,4 @@ bool TreeVisitor::VisitVarDecl(clang::VarDecl *varDecl) {
         }
     }
     return true;
-}
-
-std::shared_ptr<Location> TreeVisitor::getLocation(clang::Decl *decl) {
-    clang::SourceManager &sm = astContext->getSourceManager();
-    std::string filename = std::string(sm.getFilename(decl->getLocation()));
-    char *p = realpath(filename.c_str(), nullptr);
-    std::string path;
-    if (p) {
-        path = p;
-        delete[] p;
-    } else {
-        // TODO: check when it happens
-        path = "";
-    }
-
-    unsigned lineNumber = sm.getSpellingLineNumber(decl->getLocation());
-    return std::make_shared<Location>(path, lineNumber);
 }

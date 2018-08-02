@@ -26,8 +26,8 @@ struct bigStruct {
     int three;
     float four;
     double five;
-    point_s six;
-    int seven;
+    struct point six;
+    struct point *seven;
     int eight;
     int nine;
     int ten;
@@ -60,6 +60,26 @@ struct __attribute__((__packed__)) packedStruct { // no helper methods
     char a;
 };
 
+struct bitFieldStruct { // no helper methods
+    unsigned char b1 : 3;
+    unsigned char : 0; // start a new byte
+    unsigned char b2 : 6;
+    unsigned char b3 : 2;
+};
+
+struct bitFieldOffsetDivByEight { // no helper methods
+    unsigned b1 : 8;
+    unsigned b2 : 8;
+    unsigned char b3 : 8;
+};
+
 char getCharFromAnonymousStruct(struct structWithAnonymousStruct *s);
 
 char getIntFromAnonymousStruct(struct structWithAnonymousStruct *s);
+
+enum struct_op { STRUCT_SET, STRUCT_TEST };
+
+int struct_test_long(struct bigStruct *s, enum struct_op op, long value);
+int struct_test_double(struct bigStruct *s, enum struct_op op, double value);
+int struct_test_point(struct bigStruct *s, enum struct_op op,
+                      struct point *value);

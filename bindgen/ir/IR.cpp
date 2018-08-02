@@ -7,7 +7,8 @@ IR::IR(std::string libName, std::string linkName, std::string objectName,
       objectName(std::move(objectName)), locationManager(locationManager),
       packageName(std::move(packageName)) {}
 
-void IR::addFunction(std::string name, std::vector<Parameter *> parameters,
+void IR::addFunction(std::string name,
+                     std::vector<std::shared_ptr<Parameter>> parameters,
                      std::shared_ptr<Type> retType, bool isVariadic) {
     functions.push_back(std::make_shared<Function>(name, std::move(parameters),
                                                    retType, isVariadic));
@@ -32,23 +33,28 @@ void IR::addEnum(std::string name, const std::string &type,
     }
 }
 
-void IR::addStruct(std::string name, std::vector<std::shared_ptr<Field>> fields,
-                   uint64_t typeSize, std::shared_ptr<Location> location,
-                   bool isPacked) {
-    std::shared_ptr<Struct> s = std::make_shared<Struct>(
-        name, std::move(fields), typeSize, std::move(location), isPacked);
+std::shared_ptr<TypeDef>
+IR::addStruct(std::string name, std::vector<std::shared_ptr<Field>> fields,
+              uint64_t typeSize, std::shared_ptr<Location> location,
+              bool isPacked, bool isBitField) {
+    std::shared_ptr<Struct> s =
+        std::make_shared<Struct>(name, std::move(fields), typeSize,
+                                 std::move(location), isPacked, isBitField);
     structs.push_back(s);
     std::shared_ptr<TypeDef> typeDef = getTypeDefWithName("struct_" + name);
     if (typeDef) {
         /* the struct type used to be opaque type, typeDef contains nullptr */
         typeDef.get()->setType(s);
+        return typeDef;
     } else {
         typeDefs.push_back(s->generateTypeDef());
+        return typeDefs.back();
     }
 }
 
-void IR::addUnion(std::string name, std::vector<std::shared_ptr<Field>> fields,
-                  uint64_t maxSize, std::shared_ptr<Location> location) {
+std::shared_ptr<TypeDef>
+IR::addUnion(std::string name, std::vector<std::shared_ptr<Field>> fields,
+             uint64_t maxSize, std::shared_ptr<Location> location) {
     std::shared_ptr<Union> u = std::make_shared<Union>(
         name, std::move(fields), maxSize, std::move(location));
     unions.push_back(u);
@@ -56,8 +62,10 @@ void IR::addUnion(std::string name, std::vector<std::shared_ptr<Field>> fields,
     if (typeDef) {
         /* the union type used to be opaque type, typeDef contains nullptr */
         typeDef.get()->setType(u);
+        return typeDef;
     } else {
         typeDefs.push_back(u->generateTypeDef());
+        return typeDefs.back();
     }
 }
 
@@ -100,40 +108,65 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir) {
 
     std::string objectName = handleReservedWords(ir.objectName);
 
-    if (!ir.libObjEmpty()) {
+    bool isLibObjectEmpty = ir.libObjEmpty();
+
+    if (!isLibObjectEmpty) {
         if (!ir.linkName.empty()) {
             s << "@native.link(\"" << ir.linkName << "\")\n";
         }
 
         s << "@native.extern\n"
           << "object " << objectName << " {\n";
+    }
 
-        for (const auto &typeDef : ir.typeDefs) {
-            if (ir.shouldOutput(typeDef)) {
-                s << *typeDef;
-            }
+    std::vector<std::shared_ptr<const Type>> visitedTypes;
+
+    for (const auto &typeDef : ir.typeDefs) {
+        visitedTypes.clear();
+        if (ir.shouldOutput(typeDef, visitedTypes)) {
+            s << *typeDef;
+        } else if (typeDef->hasLocation() &&
+                   isAliasForOpaqueType(typeDef.get()) &&
+                   ir.locationManager.inMainFile(*typeDef->getLocation())) {
+            llvm::errs() << "Warning: type alias " + typeDef->getName()
+                         << " is skipped because it is an unused alias for "
+                            "incomplete type."
+                         << "\n";
+            llvm::errs().flush();
         }
+    }
 
-        for (const auto &variable : ir.variables) {
+    for (const auto &variable : ir.variables) {
+        if (!variable->hasIllegalUsageOfOpaqueType()) {
             s << *variable;
+        } else {
+            llvm::errs() << "Error: Variable " << variable->getName()
+                         << " is skipped because it has incomplete type.\n";
         }
+    }
 
-        for (const auto &varDefine : ir.varDefines) {
+    for (const auto &varDefine : ir.varDefines) {
+        if (!varDefine->hasIllegalUsageOfOpaqueType()) {
             s << *varDefine;
+        } else {
+            llvm::errs() << "Error: Variable alias " << varDefine->getName()
+                         << " is skipped because it has incomplete type.\n";
+            llvm::errs().flush();
         }
+    }
 
-        for (const auto &func : ir.functions) {
-            if (func->isLegalScalaNativeFunction()) {
-                s << *func;
-            } else {
-                llvm::errs()
-                    << "Warning: Function " << func->getName()
-                    << " is skipped because Scala Native does not support "
-                       "passing structs and arrays by value.\n";
-                llvm::errs().flush();
-            }
+    for (const auto &func : ir.functions) {
+        if (!func->isLegalScalaNativeFunction()) {
+            llvm::errs() << "Warning: Function " << func->getName()
+                         << " is skipped because Scala Native does not support "
+                            "passing structs and arrays by value.\n";
+            llvm::errs().flush();
+        } else {
+            s << *func;
         }
+    }
 
+    if (!isLibObjectEmpty) {
         s << "}\n\n";
     }
 
@@ -154,7 +187,8 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir) {
 
         std::string sep = "";
         for (const auto &e : ir.enums) {
-            if (ir.shouldOutput(e)) {
+            visitedTypes.clear();
+            if (ir.shouldOutput(e, visitedTypes)) {
                 s << sep << *e;
                 sep = "\n";
             }
@@ -167,13 +201,15 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir) {
         s << "object " << ir.libName << "Helpers {\n";
 
         for (const auto &st : ir.structs) {
-            if (ir.shouldOutput(st) && st->hasHelperMethods()) {
+            visitedTypes.clear();
+            if (ir.shouldOutput(st, visitedTypes) && st->hasHelperMethods()) {
                 s << "\n" << st->generateHelperClass();
             }
         }
 
         for (const auto &u : ir.unions) {
-            if (ir.shouldOutput(u)) {
+            visitedTypes.clear();
+            if (ir.shouldOutput(u, visitedTypes) && u->hasHelperMethods()) {
                 s << "\n" << u->generateHelperClass();
             }
         }
@@ -193,13 +229,17 @@ void IR::generate(const std::string &excludePrefix) {
 }
 
 bool IR::hasHelperMethods() const {
-    if (hasOutputtedDeclaration(unions)) {
-        /* all unions have helper methods */
-        return true;
+    std::vector<std::shared_ptr<const Type>> visitedTypes;
+    for (const auto &u : unions) {
+        visitedTypes.clear();
+        if (shouldOutput(u, visitedTypes) && u->hasHelperMethods()) {
+            return true;
+        }
     }
 
     for (const auto &s : structs) {
-        if (shouldOutput(s) && s->hasHelperMethods()) {
+        visitedTypes.clear();
+        if (shouldOutput(s, visitedTypes) && s->hasHelperMethods()) {
             return true;
         }
     }
@@ -236,8 +276,8 @@ void IR::filterTypeDefs(const std::string &excludePrefix) {
     }
 }
 
-void IR::replaceTypeInTypeDefs(std::shared_ptr<Type> oldType,
-                               std::shared_ptr<Type> newType) {
+void IR::replaceTypeInTypeDefs(std::shared_ptr<const Type> oldType,
+                               std::shared_ptr<const Type> newType) {
     for (auto &typeDef : typeDefs) {
         if (typeDef->getType() == oldType) {
             typeDef->setType(newType);
@@ -247,16 +287,20 @@ void IR::replaceTypeInTypeDefs(std::shared_ptr<Type> oldType,
 
 template <typename T>
 bool IR::isTypeUsed(const std::vector<T> &declarations,
-                    std::shared_ptr<Type> type, bool stopOnTypeDefs) const {
+                    std::shared_ptr<const Type> type,
+                    bool stopOnTypeDefs) const {
+    std::vector<std::shared_ptr<const Type>> visitedTypes;
     for (const auto &decl : declarations) {
-        if (decl->usesType(type, stopOnTypeDefs)) {
+        visitedTypes.clear();
+        if (decl->usesType(type, stopOnTypeDefs, visitedTypes)) {
             return true;
         }
     }
     return false;
 }
 
-bool IR::typeIsUsedOnlyInTypeDefs(const std::shared_ptr<Type> &type) const {
+bool IR::typeIsUsedOnlyInTypeDefs(
+    const std::shared_ptr<const Type> &type) const {
     /* varDefines are not checked here because they are simply
      * aliases for variables.*/
     return !(
@@ -265,46 +309,50 @@ bool IR::typeIsUsedOnlyInTypeDefs(const std::shared_ptr<Type> &type) const {
         isTypeUsed(literalDefines, type, true));
 }
 
-bool IR::isTypeUsed(const std::shared_ptr<Type> &type,
-                    bool checkRecursively) const {
-    if (checkRecursively) {
-        if (isTypeUsed(functions, type, true) ||
-            isTypeUsed(variables, type, true) ||
-            isTypeUsed(literalDefines, type, true)) {
-            return true;
-        }
-        /* type is used if there exists another type that is used and that
-         * references this type */
-        for (const auto &typeDef : typeDefs) {
-            if (typeDef->usesType(type, false)) {
-                if (shouldOutput(typeDef)) {
-                    return true;
-                }
-            }
-        }
-        for (const auto &s : structs) {
-            /* stopOnTypeDefs parameter is true because because typedefs were
-             * checked */
-            if (s->usesType(type, true)) {
-                if (shouldOutput(s)) {
-                    return true;
-                }
-            }
-        }
-        for (const auto &u : unions) {
-            /* stopOnTypeDefs parameter is true because because typedefs were
-             * checked */
-            if (u->usesType(type, true)) {
-                if (shouldOutput(u)) {
-                    return true;
-                }
-            }
-        }
+bool IR::isTypeUsed(
+    const std::shared_ptr<const Type> &type,
+    std::vector<std::shared_ptr<const Type>> &visitedTypes) const {
+    if (contains(type.get(), visitedTypes)) {
         return false;
-    } else {
-        return !(typeIsUsedOnlyInTypeDefs(type) &&
-                 !isTypeUsed(typeDefs, type, false));
     }
+    visitedTypes.push_back(type);
+    if (isTypeUsed(functions, type, true) ||
+        isTypeUsed(variables, type, true) ||
+        isTypeUsed(literalDefines, type, true)) {
+        return true;
+    }
+    /* type is used if there exists another type that is used and that
+     * references this type */
+    std::vector<std::shared_ptr<const Type>> visitedTypesInner;
+    for (const auto &typeDef : typeDefs) {
+        visitedTypesInner.clear();
+        if (typeDef->usesType(type, false, visitedTypesInner)) {
+            if (shouldOutput(typeDef, visitedTypes)) {
+                return true;
+            }
+        }
+    }
+    for (const auto &s : structs) {
+        /* stopOnTypeDefs parameter is true because because typedefs were
+         * checked */
+        visitedTypesInner.clear();
+        if (s->usesType(type, true, visitedTypesInner)) {
+            if (shouldOutput(s, visitedTypes)) {
+                return true;
+            }
+        }
+    }
+    for (const auto &u : unions) {
+        /* stopOnTypeDefs parameter is true because because typedefs were
+         * checked */
+        visitedTypesInner.clear();
+        if (u->usesType(type, true, visitedTypesInner)) {
+            if (shouldOutput(u, visitedTypes)) {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 void IR::setScalaNames() {
@@ -413,38 +461,28 @@ IR::~IR() {
     varDefines.clear();
 }
 
-template <typename T> bool IR::inMainFile(const T &type) const {
-    std::shared_ptr<Location> location = type.getLocation();
-    if (!location) {
-        /* generated TypeDef */
-        auto *typeDef = dynamic_cast<const TypeDef *>(&type);
-        assert(typeDef);
-        Type *innerType = typeDef->getType().get();
-        if (isInstanceOf<Struct>(innerType)) {
-            return inMainFile(*dynamic_cast<Struct *>(innerType));
-        }
-        if (isInstanceOf<Union>(innerType)) {
-            return inMainFile(*dynamic_cast<Union *>(innerType));
-        }
-        if (isInstanceOf<Enum>(innerType)) {
-            return inMainFile(*dynamic_cast<Enum *>(innerType));
-        }
-    }
-    return location && locationManager.inMainFile(*location);
-}
-
 template <typename T>
 bool IR::hasOutputtedDeclaration(
     const std::vector<std::shared_ptr<T>> &declarations) const {
+    std::vector<std::shared_ptr<const Type>> visitedTypes;
     for (const auto &declaration : declarations) {
-        if (shouldOutput(declaration)) {
+        visitedTypes.clear();
+        if (shouldOutput(declaration, visitedTypes)) {
             return true;
         }
     }
     return false;
 }
 
-template <typename T>
-bool IR::shouldOutput(const std::shared_ptr<T> &type) const {
-    return inMainFile(*type) || isTypeUsed(type, true);
+bool IR::shouldOutput(
+    const std::shared_ptr<const LocatableType> &type,
+    std::vector<std::shared_ptr<const Type>> &visitedTypes) const {
+    if (isTypeUsed(type, visitedTypes)) {
+        return true;
+    }
+    if (isAliasForOpaqueType(type.get())) {
+        return false;
+    }
+    /* remove unused types from included files */
+    return locationManager.inMainFile(*type->getLocation());
 }

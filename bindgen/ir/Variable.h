@@ -6,10 +6,12 @@
 
 class Variable : public TypeAndName {
   public:
-    Variable(const std::string &name, std::shared_ptr<Type> type);
+    Variable(const std::string &name, std::shared_ptr<const Type> type);
 
     friend llvm::raw_ostream &operator<<(llvm::raw_ostream &s,
                                          const Variable &variable);
+
+    bool hasIllegalUsageOfOpaqueType() const;
 };
 
 #endif // SCALA_NATIVE_BINDGEN_VARIABLE_H

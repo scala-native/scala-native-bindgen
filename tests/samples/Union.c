@@ -53,3 +53,13 @@ int union_test_string(union values *v, enum union_op op, const char *value) {
         return v->s == value || !strcmp(v->s, value);
     }
 }
+
+int union_test_struct(union values *v, enum union_op op, struct s *value) {
+    switch (op) {
+    case UNION_SET:
+        v->structInUnion.a = value->a;
+        return 1;
+    case UNION_TEST:
+        return v->structInUnion.a == value->a;
+    }
+}

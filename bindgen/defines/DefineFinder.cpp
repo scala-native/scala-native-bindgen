@@ -108,9 +108,6 @@ void DefineFinder::MacroUndefined(const clang::Token &macroNameTok,
         return;
     }
     clang::SourceManager &sm = compiler.getSourceManager();
-    if (!sm.isInMainFile(undef->getLocation())) {
-        return;
-    }
     if (sm.isWrittenInMainFile(macroNameTok.getLocation()) &&
         md.getMacroInfo() && !md.getMacroInfo()->isFunctionLike()) {
         std::string macroName = macroNameTok.getIdentifierInfo()->getName();

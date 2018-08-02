@@ -3,7 +3,7 @@ package org.scalanative.bindgen
 import java.io.File
 
 import scala.collection.immutable.Seq
-import scala.sys.process.Process
+import scala.sys.process.{Process, ProcessLogger}
 
 sealed trait Bindgen {
 
@@ -129,9 +129,13 @@ object Bindgen {
         withArgs("--extra-arg-before", extraArgBefore) ++
         Seq(header.get.getAbsolutePath, "--")
 
-      val output = Process(cmd).!!
+      var errs = Seq[String]()
 
-      new Bindings(output)
+      val output = Process(cmd).!!(ProcessLogger { err: String =>
+        errs :+= err
+      })
+
+      new Bindings(output, errs.mkString("\n"))
     }
   }
 }

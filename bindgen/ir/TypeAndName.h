@@ -11,11 +11,11 @@
  */
 class TypeAndName {
   public:
-    TypeAndName(std::string name, std::shared_ptr<Type> type);
+    TypeAndName(std::string name, std::shared_ptr<const Type> type);
 
-    std::shared_ptr<Type> getType() const;
+    std::shared_ptr<const Type> getType() const;
 
-    void setType(std::shared_ptr<Type> name);
+    void setType(std::shared_ptr<const Type> name);
 
     std::string getName() const;
 
@@ -23,11 +23,12 @@ class TypeAndName {
 
     bool operator!=(const TypeAndName &other) const;
 
-    bool usesType(const std::shared_ptr<Type> &type, bool stopOnTypeDefs) const;
+    bool usesType(const std::shared_ptr<const Type> &type, bool stopOnTypeDefs,
+                  std::vector<std::shared_ptr<const Type>> &visitedTypes) const;
 
   protected:
     std::string name;
-    std::shared_ptr<Type> type;
+    std::shared_ptr<const Type> type;
 };
 
 #endif // SCALA_NATIVE_BINDGEN_TYPEANDNAME_H

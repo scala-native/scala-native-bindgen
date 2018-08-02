@@ -1,14 +1,16 @@
 #include "TypeAndName.h"
 #include <clang/Tooling/Tooling.h>
 
-TypeAndName::TypeAndName(std::string name, std::shared_ptr<Type> type)
+TypeAndName::TypeAndName(std::string name, std::shared_ptr<const Type> type)
     : name(std::move(name)), type(std::move(type)) {}
 
-std::shared_ptr<Type> TypeAndName::getType() const { return type; }
+std::shared_ptr<const Type> TypeAndName::getType() const { return type; }
 
 std::string TypeAndName::getName() const { return name; }
 
-void TypeAndName::setType(std::shared_ptr<Type> type) { this->type = type; }
+void TypeAndName::setType(std::shared_ptr<const Type> type) {
+    this->type = type;
+}
 
 bool TypeAndName::operator==(const TypeAndName &other) const {
     if (this == &other) {
@@ -21,8 +23,12 @@ bool TypeAndName::operator!=(const TypeAndName &other) const {
     return !(*this == other);
 }
 
-bool TypeAndName::usesType(const std::shared_ptr<Type> &type,
-                           bool stopOnTypeDefs) const {
-    return *this->type == *type ||
-           this->type.get()->usesType(type, stopOnTypeDefs);
+bool TypeAndName::usesType(
+    const std::shared_ptr<const Type> &type, bool stopOnTypeDefs,
+    std::vector<std::shared_ptr<const Type>> &visitedTypes) const {
+    if (*this->type == *type) {
+        return true;
+    }
+    visitedTypes.clear();
+    return this->type->usesType(type, stopOnTypeDefs, visitedTypes);
 }

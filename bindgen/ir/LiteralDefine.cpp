@@ -1,7 +1,7 @@
 #include "LiteralDefine.h"
 
 LiteralDefine::LiteralDefine(std::string name, std::string literal,
-                             std::shared_ptr<Type> type)
+                             std::shared_ptr<const Type> type)
     : Define(std::move(name)), literal(std::move(literal)), type(type) {}
 
 llvm::raw_ostream &operator<<(llvm::raw_ostream &s,
@@ -11,8 +11,12 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s,
     return s;
 }
 
-bool LiteralDefine::usesType(const std::shared_ptr<Type> &type,
-                             bool stopOnTypeDefs) const {
-    return *this->type == *type ||
-           this->type.get()->usesType(type, stopOnTypeDefs);
+bool LiteralDefine::usesType(
+    const std::shared_ptr<const Type> &type, bool stopOnTypeDefs,
+    std::vector<std::shared_ptr<const Type>> &visitedTypes) const {
+    if (*this->type == *type) {
+        return true;
+    }
+    visitedTypes.clear();
+    return this->type->usesType(type, stopOnTypeDefs, visitedTypes);
 }

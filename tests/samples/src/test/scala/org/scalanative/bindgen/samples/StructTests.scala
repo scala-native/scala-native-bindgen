@@ -53,11 +53,54 @@ object StructTests extends TestSuite {
         !anonymousStruct._2 = 42
 
         val structWithAnonymousStruct = struct_structWithAnonymousStruct()
-        val array = anonymousStruct.cast[Ptr[CArray[Byte, Nat._8]]]
-        structWithAnonymousStruct.anonymousStruct = array
+        structWithAnonymousStruct.anonymousStruct = anonymousStruct
 
         assert('a' == Struct.getCharFromAnonymousStruct(structWithAnonymousStruct))
         assert(42 == Struct.getIntFromAnonymousStruct(structWithAnonymousStruct))
+      }
+    }
+
+    'getFieldOfBigStruct - {
+      Zone { implicit zone: Zone =>
+        val structPtr = alloc[Struct.struct_bigStruct]
+        for (value <- Seq(Long.MinValue, -1, 0, 1, Long.MaxValue)) {
+          Struct.struct_test_long(structPtr, enum_struct_op_STRUCT_SET, value)
+          assert(structPtr.one == value)
+        }
+
+        for (value <- Seq(Double.MinValue, -1, 0, 1, Double.MaxValue)) {
+          Struct.struct_test_double(structPtr, enum_struct_op_STRUCT_SET, value)
+          assert(structPtr.five == value)
+        }
+
+        val pointPtr = alloc[Struct.point]
+        pointPtr.x = 5
+        pointPtr.y = 10
+
+        Struct.struct_test_point(structPtr, enum_struct_op_STRUCT_SET, pointPtr)
+        assert(structPtr.six.x == pointPtr.x)
+        assert(structPtr.six.y == pointPtr.y)
+      }
+    }
+
+    'setFieldOfBigStruct - {
+      Zone { implicit zone: Zone =>
+        val structPtr = alloc[Struct.struct_bigStruct]
+        for (value <- Seq(Long.MinValue, -1, 0, 1, Long.MaxValue)) {
+          structPtr.one = value
+          assert(Struct.struct_test_long(structPtr, enum_struct_op_STRUCT_TEST, value) == 1)
+        }
+
+        for (value <- Seq(Double.MinValue, -1, 0, 1, Double.MaxValue)) {
+          structPtr.five = value
+          assert(Struct.struct_test_double(structPtr, enum_struct_op_STRUCT_TEST, value) == 1)
+        }
+
+        val pointPtr = alloc[Struct.point]
+        pointPtr.x = 5
+        pointPtr.y = 10
+        structPtr.six = pointPtr
+        assert(Struct.struct_test_point(structPtr, enum_struct_op_STRUCT_TEST, pointPtr) == 1)
       }
     }
   }
