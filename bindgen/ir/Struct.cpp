@@ -325,6 +325,11 @@ Struct::shouldFieldBreakCycle(const std::shared_ptr<Field> &field) const {
          * changed if this struct has the biggest name compared to other structs
          * in cycle that have fields of non-value type.
          */
+        if (baseNode.cycleNodes.empty()) {
+            /* field references containing struct */
+            structTypesThatShouldBeReplaced.push_back(
+                shared_from_base<Struct>());
+        }
         for (const auto &nextCycleNode : baseNode.cycleNodes) {
             std::vector<std::string> namesInCycle;
             if (hasBiggestName(nextCycleNode, namesInCycle)) {

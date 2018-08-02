@@ -6,6 +6,7 @@ import scala.scalanative.native._
 @native.link("bindgentests")
 @native.extern
 object Cycles {
+  type struct_node = native.CStruct2[native.CInt, native.Ptr[Byte]]
   type struct_b = native.CStruct1[native.Ptr[native.Ptr[Byte]]]
   type struct_a = native.CStruct1[native.Ptr[struct_b]]
   type struct_c = native.CStruct1[struct_a]
@@ -26,6 +27,15 @@ object Cycles {
 import Cycles._
 
 object CyclesHelpers {
+
+  implicit class struct_node_ops(val p: native.Ptr[struct_node]) extends AnyVal {
+    def value: native.CInt = !p._1
+    def value_=(value: native.CInt): Unit = !p._1 = value
+    def next: native.Ptr[struct_node] = (!p._2).cast[native.Ptr[struct_node]]
+    def next_=(value: native.Ptr[struct_node]): Unit = !p._2 = value.cast[native.Ptr[Byte]]
+  }
+
+  def struct_node()(implicit z: native.Zone): native.Ptr[struct_node] = native.alloc[struct_node]
 
   implicit class struct_a_ops(val p: native.Ptr[struct_a]) extends AnyVal {
     def bb: native.Ptr[struct_b] = !p._1

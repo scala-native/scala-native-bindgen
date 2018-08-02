@@ -1,3 +1,8 @@
+struct node {
+    int value;
+    struct node *next;
+};
+
 struct b;
 struct c;
 
