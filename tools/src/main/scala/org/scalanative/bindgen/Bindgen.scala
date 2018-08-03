@@ -52,6 +52,7 @@ sealed trait Bindgen {
 
   /**
    * Run binding generator
+   * @return errors if exit code was not 0, otherwise return bindings
    */
   def generate(): Either[Seq[String], Bindings]
 }
