@@ -39,8 +39,12 @@ add_executable(bindgen
   Utils.h
   ir/IR.h
   ir/IR.cpp
+  ir/Record.cpp
+  ir/Record.h
   ir/Struct.cpp
   ir/Struct.h
+  ir/Union.cpp
+  ir/Union.h
   ir/Function.cpp
   ir/Function.h
   ir/TypeDef.cpp

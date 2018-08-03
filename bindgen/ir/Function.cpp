@@ -1,6 +1,7 @@
 #include "Function.h"
 #include "../Utils.h"
 #include "Struct.h"
+#include "Union.h"
 
 Parameter::Parameter(std::string name, std::shared_ptr<const Type> type)
     : TypeAndName(std::move(name), type) {}

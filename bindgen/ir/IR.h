@@ -8,6 +8,7 @@
 #include "PossibleVarDefine.h"
 #include "Struct.h"
 #include "TypeDef.h"
+#include "Union.h"
 #include "VarDefine.h"
 
 /**

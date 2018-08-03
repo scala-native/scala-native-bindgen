@@ -2,6 +2,7 @@
 #include "../Utils.h"
 #include "Enum.h"
 #include "Struct.h"
+#include "Union.h"
 #include <stdexcept>
 
 TypeDef::TypeDef(std::string name, std::shared_ptr<const Type> type,
@@ -66,10 +67,9 @@ std::shared_ptr<Location> TypeDef::getLocation() const {
         /* if typedef is not generated */
         return location;
     }
-    auto structOrUnionPointer =
-        std::dynamic_pointer_cast<const StructOrUnion>(type);
-    if (structOrUnionPointer) {
-        return structOrUnionPointer->getLocation();
+    auto recordPointer = std::dynamic_pointer_cast<const Record>(type);
+    if (recordPointer) {
+        return recordPointer->getLocation();
     }
     auto enumPointer = std::dynamic_pointer_cast<const Enum>(type);
     if (enumPointer) {
