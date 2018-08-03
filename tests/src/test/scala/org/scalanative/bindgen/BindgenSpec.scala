@@ -30,8 +30,8 @@ class BindgenSpec extends FunSpec {
       result match {
         case Right(binding) =>
           binding.writeToFile(outputFile)
-        case Left(error) =>
-          fail("scala-native-bindgen failed: " + error.mkString("\n"))
+        case Left(errors) =>
+          fail("scala-native-bindgen failed: " + errors.mkString("\n"))
       }
     }
 

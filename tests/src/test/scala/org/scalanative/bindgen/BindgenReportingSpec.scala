@@ -34,8 +34,10 @@ class BindgenReportingSpec extends FunSpec {
           .generate()
 
         result match {
-          case Right(binding)      => assert(binding.errors == errors)
-          case Left(bindingErrors) => assert(bindingErrors == errors)
+          case Right(binding) =>
+            assert(binding.errors == errors)
+          case Left(errors) =>
+            fail(s"Non-zero exit code:\n${errors.mkString("\n")}")
         }
       } finally {
         tempFile.delete()
