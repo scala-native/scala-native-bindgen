@@ -48,7 +48,7 @@ class Type : public std::enable_shared_from_this<Type> {
      *                     the case of cyclic types.
      * @return true if current type belongs to one or more cycles that contain
      *         startStruct. If current type is struct or union then
-     *         cycleNode is updated (see StructOrUnion::findAllCycles)
+     *         cycleNode is updated (see Record::findAllCycles)
      */
     virtual bool
     findAllCycles(const std::shared_ptr<const Struct> &startStruct,

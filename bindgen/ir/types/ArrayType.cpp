@@ -1,6 +1,6 @@
 #include "ArrayType.h"
 #include "../../Utils.h"
-#include "../Struct.h"
+#include "../Union.h"
 
 ArrayType::ArrayType(std::shared_ptr<const Type> elementsType, uint64_t size)
     : size(size), elementsType(std::move(elementsType)) {}

@@ -1,57 +1,11 @@
 #ifndef SCALA_NATIVE_BINDGEN_STRUCT_H
 #define SCALA_NATIVE_BINDGEN_STRUCT_H
 
-#include "LocatableType.h"
-#include "TypeAndName.h"
-#include "TypeDef.h"
-#include "types/ArrayType.h"
-#include "types/PointerType.h"
-#include <string>
-#include <vector>
+#include "Record.h"
 
 #define SCALA_NATIVE_MAX_STRUCT_FIELDS 22
 
-class Field : public TypeAndName {
-  public:
-    Field(std::string name, std::shared_ptr<const Type> type);
-
-    Field(std::string name, std::shared_ptr<const Type> type,
-          uint64_t offsetInBits);
-
-    uint64_t getOffsetInBits() const;
-
-  protected:
-    /**
-     * Offset in bytes from address of struct/union.
-     */
-    uint64_t offsetInBits = 0;
-};
-
-class StructOrUnion : public LocatableType {
-  public:
-    StructOrUnion(std::string name, std::vector<std::shared_ptr<Field>> fields,
-                  std::shared_ptr<Location> location);
-
-    virtual std::shared_ptr<TypeDef> generateTypeDef() = 0;
-
-    virtual std::string generateHelperClass() const = 0;
-
-    std::string getName() const;
-
-    virtual std::string getTypeAlias() const = 0;
-
-    virtual bool hasHelperMethods() const;
-
-    bool usesType(
-        const std::shared_ptr<const Type> &type, bool stopOnTypeDefs,
-        std::vector<std::shared_ptr<const Type>> &visitedTypes) const override;
-
-  protected:
-    std::string name;
-    std::vector<std::shared_ptr<Field>> fields;
-};
-
-class Struct : public StructOrUnion {
+class Struct : public Record {
   public:
     Struct(std::string name, std::vector<std::shared_ptr<Field>> fields,
            uint64_t typeSize, std::shared_ptr<Location> location, bool isPacked,
@@ -162,29 +116,6 @@ class Struct : public StructOrUnion {
      */
     bool hasBiggestName(const CycleNode &node,
                         std::vector<std::string> namesInCycle) const;
-};
-
-class Union : public StructOrUnion, public ArrayType {
-  public:
-    Union(std::string name, std::vector<std::shared_ptr<Field>> fields,
-          uint64_t maxSize, std::shared_ptr<Location> location);
-
-    std::shared_ptr<TypeDef> generateTypeDef() override;
-
-    std::string generateHelperClass() const override;
-
-    bool operator==(const Type &other) const override;
-
-    std::string getTypeAlias() const override;
-
-    bool usesType(
-        const std::shared_ptr<const Type> &type, bool stopOnTypeDefs,
-        std::vector<std::shared_ptr<const Type>> &visitedTypes) const override;
-
-  private:
-    std::string generateGetter(const std::shared_ptr<Field> &field) const;
-
-    std::string generateSetter(const std::shared_ptr<Field> &field) const;
 };
 
 #endif // SCALA_NATIVE_BINDGEN_STRUCT_H

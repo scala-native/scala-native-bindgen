@@ -82,7 +82,7 @@ TypeTranslator::translatePointer(const clang::QualType &pte) {
 }
 
 std::shared_ptr<Type>
-TypeTranslator::translateStructOrUnionOrEnum(const clang::QualType &qtpe) {
+TypeTranslator::translateRecordOrEnum(const clang::QualType &qtpe) {
     std::string name = qtpe.getUnqualifiedType().getAsString();
     std::string nameWithoutSpace = replaceChar(name, " ", "_");
 
@@ -104,7 +104,7 @@ TypeTranslator::translateStructOrUnionOrEnum(const clang::QualType &qtpe) {
 }
 
 std::shared_ptr<Type>
-TypeTranslator::translateStructOrUnion(const clang::QualType &qtpe) {
+TypeTranslator::translateRecord(const clang::QualType &qtpe) {
     if (qtpe->hasUnnamedOrLocalType()) {
         if (qtpe->isStructureType()) {
             std::string name =
@@ -119,7 +119,7 @@ TypeTranslator::translateStructOrUnion(const clang::QualType &qtpe) {
         }
         return nullptr;
     }
-    return translateStructOrUnionOrEnum(qtpe);
+    return translateRecordOrEnum(qtpe);
 }
 
 std::shared_ptr<Type>
@@ -151,7 +151,7 @@ std::shared_ptr<Type> TypeTranslator::translate(const clang::QualType &qtpe) {
             tpe->getAs<clang::PointerType>()->getPointeeType());
 
     } else if (qtpe->isStructureType() || qtpe->isUnionType()) {
-        return translateStructOrUnion(qtpe);
+        return translateRecord(qtpe);
 
     } else if (qtpe->isEnumeralType()) {
         return translateEnum(qtpe);
@@ -251,5 +251,5 @@ TypeTranslator::translateEnum(const clang::QualType &type) {
         return std::make_shared<PrimitiveType>(getTypeFromTypeMap(
             enumDecl->getIntegerType().getUnqualifiedType().getAsString()));
     }
-    return translateStructOrUnionOrEnum(type);
+    return translateRecordOrEnum(type);
 }
