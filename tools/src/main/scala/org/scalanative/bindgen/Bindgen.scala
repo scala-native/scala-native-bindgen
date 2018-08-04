@@ -3,6 +3,7 @@ package org.scalanative.bindgen
 import java.io.File
 
 import scala.collection.immutable.Seq
+import scala.collection.mutable.ListBuffer
 import scala.sys.process.{Process, ProcessLogger}
 
 sealed trait Bindgen {
@@ -51,8 +52,9 @@ sealed trait Bindgen {
 
   /**
    * Run binding generator
+   * @return errors if exit code was not 0, otherwise return bindings
    */
-  def generate(): Bindings
+  def generate(): Either[Seq[String], Bindings]
 }
 
 object Bindgen {
@@ -69,46 +71,47 @@ object Bindgen {
       extends Bindgen {
 
     def bindgenExecutable(executable: File): Bindgen = {
-      require(executable.exists())
+      require(executable.exists(), s"Executable does not exist: $executable")
       copy(executable = Option(executable))
     }
 
     def header(header: File): Bindgen = {
-      require(header.exists())
+      require(header.exists(), s"Header file does not exist: $header")
       copy(header = Option(header))
     }
 
     def link(library: String): Bindgen = {
-      require(!library.isEmpty)
+      require(library.nonEmpty, "Library must be non-empty")
       copy(library = Option(library))
     }
 
     def name(name: String): Bindgen = {
-      require(!name.isEmpty)
+      require(name.nonEmpty, "Name must be non-empty")
       copy(name = Option(name))
     }
 
     def packageName(packageName: String): Bindgen = {
-      require(!packageName.isEmpty)
+      require(packageName.nonEmpty, "Package name must be non-empty")
       copy(packageName = Option(packageName))
     }
 
     def excludePrefix(prefix: String): Bindgen = {
-      require(!prefix.isEmpty)
+      require(prefix.nonEmpty, "Exclude prefix must be non-empty")
       copy(excludePrefix = Option(prefix))
     }
 
     def extraArg(args: String*): Bindgen = {
-      require(args.forall(_.nonEmpty))
+      require(args.forall(_.nonEmpty), "All extra-args must be non-empty")
       copy(extraArg = extraArg ++ args)
     }
 
     def extraArgBefore(args: String*): Bindgen = {
-      require(args.forall(_.nonEmpty))
+      require(args.forall(_.nonEmpty),
+              "All extra-args-before must be non-empty")
       copy(extraArgBefore = extraArgBefore ++ args)
     }
 
-    def generate(): Bindings = {
+    def generate(): Either[Seq[String], Bindings] = {
       require(executable.isDefined, "The executable must be specified")
       require(header.isDefined, "Header file must be specified")
 
@@ -129,13 +132,15 @@ object Bindgen {
         withArgs("--extra-arg-before", extraArgBefore) ++
         Seq(header.get.getAbsolutePath, "--")
 
-      var errs = Seq[String]()
+      val stdout = ListBuffer[String]()
+      val stderr = ListBuffer[String]()
+      val nl     = System.lineSeparator()
+      val logger = ProcessLogger(stdout.+=, stderr.+=)
 
-      val output = Process(cmd).!!(ProcessLogger { err: String =>
-        errs :+= err
-      })
-
-      new Bindings(output, errs.mkString("\n"))
+      Process(cmd).!(logger) match {
+        case 0 => Right(new Bindings(stdout.mkString(nl), Seq(stderr: _*)))
+        case _ => Left(Seq(stderr: _*))
+      }
     }
   }
 }

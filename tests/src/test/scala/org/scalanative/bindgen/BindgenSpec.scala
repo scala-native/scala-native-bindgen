@@ -18,7 +18,7 @@ class BindgenSpec extends FunSpec {
     }
 
     def bindgen(inputFile: File, name: String, outputFile: File): Unit = {
-      Bindgen()
+      val result = Bindgen()
         .bindgenExecutable(new File(bindgenPath))
         .header(inputFile)
         .name(name)
@@ -26,7 +26,13 @@ class BindgenSpec extends FunSpec {
         .packageName("org.scalanative.bindgen.samples")
         .excludePrefix("__")
         .generate()
-        .writeToFile(outputFile)
+
+      result match {
+        case Right(binding) =>
+          binding.writeToFile(outputFile)
+        case Left(errors) =>
+          fail("scala-native-bindgen failed: " + errors.mkString("\n"))
+      }
     }
 
     def contentOf(file: File) =
