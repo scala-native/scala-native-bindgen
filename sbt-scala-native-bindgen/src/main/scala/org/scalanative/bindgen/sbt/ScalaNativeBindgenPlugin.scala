@@ -6,7 +6,7 @@ import sbt.Keys._
 import java.nio.file.Files
 import java.nio.file.attribute.{PosixFileAttributeView, PosixFilePermission}
 
-import org.scalanative.bindgen.Bindgen
+import org.scalanative.bindgen.{Bindgen, BindingOptions}
 
 /**
  * Generate Scala bindings from C headers.
@@ -37,21 +37,20 @@ import org.scalanative.bindgen.Bindgen
  *
  * @example
  * {{{
- * nativeBindgenHeader in Compile := file("/usr/include/ctype.h")
- * nativeBindgenPackage in Compile := Some("org.example.app")
- * name in (Compile, nativeBindgen) := "ctype"
+ * nativeBindings += {
+ *   NativeBinding(file("/usr/include/uv.h"))
+ *     .name("uv")
+ *     .packageName("org.example.uv")
+ *     .link("uv"),
+ *     .excludePrefix("__")
+ * }
  * }}}
  */
 object ScalaNativeBindgenPlugin extends AutoPlugin {
 
   object autoImport {
-    case class NativeBinding(
-        name: String,
-        header: File,
-        packageName: Option[String],
-        link: Option[String],
-        excludePrefix: Option[String]
-    )
+    type NativeBinding = BindingOptions
+    val NativeBinding      = BindingOptions
     val ScalaNativeBindgen = config("scala-native-bindgen").hide
     val nativeBindgenPath =
       taskKey[File]("Path to the scala-native-bindgen executable")
@@ -105,14 +104,6 @@ object ScalaNativeBindgenPlugin extends AutoPlugin {
         }
       )
 
-  private implicit class BindgenOps(val bindgen: Bindgen) extends AnyVal {
-    def maybe[T](opt: Option[T], f: Bindgen => T => Bindgen): Bindgen =
-      opt match {
-        case None        => bindgen
-        case Some(value) => f(bindgen)(value)
-      }
-  }
-
   private val artifactName =
     Option(System.getProperty("os.name")).collect {
       case "Mac OS X" => "scala-native-bindgen-darwin"
@@ -126,34 +117,26 @@ object ScalaNativeBindgenPlugin extends AutoPlugin {
         sourceGenerators += Def.task { nativeBindgen.value },
         target in nativeBindgen := sourceManaged.value / "sbt-scala-native-bindgen",
         nativeBindgen := {
-          val bindgenPath     = nativeBindgenPath.value
-          val bindings        = nativeBindings.value
+          val bindgen         = Bindgen(nativeBindgenPath.value)
+          val optionsList     = nativeBindings.value
           val outputDirectory = (target in nativeBindgen).value
           val logger          = streams.value.log
 
-          bindings.map {
-            binding =>
-              val output = outputDirectory / s"${binding.name}.scala"
-              val result = Bindgen()
-                .bindgenExecutable(bindgenPath)
-                .header(binding.header)
-                .name(binding.name)
-                .maybe(binding.link, _.link)
-                .maybe(binding.packageName, _.packageName)
-                .maybe(binding.excludePrefix, _.excludePrefix)
-                .generate()
+          // FIXME: Check uniqueness of names.
 
-              result match {
+          optionsList.map {
+            options =>
+              bindgen.generate(options) match {
                 case Right(bindings) =>
+                  val output = outputDirectory / s"${bindings.name}.scala"
                   bindings.writeToFile(output)
                   bindings.errors.foreach(error => logger.error(error))
+                  output
                 case Left(errors) =>
                   errors.foreach(error => logger.error(error))
                   sys.error(
                     "scala-native-bindgen failed with non-zero exit code")
               }
-
-              output
           }
         }
       ))

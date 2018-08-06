@@ -6,33 +6,15 @@ import scala.io.Source
 
 class BindgenSpec extends FunSpec {
   describe("Bindgen") {
-    val bindgenPath    = System.getProperty("bindgen.path")
+    val bindgen        = Bindgen(new File(System.getProperty("bindgen.path")))
     val inputDirectory = new File("samples")
 
     val outputDir = new File("target/bindgen-samples")
     Option(outputDir.listFiles()).foreach(_.foreach(_.delete()))
     outputDir.mkdirs()
 
-    it("should exist") {
-      assert(new File(bindgenPath).exists, s"$bindgenPath does not exist")
-    }
-
-    def bindgen(inputFile: File, name: String, outputFile: File): Unit = {
-      val result = Bindgen()
-        .bindgenExecutable(new File(bindgenPath))
-        .header(inputFile)
-        .name(name)
-        .link("bindgentests")
-        .packageName("org.scalanative.bindgen.samples")
-        .excludePrefix("__")
-        .generate()
-
-      result match {
-        case Right(binding) =>
-          binding.writeToFile(outputFile)
-        case Left(errors) =>
-          fail("scala-native-bindgen failed: " + errors.mkString("\n"))
-      }
+    it("executable should exist") {
+      assert(bindgen.executable.exists, s"${bindgen.executable} does not exist")
     }
 
     def contentOf(file: File) =
@@ -42,12 +24,18 @@ class BindgenSpec extends FunSpec {
       it(s"should generate bindings for ${input.getName}") {
         val testName = input.getName.replace(".h", "")
         val expected = new File(inputDirectory, testName + ".scala")
-        val output   = new File(outputDir, testName + ".scala")
+        val options = BindingOptions(input)
+          .name(testName)
+          .link("bindgentests")
+          .packageName("org.scalanative.bindgen.samples")
+          .excludePrefix("__")
 
-        bindgen(input, testName, output)
-
-        assert(output.exists())
-        assert(contentOf(output) == contentOf(expected))
+        bindgen.generate(options) match {
+          case Right(binding) =>
+            assert(binding.source.trim() == contentOf(expected))
+          case Left(errors) =>
+            fail("scala-native-bindgen failed: " + errors.mkString("\n"))
+        }
       }
     }
   }
