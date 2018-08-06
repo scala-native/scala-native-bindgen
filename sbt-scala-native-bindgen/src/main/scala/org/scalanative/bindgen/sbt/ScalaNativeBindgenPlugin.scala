@@ -125,7 +125,7 @@ object ScalaNativeBindgenPlugin extends AutoPlugin {
           // FIXME: Check uniqueness of names.
 
           optionsList.map {
-            case options: BindingOptions.Impl =>
+            options =>
               bindgen.generate(options) match {
                 case Right(bindings) =>
                   val output = outputDirectory / s"${bindings.name}.scala"
