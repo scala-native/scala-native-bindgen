@@ -11,7 +11,7 @@ TypeDef::TypeDef(std::string name, std::shared_ptr<const Type> type,
       LocatableType(std::move(location)) {}
 
 llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const TypeDef &typeDef) {
-    s << "  type " << handleReservedWords(typeDef.name) << " = ";
+    s << "  type " << typeDef.str() << " = ";
     if (typeDef.type) {
         s << typeDef.getType()->str();
     } else {
@@ -40,7 +40,9 @@ bool TypeDef::usesType(
     return result;
 }
 
-std::string TypeDef::str() const { return handleReservedWords(name); }
+std::string TypeDef::str() const {
+    return handleReservedWords(replaceChar(name, " ", "_"));
+}
 
 bool TypeDef::operator==(const Type &other) const {
     if (this == &other) {

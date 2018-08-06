@@ -15,7 +15,7 @@ class Struct : public Record {
 
     std::string generateHelperClass() const override;
 
-    std::string getTypeAlias() const override;
+    std::string getTypeName() const override;
 
     /**
      * @return true if helper methods will be generated for this struct

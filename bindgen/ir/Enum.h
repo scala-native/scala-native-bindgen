@@ -33,7 +33,7 @@ class Enum : public PrimitiveType, public LocatableType {
 
     friend llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const Enum &e);
 
-    std::string getTypeAlias() const;
+    std::string getTypeName() const;
 
   private:
     std::string name; // might be empty

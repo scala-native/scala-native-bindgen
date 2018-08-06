@@ -34,7 +34,7 @@ class Record : public LocatableType {
 
     std::string getName() const;
 
-    virtual std::string getTypeAlias() const = 0;
+    virtual std::string getTypeName() const = 0;
 
     virtual bool hasHelperMethods() const;
 
@@ -43,7 +43,7 @@ class Record : public LocatableType {
         std::vector<std::shared_ptr<const Type>> &visitedTypes) const override;
 
   protected:
-    std::string name;
+    std::string name; // does not contain 'struct' or 'union' word
     std::vector<std::shared_ptr<Field>> fields;
 };
 

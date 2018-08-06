@@ -13,14 +13,14 @@ Union::Union(std::string name, std::vector<std::shared_ptr<Field>> fields,
       ArrayType(std::make_shared<PrimitiveType>("Byte"), maxSize) {}
 
 std::shared_ptr<TypeDef> Union::generateTypeDef() {
-    return std::make_shared<TypeDef>(getTypeAlias(), shared_from_this(),
+    return std::make_shared<TypeDef>(getTypeName(), shared_from_this(),
                                      nullptr);
 }
 
 std::string Union::generateHelperClass() const {
     assert(hasHelperMethods());
     std::stringstream s;
-    std::string type = getTypeAlias();
+    std::string type = replaceChar(getTypeName(), " ", "_");
     s << "  implicit class " << type << "_pos"
       << "(val p: native.Ptr[" << type << "]) extends AnyVal {\n";
     for (const auto &field : fields) {
@@ -33,7 +33,7 @@ std::string Union::generateHelperClass() const {
     return s.str();
 }
 
-std::string Union::getTypeAlias() const { return "union_" + name; }
+std::string Union::getTypeName() const { return "union " + name; }
 
 bool Union::operator==(const Type &other) const {
     if (this == &other) {

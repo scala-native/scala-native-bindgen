@@ -41,7 +41,7 @@ IR::addStruct(std::string name, std::vector<std::shared_ptr<Field>> fields,
         std::make_shared<Struct>(name, std::move(fields), typeSize,
                                  std::move(location), isPacked, isBitField);
     structs.push_back(s);
-    std::shared_ptr<TypeDef> typeDef = getTypeDefWithName("struct_" + name);
+    std::shared_ptr<TypeDef> typeDef = getTypeDefWithName("struct " + name);
     if (typeDef) {
         /* the struct type used to be opaque type, typeDef contains nullptr */
         typeDef.get()->setType(s);
@@ -58,7 +58,7 @@ IR::addUnion(std::string name, std::vector<std::shared_ptr<Field>> fields,
     std::shared_ptr<Union> u = std::make_shared<Union>(
         name, std::move(fields), maxSize, std::move(location));
     unions.push_back(u);
-    std::shared_ptr<TypeDef> typeDef = getTypeDefWithName("union_" + name);
+    std::shared_ptr<TypeDef> typeDef = getTypeDefWithName("union " + name);
     if (typeDef) {
         /* the union type used to be opaque type, typeDef contains nullptr */
         typeDef.get()->setType(u);

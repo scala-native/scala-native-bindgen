@@ -15,14 +15,14 @@ Struct::Struct(std::string name, std::vector<std::shared_ptr<Field>> fields,
 
 std::shared_ptr<TypeDef> Struct::generateTypeDef() {
     if (isRepresentedAsStruct()) {
-        return std::make_shared<TypeDef>(getTypeAlias(), shared_from_this(),
+        return std::make_shared<TypeDef>(getTypeName(), shared_from_this(),
                                          nullptr);
     } else {
         // There is no easy way to represent it as a struct in scala native,
         // have to represent it as an array and then Add helpers to help with
         // its manipulation
         return std::make_shared<TypeDef>(
-            getTypeAlias(),
+            getTypeName(),
             std::make_shared<ArrayType>(std::make_shared<PrimitiveType>("Byte"),
                                         typeSize),
             location);
@@ -32,7 +32,7 @@ std::shared_ptr<TypeDef> Struct::generateTypeDef() {
 std::string Struct::generateHelperClass() const {
     assert(hasHelperMethods());
     std::stringstream s;
-    std::string type = getTypeAlias();
+    std::string type = replaceChar(getTypeName(), " ", "_");
     s << "  implicit class " << type << "_ops(val p: native.Ptr[" << type
       << "])"
       << " extends AnyVal {\n";
@@ -83,7 +83,7 @@ std::string Struct::generateHelperClassMethodsForArrayRepresentation() const {
     return s.str();
 }
 
-std::string Struct::getTypeAlias() const { return "struct_" + name; }
+std::string Struct::getTypeName() const { return "struct " + name; }
 
 std::string Struct::str() const {
     std::stringstream ss;
@@ -248,7 +248,7 @@ Struct::getTypeReplacement(std::shared_ptr<const Type> type,
         std::make_shared<PointerType>(std::make_shared<PrimitiveType>("Byte"));
     for (const auto &recordType : structTypesThatShouldBeReplaced) {
         std::shared_ptr<TypeDef> recordTypeDef = std::make_shared<TypeDef>(
-            recordType->getTypeAlias(), recordType, nullptr);
+            recordType->getTypeName(), recordType, nullptr);
         std::shared_ptr<Type> pointerToRecord =
             std::make_shared<PointerType>(recordTypeDef);
         if (*replacementType == *pointerToRecord) {
@@ -330,11 +330,11 @@ bool Struct::findAllCycles(
 bool Struct::hasBiggestName(const CycleNode &node,
                             std::vector<std::string> namesInCycle) const {
     if (!node.isValueType) {
-        namesInCycle.push_back(node.s->getTypeAlias());
+        namesInCycle.push_back(node.s->getTypeName());
     }
     if (node.cycleNodes.empty()) {
         std::sort(namesInCycle.begin(), namesInCycle.end());
-        return getTypeAlias() >= namesInCycle.back();
+        return getTypeName() >= namesInCycle.back();
     }
     for (const auto &cycleNode : node.cycleNodes) {
         if (hasBiggestName(cycleNode, namesInCycle)) {
