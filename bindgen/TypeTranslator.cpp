@@ -84,7 +84,6 @@ TypeTranslator::translatePointer(const clang::QualType &pte) {
 std::shared_ptr<Type>
 TypeTranslator::translateRecordOrEnum(const clang::QualType &qtpe) {
     std::string name = qtpe.getUnqualifiedType().getAsString();
-    std::string nameWithoutSpace = replaceChar(name, " ", "_");
 
     /* If the struct was already declared then there is a TypeDef instance
      * with appropriate name.
@@ -92,14 +91,14 @@ TypeTranslator::translateRecordOrEnum(const clang::QualType &qtpe) {
      * If there is no such TypeDef then the type is opaque and TypeDef with
      * nullptr will be generated for the type. */
 
-    std::shared_ptr<TypeDef> typeDef = ir.getTypeDefWithName(nameWithoutSpace);
+    std::shared_ptr<TypeDef> typeDef = ir.getTypeDefWithName(name);
     if (typeDef) {
         return typeDef;
     }
     /* type is not yet defined.
      * TypeDef with nullptr will be created.
      * nullptr will be replaced by actual type when the type is declared. */
-    typeDef = ir.addTypeDef(nameWithoutSpace, nullptr, nullptr);
+    typeDef = ir.addTypeDef(name, nullptr, nullptr);
     return typeDef;
 }
 
@@ -211,8 +210,6 @@ TypeTranslator::addUnionDefinition(clang::RecordDecl *record,
 std::shared_ptr<TypeDef>
 TypeTranslator::addStructDefinition(clang::RecordDecl *record,
                                     std::string name) {
-    std::string newName = "struct_" + name;
-
     if (record->hasAttr<clang::PackedAttr>()) {
         llvm::errs() << "Warning: struct " << name << " is packed. "
                      << "Packed structs are not supported by Scala Native. "

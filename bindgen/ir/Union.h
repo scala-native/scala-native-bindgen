@@ -20,7 +20,7 @@ class Union : public Record, public ArrayType {
 
     bool operator==(const Type &other) const override;
 
-    std::string getTypeAlias() const override;
+    std::string getTypeName() const override;
 
     bool usesType(
         const std::shared_ptr<const Type> &type, bool stopOnTypeDefs,
