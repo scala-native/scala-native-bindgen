@@ -11,13 +11,7 @@ resolvers += Resolver.bintrayRepo("scala-native-bindgen", "maven")
 ```
 @@@
 
-Next configure the plugin using the settings scoped to either `Compile` or `Test`:
-
-|---------------------------|-------------------|
-|`nativeBindgenHeader`      | The C header file to read.
-|`nativeBindgenPackage`     | Package of the enclosing object. No package by default.
-|`name in nativeBindgen`    | Name of the enclosing object.
-|`nativeBindgenLink`        | Name of library to be linked.
+Next configure the plugin using the `nativeBindings` setting scoped to either `Compile` or `Test`. The `NativeBinding` type to configure each binding that should be generated. 
 
 @@@ note
 
@@ -37,15 +31,17 @@ Example settings:
 enablePlugins(ScalaNativeBindgenPlugin)
 inConfig(Compile)(
   Def.settings(
-    nativeBindgenHeader := (resourceDirectory in Compile).value / "header.h",
-    nativeBindgenPackage := Some("org.example.mylib"),
-    nativeBindgenLink := Some("mylib"), // Will pass `-lmylib` to the linker
-    nativeBindgenExclude := Some("__"),
-    name in nativeBindgen := "MyLib"
+    nativeBindings += {
+      NativeBinding((resourceDirectory in Compile).value / "header.h")
+        .name("MyLib")
+        .packageName("org.example.mylib")
+        .link("mylib"), // Will pass `-lmylib` to the linker
+        .excludePrefix("__")
+      }
   ))
 ```
 
-Running `nativeBindgen` will generate a file named `target/scala-2.x/src_managed/main/sbt-scala-native-bindgen//ScalaNativeBindgen.scala` containing something along the following lines:
+Running `nativeBindgen` will generate a file named `target/scala-2.x/src_managed/main/sbt-scala-native-bindgen/MyLib.scala` containing something along the following lines:
 
 ```scala
 package org.example.mylib

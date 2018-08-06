@@ -6,15 +6,12 @@ scalaVersion := "2.11.12"
 inConfig(Compile)(
   Def.settings(
     nativeBindgenPath := file(System.getProperty("bindgen.path")),
-    nativeBindings := Seq(
-      NativeBinding(
-        name = "stdlib",
-        header = (resourceDirectory in Compile).value / "stdlib.h",
-        packageName = Some("org.example.app.stdlib"),
-        link = None,
-        excludePrefix = Some("__")
-      )
-    )
+    nativeBindings += {
+      NativeBinding((resourceDirectory in Compile).value / "stdlib.h")
+        .name("stdlib")
+        .packageName("org.example.app.stdlib")
+        .excludePrefix("__")
+    }
   ))
 
 val nativeBindgenCustomTarget = SettingKey[File]("nativeBindgenCustomTarget")
@@ -23,13 +20,9 @@ nativeBindgenCustomTarget := baseDirectory.value / "src/main/scala/org/example"
 val nativeBindgenCoreBinding =
   SettingKey[NativeBinding]("nativeBindgenCoreBinding")
 nativeBindgenCoreBinding := {
-  NativeBinding(
-    name = "core",
-    header = (resourceDirectory in Compile).value / "core.h",
-    packageName = Some("org.example.app.core"),
-    link = Some("core"),
-    excludePrefix = None
-  )
+  NativeBinding((resourceDirectory in Compile).value / "core.h")
+    .packageName("org.example.app.core")
+    .link("core")
 }
 
 val StdlibOutput =
@@ -47,14 +40,14 @@ val StdlibOutput =
   """.stripMargin
 
 def assertFileContent(file: File, expected: String): Unit = {
-  val actual = IO.read(file).trim
+  val actual = IO.read(file).trim()
   if (actual != expected.trim) {
     println(s"== [ actual ${file.getName} ] ========")
     println(actual)
     println(s"== [ expected ${file.getName} ] ========")
-    println(expected.trim)
+    println(expected.trim())
   }
-  assert(actual == expected.trim)
+  assert(actual == expected.trim())
 }
 
 TaskKey[Unit]("checkSingle") := {

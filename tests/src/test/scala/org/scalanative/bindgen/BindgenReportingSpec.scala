@@ -7,7 +7,7 @@ import org.scalatest.FunSpec
 class BindgenReportingSpec extends FunSpec {
   describe("Bindgen") {
 
-    val bindgenPath = System.getProperty("bindgen.path")
+    val bindgen = Bindgen(new File(System.getProperty("bindgen.path")))
 
     def writeToFile(file: File, input: String): Unit = {
       new PrintWriter(file) {
@@ -24,16 +24,13 @@ class BindgenReportingSpec extends FunSpec {
       try {
         writeToFile(tempFile, input)
 
-        val result = Bindgen()
-          .bindgenExecutable(new File(bindgenPath))
-          .header(tempFile)
+        val options = BindingOptions(tempFile)
           .name("BindgenTests")
           .link("bindgentests")
           .packageName("org.scalanative.bindgen.samples")
           .excludePrefix("__")
-          .generate()
 
-        result match {
+        bindgen.generate(options) match {
           case Right(binding) =>
             assert(binding.errors == errors)
           case Left(errors) =>
