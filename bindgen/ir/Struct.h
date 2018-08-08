@@ -13,7 +13,8 @@ class Struct : public Record {
 
     std::shared_ptr<TypeDef> generateTypeDef() override;
 
-    std::string generateHelperClass() const override;
+    std::string
+    generateHelperClass(const LocationManager &locationManager) const override;
 
     std::string getTypeName() const override;
 
@@ -22,7 +23,7 @@ class Struct : public Record {
      */
     bool hasHelperMethods() const override;
 
-    std::string str() const override;
+    std::string str(const LocationManager &locationManager) const override;
 
     bool operator==(const Type &other) const override;
 
@@ -52,22 +53,26 @@ class Struct : public Record {
     /**
      * @return helper class methods for struct that is represented as CStruct.
      */
-    std::string generateHelperClassMethodsForStructRepresentation() const;
+    std::string generateHelperClassMethodsForStructRepresentation(
+        const LocationManager &locationManager) const;
 
     /**
      * @return helper class methods for struct that is represented as CArray.
      */
-    std::string generateHelperClassMethodsForArrayRepresentation() const;
+    std::string generateHelperClassMethodsForArrayRepresentation(
+        const LocationManager &locationManager) const;
 
-    std::string
-    generateSetterForStructRepresentation(unsigned fieldIndex) const;
+    std::string generateSetterForStructRepresentation(
+        unsigned fieldIndex, const LocationManager &locationManager) const;
 
-    std::string
-    generateGetterForStructRepresentation(unsigned fieldIndex) const;
+    std::string generateGetterForStructRepresentation(
+        unsigned fieldIndex, const LocationManager &locationManager) const;
 
-    std::string generateSetterForArrayRepresentation(unsigned fieldIndex) const;
+    std::string generateSetterForArrayRepresentation(
+        unsigned fieldIndex, const LocationManager &locationManager) const;
 
-    std::string generateGetterForArrayRepresentation(unsigned fieldIndex) const;
+    std::string generateGetterForArrayRepresentation(
+        unsigned fieldIndex, const LocationManager &locationManager) const;
 
     /**
      * This function is used to get type replacement for a field that should

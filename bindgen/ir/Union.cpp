@@ -17,7 +17,8 @@ std::shared_ptr<TypeDef> Union::generateTypeDef() {
                                      nullptr);
 }
 
-std::string Union::generateHelperClass() const {
+std::string
+Union::generateHelperClass(const LocationManager &locationManager) const {
     assert(hasHelperMethods());
     std::stringstream s;
     std::string type = replaceChar(getTypeName(), " ", "_");
@@ -25,8 +26,8 @@ std::string Union::generateHelperClass() const {
       << "(val p: native.Ptr[" << type << "]) extends AnyVal {\n";
     for (const auto &field : fields) {
         if (!field->getName().empty()) {
-            s << generateGetter(field);
-            s << generateSetter(field);
+            s << generateGetter(field, locationManager);
+            s << generateSetter(field, locationManager);
         }
     }
     s << "  }\n";
@@ -65,16 +66,20 @@ bool Union::usesType(
     return Record::usesType(type, stopOnTypeDefs, visitedTypes);
 }
 
-std::string Union::generateGetter(const std::shared_ptr<Field> &field) const {
+std::string
+Union::generateGetter(const std::shared_ptr<Field> &field,
+                      const LocationManager &locationManager) const {
     std::string getter = handleReservedWords(field->getName());
-    std::string ftype = field->getType()->str();
+    std::string ftype = field->getType()->str(locationManager);
     return "    def " + getter + ": native.Ptr[" + ftype +
            "] = p.cast[native.Ptr[" + ftype + "]]\n";
 }
 
-std::string Union::generateSetter(const std::shared_ptr<Field> &field) const {
+std::string
+Union::generateSetter(const std::shared_ptr<Field> &field,
+                      const LocationManager &locationManager) const {
     std::string setter = handleReservedWords(field->getName(), "_=");
-    std::string ftype = field->getType()->str();
+    std::string ftype = field->getType()->str(locationManager);
     if (isAliasForType<ArrayType>(field->getType().get()) ||
         isAliasForType<Struct>(field->getType().get())) {
         return "    def " + setter + "(value: native.Ptr[" + ftype +

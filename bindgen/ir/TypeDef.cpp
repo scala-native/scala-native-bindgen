@@ -3,6 +3,7 @@
 #include "Enum.h"
 #include "Struct.h"
 #include "Union.h"
+#include <sstream>
 #include <stdexcept>
 
 TypeDef::TypeDef(std::string name, std::shared_ptr<const Type> type,
@@ -10,15 +11,17 @@ TypeDef::TypeDef(std::string name, std::shared_ptr<const Type> type,
     : TypeAndName(std::move(name), std::move(type)),
       LocatableType(std::move(location)) {}
 
-llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const TypeDef &typeDef) {
-    s << "  type " << typeDef.str() << " = ";
-    if (typeDef.type) {
-        s << typeDef.getType()->str();
+std::string
+TypeDef::getDefinition(const LocationManager &locationManager) const {
+    std::stringstream s;
+    s << "  type " << this->str(locationManager) << " = ";
+    if (type) {
+        s << type->str(locationManager);
     } else {
         s << "native.CStruct0 // incomplete type";
     }
     s << "\n";
-    return s;
+    return s.str();
 }
 
 bool TypeDef::usesType(
@@ -40,7 +43,13 @@ bool TypeDef::usesType(
     return result;
 }
 
-std::string TypeDef::str() const {
+std::string TypeDef::str(const LocationManager &locationManager) const {
+    if (hasLocation()) {
+        std::shared_ptr<const Location> location = getLocation();
+        if (locationManager.isImported(*location)) {
+            return locationManager.getImportedType(*location, name);
+        }
+    }
     return handleReservedWords(replaceChar(name, " ", "_"));
 }
 
@@ -117,3 +126,5 @@ TypeDef::replaceType(const std::shared_ptr<const Type> &type,
     return std::make_shared<TypeDef>(
         name, this->type->replaceType(type, replacement), nullptr);
 }
+
+bool TypeDef::wrapperForOpaqueType() const { return !type; }

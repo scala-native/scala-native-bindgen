@@ -29,7 +29,8 @@ std::shared_ptr<TypeDef> Struct::generateTypeDef() {
     }
 }
 
-std::string Struct::generateHelperClass() const {
+std::string
+Struct::generateHelperClass(const LocationManager &locationManager) const {
     assert(hasHelperMethods());
     std::stringstream s;
     std::string type = replaceChar(getTypeName(), " ", "_");
@@ -37,9 +38,9 @@ std::string Struct::generateHelperClass() const {
       << "])"
       << " extends AnyVal {\n";
     if (isRepresentedAsStruct()) {
-        s << generateHelperClassMethodsForStructRepresentation();
+        s << generateHelperClassMethodsForStructRepresentation(locationManager);
     } else {
-        s << generateHelperClassMethodsForArrayRepresentation();
+        s << generateHelperClassMethodsForArrayRepresentation(locationManager);
     }
     s << "  }\n\n";
 
@@ -61,23 +62,29 @@ bool Struct::hasHelperMethods() const {
     return !isPacked && !fields.empty();
 }
 
-std::string Struct::generateHelperClassMethodsForStructRepresentation() const {
+std::string Struct::generateHelperClassMethodsForStructRepresentation(
+    const LocationManager &locationManager) const {
     std::stringstream s;
     for (unsigned fieldIndex = 0; fieldIndex < fields.size(); fieldIndex++) {
         if (!fields[fieldIndex]->getName().empty()) {
-            s << generateGetterForStructRepresentation(fieldIndex);
-            s << generateSetterForStructRepresentation(fieldIndex);
+            s << generateGetterForStructRepresentation(fieldIndex,
+                                                       locationManager);
+            s << generateSetterForStructRepresentation(fieldIndex,
+                                                       locationManager);
         }
     }
     return s.str();
 }
 
-std::string Struct::generateHelperClassMethodsForArrayRepresentation() const {
+std::string Struct::generateHelperClassMethodsForArrayRepresentation(
+    const LocationManager &locationManager) const {
     std::stringstream s;
     for (unsigned fieldIndex = 0; fieldIndex < fields.size(); fieldIndex++) {
         if (!fields[fieldIndex]->getName().empty()) {
-            s << generateGetterForArrayRepresentation(fieldIndex);
-            s << generateSetterForArrayRepresentation(fieldIndex);
+            s << generateGetterForArrayRepresentation(fieldIndex,
+                                                      locationManager);
+            s << generateSetterForArrayRepresentation(fieldIndex,
+                                                      locationManager);
         }
     }
     return s.str();
@@ -85,7 +92,7 @@ std::string Struct::generateHelperClassMethodsForArrayRepresentation() const {
 
 std::string Struct::getTypeName() const { return "struct " + name; }
 
-std::string Struct::str() const {
+std::string Struct::str(const LocationManager &locationManager) const {
     std::stringstream ss;
     ss << "native.CStruct" << std::to_string(fields.size()) << "[";
 
@@ -95,12 +102,12 @@ std::string Struct::str() const {
         std::vector<std::shared_ptr<const Struct>>
             structTypesThatShouldBeReplaced = shouldFieldBreakCycle(field);
         if (structTypesThatShouldBeReplaced.empty()) {
-            ss << field->getType()->str();
+            ss << field->getType()->str(locationManager);
         } else {
             /* field type is changed to avoid cyclic types in generated code */
             std::shared_ptr<const Type> typeReplacement = getTypeReplacement(
                 field->getType(), structTypesThatShouldBeReplaced);
-            ss << typeReplacement->str();
+            ss << typeReplacement->str(locationManager);
         }
         sep = ", ";
     }
@@ -121,11 +128,11 @@ bool Struct::operator==(const Type &other) const {
     return false;
 }
 
-std::string
-Struct::generateSetterForStructRepresentation(unsigned fieldIndex) const {
+std::string Struct::generateSetterForStructRepresentation(
+    unsigned fieldIndex, const LocationManager &locationManager) const {
     std::shared_ptr<Field> field = fields[fieldIndex];
     std::string setter = handleReservedWords(field->getName(), "_=");
-    std::string parameterType = field->getType()->str();
+    std::string parameterType = field->getType()->str(locationManager);
     std::string value = "value";
     std::vector<std::shared_ptr<const Struct>> structTypesThatShouldBeReplaced =
         shouldFieldBreakCycle(field);
@@ -133,7 +140,7 @@ Struct::generateSetterForStructRepresentation(unsigned fieldIndex) const {
         /* field type is changed to avoid cyclic types in generated code */
         std::shared_ptr<const Type> typeReplacement = getTypeReplacement(
             field->getType(), structTypesThatShouldBeReplaced);
-        value = value + ".cast[" + typeReplacement->str() + "]";
+        value = value + ".cast[" + typeReplacement->str(locationManager) + "]";
     } else if (isAliasForType<ArrayType>(field->getType().get()) ||
                isAliasForType<Struct>(field->getType().get())) {
         parameterType = "native.Ptr[" + parameterType + "]";
@@ -145,19 +152,19 @@ Struct::generateSetterForStructRepresentation(unsigned fieldIndex) const {
     return s.str();
 }
 
-std::string
-Struct::generateGetterForStructRepresentation(unsigned fieldIndex) const {
+std::string Struct::generateGetterForStructRepresentation(
+    unsigned fieldIndex, const LocationManager &locationManager) const {
     std::shared_ptr<Field> field = fields[fieldIndex];
     std::string getter = handleReservedWords(field->getName());
-    std::string returnType = field->getType()->str();
+    std::string returnType = field->getType()->str(locationManager);
     std::string methodBody = "p._" + std::to_string(fieldIndex + 1);
     if (isAliasForType<ArrayType>(field->getType().get()) ||
         isAliasForType<Struct>(field->getType().get())) {
         returnType = "native.Ptr[" + returnType + "]";
     } else if (!shouldFieldBreakCycle(field).empty()) {
         /* field type is changed to avoid cyclic types in generated code */
-        methodBody =
-            "(!" + methodBody + ").cast[" + field->getType()->str() + "]";
+        methodBody = "(!" + methodBody + ").cast[" +
+                     field->getType()->str(locationManager) + "]";
     } else {
         methodBody = "!" + methodBody;
     }
@@ -171,11 +178,11 @@ bool Struct::isRepresentedAsStruct() const {
     return fields.size() <= SCALA_NATIVE_MAX_STRUCT_FIELDS && !hasBitField;
 }
 
-std::string
-Struct::generateSetterForArrayRepresentation(unsigned int fieldIndex) const {
+std::string Struct::generateSetterForArrayRepresentation(
+    unsigned int fieldIndex, const LocationManager &locationManager) const {
     std::shared_ptr<Field> field = fields[fieldIndex];
     std::string setter = handleReservedWords(field->getName(), "_=");
-    std::string parameterType = field->getType()->str();
+    std::string parameterType = field->getType()->str(locationManager);
     std::string value = "value";
     std::string castedField = "p._1";
 
@@ -185,17 +192,18 @@ Struct::generateSetterForArrayRepresentation(unsigned int fieldIndex) const {
         castedField =
             "(" + castedField + " + " + std::to_string(offsetInBytes) + ")";
     }
-    castedField = "!" + castedField + ".cast[" + pointerToFieldType.str() + "]";
+    castedField = "!" + castedField + ".cast[" +
+                  pointerToFieldType.str(locationManager) + "]";
     std::vector<std::shared_ptr<const Struct>> structTypesThatShouldBeReplaced =
         shouldFieldBreakCycle(field);
     if (!structTypesThatShouldBeReplaced.empty()) {
         /* field type is changed to avoid cyclic types in generated code */
         std::shared_ptr<const Type> typeReplacement = getTypeReplacement(
             field->getType(), structTypesThatShouldBeReplaced);
-        value = value + ".cast[" + typeReplacement->str() + "]";
+        value = value + ".cast[" + typeReplacement->str(locationManager) + "]";
     } else if (isAliasForType<ArrayType>(field->getType().get()) ||
                isAliasForType<Struct>(field->getType().get())) {
-        parameterType = pointerToFieldType.str();
+        parameterType = pointerToFieldType.str(locationManager);
         value = "!" + value;
     }
     std::stringstream s;
@@ -205,8 +213,8 @@ Struct::generateSetterForArrayRepresentation(unsigned int fieldIndex) const {
     return s.str();
 }
 
-std::string
-Struct::generateGetterForArrayRepresentation(unsigned fieldIndex) const {
+std::string Struct::generateGetterForArrayRepresentation(
+    unsigned fieldIndex, const LocationManager &locationManager) const {
     std::shared_ptr<Field> field = fields[fieldIndex];
     std::string getter = handleReservedWords(field->getName());
     std::string returnType;
@@ -219,19 +227,20 @@ Struct::generateGetterForArrayRepresentation(unsigned fieldIndex) const {
     } else {
         methodBody = "p._1";
     }
-    methodBody = methodBody + ".cast[" + pointerToFieldType.str() + "]";
+    methodBody =
+        methodBody + ".cast[" + pointerToFieldType.str(locationManager) + "]";
 
     if (isAliasForType<ArrayType>(field->getType().get()) ||
         isAliasForType<Struct>(field->getType().get())) {
-        returnType = pointerToFieldType.str();
+        returnType = pointerToFieldType.str(locationManager);
     } else if (!shouldFieldBreakCycle(field).empty()) {
         /* field type is changed to avoid cyclic types in generated code */
-        methodBody =
-            "(!" + methodBody + ").cast[" + field->getType()->str() + "]";
-        returnType = field->getType()->str();
+        methodBody = "(!" + methodBody + ").cast[" +
+                     field->getType()->str(locationManager) + "]";
+        returnType = field->getType()->str(locationManager);
     } else {
         methodBody = "!" + methodBody;
-        returnType = field->getType()->str();
+        returnType = field->getType()->str(locationManager);
     }
     std::stringstream s;
     s << "    def " << getter << ": " << returnType << " = " << methodBody

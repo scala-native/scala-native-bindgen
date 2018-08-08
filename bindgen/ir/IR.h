@@ -153,21 +153,31 @@ class IR {
     /**
      * @return true if the type will be printed.
      *         Following types are not printed:
+     *         - Types that should be imported from other bindings
      *         - Unused types from included headers
-     *         - Unused typedefs from main header if they reference an opaque
-     *           type (if such typedef is used then true is returned but error
-     *           message is printed when bindings are generated)
      */
     bool
     shouldOutput(const std::shared_ptr<const LocatableType> &type,
                  std::vector<std::shared_ptr<const Type>> &visitedTypes) const;
 
     /**
-     * @tparam T Struct or Union
+     * @return true if typedef will be printed.
+     *         Following typedefs are not printed:
+     *         - TypeDefs that should be imported from other bindings
+     *         - Unused typedefs from included headers
+     *         - Unused typedefs from main header if they reference an opaque
+     *           type
+     */
+    bool shouldOutputTypeDef(
+        const std::shared_ptr<const TypeDef> &typeDef,
+        std::vector<std::shared_ptr<const Type>> &visitedTypes) const;
+
+    /**
+     * @tparam T one of LocatableType
      */
     template <typename T>
-    bool hasOutputtedDeclaration(
-        const std::vector<std::shared_ptr<T>> &declarations) const;
+    bool
+    shouldOutputType(const std::vector<std::shared_ptr<T>> &declarations) const;
 
     std::string libName;    // name of the library
     std::string linkName;   // name of the library to link with

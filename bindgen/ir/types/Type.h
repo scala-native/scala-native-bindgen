@@ -1,6 +1,7 @@
 #ifndef SCALA_NATIVE_BINDGEN_TYPE_H
 #define SCALA_NATIVE_BINDGEN_TYPE_H
 
+#include "../LocationManager.h"
 #include <memory>
 #include <string>
 #include <vector>
@@ -21,7 +22,7 @@ struct CycleNode {
  */
 class Type : public std::enable_shared_from_this<Type> {
   public:
-    virtual std::string str() const = 0;
+    virtual std::string str(const LocationManager &locationManager) const = 0;
 
     /**
      * @param type search type.

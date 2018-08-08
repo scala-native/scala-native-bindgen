@@ -49,6 +49,13 @@ static inline bool startsWith(const std::string &str,
     return str.substr(0, prefix.size()) == prefix;
 }
 
+/**
+ * @return true if str ends with given prefix
+ */
+static inline bool endsWith(const std::string &str, const std::string &suffix) {
+    return str.substr(str.length() - suffix.size(), str.length()) == suffix;
+}
+
 template <typename T, typename PT> static inline bool isInstanceOf(PT *type) {
     auto *p = dynamic_cast<const T *>(type);
     return p != nullptr;

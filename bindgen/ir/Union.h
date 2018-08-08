@@ -16,7 +16,8 @@ class Union : public Record, public ArrayType {
 
     std::shared_ptr<TypeDef> generateTypeDef() override;
 
-    std::string generateHelperClass() const override;
+    std::string
+    generateHelperClass(const LocationManager &locationManager) const override;
 
     bool operator==(const Type &other) const override;
 
@@ -27,9 +28,11 @@ class Union : public Record, public ArrayType {
         std::vector<std::shared_ptr<const Type>> &visitedTypes) const override;
 
   private:
-    std::string generateGetter(const std::shared_ptr<Field> &field) const;
+    std::string generateGetter(const std::shared_ptr<Field> &field,
+                               const LocationManager &locationManager) const;
 
-    std::string generateSetter(const std::shared_ptr<Field> &field) const;
+    std::string generateSetter(const std::shared_ptr<Field> &field,
+                               const LocationManager &locationManager) const;
 };
 
 #endif // SCALA_NATIVE_BINDGEN_UNION_H

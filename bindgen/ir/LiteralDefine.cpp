@@ -4,11 +4,10 @@ LiteralDefine::LiteralDefine(std::string name, std::string literal,
                              std::shared_ptr<const Type> type)
     : Define(std::move(name)), literal(std::move(literal)), type(type) {}
 
-llvm::raw_ostream &operator<<(llvm::raw_ostream &s,
-                              const LiteralDefine &literalDefine) {
-    s << "  val " << literalDefine.name << ": " << literalDefine.type->str()
-      << " = " << literalDefine.literal << "\n";
-    return s;
+std::string
+LiteralDefine::getDefinition(const LocationManager &locationManager) const {
+    return "  val " + name + ": " + type->str(locationManager) + " = " +
+           literal + "\n";
 }
 
 bool LiteralDefine::usesType(

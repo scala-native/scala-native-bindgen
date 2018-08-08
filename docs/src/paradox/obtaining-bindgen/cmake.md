@@ -4,6 +4,7 @@ Building `scala-native-bindgen` requires the following tools and libraries:
 
  - [CMake] version 3.9 or higher
  - [LLVM] and [Clang] version 5.0 or 6.0.
+ - [nlohmann/json] version 3.1.2 or higher
 
 ```sh
 # On apt-based systems
@@ -52,3 +53,4 @@ sbt test
  [LLVM]: https://llvm.org/
  [Clang]: https://clang.llvm.org/
  [Scala Native setup guide]: http://www.scala-native.org/en/latest/user/setup.html
+ [nlohmann/json]: https://github.com/nlohmann/json

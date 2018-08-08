@@ -8,8 +8,7 @@ class Variable : public TypeAndName {
   public:
     Variable(const std::string &name, std::shared_ptr<const Type> type);
 
-    friend llvm::raw_ostream &operator<<(llvm::raw_ostream &s,
-                                         const Variable &variable);
+    std::string getDefinition(const LocationManager &locationManager) const;
 
     bool hasIllegalUsageOfOpaqueType() const;
 };

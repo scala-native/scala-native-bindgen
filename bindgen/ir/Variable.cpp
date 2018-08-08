@@ -4,10 +4,10 @@
 Variable::Variable(const std::string &name, std::shared_ptr<const Type> type)
     : TypeAndName(name, type) {}
 
-llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const Variable &variable) {
-    s << "  val " << variable.getName() << ": " << variable.getType()->str()
-      << " = native.extern\n";
-    return s;
+std::string
+Variable::getDefinition(const LocationManager &locationManager) const {
+    return "  val " + name + ": " + type->str(locationManager) +
+           " = native.extern\n";
 }
 
 bool Variable::hasIllegalUsageOfOpaqueType() const {

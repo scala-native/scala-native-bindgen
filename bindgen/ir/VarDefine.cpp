@@ -3,12 +3,11 @@
 VarDefine::VarDefine(std::string name, std::shared_ptr<Variable> variable)
     : Define(std::move(name)), variable(variable) {}
 
-llvm::raw_ostream &operator<<(llvm::raw_ostream &s,
-                              const VarDefine &varDefine) {
-    s << "  @name(\"" << varDefine.variable->getName() << "\")\n"
-      << "  val " << varDefine.getName() << ": "
-      << varDefine.variable->getType()->str() << " = native.extern\n";
-    return s;
+std::string
+VarDefine::getDefinition(const LocationManager &locationManager) const {
+    return "  @name(\"" + variable->getName() + "\")\n" + "  val " + name +
+           ": " + variable->getType()->str(locationManager) +
+           " = native.extern\n";
 }
 
 bool VarDefine::hasIllegalUsageOfOpaqueType() const {

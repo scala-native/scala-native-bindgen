@@ -34,6 +34,7 @@ class Bindgen(val executable: File) {
             withArgs("--exclude-prefix", excludePrefix) ++
             withArgs("--extra-arg", extraArgs) ++
             withArgs("--extra-arg-before", extraArgsBefore) ++
+            withArgs("--binding-config", bindingConfig.map(_.getAbsolutePath)) ++
             Seq(header.getAbsolutePath, "--")
 
         val cmd    = Seq(executable.getAbsolutePath) ++ options
