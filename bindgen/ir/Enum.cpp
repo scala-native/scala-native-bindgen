@@ -15,9 +15,8 @@ Enum::Enum(std::string name, std::string type,
 
 bool Enum::isAnonymous() const { return name.empty(); }
 
-std::shared_ptr<TypeDef> Enum::generateTypeDef() {
-    return std::make_shared<TypeDef>(getTypeName(), shared_from_this(),
-                                     nullptr);
+std::string Enum::getDefinition() {
+    return "  type " + getTypeAlias() + " = " + PrimitiveType::str() + "\n";
 }
 
 llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const Enum &e) {
@@ -51,7 +50,14 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const Enum &e) {
 
 std::string Enum::getName() const { return name; }
 
-std::string Enum::getTypeName() const {
+std::string Enum::getTypeAlias() const {
     assert(!isAnonymous());
-    return "enum " + name;
+    return "enum_" + name;
+}
+
+std::string Enum::str(const LocationManager &locationManager) const {
+    if (locationManager.isImported(*location)) {
+        return locationManager.getImportedType(*location, getTypeAlias());
+    }
+    return getTypeAlias();
 }

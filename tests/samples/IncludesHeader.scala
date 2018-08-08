@@ -6,11 +6,11 @@ import scala.scalanative.native._
 @native.link("bindgentests")
 @native.extern
 object IncludesHeader {
+  type enum_semester = native.CUnsignedInt
   type size = native.CInt
   type struct_metadata = native.CStruct2[native.CUnsignedInt, native.CString]
   type metadata = struct_metadata
   type struct_document = native.CStruct1[metadata]
-  type enum_semester = native.CUnsignedInt
   type struct_courseInfo = native.CStruct2[native.CString, enum_semester]
   def getSize(d: native.Ptr[struct_document]): size = native.extern
 }

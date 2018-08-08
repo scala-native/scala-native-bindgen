@@ -34,6 +34,11 @@ bool TreeVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
 bool TreeVisitor::VisitTypedefDecl(clang::TypedefDecl *tpdef) {
     std::string name = tpdef->getName();
 
+    if (isAliasForAnonymousEnum(tpdef)) {
+        /* typedef was already created */
+        return true;
+    }
+
     std::shared_ptr<Type> type =
         typeTranslator.translate(tpdef->getUnderlyingType());
     if (type) {
@@ -42,25 +47,40 @@ bool TreeVisitor::VisitTypedefDecl(clang::TypedefDecl *tpdef) {
     return true;
 }
 
-bool TreeVisitor::VisitEnumDecl(clang::EnumDecl *enumdecl) {
-    std::string name = enumdecl->getNameAsString();
+bool TreeVisitor::isAliasForAnonymousEnum(clang::TypedefDecl *tpdef) const {
+    clang::QualType underlyingType = tpdef->getUnderlyingType();
+    if (!underlyingType->isEnumeralType()) {
+        return false;
+    }
+    const clang::EnumType *enumType = underlyingType->getAs<clang::EnumType>();
+    return enumType->getDecl()->getTypedefNameForAnonDecl();
+}
 
-    if (name.empty() && enumdecl->getTypedefNameForAnonDecl()) {
-        name = enumdecl->getTypedefNameForAnonDecl()->getNameAsString();
+bool TreeVisitor::VisitEnumDecl(clang::EnumDecl *enumDecl) {
+    std::string name = enumDecl->getNameAsString();
+
+    clang::TypedefNameDecl *typedefName = enumDecl->getTypedefNameForAnonDecl();
+    if (name.empty() && typedefName) {
+        name = typedefName->getNameAsString();
     }
 
     std::vector<Enumerator> enumerators;
 
-    for (const clang::EnumConstantDecl *en : enumdecl->enumerators()) {
+    for (const clang::EnumConstantDecl *en : enumDecl->enumerators()) {
         int64_t value = en->getInitVal().getSExtValue();
         enumerators.emplace_back(en->getNameAsString(), value);
     }
 
     std::string scalaType = typeTranslator.getTypeFromTypeMap(
-        enumdecl->getIntegerType().getUnqualifiedType().getAsString());
+        enumDecl->getIntegerType().getUnqualifiedType().getAsString());
 
-    ir.addEnum(name, scalaType, std::move(enumerators),
-               typeTranslator.getLocation(enumdecl));
+    std::shared_ptr<Enum> e =
+        ir.addEnum(name, scalaType, std::move(enumerators),
+                   typeTranslator.getLocation(enumDecl));
+
+    if (typedefName) {
+        ir.addTypeDef(name, e, typeTranslator.getLocation(typedefName));
+    }
 
     return true;
 }

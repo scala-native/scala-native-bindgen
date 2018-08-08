@@ -11,6 +11,8 @@ class TreeVisitor : public clang::RecursiveASTVisitor<TreeVisitor> {
     TypeTranslator typeTranslator;
     IR &ir;
 
+    bool isAliasForAnonymousEnum(clang::TypedefDecl *tpdef) const;
+
   public:
     TreeVisitor(clang::CompilerInstance *CI, IR &ir)
         : astContext(&(CI->getASTContext())), typeTranslator(astContext, ir),
@@ -20,7 +22,7 @@ class TreeVisitor : public clang::RecursiveASTVisitor<TreeVisitor> {
 
     virtual bool VisitFunctionDecl(clang::FunctionDecl *func);
     virtual bool VisitTypedefDecl(clang::TypedefDecl *tpdef);
-    virtual bool VisitEnumDecl(clang::EnumDecl *enumdecl);
+    virtual bool VisitEnumDecl(clang::EnumDecl *enumDecl);
     virtual bool VisitRecordDecl(clang::RecordDecl *record);
     virtual bool VisitVarDecl(clang::VarDecl *VD);
 };

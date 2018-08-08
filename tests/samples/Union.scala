@@ -6,9 +6,9 @@ import scala.scalanative.native._
 @native.link("bindgentests")
 @native.extern
 object Union {
+  type enum_union_op = native.CUnsignedInt
   type struct_s = native.CStruct1[native.CInt]
   type union_values = native.CArray[Byte, native.Nat._8]
-  type enum_union_op = native.CUnsignedInt
   def union_get_sizeof(): native.CInt = native.extern
   def union_test_int(v: native.Ptr[union_values], op: enum_union_op, value: native.CInt): native.CInt = native.extern
   def union_test_long(v: native.Ptr[union_values], op: enum_union_op, value: native.CLong): native.CInt = native.extern

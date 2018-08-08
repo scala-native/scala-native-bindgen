@@ -6,10 +6,11 @@ import scala.scalanative.native._
 @native.link("bindgentests")
 @native.extern
 object Struct {
+  type enum_pointIndex = native.CUnsignedInt
+  type enum_struct_op = native.CUnsignedInt
   type struct_point = native.CStruct2[native.CInt, native.CInt]
   type point = struct_point
   type struct_points = native.CStruct2[struct_point, point]
-  type enum_pointIndex = native.CUnsignedInt
   type point_s = native.Ptr[struct_point]
   type struct_bigStruct = native.CArray[Byte, native.Nat.Digit[native.Nat._1, native.Nat.Digit[native.Nat._1, native.Nat._2]]]
   type struct_anonymous_0 = native.CStruct2[native.CChar, native.CInt]
@@ -17,7 +18,6 @@ object Struct {
   type struct_packedStruct = native.CStruct1[native.CChar]
   type struct_bitFieldStruct = native.CArray[Byte, native.Nat._2]
   type struct_bitFieldOffsetDivByEight = native.CArray[Byte, native.Nat._4]
-  type enum_struct_op = native.CUnsignedInt
   def setPoints(points: native.Ptr[struct_points], x1: native.CInt, y1: native.CInt, x2: native.CInt, y2: native.CInt): Unit = native.extern
   def getPoint(points: native.Ptr[struct_points], pointIndex: enum_pointIndex): native.CInt = native.extern
   def createPoint(): native.Ptr[struct_point] = native.extern

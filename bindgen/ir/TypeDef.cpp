@@ -1,6 +1,5 @@
 #include "TypeDef.h"
 #include "../Utils.h"
-#include "Enum.h"
 #include "Struct.h"
 #include "Union.h"
 #include <sstream>
@@ -82,12 +81,7 @@ std::shared_ptr<Location> TypeDef::getLocation() const {
     if (recordPointer) {
         return recordPointer->getLocation();
     }
-    auto enumPointer = std::dynamic_pointer_cast<const Enum>(type);
-    if (enumPointer) {
-        return enumPointer->getLocation();
-    }
-    throw std::logic_error(
-        "Generated typedef may reference only struct, union or enum");
+    throw std::logic_error("Generated typedef may reference only records.");
 }
 
 bool TypeDef::hasLocation() const { return location || type; }
@@ -105,8 +99,7 @@ bool TypeDef::findAllCycles(
 }
 
 std::shared_ptr<const Type> TypeDef::unrollTypedefs() const {
-    if (!type || isInstanceOf<Struct>(type.get()) ||
-        isInstanceOf<Union>(type.get()) || isInstanceOf<Enum>(type.get())) {
+    if (isGenerated()) {
         return std::make_shared<TypeDef>(name, type, nullptr);
     }
     return type->unrollTypedefs();
@@ -115,9 +108,7 @@ std::shared_ptr<const Type> TypeDef::unrollTypedefs() const {
 std::shared_ptr<const Type>
 TypeDef::replaceType(const std::shared_ptr<const Type> &type,
                      const std::shared_ptr<const Type> &replacement) const {
-    if (!this->type || isInstanceOf<Struct>(this->type.get()) ||
-        isInstanceOf<Union>(this->type.get()) ||
-        isInstanceOf<Enum>(this->type.get())) {
+    if (isGenerated()) {
         return std::make_shared<TypeDef>(name, this->type, nullptr);
     }
     if (*this->type == *type) {
@@ -128,3 +119,8 @@ TypeDef::replaceType(const std::shared_ptr<const Type> &type,
 }
 
 bool TypeDef::wrapperForOpaqueType() const { return !type; }
+
+bool TypeDef::isGenerated() const {
+    return !this->type || isInstanceOf<Struct>(this->type.get()) ||
+           isInstanceOf<Union>(this->type.get());
+}

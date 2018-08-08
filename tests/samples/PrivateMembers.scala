@@ -6,14 +6,14 @@ import scala.scalanative.native._
 @native.link("bindgentests")
 @native.extern
 object PrivateMembers {
+  type enum___privateEnum = native.CUnsignedInt
+  type enum_enumWithPrivateMembers = native.CUnsignedInt
   type pid_t = native.CInt
   type __private_type = native.CInt
   type struct_structWithPrivateType = native.CStruct2[native.CInt, __private_type]
   type union___unionWithPrivateName = native.CArray[Byte, native.Nat._4]
   type struct_structWithPrivateStruct = native.CStruct1[native.Ptr[struct_structWithPrivateType]]
   type struct_normalStruct = native.CStruct1[native.CInt]
-  type enum___privateEnum = native.CUnsignedInt
-  type enum_enumWithPrivateMembers = native.CUnsignedInt
   type struct_privateStructWithTypedef = native.CStruct1[native.Ptr[__private_type]]
   type privateStructWithTypedef = struct_privateStructWithTypedef
   type privateStructWithTypedefPtr = native.Ptr[struct_privateStructWithTypedef]

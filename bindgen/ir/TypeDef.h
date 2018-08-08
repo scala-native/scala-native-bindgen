@@ -47,9 +47,12 @@ class TypeDef : public TypeAndName, public LocatableType {
 
     /**
      * @return location of the typedef is it is not generated otherwise
-     *         location of referenced type (struct, union or enum).
+     *         location of referenced record.
      */
     std::shared_ptr<Location> getLocation() const override;
+
+  private:
+    bool isGenerated() const;
 };
 
 #endif // SCALA_NATIVE_BINDGEN_TYPEDEF_H

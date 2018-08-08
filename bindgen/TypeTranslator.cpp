@@ -82,7 +82,7 @@ TypeTranslator::translatePointer(const clang::QualType &pte) {
 }
 
 std::shared_ptr<Type>
-TypeTranslator::translateRecordOrEnum(const clang::QualType &qtpe) {
+TypeTranslator::translateNonAnonymousRecord(const clang::QualType &qtpe) {
     std::string name = qtpe.getUnqualifiedType().getAsString();
 
     /* If the struct was already declared then there is a TypeDef instance
@@ -118,7 +118,7 @@ TypeTranslator::translateRecord(const clang::QualType &qtpe) {
         }
         return nullptr;
     }
-    return translateRecordOrEnum(qtpe);
+    return translateNonAnonymousRecord(qtpe);
 }
 
 std::shared_ptr<Type>
@@ -243,10 +243,17 @@ TypeTranslator::addStructDefinition(clang::RecordDecl *record,
 
 std::shared_ptr<Type>
 TypeTranslator::translateEnum(const clang::QualType &type) {
+    clang::EnumDecl *enumDecl = type->getAs<clang::EnumType>()->getDecl();
     if (type->hasUnnamedOrLocalType()) {
-        clang::EnumDecl *enumDecl = type->getAs<clang::EnumType>()->getDecl();
         return std::make_shared<PrimitiveType>(getTypeFromTypeMap(
             enumDecl->getIntegerType().getUnqualifiedType().getAsString()));
     }
-    return translateRecordOrEnum(type);
+    std::string name = enumDecl->getNameAsString();
+
+    if (name.empty()) {
+        name = enumDecl->getTypedefNameForAnonDecl()->getNameAsString();
+        return ir.getTypeDefWithName(name);
+    }
+    assert(!name.empty());
+    return ir.getEnumWithName(name);
 }
