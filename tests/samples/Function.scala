@@ -13,9 +13,9 @@ object Function {
   def void_arg(): native.CFloat = native.extern
   def one_arg(a: native.CInt): native.CChar = native.extern
   def two_args(a: native.CFloat, b: native.CInt): native.Ptr[Byte] = native.extern
-  def anonymous_args(anonymous0: native.CFloat, anonymous1: native.CInt): native.CDouble = native.extern
+  def anonymous_args(p0: native.CFloat, p1: native.CInt): native.CDouble = native.extern
   def variadic_args(a: native.CDouble, varArgs: native.CString, varArgs0: native.CVararg*): native.CDouble = native.extern
-  def acceptsArray(anonymous0: native.Ptr[native.CInt]): Unit = native.extern
+  def acceptsArray(p0: native.Ptr[native.CInt]): Unit = native.extern
 }
 
 import Function._
@@ -34,4 +34,3 @@ object FunctionHelpers {
     def a_=(value: native.CInt): Unit = !p.cast[native.Ptr[native.CInt]] = value
   }
 }
-

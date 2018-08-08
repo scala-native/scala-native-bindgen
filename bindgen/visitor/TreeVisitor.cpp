@@ -18,7 +18,7 @@ bool TreeVisitor::VisitFunctionDecl(clang::FunctionDecl *func) {
         std::string pname = parm->getNameAsString();
 
         if (pname.empty()) {
-            pname = "anonymous" + std::to_string(anonCounter++);
+            pname = "p" + std::to_string(anonCounter++);
         }
 
         std::shared_ptr<Type> ptype = typeTranslator.translate(parm->getType());
