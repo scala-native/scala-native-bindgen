@@ -19,9 +19,9 @@ object PrivateMembers {
   type privateStructWithTypedefPtr = native.Ptr[struct_privateStructWithTypedef]
   def getTypeThatUsesPrivateTypes(): pid_t = native.extern
   def getPrivateType(): native.Ptr[__private_type] = native.extern
-  def usesPrivateUnion(anonymous0: native.Ptr[union___unionWithPrivateName]): Unit = native.extern
-  def usesPrivateStruct(anonymous0: native.Ptr[struct_structWithPrivateType], anonymous1: native.Ptr[struct_normalStruct]): Unit = native.extern
-  def usesPrivateEnum(anonymous0: native.Ptr[enum___privateEnum]): Unit = native.extern
+  def usesPrivateUnion(p0: native.Ptr[union___unionWithPrivateName]): Unit = native.extern
+  def usesPrivateStruct(p0: native.Ptr[struct_structWithPrivateType], p1: native.Ptr[struct_normalStruct]): Unit = native.extern
+  def usesPrivateEnum(p0: native.Ptr[enum___privateEnum]): Unit = native.extern
 }
 
 import PrivateMembers._

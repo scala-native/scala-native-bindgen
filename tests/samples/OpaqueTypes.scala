@@ -23,10 +23,10 @@ object OpaqueTypes {
   type functionPointerWithPointerToOpaqueType = native.CFunctionPtr1[native.Ptr[native.Ptr[struct_undefinedStruct]], native.Ptr[undefinedUnion]]
   def move(point: native.Ptr[struct_point], x: native.CInt, y: native.CInt): native.Ptr[struct_point] = native.extern
   def processPoints(p: native.Ptr[points]): native.Ptr[union_u] = native.extern
-  def usePointerToUndefinedStruct(anonymous0: native.Ptr[struct_undefinedStruct]): Unit = native.extern
+  def usePointerToUndefinedStruct(p0: native.Ptr[struct_undefinedStruct]): Unit = native.extern
   def fun(): native.Ptr[native.Ptr[undefinedUnion]] = native.extern
   def returnPointerToAliasOfUndefinedStruct(): native.Ptr[aliasForUndefinedStruct] = native.extern
-  def usePointerToUndefinedIncludedStruct(anonymous0: native.Ptr[undefinedIncludedStruct]): Unit = native.extern
+  def usePointerToUndefinedIncludedStruct(p0: native.Ptr[undefinedIncludedStruct]): Unit = native.extern
 }
 
 import OpaqueTypes._

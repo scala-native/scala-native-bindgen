@@ -8,7 +8,7 @@ import scala.scalanative.native._
 object ReuseBindings {
   type aliasForBigStruct = org.scalanative.bindgen.samples.Struct.struct_bigStruct
   type struct_usesImportedEnum = native.CStruct1[org.scalanative.bindgen.samples.Struct.enum_pointIndex]
-  def useStruct(anonymous0: native.Ptr[org.scalanative.bindgen.samples.Struct.struct_point]): Unit = native.extern
+  def useStruct(p0: native.Ptr[org.scalanative.bindgen.samples.Struct.struct_point]): Unit = native.extern
   def returnTypedef_point_s(): native.Ptr[org.scalanative.bindgen.samples.Struct.struct_point] = native.extern
   def returnTypedef_point(): native.Ptr[org.scalanative.bindgen.samples.Struct.point] = native.extern
   def readBook(book: native.Ptr[org.scalanative.bindgen.samples.CustomNames.book]): Unit = native.extern
