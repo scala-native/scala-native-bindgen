@@ -29,12 +29,9 @@ class IR {
                                         std::shared_ptr<Type> type,
                                         std::shared_ptr<Location> location);
 
-    /**
-     * @return type alias for the enum
-     */
-    void addEnum(std::string name, const std::string &type,
-                 std::vector<Enumerator> enumerators,
-                 std::shared_ptr<Location> location);
+    std::shared_ptr<Enum> addEnum(std::string name, const std::string &type,
+                                  std::vector<Enumerator> enumerators,
+                                  std::shared_ptr<Location> location);
 
     std::shared_ptr<TypeDef>
     addStruct(std::string name, std::vector<std::shared_ptr<Field>> fields,
@@ -75,6 +72,8 @@ class IR {
     std::string getDefineForVar(const std::string &varName) const;
 
     std::shared_ptr<TypeDef> getTypeDefWithName(const std::string &name) const;
+
+    std::shared_ptr<Enum> getEnumWithName(const std::string &name) const;
 
   private:
     /**

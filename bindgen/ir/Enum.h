@@ -27,13 +27,15 @@ class Enum : public PrimitiveType, public LocatableType {
 
     bool isAnonymous() const;
 
-    std::shared_ptr<TypeDef> generateTypeDef();
+    std::string getDefinition();
 
     std::string getName() const;
 
     friend llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const Enum &e);
 
-    std::string getTypeName() const;
+    std::string getTypeAlias() const;
+
+    std::string str(const LocationManager &locationManager) const override;
 
   private:
     std::string name; // might be empty

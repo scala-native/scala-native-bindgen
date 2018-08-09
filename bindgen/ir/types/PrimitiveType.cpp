@@ -4,8 +4,10 @@
 
 PrimitiveType::PrimitiveType(std::string type) : type(std::move(type)) {}
 
+std::string PrimitiveType::str() const { return handleReservedWords(type); }
+
 std::string PrimitiveType::str(const LocationManager &locationManager) const {
-    return handleReservedWords(type);
+    return str();
 }
 
 std::string PrimitiveType::getType() const { return type; }

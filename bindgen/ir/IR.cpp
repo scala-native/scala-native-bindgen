@@ -22,15 +22,15 @@ std::shared_ptr<TypeDef> IR::addTypeDef(std::string name,
     return typeDefs.back();
 }
 
-void IR::addEnum(std::string name, const std::string &type,
-                 std::vector<Enumerator> enumerators,
-                 std::shared_ptr<Location> location) {
+std::shared_ptr<Enum> IR::addEnum(std::string name, const std::string &type,
+                                  std::vector<Enumerator> enumerators,
+                                  std::shared_ptr<Location> location) {
     std::shared_ptr<Enum> e = std::make_shared<Enum>(
         std::move(name), type, std::move(enumerators), std::move(location));
+
     enums.push_back(e);
-    if (!e->isAnonymous()) {
-        typeDefs.push_back(e->generateTypeDef());
-    }
+
+    return e;
 }
 
 std::shared_ptr<TypeDef>
@@ -89,7 +89,7 @@ void IR::addVarDefine(std::string name, std::shared_ptr<Variable> variable) {
 bool IR::libObjEmpty() const {
     return functions.empty() && !shouldOutputType(typeDefs) &&
            !shouldOutputType(structs) && !shouldOutputType(unions) &&
-           varDefines.empty() && variables.empty();
+           varDefines.empty() && variables.empty() && enums.empty();
 }
 
 llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir) {
@@ -119,6 +119,13 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir) {
     }
 
     std::vector<std::shared_ptr<const Type>> visitedTypes;
+
+    for (const auto &e : ir.enums) {
+        visitedTypes.clear();
+        if (!e->isAnonymous() && ir.shouldOutput(e, visitedTypes)) {
+            s << e->getDefinition();
+        }
+    }
 
     for (const auto &typeDef : ir.typeDefs) {
         visitedTypes.clear();
@@ -433,6 +440,10 @@ std::shared_ptr<TypeDef> IR::getTypeDefWithName(const std::string &name) const {
      * 2. TreeVisitor visits struct/union declaration and it checks whether a
      *    TypeDef already exists for it.*/
     return getDeclarationWithName(typeDefs, name);
+}
+
+std::shared_ptr<Enum> IR::getEnumWithName(const std::string &name) const {
+    return getDeclarationWithName(enums, name);
 }
 
 template <typename T>

@@ -35,7 +35,8 @@ class TypeTranslator {
      */
     std::map<std::string, std::string> typeMap;
 
-    std::shared_ptr<Type> translateRecordOrEnum(const clang::QualType &qtpe);
+    std::shared_ptr<Type>
+    translateNonAnonymousRecord(const clang::QualType &qtpe);
 
     std::shared_ptr<Type> translateRecord(const clang::QualType &qtpe);
 
