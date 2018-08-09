@@ -18,7 +18,7 @@
 
 <meta name="description" content="docs">
 <link rel="shortcut icon" href="../assets/images/favicon.png">
-<title>Building with docker-compose · Scala Native Bindgen</title>
+<title>Integrating Bindings · Scala Native Bindgen</title>
 <link rel="stylesheet" href="../assets/stylesheets/application.7a4cdee3.css">
 <link rel="stylesheet" href="../assets/stylesheets/application-palette.792431c1.css">
 <link rel="stylesheet" href="../lib/material__tabs/dist/mdc.tabs.min.css">
@@ -57,7 +57,7 @@ data-md-color-accent="indigo"
 Scala Native Bindgen
 </span>
 <span class="md-header-nav__topic">
-Building with docker-compose
+Integrating Bindings
 </span>
 </div>
 </div>
@@ -140,10 +140,10 @@ kornilova-l/scala-native-bindgen
     <li><a href="../obtaining-bindgen/sbt-plugin.html" class="page">Using the sbt plugin</a></li>
     <li><a href="../obtaining-bindgen/docker-container.html" class="page">Using Docker Container</a></li>
     <li><a href="../obtaining-bindgen/cmake.html" class="page">Building with <code>CMake</code></a></li>
-    <li><a href="../obtaining-bindgen/docker-compose.html" class="active page">Building with <code>docker-compose</code></a></li>
+    <li><a href="../obtaining-bindgen/docker-compose.html" class="page">Building with <code>docker-compose</code></a></li>
   </ul></li>
   <li><a href="../command-line-usage/index.html" class="page">Command Line Usage</a></li>
-  <li><a href="../integrating-bindings/index.html" class="page">Integrating Bindings</a></li>
+  <li><a href="../integrating-bindings/index.html" class="active page">Integrating Bindings</a></li>
   <li><a href="../limitations/index.html" class="page">Limitations</a></li>
   <li><a href="../using-generated-bindings/README.html" class="page">Using Generated Bindings</a></li>
 </ul>
@@ -161,19 +161,27 @@ kornilova-l/scala-native-bindgen
 <div class="md-content">
 <article class="md-content__inner md-typeset">
 <div class="md-content__searchable">
-<h1><a href="#building-with-docker-compose" name="building-with-docker-compose" class="anchor"><span class="anchor-link"></span></a>Building with <code>docker-compose</code></h1>
-<p>You can use <a href="https://docs.docker.com/compose/">docker-compose</a> to build and test the program:</p>
-<pre class="prettyprint"><code class="language-sh"># Build the docker image with LLVM version 6.0.
-docker-compose build ubuntu-18.04-llvm-6.0
-# Build the bindgen tool and run the tests.
-docker-compose run --rm ubuntu-18.04-llvm-6.0 ./script/test.sh
-# Run the bindgen tool inside the container.
-docker-compose run --rm ubuntu-18.04-llvm-6.0 \
-    bindgen/target/scala-native-bindgen --name union tests/samples/Union.h --
+<h1><a href="#integrating-bindings" name="integrating-bindings" class="anchor"><span class="anchor-link"></span></a>Integrating Bindings</h1>
+<p>To reuse already generated bindings create a <code>config.json</code> file that defines which headers correspond to which Scala objects:</p>
+<pre class="prettyprint"><code class="language-json">{
+  &quot;_stdio.h&quot;: &quot;scala.scalanative.native.stdio&quot;,
+  &quot;/full/path/to/regexp4.h&quot;: &quot;bindings.regexp4&quot;
+}
 </code></pre>
+<p>Bindgen assumes that type names in header files match type names in generated binding (spaces in struct, union and enum names are replaces with underscores), but it is possible to specify custom names mapping:</p>
+<pre class="prettyprint"><code class="language-json">{
+  &quot;hiredis.h&quot;: {
+    &quot;object&quot;: &quot;bindings.hiredis.hiredis&quot;,
+    &quot;names&quot;: {
+      &quot;redisContext&quot;: &quot;Context&quot;
+    }
+  }
+}
+</code></pre>
+<p>Provide a path to <code>config.json</code> to bindgen using <code>--binding-config</code> command-line option or <code>NativeBinding.bindingConfig</code> sbt plugin option (see <a href="../obtaining-bindgen/sbt-plugin.html">Using the sbt plugin</a>).</p>
 </div>
 <div>
-<a href="https://github.com/kornilova-l/scala-native-bindgen/tree/master/docs/src/paradox/obtaining-bindgen/docker-compose.md" title="Edit this page" class="md-source-file md-edit">
+<a href="https://github.com/kornilova-l/scala-native-bindgen/tree/master/docs/src/paradox/integrating-bindings/index.md" title="Edit this page" class="md-source-file md-edit">
 Edit this page
 </a>
 </div>
@@ -189,7 +197,7 @@ Edit this page
 <footer class="md-footer">
 <div class="md-footer-nav">
 <nav class="md-footer-nav__inner md-grid">
-<a href="../obtaining-bindgen/cmake.html" title="Building with CMake" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+<a href="../command-line-usage/index.html" title="Command Line Usage" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
 <div class="md-flex__cell md-flex__cell--shrink">
 <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
 </div>
@@ -198,17 +206,17 @@ Edit this page
 <span class="md-footer-nav__direction">
 Previous
 </span>
-Building with CMake
+Command Line Usage
 </span>
 </div>
 </a>
-<a href="../command-line-usage/index.html" title="Command Line Usage" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+<a href="../limitations/index.html" title="Limitations" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
 <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
 <span class="md-flex__ellipsis">
 <span class="md-footer-nav__direction">
 Next
 </span>
-Command Line Usage
+Limitations
 </span>
 </div>
 <div class="md-flex__cell md-flex__cell--shrink">

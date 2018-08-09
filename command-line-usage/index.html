@@ -143,6 +143,7 @@ kornilova-l/scala-native-bindgen
     <li><a href="../obtaining-bindgen/docker-compose.html" class="page">Building with <code>docker-compose</code></a></li>
   </ul></li>
   <li><a href="../command-line-usage/index.html" class="active page">Command Line Usage</a></li>
+  <li><a href="../integrating-bindings/index.html" class="page">Integrating Bindings</a></li>
   <li><a href="../limitations/index.html" class="page">Limitations</a></li>
   <li><a href="../using-generated-bindings/README.html" class="page">Using Generated Bindings</a></li>
 </ul>
@@ -157,7 +158,7 @@ kornilova-l/scala-native-bindgen
 </nav>
 
 <div class="md-nav__title--site md-version" title="Version">
-<i class="md-icon">label_outline</i> 0.2.0-RC1
+<i class="md-icon">label_outline</i> 0.3.0-RC0
 </div>
 </nav>
 
@@ -195,37 +196,41 @@ kornilova-l/scala-native-bindgen
   <thead>
     <tr>
       <th>Option </th>
-      <th>Description </th>
+      <th>Description</th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <td><code>--link</code> </td>
-      <td>Library to link with, e.g. <code>--link</code> uv for libuv. </td>
+      <td>Library to link with, e.g. <code>--link</code> uv for libuv.</td>
     </tr>
     <tr>
       <td><code>--no-link</code> </td>
-      <td>Library does not require linking. </td>
+      <td>Library does not require linking.</td>
     </tr>
     <tr>
       <td><code>--name</code> </td>
-      <td>Scala object name that contains bindings. Default value set to library name. </td>
+      <td>Scala object name that contains bindings. Default value set to library name.</td>
     </tr>
     <tr>
       <td><code>--package</code> </td>
-      <td>Package name of generated Scala file. </td>
+      <td>Package name of generated Scala file.</td>
     </tr>
     <tr>
       <td><code>--exclude-prefix</code> </td>
-      <td>Functions and unused typedefs will be removed if their names have given prefix. </td>
+      <td>Functions and unused typedefs will be removed if their names have given prefix.</td>
+    </tr>
+    <tr>
+      <td><code>--binding-config</code> </td>
+      <td>Path to a config file that contains the information about bindings that should be reused. See <a href="../integrating-bindings/index.html">Integrating Bindings</a> for more information.</td>
     </tr>
     <tr>
       <td><code>--extra-arg</code> </td>
-      <td>Additional argument to append to the compiler command line. </td>
+      <td>Additional argument to append to the compiler command line.</td>
     </tr>
     <tr>
       <td><code>--extra-arg-before</code> </td>
-      <td>Additional argument to prepend to the compiler command line. </td>
+      <td>Additional argument to prepend to the compiler command line.</td>
     </tr>
   </tbody>
 </table>
@@ -237,7 +242,7 @@ Edit this page
 </div>
 <div class="print-only">
 <span class="md-source-file md-version">
-0.2.0-RC1
+0.3.0-RC0
 </span>
 </div>
 </article>
@@ -260,13 +265,13 @@ Building with docker-compose
 </span>
 </div>
 </a>
-<a href="../limitations/index.html" title="Limitations" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+<a href="../integrating-bindings/index.html" title="Integrating Bindings" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
 <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
 <span class="md-flex__ellipsis">
 <span class="md-footer-nav__direction">
 Next
 </span>
-Limitations
+Integrating Bindings
 </span>
 </div>
 <div class="md-flex__cell md-flex__cell--shrink">
