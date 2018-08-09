@@ -1,3 +1,4 @@
 target/
 scripts/.coursier
 scripts/.scalafmt-*
+/scala-native-bindgen-*
