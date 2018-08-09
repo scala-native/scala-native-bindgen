@@ -8,7 +8,7 @@ services:
       args:
         - UBUNTU_VERSION=18.04
         - LLVM_VERSION=6.0
-    entrypoint: [scala-native-bindgen]
+    entrypoint: [/scala-native-bindgen]
 
   ubuntu-18.04-llvm-6.0:
     image: scalabindgen/scala-native-bindgen-builder:ubuntu-18.04-llvm-6.0
