@@ -13,6 +13,7 @@ object ReuseBindings {
   def returnTypedef_point(): native.Ptr[org.scalanative.bindgen.samples.Struct.point] = native.extern
   def readBook(book: native.Ptr[org.scalanative.bindgen.samples.CustomNames.book]): Unit = native.extern
   def getMyInt(): org.scalanative.bindgen.samples.CustomNames.MY_INT = native.extern
+  def getEnum(): org.scalanative.bindgen.samples.CustomNames.EnumWithTypedef = native.extern
 }
 
 import ReuseBindings._

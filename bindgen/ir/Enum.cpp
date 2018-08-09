@@ -13,46 +13,30 @@ Enum::Enum(std::string name, std::string type,
     : PrimitiveType(std::move(type)), LocatableType(std::move(location)),
       name(std::move(name)), enumerators(std::move(enumerators)) {}
 
-bool Enum::isAnonymous() const { return name.empty(); }
-
-std::string Enum::getDefinition() {
-    return "  type " + getTypeAlias() + " = " + PrimitiveType::str() + "\n";
-}
-
-llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const Enum &e) {
-    for (auto enumerator : e.enumerators) {
-        std::string enumeratorName;
-        if (!e.name.empty()) {
-            enumeratorName = "enum_" + e.name + "_" + enumerator.getName();
-        } else {
-            enumeratorName = "enum_" + enumerator.getName();
-        }
-        s << "  final val " << enumeratorName;
-        std::string type;
-        if (e.isAnonymous()) {
-            type = e.getType();
-        } else {
-            type = "enum_" + e.name;
-        }
-        s << ": " << type << " = " << std::to_string(enumerator.getValue());
-
-        if (e.getType() == "native.CLong") {
-            s << "L";
-        } else if (e.getType() == "native.CUnsignedInt") {
-            s << ".toUInt";
-        } else if (e.getType() == "native.CUnsignedLong") {
-            s << "L.toULong";
-        }
-        s << "\n";
+std::string Enum::getEnumerators() const {
+    std::stringstream s;
+    std::string typeCastSuffix = getTypeCastSuffix();
+    std::string type = getTypeAlias();
+    s << "  object " << type << " {\n";
+    for (auto enumerator : enumerators) {
+        s << "    final val " << enumerator.getName();
+        s << ": " << type << " = " << std::to_string(enumerator.getValue())
+          << typeCastSuffix << "\n";
     }
-    return s;
+    s << "  }\n";
+    return s.str();
 }
 
-std::string Enum::getName() const { return name; }
-
-std::string Enum::getTypeAlias() const {
-    assert(!isAnonymous());
-    return "enum_" + name;
+std::string Enum::getTypeCastSuffix() const {
+    std::string primitiveType = PrimitiveType::getType();
+    if (primitiveType == "native.CLong") {
+        return "L";
+    } else if (primitiveType == "native.CUnsignedInt") {
+        return ".toUInt";
+    } else if (primitiveType == "native.CUnsignedLong") {
+        return "L.toULong";
+    }
+    return "";
 }
 
 std::string Enum::str(const LocationManager &locationManager) const {
@@ -61,3 +45,11 @@ std::string Enum::str(const LocationManager &locationManager) const {
     }
     return getTypeAlias();
 }
+
+std::string Enum::getTypeAlias() const { return "enum_" + name; }
+
+std::string Enum::getDefinition() const {
+    return "  type " + getTypeAlias() + " = " + PrimitiveType::str() + "\n";
+}
+
+std::string Enum::getName() const { return name; }

@@ -7,7 +7,19 @@ import scala.scalanative.native._
 @native.extern
 object Struct {
   type enum_pointIndex = native.CUnsignedInt
+  object enum_pointIndex {
+    final val X1: enum_pointIndex = 0.toUInt
+    final val Y1: enum_pointIndex = 1.toUInt
+    final val X2: enum_pointIndex = 2.toUInt
+    final val Y2: enum_pointIndex = 3.toUInt
+  }
+
   type enum_struct_op = native.CUnsignedInt
+  object enum_struct_op {
+    final val STRUCT_SET: enum_struct_op = 0.toUInt
+    final val STRUCT_TEST: enum_struct_op = 1.toUInt
+  }
+
   type struct_point = native.CStruct2[native.CInt, native.CInt]
   type point = struct_point
   type struct_points = native.CStruct2[struct_point, point]
@@ -30,16 +42,6 @@ object Struct {
 }
 
 import Struct._
-
-object StructEnums {
-  final val enum_pointIndex_X1: enum_pointIndex = 0.toUInt
-  final val enum_pointIndex_Y1: enum_pointIndex = 1.toUInt
-  final val enum_pointIndex_X2: enum_pointIndex = 2.toUInt
-  final val enum_pointIndex_Y2: enum_pointIndex = 3.toUInt
-
-  final val enum_struct_op_STRUCT_SET: enum_struct_op = 0.toUInt
-  final val enum_struct_op_STRUCT_TEST: enum_struct_op = 1.toUInt
-}
 
 object StructHelpers {
 

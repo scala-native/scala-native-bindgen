@@ -74,11 +74,16 @@ bool TreeVisitor::VisitEnumDecl(clang::EnumDecl *enumDecl) {
     std::string scalaType = typeTranslator.getTypeFromTypeMap(
         enumDecl->getIntegerType().getUnqualifiedType().getAsString());
 
+    std::shared_ptr<Location> location = typeTranslator.getLocation(enumDecl);
+    if (name.empty()) {
+        name = "anonymous_" + std::to_string(anonymousEnumId++);
+    }
     std::shared_ptr<Enum> e =
-        ir.addEnum(name, scalaType, std::move(enumerators),
-                   typeTranslator.getLocation(enumDecl));
+        ir.addEnum(name, scalaType, std::move(enumerators), location);
 
     if (typedefName) {
+        /* add alias here because in VisitTypedefDecl it will be difficult to
+         * match typedef with enum */
         ir.addTypeDef(name, e, typeTranslator.getLocation(typedefName));
     }
 

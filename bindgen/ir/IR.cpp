@@ -27,9 +27,7 @@ std::shared_ptr<Enum> IR::addEnum(std::string name, const std::string &type,
                                   std::shared_ptr<Location> location) {
     std::shared_ptr<Enum> e = std::make_shared<Enum>(
         std::move(name), type, std::move(enumerators), std::move(location));
-
     enums.push_back(e);
-
     return e;
 }
 
@@ -122,8 +120,9 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir) {
 
     for (const auto &e : ir.enums) {
         visitedTypes.clear();
-        if (!e->isAnonymous() && ir.shouldOutput(e, visitedTypes)) {
+        if (ir.shouldOutput(e, visitedTypes)) {
             s << e->getDefinition();
+            s << e->getEnumerators() << "\n";
         }
     }
 
@@ -184,23 +183,8 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir) {
         s << "}\n\n";
     }
 
-    if (ir.shouldOutputType(ir.enums) || ir.hasHelperMethods()) {
+    if (ir.hasHelperMethods()) {
         s << "import " << objectName << "._\n\n";
-    }
-
-    if (ir.shouldOutputType(ir.enums)) {
-        s << "object " << ir.libName << "Enums {\n";
-
-        std::string sep = "";
-        for (const auto &e : ir.enums) {
-            visitedTypes.clear();
-            if (ir.shouldOutput(e, visitedTypes)) {
-                s << sep << *e;
-                sep = "\n";
-            }
-        }
-
-        s << "}\n\n";
     }
 
     if (ir.hasHelperMethods()) {

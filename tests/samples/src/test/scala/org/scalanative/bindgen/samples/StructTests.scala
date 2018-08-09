@@ -3,7 +3,6 @@ package org.scalanative.bindgen.samples
 import utest._
 import scala.scalanative.native._
 import org.scalanative.bindgen.samples.StructHelpers._
-import org.scalanative.bindgen.samples.StructEnums._
 
 object StructTests extends TestSuite {
   val tests = Tests {
@@ -38,10 +37,10 @@ object StructTests extends TestSuite {
         points.p1.y = 2
         points.p2.x = 3
         points.p2.y = 4
-        assert(1 == Struct.getPoint(points, enum_pointIndex_X1))
-        assert(2 == Struct.getPoint(points, enum_pointIndex_Y1))
-        assert(3 == Struct.getPoint(points, enum_pointIndex_X2))
-        assert(4 == Struct.getPoint(points, enum_pointIndex_Y2))
+        assert(1 == Struct.getPoint(points, Struct.enum_pointIndex.X1))
+        assert(2 == Struct.getPoint(points, Struct.enum_pointIndex.Y1))
+        assert(3 == Struct.getPoint(points, Struct.enum_pointIndex.X2))
+        assert(4 == Struct.getPoint(points, Struct.enum_pointIndex.Y2))
       }
     }
 
@@ -64,12 +63,12 @@ object StructTests extends TestSuite {
       Zone { implicit zone: Zone =>
         val structPtr = alloc[Struct.struct_bigStruct]
         for (value <- Seq(Long.MinValue, -1, 0, 1, Long.MaxValue)) {
-          Struct.struct_test_long(structPtr, enum_struct_op_STRUCT_SET, value)
+          Struct.struct_test_long(structPtr, Struct.enum_struct_op.STRUCT_SET, value)
           assert(structPtr.one == value)
         }
 
         for (value <- Seq(Double.MinValue, -1, 0, 1, Double.MaxValue)) {
-          Struct.struct_test_double(structPtr, enum_struct_op_STRUCT_SET, value)
+          Struct.struct_test_double(structPtr, Struct.enum_struct_op.STRUCT_SET, value)
           assert(structPtr.five == value)
         }
 
@@ -77,7 +76,7 @@ object StructTests extends TestSuite {
         pointPtr.x = 5
         pointPtr.y = 10
 
-        Struct.struct_test_point(structPtr, enum_struct_op_STRUCT_SET, pointPtr)
+        Struct.struct_test_point(structPtr, Struct.enum_struct_op.STRUCT_SET, pointPtr)
         assert(structPtr.six.x == pointPtr.x)
         assert(structPtr.six.y == pointPtr.y)
       }
@@ -88,19 +87,19 @@ object StructTests extends TestSuite {
         val structPtr = alloc[Struct.struct_bigStruct]
         for (value <- Seq(Long.MinValue, -1, 0, 1, Long.MaxValue)) {
           structPtr.one = value
-          assert(Struct.struct_test_long(structPtr, enum_struct_op_STRUCT_TEST, value) == 1)
+          assert(Struct.struct_test_long(structPtr, Struct.enum_struct_op.STRUCT_TEST, value) == 1)
         }
 
         for (value <- Seq(Double.MinValue, -1, 0, 1, Double.MaxValue)) {
           structPtr.five = value
-          assert(Struct.struct_test_double(structPtr, enum_struct_op_STRUCT_TEST, value) == 1)
+          assert(Struct.struct_test_double(structPtr, Struct.enum_struct_op.STRUCT_TEST, value) == 1)
         }
 
         val pointPtr = alloc[Struct.point]
         pointPtr.x = 5
         pointPtr.y = 10
         structPtr.six = pointPtr
-        assert(Struct.struct_test_point(structPtr, enum_struct_op_STRUCT_TEST, pointPtr) == 1)
+        assert(Struct.struct_test_point(structPtr, Struct.enum_struct_op.STRUCT_TEST, pointPtr) == 1)
       }
     }
   }

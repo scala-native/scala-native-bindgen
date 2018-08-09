@@ -7,6 +7,11 @@ import scala.scalanative.native._
 @native.extern
 object Extern {
   type enum_mode = native.CUnsignedInt
+  object enum_mode {
+    final val SYSTEM: enum_mode = 0.toUInt
+    final val USER: enum_mode = 1.toUInt
+  }
+
   type struct_version = native.CStruct3[native.CInt, native.CInt, native.CInt]
   val forty_two: native.CInt = native.extern
   val version: native.CString = native.extern
@@ -15,11 +20,6 @@ object Extern {
 }
 
 import Extern._
-
-object ExternEnums {
-  final val enum_mode_SYSTEM: enum_mode = 0.toUInt
-  final val enum_mode_USER: enum_mode = 1.toUInt
-}
 
 object ExternHelpers {
 

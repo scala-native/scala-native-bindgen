@@ -8,3 +8,4 @@ struct book {
 };
 
 typedef int myInt;
+typedef enum { CONST } enumWithTypedef;

@@ -5,7 +5,8 @@
     "names": {
       "struct book": "book",
       "struct page": "page",
-      "myInt": "MY_INT"
+      "myInt": "MY_INT",
+      "enumWithTypedef": "EnumWithTypedef"
     }
   }
 }

@@ -10,7 +10,7 @@ object ExternTests extends TestSuite {
     }
 
     'mode - {
-      assert(Extern.mode == ExternEnums.enum_mode_USER)
+      assert(Extern.mode == Extern.enum_mode.USER)
     }
 
     'semver - {
