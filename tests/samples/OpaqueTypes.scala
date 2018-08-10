@@ -27,46 +27,40 @@ object OpaqueTypes {
   def fun(): native.Ptr[native.Ptr[undefinedUnion]] = native.extern
   def returnPointerToAliasOfUndefinedStruct(): native.Ptr[aliasForUndefinedStruct] = native.extern
   def usePointerToUndefinedIncludedStruct(p0: native.Ptr[undefinedIncludedStruct]): Unit = native.extern
-}
 
-import OpaqueTypes._
+  object implicits {
+    implicit class struct_points_ops(val p: native.Ptr[struct_points]) extends AnyVal {
+      def point1: native.Ptr[struct_point] = !p._1
+      def point1_=(value: native.Ptr[struct_point]): Unit = !p._1 = value
+      def point2: native.Ptr[struct_point] = !p._2
+      def point2_=(value: native.Ptr[struct_point]): Unit = !p._2 = value
+    }
+    def struct_points()(implicit z: native.Zone): native.Ptr[struct_points] = native.alloc[struct_points]
 
-object OpaqueTypesHelpers {
+    implicit class struct_point_ops(val p: native.Ptr[struct_point]) extends AnyVal {
+      def x: native.CInt = !p._1
+      def x_=(value: native.CInt): Unit = !p._1 = value
+      def y: native.CInt = !p._2
+      def y_=(value: native.CInt): Unit = !p._2 = value
+    }
+    def struct_point()(implicit z: native.Zone): native.Ptr[struct_point] = native.alloc[struct_point]
 
-  implicit class struct_points_ops(val p: native.Ptr[struct_points]) extends AnyVal {
-    def point1: native.Ptr[struct_point] = !p._1
-    def point1_=(value: native.Ptr[struct_point]): Unit = !p._1 = value
-    def point2: native.Ptr[struct_point] = !p._2
-    def point2_=(value: native.Ptr[struct_point]): Unit = !p._2 = value
-  }
+    implicit class struct_structWithPointerToUndefinedStruct_ops(val p: native.Ptr[struct_structWithPointerToUndefinedStruct]) extends AnyVal {
+      def field: native.Ptr[struct_undefinedStruct] = !p._1
+      def field_=(value: native.Ptr[struct_undefinedStruct]): Unit = !p._1 = value
+    }
+    def struct_structWithPointerToUndefinedStruct()(implicit z: native.Zone): native.Ptr[struct_structWithPointerToUndefinedStruct] = native.alloc[struct_structWithPointerToUndefinedStruct]
 
-  def struct_points()(implicit z: native.Zone): native.Ptr[struct_points] = native.alloc[struct_points]
+    implicit class union_u_pos(val p: native.Ptr[union_u]) extends AnyVal {
+      def i: native.Ptr[native.CInt] = p.cast[native.Ptr[native.CInt]]
+      def i_=(value: native.CInt): Unit = !p.cast[native.Ptr[native.CInt]] = value
+      def f: native.Ptr[native.CFloat] = p.cast[native.Ptr[native.CFloat]]
+      def f_=(value: native.CFloat): Unit = !p.cast[native.Ptr[native.CFloat]] = value
+    }
 
-  implicit class struct_point_ops(val p: native.Ptr[struct_point]) extends AnyVal {
-    def x: native.CInt = !p._1
-    def x_=(value: native.CInt): Unit = !p._1 = value
-    def y: native.CInt = !p._2
-    def y_=(value: native.CInt): Unit = !p._2 = value
-  }
-
-  def struct_point()(implicit z: native.Zone): native.Ptr[struct_point] = native.alloc[struct_point]
-
-  implicit class struct_structWithPointerToUndefinedStruct_ops(val p: native.Ptr[struct_structWithPointerToUndefinedStruct]) extends AnyVal {
-    def field: native.Ptr[struct_undefinedStruct] = !p._1
-    def field_=(value: native.Ptr[struct_undefinedStruct]): Unit = !p._1 = value
-  }
-
-  def struct_structWithPointerToUndefinedStruct()(implicit z: native.Zone): native.Ptr[struct_structWithPointerToUndefinedStruct] = native.alloc[struct_structWithPointerToUndefinedStruct]
-
-  implicit class union_u_pos(val p: native.Ptr[union_u]) extends AnyVal {
-    def i: native.Ptr[native.CInt] = p.cast[native.Ptr[native.CInt]]
-    def i_=(value: native.CInt): Unit = !p.cast[native.Ptr[native.CInt]] = value
-    def f: native.Ptr[native.CFloat] = p.cast[native.Ptr[native.CFloat]]
-    def f_=(value: native.CFloat): Unit = !p.cast[native.Ptr[native.CFloat]] = value
-  }
-
-  implicit class union_unionWithPointerToUndefinedStruct_pos(val p: native.Ptr[union_unionWithPointerToUndefinedStruct]) extends AnyVal {
-    def field: native.Ptr[native.Ptr[struct_undefinedStruct]] = p.cast[native.Ptr[native.Ptr[struct_undefinedStruct]]]
-    def field_=(value: native.Ptr[struct_undefinedStruct]): Unit = !p.cast[native.Ptr[native.Ptr[struct_undefinedStruct]]] = value
+    implicit class union_unionWithPointerToUndefinedStruct_pos(val p: native.Ptr[union_unionWithPointerToUndefinedStruct]) extends AnyVal {
+      def field: native.Ptr[native.Ptr[struct_undefinedStruct]] = p.cast[native.Ptr[native.Ptr[struct_undefinedStruct]]]
+      def field_=(value: native.Ptr[struct_undefinedStruct]): Unit = !p.cast[native.Ptr[native.Ptr[struct_undefinedStruct]]] = value
+    }
   }
 }

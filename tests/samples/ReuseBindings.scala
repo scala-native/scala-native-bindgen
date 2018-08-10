@@ -14,17 +14,13 @@ object ReuseBindings {
   def readBook(book: native.Ptr[org.scalanative.bindgen.samples.CustomNames.book]): Unit = native.extern
   def getMyInt(): org.scalanative.bindgen.samples.CustomNames.MY_INT = native.extern
   def getEnum(): org.scalanative.bindgen.samples.CustomNames.EnumWithTypedef = native.extern
-}
 
-import ReuseBindings._
-
-object ReuseBindingsHelpers {
-
-  implicit class struct_usesImportedEnum_ops(val p: native.Ptr[struct_usesImportedEnum]) extends AnyVal {
-    def index: org.scalanative.bindgen.samples.Struct.enum_pointIndex = !p._1
-    def index_=(value: org.scalanative.bindgen.samples.Struct.enum_pointIndex): Unit = !p._1 = value
+  object implicits {
+    implicit class struct_usesImportedEnum_ops(val p: native.Ptr[struct_usesImportedEnum]) extends AnyVal {
+      def index: org.scalanative.bindgen.samples.Struct.enum_pointIndex = !p._1
+      def index_=(value: org.scalanative.bindgen.samples.Struct.enum_pointIndex): Unit = !p._1 = value
+    }
+    def struct_usesImportedEnum()(implicit z: native.Zone): native.Ptr[struct_usesImportedEnum] = native.alloc[struct_usesImportedEnum]
   }
-
-  def struct_usesImportedEnum()(implicit z: native.Zone): native.Ptr[struct_usesImportedEnum] = native.alloc[struct_usesImportedEnum]
 }
 

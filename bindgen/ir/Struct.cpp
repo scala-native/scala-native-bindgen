@@ -34,7 +34,7 @@ Struct::generateHelperClass(const LocationManager &locationManager) const {
     assert(hasHelperMethods());
     std::stringstream s;
     std::string type = replaceChar(getTypeName(), " ", "_");
-    s << "  implicit class " << type << "_ops(val p: native.Ptr[" << type
+    s << "    implicit class " << type << "_ops(val p: native.Ptr[" << type
       << "])"
       << " extends AnyVal {\n";
     if (isRepresentedAsStruct()) {
@@ -42,10 +42,10 @@ Struct::generateHelperClass(const LocationManager &locationManager) const {
     } else {
         s << generateHelperClassMethodsForArrayRepresentation(locationManager);
     }
-    s << "  }\n\n";
+    s << "    }\n";
 
     /* makes struct instantiation easier */
-    s << "  def "
+    s << "    def "
       << type + "()(implicit z: native.Zone): native.Ptr[" + type + "]"
       << " = native.alloc[" + type + "]\n";
 
@@ -147,7 +147,7 @@ std::string Struct::generateSetterForStructRepresentation(
         value = "!" + value;
     }
     std::stringstream s;
-    s << "    def " << setter << "(value: " + parameterType + "): Unit = !p._"
+    s << "      def " << setter << "(value: " + parameterType + "): Unit = !p._"
       << std::to_string(fieldIndex + 1) << " = " << value << "\n";
     return s.str();
 }
@@ -169,7 +169,7 @@ std::string Struct::generateGetterForStructRepresentation(
         methodBody = "!" + methodBody;
     }
     std::stringstream s;
-    s << "    def " << getter << ": " << returnType << " = " << methodBody
+    s << "      def " << getter << ": " << returnType << " = " << methodBody
       << "\n";
     return s.str();
 }
@@ -207,7 +207,7 @@ std::string Struct::generateSetterForArrayRepresentation(
         value = "!" + value;
     }
     std::stringstream s;
-    s << "    def " << setter
+    s << "      def " << setter
       << "(value: " + parameterType + "): Unit = " << castedField << " = "
       << value << "\n";
     return s.str();
@@ -243,7 +243,7 @@ std::string Struct::generateGetterForArrayRepresentation(
         returnType = field->getType()->str(locationManager);
     }
     std::stringstream s;
-    s << "    def " << getter << ": " << returnType << " = " << methodBody
+    s << "      def " << getter << ": " << returnType << " = " << methodBody
       << "\n";
     return s.str();
 }

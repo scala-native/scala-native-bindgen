@@ -178,6 +178,8 @@ class IR {
     bool
     shouldOutputType(const std::vector<std::shared_ptr<T>> &declarations) const;
 
+    std::string getHelperMethods() const;
+
     std::string libName;    // name of the library
     std::string linkName;   // name of the library to link with
     std::string objectName; // name of Scala object
