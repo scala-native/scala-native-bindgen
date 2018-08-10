@@ -2,7 +2,7 @@ package org.scalanative.bindgen.samples
 
 import utest._
 import scala.scalanative.native._
-import org.scalanative.bindgen.samples.StructHelpers._
+import org.scalanative.bindgen.samples.Struct.implicits._
 
 object StructTests extends TestSuite {
   val tests = Tests {

@@ -16,21 +16,17 @@ object Function {
   def anonymous_args(p0: native.CFloat, p1: native.CInt): native.CDouble = native.extern
   def variadic_args(a: native.CDouble, varArgs: native.CString, varArgs0: native.CVararg*): native.CDouble = native.extern
   def acceptsArray(p0: native.Ptr[native.CInt]): Unit = native.extern
-}
 
-import Function._
+  object implicits {
+    implicit class struct_s_ops(val p: native.Ptr[struct_s]) extends AnyVal {
+      def `val`: native.CInt = !p._1
+      def `val_=`(value: native.CInt): Unit = !p._1 = value
+    }
+    def struct_s()(implicit z: native.Zone): native.Ptr[struct_s] = native.alloc[struct_s]
 
-object FunctionHelpers {
-
-  implicit class struct_s_ops(val p: native.Ptr[struct_s]) extends AnyVal {
-    def `val`: native.CInt = !p._1
-    def `val_=`(value: native.CInt): Unit = !p._1 = value
-  }
-
-  def struct_s()(implicit z: native.Zone): native.Ptr[struct_s] = native.alloc[struct_s]
-
-  implicit class union_u_pos(val p: native.Ptr[union_u]) extends AnyVal {
-    def a: native.Ptr[native.CInt] = p.cast[native.Ptr[native.CInt]]
-    def a_=(value: native.CInt): Unit = !p.cast[native.Ptr[native.CInt]] = value
+    implicit class union_u_pos(val p: native.Ptr[union_u]) extends AnyVal {
+      def a: native.Ptr[native.CInt] = p.cast[native.Ptr[native.CInt]]
+      def a_=(value: native.CInt): Unit = !p.cast[native.Ptr[native.CInt]] = value
+    }
   }
 }

@@ -171,6 +171,10 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir) {
         }
     }
 
+    if (ir.hasHelperMethods()) {
+        s << "\n  object implicits {\n" << ir.getHelperMethods() << "  }\n";
+    }
+
     if (!isLibObjectEmpty) {
         s << "}\n\n";
     }
@@ -180,30 +184,6 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir) {
         for (const auto &literalDefine : ir.literalDefines) {
             s << literalDefine->getDefinition(ir.locationManager);
         }
-        s << "}\n\n";
-    }
-
-    if (ir.hasHelperMethods()) {
-        s << "import " << objectName << "._\n\n";
-    }
-
-    if (ir.hasHelperMethods()) {
-        s << "object " << ir.libName << "Helpers {\n";
-
-        for (const auto &st : ir.structs) {
-            visitedTypes.clear();
-            if (ir.shouldOutput(st, visitedTypes) && st->hasHelperMethods()) {
-                s << "\n" << st->generateHelperClass(ir.locationManager);
-            }
-        }
-
-        for (const auto &u : ir.unions) {
-            visitedTypes.clear();
-            if (ir.shouldOutput(u, visitedTypes) && u->hasHelperMethods()) {
-                s << "\n" << u->generateHelperClass(ir.locationManager);
-            }
-        }
-
         s << "}\n\n";
     }
 
@@ -506,4 +486,28 @@ bool IR::shouldOutputTypeDef(
     }
     /* remove unused types from included files */
     return locationManager.inMainFile(*typeDef->getLocation());
+}
+
+std::string IR::getHelperMethods() const {
+    std::stringstream s;
+    std::vector<std::shared_ptr<const Type>> visitedTypes;
+
+    std::string sep = "";
+
+    for (const auto &st : structs) {
+        visitedTypes.clear();
+        if (shouldOutput(st, visitedTypes) && st->hasHelperMethods()) {
+            s << sep << st->generateHelperClass(locationManager);
+            sep = "\n";
+        }
+    }
+
+    for (const auto &u : unions) {
+        visitedTypes.clear();
+        if (shouldOutput(u, visitedTypes) && u->hasHelperMethods()) {
+            s << sep << u->generateHelperClass(locationManager);
+        }
+        sep = "\n";
+    }
+    return s.str();
 }

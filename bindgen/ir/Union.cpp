@@ -22,7 +22,7 @@ Union::generateHelperClass(const LocationManager &locationManager) const {
     assert(hasHelperMethods());
     std::stringstream s;
     std::string type = replaceChar(getTypeName(), " ", "_");
-    s << "  implicit class " << type << "_pos"
+    s << "    implicit class " << type << "_pos"
       << "(val p: native.Ptr[" << type << "]) extends AnyVal {\n";
     for (const auto &field : fields) {
         if (!field->getName().empty()) {
@@ -30,7 +30,7 @@ Union::generateHelperClass(const LocationManager &locationManager) const {
             s << generateSetter(field, locationManager);
         }
     }
-    s << "  }\n";
+    s << "    }\n";
     return s.str();
 }
 
@@ -71,7 +71,7 @@ Union::generateGetter(const std::shared_ptr<Field> &field,
                       const LocationManager &locationManager) const {
     std::string getter = handleReservedWords(field->getName());
     std::string ftype = field->getType()->str(locationManager);
-    return "    def " + getter + ": native.Ptr[" + ftype +
+    return "      def " + getter + ": native.Ptr[" + ftype +
            "] = p.cast[native.Ptr[" + ftype + "]]\n";
 }
 
@@ -82,9 +82,9 @@ Union::generateSetter(const std::shared_ptr<Field> &field,
     std::string ftype = field->getType()->str(locationManager);
     if (isAliasForType<ArrayType>(field->getType().get()) ||
         isAliasForType<Struct>(field->getType().get())) {
-        return "    def " + setter + "(value: native.Ptr[" + ftype +
+        return "      def " + setter + "(value: native.Ptr[" + ftype +
                "]): Unit = !p.cast[native.Ptr[" + ftype + "]] = !value\n";
     }
-    return "    def " + setter + "(value: " + ftype +
+    return "      def " + setter + "(value: " + ftype +
            "): Unit = !p.cast[native.Ptr[" + ftype + "]] = value\n";
 }

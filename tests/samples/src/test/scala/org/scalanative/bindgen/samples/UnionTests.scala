@@ -2,7 +2,7 @@ package org.scalanative.bindgen.samples
 
 import utest._
 import scala.scalanative.native._
-import org.scalanative.bindgen.samples.UnionHelpers._
+import org.scalanative.bindgen.samples.Union.implicits._
 
 object UnionTests extends TestSuite {
   val tests = Tests {
