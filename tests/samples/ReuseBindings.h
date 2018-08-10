@@ -16,3 +16,4 @@ struct usesImportedEnum {
 void readBook(struct book *book);
 
 myInt getMyInt();
+enumWithTypedef getEnum();

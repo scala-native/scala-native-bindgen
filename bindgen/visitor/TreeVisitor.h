@@ -10,6 +10,7 @@ class TreeVisitor : public clang::RecursiveASTVisitor<TreeVisitor> {
     clang::ASTContext *astContext;
     TypeTranslator typeTranslator;
     IR &ir;
+    uint anonymousEnumId = 0;
 
     bool isAliasForAnonymousEnum(clang::TypedefDecl *tpdef) const;
 

@@ -7,6 +7,11 @@ import scala.scalanative.native._
 @native.extern
 object Union {
   type enum_union_op = native.CUnsignedInt
+  object enum_union_op {
+    final val UNION_SET: enum_union_op = 0.toUInt
+    final val UNION_TEST: enum_union_op = 1.toUInt
+  }
+
   type struct_s = native.CStruct1[native.CInt]
   type union_values = native.CArray[Byte, native.Nat._8]
   def union_get_sizeof(): native.CInt = native.extern
@@ -19,11 +24,6 @@ object Union {
 }
 
 import Union._
-
-object UnionEnums {
-  final val enum_union_op_UNION_SET: enum_union_op = 0.toUInt
-  final val enum_union_op_UNION_TEST: enum_union_op = 1.toUInt
-}
 
 object UnionHelpers {
 

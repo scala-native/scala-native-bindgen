@@ -7,6 +7,11 @@ import scala.scalanative.native._
 @native.extern
 object IncludesHeader {
   type enum_semester = native.CUnsignedInt
+  object enum_semester {
+    final val AUTUMN: enum_semester = 0.toUInt
+    final val SPRING: enum_semester = 1.toUInt
+  }
+
   type size = native.CInt
   type struct_metadata = native.CStruct2[native.CUnsignedInt, native.CString]
   type metadata = struct_metadata
@@ -16,11 +21,6 @@ object IncludesHeader {
 }
 
 import IncludesHeader._
-
-object IncludesHeaderEnums {
-  final val enum_semester_AUTUMN: enum_semester = 0.toUInt
-  final val enum_semester_SPRING: enum_semester = 1.toUInt
-}
 
 object IncludesHeaderHelpers {
 

@@ -7,7 +7,23 @@ import scala.scalanative.native._
 @native.extern
 object PrivateMembers {
   type enum___privateEnum = native.CUnsignedInt
+  object enum___privateEnum {
+    final val A: enum___privateEnum = 0.toUInt
+    final val B: enum___privateEnum = 1.toUInt
+  }
+
   type enum_enumWithPrivateMembers = native.CUnsignedInt
+  object enum_enumWithPrivateMembers {
+    final val __C: enum_enumWithPrivateMembers = 0.toUInt
+    final val D: enum_enumWithPrivateMembers = 1.toUInt
+  }
+
+  type enum_anonymous_0 = native.CUnsignedInt
+  object enum_anonymous_0 {
+    final val __E: enum_anonymous_0 = 0.toUInt
+    final val F: enum_anonymous_0 = 1.toUInt
+  }
+
   type pid_t = native.CInt
   type __private_type = native.CInt
   type struct_structWithPrivateType = native.CStruct2[native.CInt, __private_type]
@@ -25,17 +41,6 @@ object PrivateMembers {
 }
 
 import PrivateMembers._
-
-object PrivateMembersEnums {
-  final val enum___privateEnum_A: enum___privateEnum = 0.toUInt
-  final val enum___privateEnum_B: enum___privateEnum = 1.toUInt
-
-  final val enum_enumWithPrivateMembers___C: enum_enumWithPrivateMembers = 0.toUInt
-  final val enum_enumWithPrivateMembers_D: enum_enumWithPrivateMembers = 1.toUInt
-
-  final val enum___E: native.CUnsignedInt = 0.toUInt
-  final val enum_F: native.CUnsignedInt = 1.toUInt
-}
 
 object PrivateMembersHelpers {
 
