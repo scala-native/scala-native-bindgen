@@ -12,7 +12,7 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 LINUX_EXEC="$ROOT/scala-native-bindgen-linux"
 if [[ ! -e "$LINUX_EXEC" ]]; then
   docker-compose build bindgen
-  local container="$(docker container create "scalabindgen/scala-native-bindgen:${VERSION:-latest}")"
+  container="$(docker container create "scalabindgen/scala-native-bindgen:${VERSION:-latest}")"
   docker cp "$container:/scala-native-bindgen" "$LINUX_EXEC"
   docker container rm "$container"
 fi
