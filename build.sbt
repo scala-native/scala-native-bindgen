@@ -211,22 +211,28 @@ def compileTask(libname: String, srcDirTask: SettingKey[File]) = Def.settings(
       Process(command, cwd) ! log
     }
 
-    val opaths = cpaths.map { cpath =>
-      val opath = abs(cwd / s"${cpath.getName}.o")
-      val command = Seq(clangPath) ++ compileOptions ++ Seq("-c",
-                                                            abs(cpath),
-                                                            "-o",
-                                                            opath)
+    val opaths = cpaths.map {
+      cpath =>
+        val opath = cwd / s"${cpath.getName}.o"
+        val command = Seq(clangPath) ++ compileOptions ++ Seq("-c",
+                                                              abs(cpath),
+                                                              "-o",
+                                                              abs(opath))
+        val doCompile =
+          !opath.exists() || cpath.lastModified() >= opath.lastModified()
 
-      if (run(command) != 0) {
-        sys.error(s"Failed to compile $cpath")
-      }
-      opath
+        if (doCompile && run(command) != 0) {
+          sys.error(s"Failed to compile $cpath")
+        }
+        opath
     }
 
     val archivePath = cwd / s"lib$libname.a"
-    val archive     = Seq("ar", "cr", abs(archivePath)) ++ opaths
-    if (run(archive) != 0) {
+    val archive     = Seq("ar", "cr", abs(archivePath)) ++ opaths.map(abs)
+    val doArchive =
+      opaths.map(_.lastModified).max >= archivePath.lastModified()
+
+    if (doArchive && run(archive) != 0) {
       sys.error(s"Failed to create archive $archivePath")
     }
 
