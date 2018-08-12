@@ -10,7 +10,8 @@ object EnumTests extends TestSuite {
     }
 
     'check_BIG_NEG_A - {
-      assert(Enum.check_BIG_NEG_A(Enum.enum_bigNegativeValues.BIG_NEG_A) == c"OK")
+      assert(
+        Enum.check_BIG_NEG_A(Enum.enum_bigNegativeValues.BIG_NEG_A) == c"OK")
     }
   }
 }
