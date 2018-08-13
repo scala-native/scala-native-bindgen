@@ -79,6 +79,7 @@ class BindgenReportingSpec extends FunSpec {
       assertBindgenError(
         """union undefinedUnion;
           |typedef union undefinedUnion aliasForUndefinedUnion;
+          |void foo();
           |""".stripMargin,
         Seq(
           "Warning: type alias aliasForUndefinedUnion is skipped because it is an unused alias for incomplete type.")
