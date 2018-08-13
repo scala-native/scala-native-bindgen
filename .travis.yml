@@ -1,14 +1,17 @@
-language: cpp
+language: scala
 sudo: required
-compiler: gcc
+os: linux
+dist: trusty
+jdk: oraclejdk8
+
+scala:
+  - "2.11.12"
+
+before_script:
+ - docker-compose build $TEST_ENV
 
 script:
- - docker-compose build $TEST_ENV
  - docker-compose run $TEST_ENV
- - if [[ "$TEST_ENV" = *llvm-5.0 ]]; then
-     docker-compose run --rm $TEST_ENV scripts/scalafmt --test;
-     docker-compose run --rm $TEST_ENV scripts/clangfmt --test;
-   fi
  - if [[ "$TEST_ENV" = *llvm-6.0 ]]; then
      export VERSION="${TRAVIS_COMMIT}";
      docker-compose build bindgen;
@@ -29,6 +32,12 @@ matrix:
       on:
         branch: master
   - env: TEST_ENV=ubuntu-18.04-llvm-5.0
+  - env: TEST_ENV=formatting
+    before_script:
+    - clang-format --version 
+    script:
+    - scripts/scalafmt --test;
+    - scripts/clangfmt --test;
 
 before_cache:
   # See https://www.scala-sbt.org/1.0/docs/Travis-CI-with-sbt.html
@@ -39,4 +48,5 @@ before_cache:
 cache:
   directories:
    - "$HOME/.ivy2/cache"
-   - "$HOME/.sbt/boot"
+   - "$HOME/.sbt/boot/scala-*"
+   - "$HOME/.coursier"
