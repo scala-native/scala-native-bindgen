@@ -26,13 +26,11 @@ object IncludesHeader {
       def publisher: native.CString = !p._2
       def publisher_=(value: native.CString): Unit = !p._2 = value
     }
-    def struct_metadata()(implicit z: native.Zone): native.Ptr[struct_metadata] = native.alloc[struct_metadata]
 
     implicit class struct_document_ops(val p: native.Ptr[struct_document]) extends AnyVal {
       def m: native.Ptr[metadata] = p._1
       def m_=(value: native.Ptr[metadata]): Unit = !p._1 = !value
     }
-    def struct_document()(implicit z: native.Zone): native.Ptr[struct_document] = native.alloc[struct_document]
 
     implicit class struct_courseInfo_ops(val p: native.Ptr[struct_courseInfo]) extends AnyVal {
       def name: native.CString = !p._1
@@ -40,6 +38,37 @@ object IncludesHeader {
       def s: enum_semester = !p._2
       def s_=(value: enum_semester): Unit = !p._2 = value
     }
-    def struct_courseInfo()(implicit z: native.Zone): native.Ptr[struct_courseInfo] = native.alloc[struct_courseInfo]
+  }
+
+  object struct_metadata {
+    import implicits._
+    def apply()(implicit z: native.Zone): native.Ptr[struct_metadata] = native.alloc[struct_metadata]
+    def apply(year: native.CUnsignedInt, publisher: native.CString)(implicit z: native.Zone): native.Ptr[struct_metadata] = {
+      val ptr = native.alloc[struct_metadata]
+      ptr.year = year
+      ptr.publisher = publisher
+      ptr
+    }
+  }
+
+  object struct_document {
+    import implicits._
+    def apply()(implicit z: native.Zone): native.Ptr[struct_document] = native.alloc[struct_document]
+    def apply(m: native.Ptr[metadata])(implicit z: native.Zone): native.Ptr[struct_document] = {
+      val ptr = native.alloc[struct_document]
+      ptr.m = m
+      ptr
+    }
+  }
+
+  object struct_courseInfo {
+    import implicits._
+    def apply()(implicit z: native.Zone): native.Ptr[struct_courseInfo] = native.alloc[struct_courseInfo]
+    def apply(name: native.CString, s: enum_semester)(implicit z: native.Zone): native.Ptr[struct_courseInfo] = {
+      val ptr = native.alloc[struct_courseInfo]
+      ptr.name = name
+      ptr.s = s
+      ptr
+    }
   }
 }

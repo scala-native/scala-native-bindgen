@@ -27,7 +27,6 @@ object Union {
       def a: native.CInt = !p._1
       def a_=(value: native.CInt): Unit = !p._1 = value
     }
-    def struct_s()(implicit z: native.Zone): native.Ptr[struct_s] = native.alloc[struct_s]
 
     implicit class union_values_pos(val p: native.Ptr[union_values]) extends AnyVal {
       def l: native.Ptr[native.CLong] = p.cast[native.Ptr[native.CLong]]
@@ -42,6 +41,16 @@ object Union {
       def s_=(value: native.CString): Unit = !p.cast[native.Ptr[native.CString]] = value
       def structInUnion: native.Ptr[struct_s] = p.cast[native.Ptr[struct_s]]
       def structInUnion_=(value: native.Ptr[struct_s]): Unit = !p.cast[native.Ptr[struct_s]] = !value
+    }
+  }
+
+  object struct_s {
+    import implicits._
+    def apply()(implicit z: native.Zone): native.Ptr[struct_s] = native.alloc[struct_s]
+    def apply(a: native.CInt)(implicit z: native.Zone): native.Ptr[struct_s] = {
+      val ptr = native.alloc[struct_s]
+      ptr.a = a
+      ptr
     }
   }
 }

@@ -41,6 +41,9 @@ class Struct : public Record {
         const std::shared_ptr<const Struct> &startStruct, CycleNode &cycleNode,
         std::vector<std::shared_ptr<const Type>> &visitedTypes) const override;
 
+    std::string
+    getConstructorHelper(const LocationManager &locationManager) const;
+
   private:
     /** type size is needed if number of fields is bigger than 22 */
     uint64_t typeSize;
@@ -121,6 +124,14 @@ class Struct : public Record {
      */
     bool hasBiggestName(const CycleNode &node,
                         std::vector<std::string> namesInCycle) const;
+
+    bool isArrayOrRecord(std::shared_ptr<const Type> type) const;
+
+    /**
+     * @return pointer to given type if given type is record or array
+     */
+    std::shared_ptr<const Type>
+    wrapArrayOrRecordInPointer(std::shared_ptr<const Type> type) const;
 };
 
 #endif // SCALA_NATIVE_BINDGEN_STRUCT_H

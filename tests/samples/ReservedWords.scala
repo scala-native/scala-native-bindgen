@@ -28,7 +28,6 @@ object ReservedWords {
       def `val`: native.CInt = !p._2
       def `val_=`(value: native.CInt): Unit = !p._2 = value
     }
-    def struct_object()(implicit z: native.Zone): native.Ptr[struct_object] = native.alloc[struct_object]
 
     implicit class struct_anonymous_0_ops(val p: native.Ptr[struct_anonymous_0]) extends AnyVal {
       def `def`: native.CChar = !p._1
@@ -36,7 +35,6 @@ object ReservedWords {
       def `super`: native.Ptr[`type`] = !p._2
       def `super_=`(value: native.Ptr[`type`]): Unit = !p._2 = value
     }
-    def struct_anonymous_0()(implicit z: native.Zone): native.Ptr[struct_anonymous_0] = native.alloc[struct_anonymous_0]
 
     implicit class struct_finally_ops(val p: native.Ptr[struct_finally]) extends AnyVal {
       def `val`: `def` = !p._1
@@ -44,7 +42,6 @@ object ReservedWords {
       def `finally`: native.Ptr[`lazy`] = p._2
       def `finally_=`(value: native.Ptr[`lazy`]): Unit = !p._2 = !value
     }
-    def struct_finally()(implicit z: native.Zone): native.Ptr[struct_finally] = native.alloc[struct_finally]
 
     implicit class union_lazy_pos(val p: native.Ptr[union_lazy]) extends AnyVal {
       def instance: native.Ptr[native.Ptr[`object`]] = p.cast[native.Ptr[native.Ptr[`object`]]]
@@ -53,6 +50,39 @@ object ReservedWords {
       def `forSome_=`(value: `match`): Unit = !p.cast[native.Ptr[`match`]] = value
       def `implicit`: native.Ptr[native.Ptr[struct_anonymous_0]] = p.cast[native.Ptr[native.Ptr[struct_anonymous_0]]]
       def `implicit_=`(value: native.Ptr[struct_anonymous_0]): Unit = !p.cast[native.Ptr[native.Ptr[struct_anonymous_0]]] = value
+    }
+  }
+
+  object struct_object {
+    import implicits._
+    def apply()(implicit z: native.Zone): native.Ptr[struct_object] = native.alloc[struct_object]
+    def apply(`yield`: `match`, `val`: native.CInt)(implicit z: native.Zone): native.Ptr[struct_object] = {
+      val ptr = native.alloc[struct_object]
+      ptr.`yield` = `yield`
+      ptr.`val` = `val`
+      ptr
+    }
+  }
+
+  object struct_anonymous_0 {
+    import implicits._
+    def apply()(implicit z: native.Zone): native.Ptr[struct_anonymous_0] = native.alloc[struct_anonymous_0]
+    def apply(`def`: native.CChar, `super`: native.Ptr[`type`])(implicit z: native.Zone): native.Ptr[struct_anonymous_0] = {
+      val ptr = native.alloc[struct_anonymous_0]
+      ptr.`def` = `def`
+      ptr.`super` = `super`
+      ptr
+    }
+  }
+
+  object struct_finally {
+    import implicits._
+    def apply()(implicit z: native.Zone): native.Ptr[struct_finally] = native.alloc[struct_finally]
+    def apply(`val`: `def`, `finally`: native.Ptr[`lazy`])(implicit z: native.Zone): native.Ptr[struct_finally] = {
+      val ptr = native.alloc[struct_finally]
+      ptr.`val` = `val`
+      ptr.`finally` = `finally`
+      ptr
     }
   }
 }

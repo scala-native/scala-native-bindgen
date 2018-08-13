@@ -15,13 +15,21 @@ object StructTests extends TestSuite {
       assert(point.x == 11)
     }
 
+    'constructor - {
+      Zone { implicit Zone =>
+        val point = Struct.struct_point(1, 2)
+        assert(point.x == 1)
+        assert(point.y == 2)
+      }
+    }
+
     'bigStructSize - {
       assert(Struct.getBigStructSize() == sizeof[Struct.struct_bigStruct])
     }
 
     'getFieldsOfInnerStruct - {
       Zone { implicit zone =>
-        val points = struct_points()
+        val points = Struct.struct_points()
         Struct.setPoints(points, 1, 2, 3, 4)
         assert(1 == points.p1.x)
         assert(2 == points.p1.y)
@@ -32,7 +40,7 @@ object StructTests extends TestSuite {
 
     'setFieldsOfInnerStruct - {
       Zone { implicit zone =>
-        val points = struct_points()
+        val points = Struct.struct_points()
         points.p1.x = 1
         points.p1.y = 2
         points.p2.x = 3
@@ -52,7 +60,7 @@ object StructTests extends TestSuite {
         !anonymousStruct._1 = 'a'
         !anonymousStruct._2 = 42
 
-        val structWithAnonymousStruct = struct_structWithAnonymousStruct()
+        val structWithAnonymousStruct = Struct.struct_structWithAnonymousStruct()
         structWithAnonymousStruct.anonymousStruct = anonymousStruct
 
         assert(

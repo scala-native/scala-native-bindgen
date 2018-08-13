@@ -46,29 +46,66 @@ object PrivateMembers {
       def field2: __private_type = !p._2
       def field2_=(value: __private_type): Unit = !p._2 = value
     }
-    def struct_structWithPrivateType()(implicit z: native.Zone): native.Ptr[struct_structWithPrivateType] = native.alloc[struct_structWithPrivateType]
 
     implicit class struct_structWithPrivateStruct_ops(val p: native.Ptr[struct_structWithPrivateStruct]) extends AnyVal {
       def s: native.Ptr[struct_structWithPrivateType] = !p._1
       def s_=(value: native.Ptr[struct_structWithPrivateType]): Unit = !p._1 = value
     }
-    def struct_structWithPrivateStruct()(implicit z: native.Zone): native.Ptr[struct_structWithPrivateStruct] = native.alloc[struct_structWithPrivateStruct]
 
     implicit class struct_normalStruct_ops(val p: native.Ptr[struct_normalStruct]) extends AnyVal {
       def a: native.CInt = !p._1
       def a_=(value: native.CInt): Unit = !p._1 = value
     }
-    def struct_normalStruct()(implicit z: native.Zone): native.Ptr[struct_normalStruct] = native.alloc[struct_normalStruct]
 
     implicit class struct_privateStructWithTypedef_ops(val p: native.Ptr[struct_privateStructWithTypedef]) extends AnyVal {
       def a: native.Ptr[__private_type] = !p._1
       def a_=(value: native.Ptr[__private_type]): Unit = !p._1 = value
     }
-    def struct_privateStructWithTypedef()(implicit z: native.Zone): native.Ptr[struct_privateStructWithTypedef] = native.alloc[struct_privateStructWithTypedef]
 
     implicit class union___unionWithPrivateName_pos(val p: native.Ptr[union___unionWithPrivateName]) extends AnyVal {
       def a: native.Ptr[native.CInt] = p.cast[native.Ptr[native.CInt]]
       def a_=(value: native.CInt): Unit = !p.cast[native.Ptr[native.CInt]] = value
+    }
+  }
+
+  object struct_structWithPrivateType {
+    import implicits._
+    def apply()(implicit z: native.Zone): native.Ptr[struct_structWithPrivateType] = native.alloc[struct_structWithPrivateType]
+    def apply(field1: native.CInt, field2: __private_type)(implicit z: native.Zone): native.Ptr[struct_structWithPrivateType] = {
+      val ptr = native.alloc[struct_structWithPrivateType]
+      ptr.field1 = field1
+      ptr.field2 = field2
+      ptr
+    }
+  }
+
+  object struct_structWithPrivateStruct {
+    import implicits._
+    def apply()(implicit z: native.Zone): native.Ptr[struct_structWithPrivateStruct] = native.alloc[struct_structWithPrivateStruct]
+    def apply(s: native.Ptr[struct_structWithPrivateType])(implicit z: native.Zone): native.Ptr[struct_structWithPrivateStruct] = {
+      val ptr = native.alloc[struct_structWithPrivateStruct]
+      ptr.s = s
+      ptr
+    }
+  }
+
+  object struct_normalStruct {
+    import implicits._
+    def apply()(implicit z: native.Zone): native.Ptr[struct_normalStruct] = native.alloc[struct_normalStruct]
+    def apply(a: native.CInt)(implicit z: native.Zone): native.Ptr[struct_normalStruct] = {
+      val ptr = native.alloc[struct_normalStruct]
+      ptr.a = a
+      ptr
+    }
+  }
+
+  object struct_privateStructWithTypedef {
+    import implicits._
+    def apply()(implicit z: native.Zone): native.Ptr[struct_privateStructWithTypedef] = native.alloc[struct_privateStructWithTypedef]
+    def apply(a: native.Ptr[__private_type])(implicit z: native.Zone): native.Ptr[struct_privateStructWithTypedef] = {
+      val ptr = native.alloc[struct_privateStructWithTypedef]
+      ptr.a = a
+      ptr
     }
   }
 }

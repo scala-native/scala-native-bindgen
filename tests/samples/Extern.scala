@@ -27,6 +27,17 @@ object Extern {
       def patch: native.CInt = !p._3
       def patch_=(value: native.CInt): Unit = !p._3 = value
     }
-    def struct_version()(implicit z: native.Zone): native.Ptr[struct_version] = native.alloc[struct_version]
+  }
+
+  object struct_version {
+    import implicits._
+    def apply()(implicit z: native.Zone): native.Ptr[struct_version] = native.alloc[struct_version]
+    def apply(major: native.CInt, minor: native.CInt, patch: native.CInt)(implicit z: native.Zone): native.Ptr[struct_version] = {
+      val ptr = native.alloc[struct_version]
+      ptr.major = major
+      ptr.minor = minor
+      ptr.patch = patch
+      ptr
+    }
   }
 }

@@ -181,6 +181,13 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir) {
         s << "\n  object implicits {\n" << ir.getHelperMethods() << "  }\n";
     }
 
+    for (const auto &str : ir.structs) {
+        visitedTypes.clear();
+        if (ir.shouldOutput(str, visitedTypes) && str->hasHelperMethods()) {
+            s << "\n" << str->getConstructorHelper(ir.locationManager);
+        }
+    }
+
     s << "}\n\n";
 
     return s;

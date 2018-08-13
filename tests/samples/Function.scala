@@ -22,11 +22,20 @@ object Function {
       def `val`: native.CInt = !p._1
       def `val_=`(value: native.CInt): Unit = !p._1 = value
     }
-    def struct_s()(implicit z: native.Zone): native.Ptr[struct_s] = native.alloc[struct_s]
 
     implicit class union_u_pos(val p: native.Ptr[union_u]) extends AnyVal {
       def a: native.Ptr[native.CInt] = p.cast[native.Ptr[native.CInt]]
       def a_=(value: native.CInt): Unit = !p.cast[native.Ptr[native.CInt]] = value
+    }
+  }
+
+  object struct_s {
+    import implicits._
+    def apply()(implicit z: native.Zone): native.Ptr[struct_s] = native.alloc[struct_s]
+    def apply(`val`: native.CInt)(implicit z: native.Zone): native.Ptr[struct_s] = {
+      val ptr = native.alloc[struct_s]
+      ptr.`val` = `val`
+      ptr
     }
   }
 }
