@@ -1,4 +1,4 @@
-# Building with `CMake`
+# Building the executable with `CMake`
 
 Building `scala-native-bindgen` requires the following tools and libraries:
 
@@ -40,16 +40,6 @@ equivalent, e.g. to compile with debug symbols the following are the same:
 ```sh
 cmake -DCMAKE_CXX_FLAGS=-g ..
 CXXFLAGS=-g cmake ..
-```
-
-## Testing
-
-The tests assume that the above instructions for building `scala-native-bindgen` from source
-has been followed.
-
-```sh
-cd tests
-sbt test
 ```
 
  [CMake]: https://cmake.org/

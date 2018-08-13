@@ -30,6 +30,12 @@ cd tests
 sbt ~test
 ```
 
+To run the same tests as is run by Travis CI use the `test.sh` script, which will both build the executable and run `sbt verify`:
+
+```sh
+./scripts/test.sh
+```
+
 ## Coding Guidelines
 
 Code should be formatted with `./scripts/scalafmt` and `./scripts/clangfmt`.

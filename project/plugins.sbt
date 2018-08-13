@@ -8,3 +8,12 @@ addSbtPlugin("org.foundweekends" % "sbt-bintray"                % "0.5.4")
 addSbtPlugin("com.eed3si9n"      % "sbt-buildinfo"              % "0.9.0")
 
 libraryDependencies += "org.scala-sbt" %% "scripted-plugin" % sbtVersion.value
+
+val VERSION = "0.3.0-RC0"
+
+//#sbt-plugin-example
+addSbtPlugin("org.scala-native.bindgen" % "sbt-scala-native-bindgen" % VERSION)
+
+resolvers += Resolver.bintrayIvyRepo("scala-native-bindgen", "sbt-plugins")
+resolvers += Resolver.bintrayRepo("scala-native-bindgen", "maven")
+//#sbt-plugin-example

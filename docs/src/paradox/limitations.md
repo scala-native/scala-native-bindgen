@@ -2,6 +2,8 @@
 
 There are multiple unsupported cases that should be considered when generating bindings.
 
+@@ toc
+
 ## Passing structs by value
 
 Scala Native does not support passing structs by value, bindgen skips such functions.
