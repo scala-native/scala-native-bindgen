@@ -6,7 +6,7 @@ LiteralDefine::LiteralDefine(std::string name, std::string literal,
 
 std::string
 LiteralDefine::getDefinition(const LocationManager &locationManager) const {
-    return "  val " + name + ": " + type->str(locationManager) + " = " +
+    return "    val " + name + ": " + type->str(locationManager) + " = " +
            literal + "\n";
 }
 

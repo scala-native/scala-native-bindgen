@@ -3,8 +3,6 @@ package org.scalanative.bindgen.samples
 import scala.scalanative._
 import scala.scalanative.native._
 
-@native.link("bindgentests")
-@native.extern
 object Cycles {
   type struct_node = native.CStruct2[native.CInt, native.Ptr[Byte]]
   type struct_b = native.CStruct1[native.Ptr[native.Ptr[Byte]]]

@@ -87,7 +87,8 @@ void IR::addVarDefine(std::string name, std::shared_ptr<Variable> variable) {
 bool IR::libObjEmpty() const {
     return functions.empty() && !shouldOutputType(typeDefs) &&
            !shouldOutputType(structs) && !shouldOutputType(unions) &&
-           varDefines.empty() && variables.empty() && enums.empty();
+           varDefines.empty() && variables.empty() &&
+           !shouldOutputType(enums) && literalDefines.empty();
 }
 
 llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir) {
@@ -97,24 +98,21 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir) {
         s << "package " << ir.packageName << "\n\n";
     }
 
-    if (!ir.libObjEmpty() || ir.shouldOutputType(ir.enums) ||
-        !ir.literalDefines.empty()) {
-        s << "import scala.scalanative._\n"
-          << "import scala.scalanative.native._\n\n";
+    if (ir.libObjEmpty()) {
+        return s;
     }
 
-    std::string objectName = handleReservedWords(ir.objectName);
+    s << "import scala.scalanative._\n"
+      << "import scala.scalanative.native._\n\n";
 
-    bool isLibObjectEmpty = ir.libObjEmpty();
-
-    if (!isLibObjectEmpty) {
+    if (!ir.functions.empty() || !ir.varDefines.empty() ||
+        !ir.variables.empty()) {
         if (!ir.linkName.empty()) {
             s << "@native.link(\"" << ir.linkName << "\")\n";
         }
-
-        s << "@native.extern\n"
-          << "object " << objectName << " {\n";
+        s << "@native.extern\n";
     }
+    s << "object " << handleReservedWords(ir.objectName) << " {\n";
 
     std::vector<std::shared_ptr<const Type>> visitedTypes;
 
@@ -171,21 +169,19 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir) {
         }
     }
 
+    if (!ir.literalDefines.empty()) {
+        s << "\n  object defines {\n";
+        for (const auto &literalDefine : ir.literalDefines) {
+            s << literalDefine->getDefinition(ir.locationManager);
+        }
+        s << "  }\n";
+    }
+
     if (ir.hasHelperMethods()) {
         s << "\n  object implicits {\n" << ir.getHelperMethods() << "  }\n";
     }
 
-    if (!isLibObjectEmpty) {
-        s << "}\n\n";
-    }
-
-    if (!ir.literalDefines.empty()) {
-        s << "object " << ir.libName << "Defines {\n";
-        for (const auto &literalDefine : ir.literalDefines) {
-            s << literalDefine->getDefinition(ir.locationManager);
-        }
-        s << "}\n\n";
-    }
+    s << "}\n\n";
 
     return s;
 }

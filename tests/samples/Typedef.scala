@@ -3,8 +3,6 @@ package org.scalanative.bindgen.samples
 import scala.scalanative._
 import scala.scalanative.native._
 
-@native.link("bindgentests")
-@native.extern
 object Typedef {
   type enum_days = native.CUnsignedInt
   object enum_days {
