@@ -133,8 +133,6 @@ lazy val docs = project("docs")
   .settings(
     publish / skip := true,
     scalaVersion := Versions.scala211,
-    // FIXME: Remove when a version has been released with Test scope settings.
-    ScalaNativeBindgenPlugin.nativeBindgenScopedSettings(Test),
     Test / nativeBindings += {
       NativeBinding((Test / resourceDirectory).value / "vector.h")
         .name("vector")

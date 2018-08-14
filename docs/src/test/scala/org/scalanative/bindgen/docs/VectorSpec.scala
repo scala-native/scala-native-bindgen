@@ -8,7 +8,7 @@ class VectorSpec extends FunSpec {
       //#step-1
       import scala.scalanative.native.Zone
       import org.example.vector
-      import org.example.vectorHelpers._
+      import org.example.vector.implicits._
 
       Zone { implicit zone =>
         val vec1p1 = struct_point()
