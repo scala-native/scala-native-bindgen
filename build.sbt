@@ -3,9 +3,7 @@ import scala.util.Try
 import org.scalanative.bindgen.sbt.ScalaNativeBindgenPlugin
 import BindingHelpers._
 
-addCommandAlias(
-  "verify",
-  "; tests/test ; docs/test ; bindings/test ; ^scripted ; docs/makeSite")
+addCommandAlias("verify", "; test ; ^scripted ; docs/makeSite")
 
 val Versions = new {
   val scala210 = "2.10.6"
@@ -28,6 +26,7 @@ inThisBuild(
       "-encoding",
       "utf8"
     ),
+    parallelExecution in Global := false,
     scmInfo := Some(
       ScmInfo(url("https://github.com/kornilova-l/scala-native-bindgen"),
               "scm:git:git@github.com:kornilova-l/scala-native-bindgen.git")),
