@@ -32,6 +32,7 @@ This project is distributed under the Scala license.
 * [Using Generated Bindings](using-generated-bindings.md)
 * [Integrating Bindings](integrating-bindings.md)
 * [Limitations](limitations.md)
+* [bindings](bindings/index.md)
 * [Contributor's Guide](contrib/index.md)
 
 @@@

@@ -10,6 +10,7 @@ information about how to build and contribute to the project.
 * [guidelines](guidelines.md)
 * [cmake](cmake.md)
 * [docker-compose](docker-compose.md)
+* [bindings](bindings.md)
 * [releasing](releasing.md)
 
 @@@
