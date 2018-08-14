@@ -47,15 +47,18 @@ object StructTests extends TestSuite {
     'innerAnonymousStruct - {
       type struct_anonymousStruct = CStruct2[CChar, CInt]
       Zone { implicit zone =>
-        val anonymousStruct: Ptr[struct_anonymousStruct] = alloc[struct_anonymousStruct]
+        val anonymousStruct: Ptr[struct_anonymousStruct] =
+          alloc[struct_anonymousStruct]
         !anonymousStruct._1 = 'a'
         !anonymousStruct._2 = 42
 
         val structWithAnonymousStruct = struct_structWithAnonymousStruct()
         structWithAnonymousStruct.anonymousStruct = anonymousStruct
 
-        assert('a' == Struct.getCharFromAnonymousStruct(structWithAnonymousStruct))
-        assert(42 == Struct.getIntFromAnonymousStruct(structWithAnonymousStruct))
+        assert(
+          'a' == Struct.getCharFromAnonymousStruct(structWithAnonymousStruct))
+        assert(
+          42 == Struct.getIntFromAnonymousStruct(structWithAnonymousStruct))
       }
     }
 
@@ -63,12 +66,16 @@ object StructTests extends TestSuite {
       Zone { implicit zone: Zone =>
         val structPtr = alloc[Struct.struct_bigStruct]
         for (value <- Seq(Long.MinValue, -1, 0, 1, Long.MaxValue)) {
-          Struct.struct_test_long(structPtr, Struct.enum_struct_op.STRUCT_SET, value)
+          Struct.struct_test_long(structPtr,
+                                  Struct.enum_struct_op.STRUCT_SET,
+                                  value)
           assert(structPtr.one == value)
         }
 
         for (value <- Seq(Double.MinValue, -1, 0, 1, Double.MaxValue)) {
-          Struct.struct_test_double(structPtr, Struct.enum_struct_op.STRUCT_SET, value)
+          Struct.struct_test_double(structPtr,
+                                    Struct.enum_struct_op.STRUCT_SET,
+                                    value)
           assert(structPtr.five == value)
         }
 
@@ -76,7 +83,9 @@ object StructTests extends TestSuite {
         pointPtr.x = 5
         pointPtr.y = 10
 
-        Struct.struct_test_point(structPtr, Struct.enum_struct_op.STRUCT_SET, pointPtr)
+        Struct.struct_test_point(structPtr,
+                                 Struct.enum_struct_op.STRUCT_SET,
+                                 pointPtr)
         assert(structPtr.six.x == pointPtr.x)
         assert(structPtr.six.y == pointPtr.y)
       }
@@ -87,19 +96,28 @@ object StructTests extends TestSuite {
         val structPtr = alloc[Struct.struct_bigStruct]
         for (value <- Seq(Long.MinValue, -1, 0, 1, Long.MaxValue)) {
           structPtr.one = value
-          assert(Struct.struct_test_long(structPtr, Struct.enum_struct_op.STRUCT_TEST, value) == 1)
+          assert(
+            Struct.struct_test_long(structPtr,
+                                    Struct.enum_struct_op.STRUCT_TEST,
+                                    value) == 1)
         }
 
         for (value <- Seq(Double.MinValue, -1, 0, 1, Double.MaxValue)) {
           structPtr.five = value
-          assert(Struct.struct_test_double(structPtr, Struct.enum_struct_op.STRUCT_TEST, value) == 1)
+          assert(
+            Struct.struct_test_double(structPtr,
+                                      Struct.enum_struct_op.STRUCT_TEST,
+                                      value) == 1)
         }
 
         val pointPtr = alloc[Struct.point]
         pointPtr.x = 5
         pointPtr.y = 10
         structPtr.six = pointPtr
-        assert(Struct.struct_test_point(structPtr, Struct.enum_struct_op.STRUCT_TEST, pointPtr) == 1)
+        assert(
+          Struct.struct_test_point(structPtr,
+                                   Struct.enum_struct_op.STRUCT_TEST,
+                                   pointPtr) == 1)
       }
     }
   }

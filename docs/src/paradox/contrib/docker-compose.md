@@ -1,4 +1,4 @@
-# Building with `docker-compose`
+# Building the executable with `docker-compose`
 
 You can use [docker-compose] to build and test the program:
 
@@ -11,4 +11,5 @@ docker-compose run --rm ubuntu-18.04-llvm-6.0 ./script/test.sh
 docker-compose run --rm ubuntu-18.04-llvm-6.0 \
     bindgen/target/scala-native-bindgen --name union tests/samples/Union.h --
 ```
+
  [docker-compose]: https://docs.docker.com/compose/

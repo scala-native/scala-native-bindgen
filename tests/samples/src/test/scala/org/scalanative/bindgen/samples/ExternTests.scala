@@ -15,7 +15,8 @@ object ExternTests extends TestSuite {
 
     'semver - {
       import Extern.implicits._
-      assert(Extern.semver.major == 1 && Extern.semver.minor == 2 && Extern.semver.patch == 3)
+      assert(
+        Extern.semver.major == 1 && Extern.semver.minor == 2 && Extern.semver.patch == 3)
     }
   }
 }

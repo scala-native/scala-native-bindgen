@@ -1,6 +1,8 @@
 import scala.sys.process._
+import org.scalanative.bindgen.sbt.ScalaNativeBindgenPlugin
 
-addCommandAlias("verify", "; ^test:compile ; ^test ; ^scripted ; docs/makeSite")
+addCommandAlias("verify",
+                "; tests/test ; docs/test ; ^scripted ; docs/makeSite")
 
 val Versions = new {
   val scala210 = "2.10.6"
@@ -88,6 +90,7 @@ lazy val tests = project("tests")
     ),
     libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % Test
   )
+  .aggregate(samples)
 
 lazy val samples = project("samples")
   .in(file("tests/samples"))
@@ -98,47 +101,7 @@ lazy val samples = project("samples")
     libraryDependencies += "com.lihaoyi" %%% "utest" % "0.6.3" % "test",
     testFrameworks += new TestFramework("utest.runner.Framework"),
     nativeLinkStubs := true,
-    Test / nativeLinkingOptions += {
-      Seq("-L", (Test / target).value.getAbsoluteFile / "bindgen").mkString
-    },
-    Test / compile := {
-      val log            = streams.value.log
-      val cwd            = (Test / target).value / "bindgen"
-      val compileOptions = (Test / nativeCompileOptions).value
-      val cpaths         = (baseDirectory.value.getAbsoluteFile * "*.c").get
-      val clangPath      = nativeClang.value.toPath.toAbsolutePath.toString
-
-      cwd.mkdirs()
-
-      def abs(path: File): String =
-        path.getAbsolutePath
-
-      def run(command: Seq[String]): Int = {
-        log.info("Running " + command.mkString(" "))
-        Process(command, cwd) ! log
-      }
-
-      val opaths = cpaths.map { cpath =>
-        val opath = abs(cwd / s"${cpath.getName}.o")
-        val command = Seq(clangPath) ++ compileOptions ++ Seq("-c",
-                                                              abs(cpath),
-                                                              "-o",
-                                                              opath)
-
-        if (run(command) != 0) {
-          sys.error(s"Failed to compile $cpath")
-        }
-        opath
-      }
-
-      val archivePath = cwd / "libbindgentests.a"
-      val archive     = Seq("ar", "cr", abs(archivePath)) ++ opaths
-      if (run(archive) != 0) {
-        sys.error(s"Failed to create archive $archivePath")
-      }
-
-      (Test / compile).value
-    }
+    compileTask("bindgentests", baseDirectory)
   )
 
 lazy val tools = project("tools")
@@ -166,16 +129,33 @@ lazy val sbtPlugin = project("sbt-scala-native-bindgen", ScriptedPlugin)
 
 lazy val docs = project("docs")
   .enablePlugins(GhpagesPlugin, ParadoxSitePlugin, ParadoxMaterialThemePlugin)
+  .enablePlugins(ScalaNativePlugin, ScalaNativeBindgenPlugin)
   .settings(
     publish / skip := true,
+    scalaVersion := Versions.scala211,
+    // FIXME: Remove when a version has been released with Test scope settings.
+    ScalaNativeBindgenPlugin.nativeBindgenScopedSettings(Test),
+    Test / nativeBindings += {
+      NativeBinding((Test / resourceDirectory).value / "vector.h")
+        .name("vector")
+        .link("vector")
+        .packageName("org.example")
+    },
+    Test / nativeBindgen / target := (Test / scalaSource).value / "org/example",
+    nativeLinkStubs := true,
+    compileTask("vector", Test / resourceDirectory),
+    libraryDependencies += "org.scalatest" %%% "scalatest" % "3.2.0-SNAP10" % Test,
     Paradox / paradoxProperties ++= Map(
       "github.base_url" -> scmInfo.value.get.browseUrl.toString
     ),
     ParadoxMaterialThemePlugin.paradoxMaterialThemeSettings(Paradox),
     Paradox / paradoxMaterialTheme := {
+      val licenseUrl = scmInfo.value.get.browseUrl.toString + "blob/master/LICENSE.txt"
       (Paradox / paradoxMaterialTheme).value
         .withRepository(scmInfo.value.get.browseUrl.toURI)
         .withColor("indigo", "indigo")
+        .withCopyright(
+          s"Copyright © Liudmila Kornilova, distributed under the <a href='$licenseUrl'>Scala license</a>.")
     }
   )
 
@@ -209,3 +189,53 @@ def project(name: String, plugged: AutoPlugin*) = {
 
 lazy val setReleaseVersions: String => State => State =
   v => _.put(ReleaseKeys.versions, (v, v))
+
+def compileTask(libname: String, srcDirTask: SettingKey[File]) = Def.settings(
+  Test / nativeLinkingOptions += {
+    Seq("-L", (Test / target).value.getAbsoluteFile / "bindgen").mkString
+  },
+  Test / compile := {
+    val log            = streams.value.log
+    val cwd            = (Test / target).value / "bindgen"
+    val compileOptions = (Test / nativeCompileOptions).value
+    val cpaths         = (srcDirTask.value.getAbsoluteFile * "*.c").get
+    val clangPath      = nativeClang.value.toPath.toAbsolutePath.toString
+
+    cwd.mkdirs()
+
+    def abs(path: File): String =
+      path.getAbsolutePath
+
+    def run(command: Seq[String]): Int = {
+      log.info("Running " + command.mkString(" "))
+      Process(command, cwd) ! log
+    }
+
+    val opaths = cpaths.map {
+      cpath =>
+        val opath = cwd / s"${cpath.getName}.o"
+        val command = Seq(clangPath) ++ compileOptions ++ Seq("-c",
+                                                              abs(cpath),
+                                                              "-o",
+                                                              abs(opath))
+        val doCompile =
+          !opath.exists() || cpath.lastModified() >= opath.lastModified()
+
+        if (doCompile && run(command) != 0) {
+          sys.error(s"Failed to compile $cpath")
+        }
+        opath
+    }
+
+    val archivePath = cwd / s"lib$libname.a"
+    val archive     = Seq("ar", "cr", abs(archivePath)) ++ opaths.map(abs)
+    val doArchive =
+      opaths.map(_.lastModified).max >= archivePath.lastModified()
+
+    if (doArchive && run(archive) != 0) {
+      sys.error(s"Failed to create archive $archivePath")
+    }
+
+    (Test / compile).value
+  }
+)

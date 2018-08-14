@@ -1,10 +1,13 @@
-> checkSingle
-$ exists target/scala-2.11/src_managed/main/sbt-scala-native-bindgen/stdlib.scala
+> nativeBindgen
+$ must-mirror target/scala-2.11/src_managed/main/sbt-scala-native-bindgen/stdlib.scala expected/stdlib.scala
+
+> clean
 > set target in (Compile, nativeBindgen) := nativeBindgenCustomTarget.value
-> checkSingle
-$ exists src/main/scala/org/example/stdlib.scala
+> nativeBindgen
+$ must-mirror src/main/scala/org/example/stdlib.scala expected/stdlib.scala
+
 > clean
 > set nativeBindings in Compile += nativeBindgenCoreBinding.value
-> checkMultiple
-$ exists src/main/scala/org/example/core.scala
-$ exists src/main/scala/org/example/stdlib.scala
+> nativeBindgen
+$ must-mirror src/main/scala/org/example/core.scala expected/core.scala
+$ must-mirror src/main/scala/org/example/stdlib.scala expected/stdlib.scala

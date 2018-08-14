@@ -65,6 +65,7 @@ object ScalaNativeBindgenPlugin extends AutoPlugin {
   override def projectSettings: Seq[Setting[_]] =
     inConfig(ScalaNativeBindgen)(Defaults.configSettings) ++
       nativeBindgenScopedSettings(Compile) ++
+      nativeBindgenScopedSettings(Test) ++
       Def.settings(
         ivyConfigurations += ScalaNativeBindgen,
         version in nativeBindgen := BuildInfo.version,
