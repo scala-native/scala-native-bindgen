@@ -18,7 +18,7 @@
 
 <meta name="description" content="docs">
 <link rel="shortcut icon" href="../assets/images/favicon.png">
-<title>Using Generated Bindings · Scala Native Bindgen</title>
+<title>Release Workflow · Scala Native Bindgen</title>
 <link rel="stylesheet" href="../assets/stylesheets/application.7a4cdee3.css">
 <link rel="stylesheet" href="../assets/stylesheets/application-palette.792431c1.css">
 <link rel="stylesheet" href="../lib/material__tabs/dist/mdc.tabs.min.css">
@@ -57,7 +57,7 @@ data-md-color-accent="indigo"
 Scala Native Bindgen
 </span>
 <span class="md-header-nav__topic">
-Using Generated Bindings
+Release Workflow
 </span>
 </div>
 </div>
@@ -135,23 +135,24 @@ kornilova-l/scala-native-bindgen
 
 </div>
 <ul>
-  <li><a href="../obtaining-bindgen/index.html" class="page">Obtaining Bindgen</a>
+  <li><a href="../sbt.html" class="page">Generating Bindings with sbt</a></li>
+  <li><a href="../cli.html" class="page">Generating Bindings with the CLI</a></li>
+  <li><a href="../using-generated-bindings.html" class="page">Using Generated Bindings</a></li>
+  <li><a href="../integrating-bindings.html" class="page">Integrating Bindings</a></li>
+  <li><a href="../limitations.html" class="page">Limitations</a></li>
+  <li><a href="../contrib/index.html" class="page">Contributor&rsquo;s Guide</a>
   <ul>
-    <li><a href="../obtaining-bindgen/sbt-plugin.html" class="page">Using the sbt plugin</a></li>
-    <li><a href="../obtaining-bindgen/docker-container.html" class="page">Using Docker Container</a></li>
-    <li><a href="../obtaining-bindgen/cmake.html" class="page">Building with <code>CMake</code></a></li>
-    <li><a href="../obtaining-bindgen/docker-compose.html" class="page">Building with <code>docker-compose</code></a></li>
+    <li><a href="../contrib/guidelines.html" class="page">Guide for contributors</a></li>
+    <li><a href="../contrib/cmake.html" class="page">Building the executable with <code>CMake</code></a></li>
+    <li><a href="../contrib/docker-compose.html" class="page">Building the executable with <code>docker-compose</code></a></li>
+    <li><a href="../contrib/releasing.html" class="active page">Release Workflow</a></li>
   </ul></li>
-  <li><a href="../command-line-usage/index.html" class="page">Command Line Usage</a></li>
-  <li><a href="../integrating-bindings/index.html" class="page">Integrating Bindings</a></li>
-  <li><a href="../limitations/index.html" class="page">Limitations</a></li>
-  <li><a href="../using-generated-bindings/README.html" class="active page">Using Generated Bindings</a></li>
 </ul>
 <nav class="md-nav md-nav--secondary">
 </nav>
 
 <div class="md-nav__title--site md-version" title="Version">
-<i class="md-icon">label_outline</i> 0.3.0-RC0
+<i class="md-icon">label_outline</i> 0.3.0-RC1
 </div>
 </nav>
 
@@ -161,95 +162,24 @@ kornilova-l/scala-native-bindgen
 <div class="md-content">
 <article class="md-content__inner md-typeset">
 <div class="md-content__searchable">
-<h1><a href="#using-generated-bindings" name="using-generated-bindings" class="anchor"><span class="anchor-link"></span></a>Using Generated Bindings</h1>
-<p>Consider following header file:</p>
-<pre class="prettyprint"><code class="language-c">struct point {
-    float x;
-    float y;
-};
-
-struct vector {
-    struct point a;
-    struct point b;
-};
-
-struct vector *add(struct vector *v1, struct vector *v2);
+<h1><a href="#release-workflow" name="release-workflow" class="anchor"><span class="anchor-link"></span></a>Release Workflow</h1>
+<p>First build the <code>scala-native-bindgen</code> executable for both macOS and Linux:</p>
+<pre class="prettyprint"><code class="language-sh">scripts/prepare-release.sh
 </code></pre>
-<p>Bindgen will generate type aliases for the structs, binding for function <code>add</code> and helper functions that make usage of structs easier.</p>
-<pre class="prettyprint"><code class="language-scala">import scala.scalanative._
-import scala.scalanative.native._
-
-@native.link(&quot;mylib&quot;)
-@native.extern
-object mylib {
-  type struct_point = native.CStruct2[native.CFloat, native.CFloat]
-  type struct_vector = native.CStruct2[struct_point, struct_point]
-  def add(v1: native.Ptr[struct_vector], v2: native.Ptr[struct_vector]): native.Ptr[struct_vector] = native.extern
-}
-
-import mylib._
-
-object mylibHelpers {
-
-  implicit class struct_point_ops(val p: native.Ptr[struct_point]) extends AnyVal {
-    def x: native.CFloat = !p._1
-    def x_=(value: native.CFloat): Unit = !p._1 = value
-    def y: native.CFloat = !p._2
-    def y_=(value: native.CFloat): Unit = !p._2 = value
-  }
-
-  def struct_point()(implicit z: native.Zone): native.Ptr[struct_point] = native.alloc[struct_point]
-
-  implicit class struct_vector_ops(val p: native.Ptr[struct_vector]) extends AnyVal {
-    def a: native.Ptr[struct_point] = p._1
-    def a_=(value: native.Ptr[struct_point]): Unit = !p._1 = !value
-    def b: native.Ptr[struct_point] = p._2
-    def b_=(value: native.Ptr[struct_point]): Unit = !p._2 = !value
-  }
-
-  def struct_vector()(implicit z: native.Zone): native.Ptr[struct_vector] = native.alloc[struct_vector]
-}
+<p>You should now have <code>scala-native-bindgen-linux</code> and <code>scala-native-bindgen-darwin</code> if you ran the script on a macOS machine.</p>
+<p>Then release version <code>x.y.z</code> by running:</p>
+<pre class="prettyprint"><code class="language-sh">sbt -Dproject.version=x.y.z release
 </code></pre>
-<p>Let&rsquo;s write code that creates two vectors, adds them and prints resulting vector.</p>
-<p>First we need to create points for vectors. We will use <code>native.Zone</code> to allocate struct (more information on memory management can be found here: <a href="http://www.scala-native.org/en/latest/user/interop.html#memory-management">Scala Native memory management</a>).</p>
-<p>Helper object <code>mylibHelpers</code> contains function for struct allocation. To import it use <code>import mylibHelpers._</code></p>
-<p>Let&rsquo;s create points for first vector:</p>
-<pre class="prettyprint"><code class="language-scala">import mylibHelpers._
-import scala.scalanative.native.Zone
-
-object Hello extends App {
-  Zone { implicit zone =&gt;
-   val vec1p1 = struct_point()
-   val vec1p2 = struct_point()
-  }
-}
-</code></pre>
-<p>Now we want to set fields of created points. Scala Native provides access to fields by using <code>_N</code> methods where <code>N</code> is index of a field (see <a href="http://www.scala-native.org/en/latest/user/interop.html#memory-layout-types">Scala Native memory layout types</a>).</p>
-<p>Bindgen generates implicit helper classes that wrap calls to <code>_N</code> in functions with meaningful names. We already imported helper class, so we can use the functions:</p>
-<pre class="prettyprint"><code class="language-scala">vec1p1.x = 0
-vec1p1.y = 1
-
-vec1p2.x = 6
-vec1p2.y = 3
-</code></pre>
-<p>Lets create first vector. Note that <code>struct_vector</code> contains fields of type <code>struct_point</code> but setters accept variables of type <code>native.Ptr[struct_point]</code>. It helps to avoid Scala Native limitation that does not allow passing structs and arrays by value (see <a href="https://github.com/scala-native/scala-native/issues/555">scala-native/scala-native#555</a>).</p>
-<pre class="prettyprint"><code class="language-scala">val vec1 = struct_vector()
-vec1.a = vec1p1
-vec1.b = vec1p2
-</code></pre>
-<p>Repeat these steps to create second vector. Once both vectors are created we can call <code>add</code> function and print the result:</p>
-<pre class="prettyprint"><code class="language-scala">val vec3 = mylib.add(vec1, vec2)
-println(s&quot;(${vec3.a.x}, ${vec3.a.y}), (${vec3.b.x}, ${vec3.b.y})&quot;)
-</code></pre>
+<p>Finally, upload the <code>scala-native-bindgen-linux</code> and <code>scala-native-bindgen-darwin</code> executables to the release page at: <a href="https://github.com/kornilova-l/scala-native-bindgen/releases/tag/vx.y.z">https://github.com/kornilova-l/scala-native-bindgen/releases/tag/vx.y.z</a></p>
 </div>
 <div>
-<a href="https://github.com/kornilova-l/scala-native-bindgen/tree/master/docs/src/paradox/using-generated-bindings/README.md" title="Edit this page" class="md-source-file md-edit">
+<a href="https://github.com/kornilova-l/scala-native-bindgen/tree/master/docs/src/paradox/contrib/releasing.md" title="Edit this page" class="md-source-file md-edit">
 Edit this page
 </a>
 </div>
 <div class="print-only">
 <span class="md-source-file md-version">
-0.3.0-RC0
+0.3.0-RC1
 </span>
 </div>
 </article>
@@ -259,7 +189,7 @@ Edit this page
 <footer class="md-footer">
 <div class="md-footer-nav">
 <nav class="md-footer-nav__inner md-grid">
-<a href="../limitations/index.html" title="Limitations" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+<a href="../contrib/docker-compose.html" title="Building the executable with docker-compose" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
 <div class="md-flex__cell md-flex__cell--shrink">
 <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
 </div>
@@ -268,7 +198,7 @@ Edit this page
 <span class="md-footer-nav__direction">
 Previous
 </span>
-Limitations
+Building the executable with docker-compose
 </span>
 </div>
 </a>
@@ -277,6 +207,9 @@ Limitations
 <div class="md-footer-meta md-typeset">
 <div class="md-footer-meta__inner md-grid">
 <div class="md-footer-copyright">
+<div class="md-footer-copyright__highlight">
+Copyright © Liudmila Kornilova, distributed under the <a href='https://github.com/kornilova-l/scala-native-bindgenblob/master/LICENSE.txt'>Scala license</a>.
+</div>
 Powered by
 <a href="https://github.com/lightbend/paradox">Paradox</a>
 and

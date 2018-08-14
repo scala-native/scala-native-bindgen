@@ -17,13 +17,13 @@
 
 
 <meta name="description" content="docs">
-<link rel="shortcut icon" href="../assets/images/favicon.png">
+<link rel="shortcut icon" href="assets/images/favicon.png">
 <title>Limitations · Scala Native Bindgen</title>
-<link rel="stylesheet" href="../assets/stylesheets/application.7a4cdee3.css">
-<link rel="stylesheet" href="../assets/stylesheets/application-palette.792431c1.css">
-<link rel="stylesheet" href="../lib/material__tabs/dist/mdc.tabs.min.css">
-<link rel="stylesheet" href="../lib/prettify/prettify.css">
-<script src="../lib/modernizr/modernizr.min.js"></script>
+<link rel="stylesheet" href="assets/stylesheets/application.7a4cdee3.css">
+<link rel="stylesheet" href="assets/stylesheets/application-palette.792431c1.css">
+<link rel="stylesheet" href="lib/material__tabs/dist/mdc.tabs.min.css">
+<link rel="stylesheet" href="lib/prettify/prettify.css">
+<script src="lib/modernizr/modernizr.min.js"></script>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700|Roboto+Mono">
 <style>
 body,input{font-family:"Roboto","Helvetica Neue",Helvetica,Arial,sans-serif}
@@ -31,7 +31,7 @@ code,kbd,pre{font-family:"Roboto Mono","Courier New",Courier,monospace}
 </style>
 <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<link rel="stylesheet" href="../assets/stylesheets/paradox-material-theme.css">
+<link rel="stylesheet" href="assets/stylesheets/paradox-material-theme.css">
 </head>
 <body
 data-md-color-primary="indigo"
@@ -44,7 +44,7 @@ data-md-color-accent="indigo"
 <nav class="md-header-nav md-grid">
 <div class="md-flex">
 <div class="md-flex__cell md-flex__cell--shrink">
-<a href="../index.html" title="Scala Native Bindgen" class="md-header-nav__button md-logo">
+<a href="index.html" title="Scala Native Bindgen" class="md-header-nav__button md-logo">
 <i class="md-icon">local_library</i>
 </a>
 </div>
@@ -116,7 +116,7 @@ kornilova-l/scala-native-bindgen
 <span class="md-nav__button md-logo">
 <i class="md-icon">local_library</i>
 </span>
-<a href="../index.html" title="Scala Native Bindgen">
+<a href="index.html" title="Scala Native Bindgen">
 Scala Native Bindgen
 </a>
 </label>
@@ -135,34 +135,35 @@ kornilova-l/scala-native-bindgen
 
 </div>
 <ul>
-  <li><a href="../obtaining-bindgen/index.html" class="page">Obtaining Bindgen</a>
+  <li><a href="sbt.html" class="page">Generating Bindings with sbt</a></li>
+  <li><a href="cli.html" class="page">Generating Bindings with the CLI</a></li>
+  <li><a href="using-generated-bindings.html" class="page">Using Generated Bindings</a></li>
+  <li><a href="integrating-bindings.html" class="page">Integrating Bindings</a></li>
+  <li><a href="limitations.html" class="active page">Limitations</a></li>
+  <li><a href="contrib/index.html" class="page">Contributor&rsquo;s Guide</a>
   <ul>
-    <li><a href="../obtaining-bindgen/sbt-plugin.html" class="page">Using the sbt plugin</a></li>
-    <li><a href="../obtaining-bindgen/docker-container.html" class="page">Using Docker Container</a></li>
-    <li><a href="../obtaining-bindgen/cmake.html" class="page">Building with <code>CMake</code></a></li>
-    <li><a href="../obtaining-bindgen/docker-compose.html" class="page">Building with <code>docker-compose</code></a></li>
+    <li><a href="contrib/guidelines.html" class="page">Guide for contributors</a></li>
+    <li><a href="contrib/cmake.html" class="page">Building the executable with <code>CMake</code></a></li>
+    <li><a href="contrib/docker-compose.html" class="page">Building the executable with <code>docker-compose</code></a></li>
+    <li><a href="contrib/releasing.html" class="page">Release Workflow</a></li>
   </ul></li>
-  <li><a href="../command-line-usage/index.html" class="page">Command Line Usage</a></li>
-  <li><a href="../integrating-bindings/index.html" class="page">Integrating Bindings</a></li>
-  <li><a href="../limitations/index.html" class="active page">Limitations</a></li>
-  <li><a href="../using-generated-bindings/README.html" class="page">Using Generated Bindings</a></li>
 </ul>
 <nav class="md-nav md-nav--secondary">
 <label class="md-nav__title" for="toc">Table of contents</label>
 <ul>
-  <li><a href="../limitations/index.html#limitations" class="header">Limitations</a>
+  <li><a href="limitations.html#limitations" class="header">Limitations</a>
   <ul>
-    <li><a href="../limitations/index.html#passing-structs-by-value" class="header">Passing structs by value</a></li>
-    <li><a href="../limitations/index.html#limited-support-of-defines" class="header">Limited support of <code>#define</code>s</a></li>
-    <li><a href="../limitations/index.html#reusing-generated-bindings" class="header">Reusing generated bindings</a></li>
-    <li><a href="../limitations/index.html#type-qualifiers" class="header">Type qualifiers</a></li>
-    <li><a href="../limitations/index.html#updating-extern-variables" class="header">Updating extern variables</a></li>
+    <li><a href="limitations.html#passing-structs-by-value" class="header">Passing structs by value</a></li>
+    <li><a href="limitations.html#limited-support-of-defines" class="header">Limited support of <code>#define</code>s</a></li>
+    <li><a href="limitations.html#reusing-generated-bindings" class="header">Reusing generated bindings</a></li>
+    <li><a href="limitations.html#type-qualifiers" class="header">Type qualifiers</a></li>
+    <li><a href="limitations.html#updating-extern-variables" class="header">Updating extern variables</a></li>
   </ul></li>
 </ul>
 </nav>
 
 <div class="md-nav__title--site md-version" title="Version">
-<i class="md-icon">label_outline</i> 0.3.0-RC0
+<i class="md-icon">label_outline</i> 0.3.0-RC1
 </div>
 </nav>
 
@@ -175,13 +176,13 @@ kornilova-l/scala-native-bindgen
 <nav class="md-nav md-nav--secondary">
 <label class="md-nav__title" for="toc">Table of contents</label>
 <ul>
-  <li><a href="../limitations/index.html#limitations" class="header">Limitations</a>
+  <li><a href="limitations.html#limitations" class="header">Limitations</a>
   <ul>
-    <li><a href="../limitations/index.html#passing-structs-by-value" class="header">Passing structs by value</a></li>
-    <li><a href="../limitations/index.html#limited-support-of-defines" class="header">Limited support of <code>#define</code>s</a></li>
-    <li><a href="../limitations/index.html#reusing-generated-bindings" class="header">Reusing generated bindings</a></li>
-    <li><a href="../limitations/index.html#type-qualifiers" class="header">Type qualifiers</a></li>
-    <li><a href="../limitations/index.html#updating-extern-variables" class="header">Updating extern variables</a></li>
+    <li><a href="limitations.html#passing-structs-by-value" class="header">Passing structs by value</a></li>
+    <li><a href="limitations.html#limited-support-of-defines" class="header">Limited support of <code>#define</code>s</a></li>
+    <li><a href="limitations.html#reusing-generated-bindings" class="header">Reusing generated bindings</a></li>
+    <li><a href="limitations.html#type-qualifiers" class="header">Type qualifiers</a></li>
+    <li><a href="limitations.html#updating-extern-variables" class="header">Updating extern variables</a></li>
   </ul></li>
 </ul>
 </nav>
@@ -194,6 +195,15 @@ kornilova-l/scala-native-bindgen
 <div class="md-content__searchable">
 <h1><a href="#limitations" name="limitations" class="anchor"><span class="anchor-link"></span></a>Limitations</h1>
 <p>There are multiple unsupported cases that should be considered when generating bindings.</p>
+<div class="toc ">
+<ul>
+  <li><a href="limitations.html#passing-structs-by-value" class="header">Passing structs by value</a></li>
+  <li><a href="limitations.html#limited-support-of-defines" class="header">Limited support of <code>#define</code>s</a></li>
+  <li><a href="limitations.html#reusing-generated-bindings" class="header">Reusing generated bindings</a></li>
+  <li><a href="limitations.html#type-qualifiers" class="header">Type qualifiers</a></li>
+  <li><a href="limitations.html#updating-extern-variables" class="header">Updating extern variables</a></li>
+</ul>
+</div>
 <h2><a href="#passing-structs-by-value" name="passing-structs-by-value" class="anchor"><span class="anchor-link"></span></a>Passing structs by value</h2>
 <p>Scala Native does not support passing structs by value, bindgen skips such functions.</p>
 <pre class="prettyprint"><code class="language-c">struct MyStruct {
@@ -224,13 +234,13 @@ extern const int pi_const;
 <p>Extern variables are read-only. See <a href="https://github.com/scala-native/scala-native/issues/202">scala-native/scala-native#202</a>.</p>
 </div>
 <div>
-<a href="https://github.com/kornilova-l/scala-native-bindgen/tree/master/docs/src/paradox/limitations/index.md" title="Edit this page" class="md-source-file md-edit">
+<a href="https://github.com/kornilova-l/scala-native-bindgen/tree/master/docs/src/paradox/limitations.md" title="Edit this page" class="md-source-file md-edit">
 Edit this page
 </a>
 </div>
 <div class="print-only">
 <span class="md-source-file md-version">
-0.3.0-RC0
+0.3.0-RC1
 </span>
 </div>
 </article>
@@ -240,7 +250,7 @@ Edit this page
 <footer class="md-footer">
 <div class="md-footer-nav">
 <nav class="md-footer-nav__inner md-grid">
-<a href="../integrating-bindings/index.html" title="Integrating Bindings" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+<a href="integrating-bindings.html" title="Integrating Bindings" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
 <div class="md-flex__cell md-flex__cell--shrink">
 <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
 </div>
@@ -253,13 +263,13 @@ Integrating Bindings
 </span>
 </div>
 </a>
-<a href="../using-generated-bindings/README.html" title="Using Generated Bindings" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+<a href="contrib/index.html" title="Contributors Guide" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
 <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
 <span class="md-flex__ellipsis">
 <span class="md-footer-nav__direction">
 Next
 </span>
-Using Generated Bindings
+Contributors Guide
 </span>
 </div>
 <div class="md-flex__cell md-flex__cell--shrink">
@@ -271,6 +281,9 @@ Using Generated Bindings
 <div class="md-footer-meta md-typeset">
 <div class="md-footer-meta__inner md-grid">
 <div class="md-footer-copyright">
+<div class="md-footer-copyright__highlight">
+Copyright © Liudmila Kornilova, distributed under the <a href='https://github.com/kornilova-l/scala-native-bindgenblob/master/LICENSE.txt'>Scala license</a>.
+</div>
 Powered by
 <a href="https://github.com/lightbend/paradox">Paradox</a>
 and
@@ -282,11 +295,11 @@ and
 </footer>
 
 </div>
-<script src="../assets/javascripts/application.5165553b.js"></script>
-<script src="../assets/javascripts/paradox-material-theme.js"></script>
-<script>app.initialize({version:"0.17",url:{base:"../."}})</script>
-<script type="text/javascript" src="../lib/prettify/prettify.js"></script>
-<script type="text/javascript" src="../lib/prettify/lang-scala.js"></script>
+<script src="assets/javascripts/application.5165553b.js"></script>
+<script src="assets/javascripts/paradox-material-theme.js"></script>
+<script>app.initialize({version:"0.17",url:{base:"."}})</script>
+<script type="text/javascript" src="lib/prettify/prettify.js"></script>
+<script type="text/javascript" src="lib/prettify/lang-scala.js"></script>
 <script type="text/javascript">
 document.addEventListener("DOMContentLoaded", function(event) {
 window.prettyPrint && prettyPrint();

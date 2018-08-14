@@ -17,13 +17,13 @@
 
 
 <meta name="description" content="docs">
-<link rel="shortcut icon" href="../assets/images/favicon.png">
-<title>Using Docker Container · Scala Native Bindgen</title>
-<link rel="stylesheet" href="../assets/stylesheets/application.7a4cdee3.css">
-<link rel="stylesheet" href="../assets/stylesheets/application-palette.792431c1.css">
-<link rel="stylesheet" href="../lib/material__tabs/dist/mdc.tabs.min.css">
-<link rel="stylesheet" href="../lib/prettify/prettify.css">
-<script src="../lib/modernizr/modernizr.min.js"></script>
+<link rel="shortcut icon" href="assets/images/favicon.png">
+<title>Generating Bindings with sbt · Scala Native Bindgen</title>
+<link rel="stylesheet" href="assets/stylesheets/application.7a4cdee3.css">
+<link rel="stylesheet" href="assets/stylesheets/application-palette.792431c1.css">
+<link rel="stylesheet" href="lib/material__tabs/dist/mdc.tabs.min.css">
+<link rel="stylesheet" href="lib/prettify/prettify.css">
+<script src="lib/modernizr/modernizr.min.js"></script>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700|Roboto+Mono">
 <style>
 body,input{font-family:"Roboto","Helvetica Neue",Helvetica,Arial,sans-serif}
@@ -31,7 +31,7 @@ code,kbd,pre{font-family:"Roboto Mono","Courier New",Courier,monospace}
 </style>
 <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<link rel="stylesheet" href="../assets/stylesheets/paradox-material-theme.css">
+<link rel="stylesheet" href="assets/stylesheets/paradox-material-theme.css">
 </head>
 <body
 data-md-color-primary="indigo"
@@ -44,7 +44,7 @@ data-md-color-accent="indigo"
 <nav class="md-header-nav md-grid">
 <div class="md-flex">
 <div class="md-flex__cell md-flex__cell--shrink">
-<a href="../index.html" title="Scala Native Bindgen" class="md-header-nav__button md-logo">
+<a href="index.html" title="Scala Native Bindgen" class="md-header-nav__button md-logo">
 <i class="md-icon">local_library</i>
 </a>
 </div>
@@ -57,7 +57,7 @@ data-md-color-accent="indigo"
 Scala Native Bindgen
 </span>
 <span class="md-header-nav__topic">
-Using Docker Container
+Generating Bindings with sbt
 </span>
 </div>
 </div>
@@ -116,7 +116,7 @@ kornilova-l/scala-native-bindgen
 <span class="md-nav__button md-logo">
 <i class="md-icon">local_library</i>
 </span>
-<a href="../index.html" title="Scala Native Bindgen">
+<a href="index.html" title="Scala Native Bindgen">
 Scala Native Bindgen
 </a>
 </label>
@@ -135,23 +135,24 @@ kornilova-l/scala-native-bindgen
 
 </div>
 <ul>
-  <li><a href="../obtaining-bindgen/index.html" class="page">Obtaining Bindgen</a>
+  <li><a href="sbt.html" class="active page">Generating Bindings with sbt</a></li>
+  <li><a href="cli.html" class="page">Generating Bindings with the CLI</a></li>
+  <li><a href="using-generated-bindings.html" class="page">Using Generated Bindings</a></li>
+  <li><a href="integrating-bindings.html" class="page">Integrating Bindings</a></li>
+  <li><a href="limitations.html" class="page">Limitations</a></li>
+  <li><a href="contrib/index.html" class="page">Contributor&rsquo;s Guide</a>
   <ul>
-    <li><a href="../obtaining-bindgen/sbt-plugin.html" class="page">Using the sbt plugin</a></li>
-    <li><a href="../obtaining-bindgen/docker-container.html" class="active page">Using Docker Container</a></li>
-    <li><a href="../obtaining-bindgen/cmake.html" class="page">Building with <code>CMake</code></a></li>
-    <li><a href="../obtaining-bindgen/docker-compose.html" class="page">Building with <code>docker-compose</code></a></li>
+    <li><a href="contrib/guidelines.html" class="page">Guide for contributors</a></li>
+    <li><a href="contrib/cmake.html" class="page">Building the executable with <code>CMake</code></a></li>
+    <li><a href="contrib/docker-compose.html" class="page">Building the executable with <code>docker-compose</code></a></li>
+    <li><a href="contrib/releasing.html" class="page">Release Workflow</a></li>
   </ul></li>
-  <li><a href="../command-line-usage/index.html" class="page">Command Line Usage</a></li>
-  <li><a href="../integrating-bindings/index.html" class="page">Integrating Bindings</a></li>
-  <li><a href="../limitations/index.html" class="page">Limitations</a></li>
-  <li><a href="../using-generated-bindings/README.html" class="page">Using Generated Bindings</a></li>
 </ul>
 <nav class="md-nav md-nav--secondary">
 </nav>
 
 <div class="md-nav__title--site md-version" title="Version">
-<i class="md-icon">label_outline</i> 0.3.0-RC0
+<i class="md-icon">label_outline</i> 0.3.0-RC1
 </div>
 </nav>
 
@@ -161,28 +162,56 @@ kornilova-l/scala-native-bindgen
 <div class="md-content">
 <article class="md-content__inner md-typeset">
 <div class="md-content__searchable">
-<h1><a href="#using-docker-container" name="using-docker-container" class="anchor"><span class="anchor-link"></span></a>Using Docker Container</h1>
-<p>This option requires <a href="https://www.docker.com/">Docker</a>.</p>
-<p>Download docker image with the binary:</p>
-<pre class="prettyprint"><code class="language-sh">docker pull scalabindgen/scala-native-bindgen
-</code></pre>
-<p>Mount directories with required header files and run bindgen:</p>
-<pre class="prettyprint"><code class="language-sh">docker run -v &quot;$(pwd)&quot;:/src -v /usr/include:/usr/include \
-  --rm scalabindgen/scala-native-bindgen \
-  relative/path/to/my_header.h --name my_header --
-</code></pre>
-<p>The docker image does not contain standard headers so it is important to mount all system include directories that are used by the header file passed to <code>scala-native-bindgen</code>.</p>
-<p>See the <a href="https://github.com/kornilova-l/scala-native-bindgen/blob/master/scripts/docker-bindgen.sh">docker-bindgen.sh</a> script for how to wrap the dockerized program. The <code>$CWD</code> of the container is <code>/src</code> which should be mounted from <code>$(pwd)</code> in case relative paths are used.</p>
-<p>Note, the <code>scalabindgen/scala-native-bindgen:latest</code> image is updated on each merge to the <code>master</code> branch.</p>
+<h1><a href="#generating-bindings-with-sbt" name="generating-bindings-with-sbt" class="anchor"><span class="anchor-link"></span></a>Generating Bindings with sbt</h1>
+<p>To add the sbt plugin to your project add the following lines in <code>project/plugins.sbt</code>:</p>
+<pre class="prettyprint"><code class="language-sbt">addSbtPlugin(&quot;org.scala-native.bindgen&quot; % &quot;sbt-scala-native-bindgen&quot; % VERSION)
+
+resolvers += Resolver.bintrayIvyRepo(&quot;scala-native-bindgen&quot;, &quot;sbt-plugins&quot;)
+resolvers += Resolver.bintrayRepo(&quot;scala-native-bindgen&quot;, &quot;maven&quot;)</code></pre>
+<p>Replacing <code>VERSION</code> with 0.3.0-RC1 to use the latest version.</p>
+<p>Next configure the plugin using the <code>nativeBindings</code> setting scoped to either <code>Compile</code> or <code>Test</code>. The <code>NativeBinding</code> type to configure each binding that should be generated. </p><div class="callout note "><div class="callout-title">Note</div>
+<p>By default the <code>scala-native-bindgen</code> executable is downloaded automatically for supported platforms. Set <code>version in nativeBindgen</code> (unscoped) to configure the version of the <code>scala-native-bindgen</code> to use if you want a version different from the version of the sbt plugin.</p>
+<p>In case your platform is not supported, you must compile <code>scala-native-bindgen</code> yourself and configure the path to the executable using <code>nativeBindgenPath</code>, e.g.:</p>
+<pre class="prettyprint"><code class="language-sbt">nativeBindgenPath := file(&quot;/path/to/scala-native-bindgen&quot;)
+</code></pre></div>
+<p>Example settings:</p>
+<pre class="prettyprint"><code class="language-sbt">enablePlugins(ScalaNativeBindgenPlugin)
+
+inConfig(Compile)(
+  Def.settings(
+    nativeBindings += {
+      NativeBinding((resourceDirectory in Compile).value / &quot;stdlib.h&quot;)
+        .name(&quot;stdlib&quot;)
+        .packageName(&quot;org.example.app.stdlib&quot;)
+        .excludePrefix(&quot;__&quot;)
+    }
+  ))</code></pre>
+<p>Given that the <code>stdlib.h</code> header file contains:</p>
+<pre class="prettyprint"><code class="language-h">int access(const char *path, int mode);
+int read(int fildes, void *buf, int nbyte);
+int printf(const char *restrict format, ...);
+int __excluded(void);</code></pre>
+<p>Running <code>nativeBindgen</code> will generate a file named <code>target/scala-2.11/src_managed/main/sbt-scala-native-bindgen/stdlib.scala</code> containing something along the following lines:</p>
+<pre class="prettyprint"><code class="language-scala">package org.example.app.stdlib
+
+import scala.scalanative._
+import scala.scalanative.native._
+
+@native.extern
+object stdlib {
+  def access(path: native.CString, mode: native.CInt): native.CInt = native.extern
+  def read(fildes: native.CInt, buf: native.Ptr[Byte], nbyte: native.CInt): native.CInt = native.extern
+  def printf(format: native.CString, varArgs: native.CVararg*): native.CInt = native.extern
+}</code></pre>
 </div>
 <div>
-<a href="https://github.com/kornilova-l/scala-native-bindgen/tree/master/docs/src/paradox/obtaining-bindgen/docker-container.md" title="Edit this page" class="md-source-file md-edit">
+<a href="https://github.com/kornilova-l/scala-native-bindgen/tree/master/docs/src/paradox/sbt.md" title="Edit this page" class="md-source-file md-edit">
 Edit this page
 </a>
 </div>
 <div class="print-only">
 <span class="md-source-file md-version">
-0.3.0-RC0
+0.3.0-RC1
 </span>
 </div>
 </article>
@@ -192,7 +221,7 @@ Edit this page
 <footer class="md-footer">
 <div class="md-footer-nav">
 <nav class="md-footer-nav__inner md-grid">
-<a href="../obtaining-bindgen/sbt-plugin.html" title="Using the sbt plugin" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+<a href="index.html" title="Scala Native Bindgen" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
 <div class="md-flex__cell md-flex__cell--shrink">
 <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
 </div>
@@ -201,17 +230,17 @@ Edit this page
 <span class="md-footer-nav__direction">
 Previous
 </span>
-Using the sbt plugin
+Scala Native Bindgen
 </span>
 </div>
 </a>
-<a href="../obtaining-bindgen/cmake.html" title="Building with CMake" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+<a href="cli.html" title="Generating Bindings with the CLI" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
 <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
 <span class="md-flex__ellipsis">
 <span class="md-footer-nav__direction">
 Next
 </span>
-Building with CMake
+Generating Bindings with the CLI
 </span>
 </div>
 <div class="md-flex__cell md-flex__cell--shrink">
@@ -223,6 +252,9 @@ Building with CMake
 <div class="md-footer-meta md-typeset">
 <div class="md-footer-meta__inner md-grid">
 <div class="md-footer-copyright">
+<div class="md-footer-copyright__highlight">
+Copyright © Liudmila Kornilova, distributed under the <a href='https://github.com/kornilova-l/scala-native-bindgenblob/master/LICENSE.txt'>Scala license</a>.
+</div>
 Powered by
 <a href="https://github.com/lightbend/paradox">Paradox</a>
 and
@@ -234,11 +266,11 @@ and
 </footer>
 
 </div>
-<script src="../assets/javascripts/application.5165553b.js"></script>
-<script src="../assets/javascripts/paradox-material-theme.js"></script>
-<script>app.initialize({version:"0.17",url:{base:"../."}})</script>
-<script type="text/javascript" src="../lib/prettify/prettify.js"></script>
-<script type="text/javascript" src="../lib/prettify/lang-scala.js"></script>
+<script src="assets/javascripts/application.5165553b.js"></script>
+<script src="assets/javascripts/paradox-material-theme.js"></script>
+<script>app.initialize({version:"0.17",url:{base:"."}})</script>
+<script type="text/javascript" src="lib/prettify/prettify.js"></script>
+<script type="text/javascript" src="lib/prettify/lang-scala.js"></script>
 <script type="text/javascript">
 document.addEventListener("DOMContentLoaded", function(event) {
 window.prettyPrint && prettyPrint();

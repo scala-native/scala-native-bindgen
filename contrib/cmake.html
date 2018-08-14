@@ -18,7 +18,7 @@
 
 <meta name="description" content="docs">
 <link rel="shortcut icon" href="../assets/images/favicon.png">
-<title>Using the sbt plugin · Scala Native Bindgen</title>
+<title>Building the executable with CMake · Scala Native Bindgen</title>
 <link rel="stylesheet" href="../assets/stylesheets/application.7a4cdee3.css">
 <link rel="stylesheet" href="../assets/stylesheets/application-palette.792431c1.css">
 <link rel="stylesheet" href="../lib/material__tabs/dist/mdc.tabs.min.css">
@@ -57,7 +57,7 @@ data-md-color-accent="indigo"
 Scala Native Bindgen
 </span>
 <span class="md-header-nav__topic">
-Using the sbt plugin
+Building the executable with CMake
 </span>
 </div>
 </div>
@@ -135,23 +135,24 @@ kornilova-l/scala-native-bindgen
 
 </div>
 <ul>
-  <li><a href="../obtaining-bindgen/index.html" class="page">Obtaining Bindgen</a>
+  <li><a href="../sbt.html" class="page">Generating Bindings with sbt</a></li>
+  <li><a href="../cli.html" class="page">Generating Bindings with the CLI</a></li>
+  <li><a href="../using-generated-bindings.html" class="page">Using Generated Bindings</a></li>
+  <li><a href="../integrating-bindings.html" class="page">Integrating Bindings</a></li>
+  <li><a href="../limitations.html" class="page">Limitations</a></li>
+  <li><a href="../contrib/index.html" class="page">Contributor&rsquo;s Guide</a>
   <ul>
-    <li><a href="../obtaining-bindgen/sbt-plugin.html" class="active page">Using the sbt plugin</a></li>
-    <li><a href="../obtaining-bindgen/docker-container.html" class="page">Using Docker Container</a></li>
-    <li><a href="../obtaining-bindgen/cmake.html" class="page">Building with <code>CMake</code></a></li>
-    <li><a href="../obtaining-bindgen/docker-compose.html" class="page">Building with <code>docker-compose</code></a></li>
+    <li><a href="../contrib/guidelines.html" class="page">Guide for contributors</a></li>
+    <li><a href="../contrib/cmake.html" class="active page">Building the executable with <code>CMake</code></a></li>
+    <li><a href="../contrib/docker-compose.html" class="page">Building the executable with <code>docker-compose</code></a></li>
+    <li><a href="../contrib/releasing.html" class="page">Release Workflow</a></li>
   </ul></li>
-  <li><a href="../command-line-usage/index.html" class="page">Command Line Usage</a></li>
-  <li><a href="../integrating-bindings/index.html" class="page">Integrating Bindings</a></li>
-  <li><a href="../limitations/index.html" class="page">Limitations</a></li>
-  <li><a href="../using-generated-bindings/README.html" class="page">Using Generated Bindings</a></li>
 </ul>
 <nav class="md-nav md-nav--secondary">
 </nav>
 
 <div class="md-nav__title--site md-version" title="Version">
-<i class="md-icon">label_outline</i> 0.3.0-RC0
+<i class="md-icon">label_outline</i> 0.3.0-RC1
 </div>
 </nav>
 
@@ -161,52 +162,45 @@ kornilova-l/scala-native-bindgen
 <div class="md-content">
 <article class="md-content__inner md-typeset">
 <div class="md-content__searchable">
-<h1><a href="#using-the-sbt-plugin" name="using-the-sbt-plugin" class="anchor"><span class="anchor-link"></span></a>Using the sbt plugin</h1>
-<p>To add the sbt plugin to your project add the following lines in <code>project/plugins.sbt</code>:</p>
-<pre class="prettyprint"><code class="language-sbt">addSbtPlugin(&quot;org.scala-native.bindgen&quot; % &quot;sbt-scala-native-bindgen&quot; % &quot;0.3.0-RC0&quot;)
+<h1><a href="#building-the-executable-with-cmake" name="building-the-executable-with-cmake" class="anchor"><span class="anchor-link"></span></a>Building the executable with <code>CMake</code></h1>
+<p>Building <code>scala-native-bindgen</code> requires the following tools and libraries:</p>
+<ul>
+  <li><a href="https://cmake.org/">CMake</a> version 3.9 or higher</li>
+  <li><a href="https://www.gnu.org/software/make/">GNU Make</a></li>
+  <li><a href="https://llvm.org/">LLVM</a> and <a href="https://clang.llvm.org/">Clang</a> version 5.0 or 6.0.</li>
+  <li><a href="https://github.com/nlohmann/json">nlohmann/json</a> version 3.1.2 or higher</li>
+</ul>
+<pre class="prettyprint"><code class="language-sh"># On apt-based systems
+apt install cmake make clang-6.0 libclang-6.0-dev llvm-6.0-dev \
+            nlohmann-json-dev
 
-resolvers += Resolver.bintrayIvyRepo(&quot;scala-native-bindgen&quot;, &quot;sbt-plugin&quot;)
-resolvers += Resolver.bintrayRepo(&quot;scala-native-bindgen&quot;, &quot;maven&quot;)
+# With `brew`
+brew tap nlohmann/json
+brew install cmake llvm@6 nlohmann_json
 </code></pre>
-<p>Next configure the plugin using the <code>nativeBindings</code> setting scoped to either <code>Compile</code> or <code>Test</code>. The <code>NativeBinding</code> type to configure each binding that should be generated. </p><div class="callout note "><div class="callout-title">Note</div>
-<p>By default the <code>scala-native-bindgen</code> executable is downloaded automatically for supported platforms. Set <code>version in nativeBindgen</code> (unscoped) to configure the version of the <code>scala-native-bindgen</code> to use if you want a version different from the version of the sbt plugin.</p>
-<p>In case your platform is not supported, you must compile <code>scala-native-bindgen</code> yourself and configure the path to the executable using <code>nativeBindgenPath</code>, e.g.:</p>
-<pre class="prettyprint"><code class="language-sbt">nativeBindgenPath := file(&quot;/path/to/scala-native-bindgen&quot;)
-</code></pre></div>
-<p>Example settings:</p>
-<pre class="prettyprint"><code class="language-sbt">enablePlugins(ScalaNativeBindgenPlugin)
-inConfig(Compile)(
-  Def.settings(
-    nativeBindings += {
-      NativeBinding((resourceDirectory in Compile).value / &quot;header.h&quot;)
-        .name(&quot;MyLib&quot;)
-        .packageName(&quot;org.example.mylib&quot;)
-        .link(&quot;mylib&quot;), // Will pass `-lmylib` to the linker
-        .excludePrefix(&quot;__&quot;)
-      }
-  ))
+<p>To run the tests you also need the required Scala Native libraries. See the <a href="http://www.scala-native.org/en/latest/user/setup.html">Scala Native setup guide</a> for instructions on installing the dependencies.</p>
+<pre class="prettyprint"><code class="language-sh">mkdir -p bindgen/target
+cd bindgen/target
+cmake ..
+make
+./scala-native-bindgen --name ctype /usr/include/ctype.h --
 </code></pre>
-<p>Running <code>nativeBindgen</code> will generate a file named <code>target/scala-2.x/src_managed/main/sbt-scala-native-bindgen/MyLib.scala</code> containing something along the following lines:</p>
-<pre class="prettyprint"><code class="language-scala">package org.example.mylib
-
-import scala.scalanative._
-import scala.scalanative.native._
-
-@native.link(&quot;mylib&quot;)
-@native.extern
-object MyLib {
-  // ... left out for brevity ...
-}
+<p>To build a statically linked executable pass <code>-DSTATIC_LINKING=ON</code> when invoking <code>cmake</code>:</p>
+<pre class="prettyprint"><code class="language-sh">cmake -DSTATIC_LINKING=ON ..
+</code></pre>
+<p>Additional compiler and linker flags may be passed as environment variable sor their CMake equivalent, e.g. to compile with debug symbols the following are the same:</p>
+<pre class="prettyprint"><code class="language-sh">cmake -DCMAKE_CXX_FLAGS=-g ..
+CXXFLAGS=-g cmake ..
 </code></pre>
 </div>
 <div>
-<a href="https://github.com/kornilova-l/scala-native-bindgen/tree/master/docs/src/paradox/obtaining-bindgen/sbt-plugin.md" title="Edit this page" class="md-source-file md-edit">
+<a href="https://github.com/kornilova-l/scala-native-bindgen/tree/master/docs/src/paradox/contrib/cmake.md" title="Edit this page" class="md-source-file md-edit">
 Edit this page
 </a>
 </div>
 <div class="print-only">
 <span class="md-source-file md-version">
-0.3.0-RC0
+0.3.0-RC1
 </span>
 </div>
 </article>
@@ -216,7 +210,7 @@ Edit this page
 <footer class="md-footer">
 <div class="md-footer-nav">
 <nav class="md-footer-nav__inner md-grid">
-<a href="../obtaining-bindgen/index.html" title="Obtaining Bindgen" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+<a href="../contrib/guidelines.html" title="Guide for contributors" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
 <div class="md-flex__cell md-flex__cell--shrink">
 <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
 </div>
@@ -225,17 +219,17 @@ Edit this page
 <span class="md-footer-nav__direction">
 Previous
 </span>
-Obtaining Bindgen
+Guide for contributors
 </span>
 </div>
 </a>
-<a href="../obtaining-bindgen/docker-container.html" title="Using Docker Container" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+<a href="../contrib/docker-compose.html" title="Building the executable with docker-compose" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
 <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
 <span class="md-flex__ellipsis">
 <span class="md-footer-nav__direction">
 Next
 </span>
-Using Docker Container
+Building the executable with docker-compose
 </span>
 </div>
 <div class="md-flex__cell md-flex__cell--shrink">
@@ -247,6 +241,9 @@ Using Docker Container
 <div class="md-footer-meta md-typeset">
 <div class="md-footer-meta__inner md-grid">
 <div class="md-footer-copyright">
+<div class="md-footer-copyright__highlight">
+Copyright © Liudmila Kornilova, distributed under the <a href='https://github.com/kornilova-l/scala-native-bindgenblob/master/LICENSE.txt'>Scala license</a>.
+</div>
 Powered by
 <a href="https://github.com/lightbend/paradox">Paradox</a>
 and

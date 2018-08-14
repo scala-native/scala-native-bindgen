@@ -17,13 +17,13 @@
 
 
 <meta name="description" content="docs">
-<link rel="shortcut icon" href="../assets/images/favicon.png">
-<title>Command Line Usage · Scala Native Bindgen</title>
-<link rel="stylesheet" href="../assets/stylesheets/application.7a4cdee3.css">
-<link rel="stylesheet" href="../assets/stylesheets/application-palette.792431c1.css">
-<link rel="stylesheet" href="../lib/material__tabs/dist/mdc.tabs.min.css">
-<link rel="stylesheet" href="../lib/prettify/prettify.css">
-<script src="../lib/modernizr/modernizr.min.js"></script>
+<link rel="shortcut icon" href="assets/images/favicon.png">
+<title>Generating Bindings with the CLI · Scala Native Bindgen</title>
+<link rel="stylesheet" href="assets/stylesheets/application.7a4cdee3.css">
+<link rel="stylesheet" href="assets/stylesheets/application-palette.792431c1.css">
+<link rel="stylesheet" href="lib/material__tabs/dist/mdc.tabs.min.css">
+<link rel="stylesheet" href="lib/prettify/prettify.css">
+<script src="lib/modernizr/modernizr.min.js"></script>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700|Roboto+Mono">
 <style>
 body,input{font-family:"Roboto","Helvetica Neue",Helvetica,Arial,sans-serif}
@@ -31,7 +31,7 @@ code,kbd,pre{font-family:"Roboto Mono","Courier New",Courier,monospace}
 </style>
 <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<link rel="stylesheet" href="../assets/stylesheets/paradox-material-theme.css">
+<link rel="stylesheet" href="assets/stylesheets/paradox-material-theme.css">
 </head>
 <body
 data-md-color-primary="indigo"
@@ -44,7 +44,7 @@ data-md-color-accent="indigo"
 <nav class="md-header-nav md-grid">
 <div class="md-flex">
 <div class="md-flex__cell md-flex__cell--shrink">
-<a href="../index.html" title="Scala Native Bindgen" class="md-header-nav__button md-logo">
+<a href="index.html" title="Scala Native Bindgen" class="md-header-nav__button md-logo">
 <i class="md-icon">local_library</i>
 </a>
 </div>
@@ -57,7 +57,7 @@ data-md-color-accent="indigo"
 Scala Native Bindgen
 </span>
 <span class="md-header-nav__topic">
-Command Line Usage
+Generating Bindings with the CLI
 </span>
 </div>
 </div>
@@ -116,7 +116,7 @@ kornilova-l/scala-native-bindgen
 <span class="md-nav__button md-logo">
 <i class="md-icon">local_library</i>
 </span>
-<a href="../index.html" title="Scala Native Bindgen">
+<a href="index.html" title="Scala Native Bindgen">
 Scala Native Bindgen
 </a>
 </label>
@@ -135,30 +135,32 @@ kornilova-l/scala-native-bindgen
 
 </div>
 <ul>
-  <li><a href="../obtaining-bindgen/index.html" class="page">Obtaining Bindgen</a>
+  <li><a href="sbt.html" class="page">Generating Bindings with sbt</a></li>
+  <li><a href="cli.html" class="active page">Generating Bindings with the CLI</a></li>
+  <li><a href="using-generated-bindings.html" class="page">Using Generated Bindings</a></li>
+  <li><a href="integrating-bindings.html" class="page">Integrating Bindings</a></li>
+  <li><a href="limitations.html" class="page">Limitations</a></li>
+  <li><a href="contrib/index.html" class="page">Contributor&rsquo;s Guide</a>
   <ul>
-    <li><a href="../obtaining-bindgen/sbt-plugin.html" class="page">Using the sbt plugin</a></li>
-    <li><a href="../obtaining-bindgen/docker-container.html" class="page">Using Docker Container</a></li>
-    <li><a href="../obtaining-bindgen/cmake.html" class="page">Building with <code>CMake</code></a></li>
-    <li><a href="../obtaining-bindgen/docker-compose.html" class="page">Building with <code>docker-compose</code></a></li>
+    <li><a href="contrib/guidelines.html" class="page">Guide for contributors</a></li>
+    <li><a href="contrib/cmake.html" class="page">Building the executable with <code>CMake</code></a></li>
+    <li><a href="contrib/docker-compose.html" class="page">Building the executable with <code>docker-compose</code></a></li>
+    <li><a href="contrib/releasing.html" class="page">Release Workflow</a></li>
   </ul></li>
-  <li><a href="../command-line-usage/index.html" class="active page">Command Line Usage</a></li>
-  <li><a href="../integrating-bindings/index.html" class="page">Integrating Bindings</a></li>
-  <li><a href="../limitations/index.html" class="page">Limitations</a></li>
-  <li><a href="../using-generated-bindings/README.html" class="page">Using Generated Bindings</a></li>
 </ul>
 <nav class="md-nav md-nav--secondary">
 <label class="md-nav__title" for="toc">Table of contents</label>
 <ul>
-  <li><a href="../command-line-usage/index.html#command-line-usage" class="header">Command Line Usage</a>
+  <li><a href="cli.html#generating-bindings-with-the-cli" class="header">Generating Bindings with the CLI</a>
   <ul>
-    <li><a href="../command-line-usage/index.html#bindgen-options" class="header">Bindgen Options</a></li>
+    <li><a href="cli.html#command-line-usage" class="header">Command Line Usage</a></li>
+    <li><a href="cli.html#options" class="header">Options</a></li>
   </ul></li>
 </ul>
 </nav>
 
 <div class="md-nav__title--site md-version" title="Version">
-<i class="md-icon">label_outline</i> 0.3.0-RC0
+<i class="md-icon">label_outline</i> 0.3.0-RC1
 </div>
 </nav>
 
@@ -171,9 +173,10 @@ kornilova-l/scala-native-bindgen
 <nav class="md-nav md-nav--secondary">
 <label class="md-nav__title" for="toc">Table of contents</label>
 <ul>
-  <li><a href="../command-line-usage/index.html#command-line-usage" class="header">Command Line Usage</a>
+  <li><a href="cli.html#generating-bindings-with-the-cli" class="header">Generating Bindings with the CLI</a>
   <ul>
-    <li><a href="../command-line-usage/index.html#bindgen-options" class="header">Bindgen Options</a></li>
+    <li><a href="cli.html#command-line-usage" class="header">Command Line Usage</a></li>
+    <li><a href="cli.html#options" class="header">Options</a></li>
   </ul></li>
 </ul>
 </nav>
@@ -184,14 +187,25 @@ kornilova-l/scala-native-bindgen
 <div class="md-content">
 <article class="md-content__inner md-typeset">
 <div class="md-content__searchable">
-<h1><a href="#command-line-usage" name="command-line-usage" class="anchor"><span class="anchor-link"></span></a>Command Line Usage</h1>
-<p>Calling the tool is pretty easy, you need to specify the file(s) and the name of the created bindings.</p>
-<pre class="prettyprint"><code class="language-sh">scala-native-bindgen --name uv /usr/include/uv.h --
+<h1><a href="#generating-bindings-with-the-cli" name="generating-bindings-with-the-cli" class="anchor"><span class="anchor-link"></span></a>Generating Bindings with the CLI</h1>
+<p>Statically linked executables are provided with each release for Linux and macOS. Head over to the <a href="https://github.com/kornilova-l/scala-native-bindgen/releases">releases page</a> to download the latest version for your platform.</p><div class="callout note "><div class="callout-title">Note</div>
+<p>In the following we assume you have renamed the downloaded <code>scala-native-bindgen-$PLATFORM</code> file to <code>scala-native-bindgen</code>.</p></div>
+<h2><a href="#command-line-usage" name="command-line-usage" class="anchor"><span class="anchor-link"></span></a>Command Line Usage</h2>
+<p>When generating bindings with the CLI, you need to specify the header file and provide the name of the created bindings using the <code>--name</code> option:</p>
+<pre class="prettyprint"><code class="language-sh">scala-native-bindgen --name fnmatch /usr/include/fnmatch.h --
 </code></pre>
-<p>Running the previous command wild also yield warnings along with the translation. To keep only the bindings please redirect the output to a file like this:</p>
-<pre class="prettyprint"><code class="language-sh">scala-native-bindgen --name uv /usr/include/uv.h -- &gt; uv.scala
+<p>When running the CLI it will also yield warnings along with the translation. To keep only the bindings please redirect the output to a file like this:</p>
+<pre class="prettyprint"><code class="language-sh">scala-native-bindgen --name fnmatch /usr/include/fnmatch.h -- &gt; fnmatch.scala
 </code></pre>
-<h2><a href="#bindgen-options" name="bindgen-options" class="anchor"><span class="anchor-link"></span></a>Bindgen Options</h2>
+<p>By default it is assumed that you want to link with a library based on the name option. In case the name of the library to link with is different from the binding name provide the library name using <code>--link</code>:</p>
+<pre class="prettyprint"><code class="language-sh">scala-native-bindgen --name zlib --link z /usr/include/zlib.h --
+</code></pre>
+<p>If the binding does not require any linking, pass <code>--no-link</code>:</p>
+<pre class="prettyprint"><code class="language-sh">scala-native-bindgen --name fnmatch --no-link /usr/include/fnmatch.h --
+</code></pre>
+<p>For libraries that require linking you m</p>
+<h2><a href="#options" name="options" class="anchor"><span class="anchor-link"></span></a>Options</h2>
+<p>The generated bindings can be configured using the different options and it is also possible to pass arguments directly to the Clang compiler using the <code>--extra-arg*</code> options.</p>
 <table>
   <thead>
     <tr>
@@ -222,7 +236,7 @@ kornilova-l/scala-native-bindgen
     </tr>
     <tr>
       <td><code>--binding-config</code> </td>
-      <td>Path to a config file that contains the information about bindings that should be reused. See <a href="../integrating-bindings/index.html">Integrating Bindings</a> for more information.</td>
+      <td>Path to a config file that contains the information about bindings that should be reused. See <a href="integrating-bindings.html">Integrating Bindings</a> for more information.</td>
     </tr>
     <tr>
       <td><code>--extra-arg</code> </td>
@@ -236,13 +250,13 @@ kornilova-l/scala-native-bindgen
 </table>
 </div>
 <div>
-<a href="https://github.com/kornilova-l/scala-native-bindgen/tree/master/docs/src/paradox/command-line-usage/index.md" title="Edit this page" class="md-source-file md-edit">
+<a href="https://github.com/kornilova-l/scala-native-bindgen/tree/master/docs/src/paradox/cli.md" title="Edit this page" class="md-source-file md-edit">
 Edit this page
 </a>
 </div>
 <div class="print-only">
 <span class="md-source-file md-version">
-0.3.0-RC0
+0.3.0-RC1
 </span>
 </div>
 </article>
@@ -252,7 +266,7 @@ Edit this page
 <footer class="md-footer">
 <div class="md-footer-nav">
 <nav class="md-footer-nav__inner md-grid">
-<a href="../obtaining-bindgen/docker-compose.html" title="Building with docker-compose" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+<a href="sbt.html" title="Generating Bindings with sbt" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
 <div class="md-flex__cell md-flex__cell--shrink">
 <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
 </div>
@@ -261,17 +275,17 @@ Edit this page
 <span class="md-footer-nav__direction">
 Previous
 </span>
-Building with docker-compose
+Generating Bindings with sbt
 </span>
 </div>
 </a>
-<a href="../integrating-bindings/index.html" title="Integrating Bindings" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+<a href="using-generated-bindings.html" title="Using Generated Bindings" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
 <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
 <span class="md-flex__ellipsis">
 <span class="md-footer-nav__direction">
 Next
 </span>
-Integrating Bindings
+Using Generated Bindings
 </span>
 </div>
 <div class="md-flex__cell md-flex__cell--shrink">
@@ -283,6 +297,9 @@ Integrating Bindings
 <div class="md-footer-meta md-typeset">
 <div class="md-footer-meta__inner md-grid">
 <div class="md-footer-copyright">
+<div class="md-footer-copyright__highlight">
+Copyright © Liudmila Kornilova, distributed under the <a href='https://github.com/kornilova-l/scala-native-bindgenblob/master/LICENSE.txt'>Scala license</a>.
+</div>
 Powered by
 <a href="https://github.com/lightbend/paradox">Paradox</a>
 and
@@ -294,11 +311,11 @@ and
 </footer>
 
 </div>
-<script src="../assets/javascripts/application.5165553b.js"></script>
-<script src="../assets/javascripts/paradox-material-theme.js"></script>
-<script>app.initialize({version:"0.17",url:{base:"../."}})</script>
-<script type="text/javascript" src="../lib/prettify/prettify.js"></script>
-<script type="text/javascript" src="../lib/prettify/lang-scala.js"></script>
+<script src="assets/javascripts/application.5165553b.js"></script>
+<script src="assets/javascripts/paradox-material-theme.js"></script>
+<script>app.initialize({version:"0.17",url:{base:"."}})</script>
+<script type="text/javascript" src="lib/prettify/prettify.js"></script>
+<script type="text/javascript" src="lib/prettify/lang-scala.js"></script>
 <script type="text/javascript">
 document.addEventListener("DOMContentLoaded", function(event) {
 window.prettyPrint && prettyPrint();

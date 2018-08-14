@@ -18,7 +18,7 @@
 
 <meta name="description" content="docs">
 <link rel="shortcut icon" href="../assets/images/favicon.png">
-<title>Obtaining Bindgen · Scala Native Bindgen</title>
+<title>Building the executable with docker-compose · Scala Native Bindgen</title>
 <link rel="stylesheet" href="../assets/stylesheets/application.7a4cdee3.css">
 <link rel="stylesheet" href="../assets/stylesheets/application-palette.792431c1.css">
 <link rel="stylesheet" href="../lib/material__tabs/dist/mdc.tabs.min.css">
@@ -57,7 +57,7 @@ data-md-color-accent="indigo"
 Scala Native Bindgen
 </span>
 <span class="md-header-nav__topic">
-Obtaining Bindgen
+Building the executable with docker-compose
 </span>
 </div>
 </div>
@@ -135,23 +135,24 @@ kornilova-l/scala-native-bindgen
 
 </div>
 <ul>
-  <li><a href="../obtaining-bindgen/index.html" class="active page">Obtaining Bindgen</a>
+  <li><a href="../sbt.html" class="page">Generating Bindings with sbt</a></li>
+  <li><a href="../cli.html" class="page">Generating Bindings with the CLI</a></li>
+  <li><a href="../using-generated-bindings.html" class="page">Using Generated Bindings</a></li>
+  <li><a href="../integrating-bindings.html" class="page">Integrating Bindings</a></li>
+  <li><a href="../limitations.html" class="page">Limitations</a></li>
+  <li><a href="../contrib/index.html" class="page">Contributor&rsquo;s Guide</a>
   <ul>
-    <li><a href="../obtaining-bindgen/sbt-plugin.html" class="page">Using the sbt plugin</a></li>
-    <li><a href="../obtaining-bindgen/docker-container.html" class="page">Using Docker Container</a></li>
-    <li><a href="../obtaining-bindgen/cmake.html" class="page">Building with <code>CMake</code></a></li>
-    <li><a href="../obtaining-bindgen/docker-compose.html" class="page">Building with <code>docker-compose</code></a></li>
+    <li><a href="../contrib/guidelines.html" class="page">Guide for contributors</a></li>
+    <li><a href="../contrib/cmake.html" class="page">Building the executable with <code>CMake</code></a></li>
+    <li><a href="../contrib/docker-compose.html" class="active page">Building the executable with <code>docker-compose</code></a></li>
+    <li><a href="../contrib/releasing.html" class="page">Release Workflow</a></li>
   </ul></li>
-  <li><a href="../command-line-usage/index.html" class="page">Command Line Usage</a></li>
-  <li><a href="../integrating-bindings/index.html" class="page">Integrating Bindings</a></li>
-  <li><a href="../limitations/index.html" class="page">Limitations</a></li>
-  <li><a href="../using-generated-bindings/README.html" class="page">Using Generated Bindings</a></li>
 </ul>
 <nav class="md-nav md-nav--secondary">
 </nav>
 
 <div class="md-nav__title--site md-version" title="Version">
-<i class="md-icon">label_outline</i> 0.3.0-RC0
+<i class="md-icon">label_outline</i> 0.3.0-RC1
 </div>
 </nav>
 
@@ -161,27 +162,25 @@ kornilova-l/scala-native-bindgen
 <div class="md-content">
 <article class="md-content__inner md-typeset">
 <div class="md-content__searchable">
-<h1><a href="#obtaining-bindgen" name="obtaining-bindgen" class="anchor"><span class="anchor-link"></span></a>Obtaining Bindgen</h1>
-<p>There are 3 ways to obtain bindgen:</p>
-<ul>
-  <li>
-  <p><a href="sbt-plugin.html">Use the sbt plugin</a></p></li>
-  <li>
-  <p><a href="docker-container.html">Use docker container</a></p></li>
-  <li>
-  <p><a href="cmake.html">Build binary with CMake</a></p></li>
-  <li>
-  <p><a href="docker-compose.html">Build binary with docker-compose</a></p></li>
-</ul>
+<h1><a href="#building-the-executable-with-docker-compose" name="building-the-executable-with-docker-compose" class="anchor"><span class="anchor-link"></span></a>Building the executable with <code>docker-compose</code></h1>
+<p>You can use <a href="https://docs.docker.com/compose/">docker-compose</a> to build and test the program:</p>
+<pre class="prettyprint"><code class="language-sh"># Build the docker image with LLVM version 6.0.
+docker-compose build ubuntu-18.04-llvm-6.0
+# Build the bindgen tool and run the tests.
+docker-compose run --rm ubuntu-18.04-llvm-6.0 ./script/test.sh
+# Run the bindgen tool inside the container.
+docker-compose run --rm ubuntu-18.04-llvm-6.0 \
+    bindgen/target/scala-native-bindgen --name union tests/samples/Union.h --
+</code></pre>
 </div>
 <div>
-<a href="https://github.com/kornilova-l/scala-native-bindgen/tree/master/docs/src/paradox/obtaining-bindgen/index.md" title="Edit this page" class="md-source-file md-edit">
+<a href="https://github.com/kornilova-l/scala-native-bindgen/tree/master/docs/src/paradox/contrib/docker-compose.md" title="Edit this page" class="md-source-file md-edit">
 Edit this page
 </a>
 </div>
 <div class="print-only">
 <span class="md-source-file md-version">
-0.3.0-RC0
+0.3.0-RC1
 </span>
 </div>
 </article>
@@ -191,7 +190,7 @@ Edit this page
 <footer class="md-footer">
 <div class="md-footer-nav">
 <nav class="md-footer-nav__inner md-grid">
-<a href="../index.html" title="Scala Native Bindgen" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+<a href="../contrib/cmake.html" title="Building the executable with CMake" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
 <div class="md-flex__cell md-flex__cell--shrink">
 <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
 </div>
@@ -200,17 +199,17 @@ Edit this page
 <span class="md-footer-nav__direction">
 Previous
 </span>
-Scala Native Bindgen
+Building the executable with CMake
 </span>
 </div>
 </a>
-<a href="../obtaining-bindgen/sbt-plugin.html" title="Using the sbt plugin" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+<a href="../contrib/releasing.html" title="Release Workflow" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
 <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
 <span class="md-flex__ellipsis">
 <span class="md-footer-nav__direction">
 Next
 </span>
-Using the sbt plugin
+Release Workflow
 </span>
 </div>
 <div class="md-flex__cell md-flex__cell--shrink">
@@ -222,6 +221,9 @@ Using the sbt plugin
 <div class="md-footer-meta md-typeset">
 <div class="md-footer-meta__inner md-grid">
 <div class="md-footer-copyright">
+<div class="md-footer-copyright__highlight">
+Copyright © Liudmila Kornilova, distributed under the <a href='https://github.com/kornilova-l/scala-native-bindgenblob/master/LICENSE.txt'>Scala license</a>.
+</div>
 Powered by
 <a href="https://github.com/lightbend/paradox">Paradox</a>
 and
