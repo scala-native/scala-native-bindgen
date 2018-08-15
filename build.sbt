@@ -146,6 +146,10 @@ lazy val docs = project("docs")
         .link("vector")
         .packageName("org.example")
     },
+    nativeBindgenPath := {
+      Some(
+        (ThisBuild / baseDirectory).value / "bindgen/target/scala-native-bindgen")
+    },
     Test / nativeBindgen / target := (Test / scalaSource).value / "org/example",
     nativeLinkStubs := true,
     compileTask("vector", Test / resourceDirectory),

@@ -60,7 +60,8 @@ object StructTests extends TestSuite {
         !anonymousStruct._1 = 'a'
         !anonymousStruct._2 = 42
 
-        val structWithAnonymousStruct = Struct.struct_structWithAnonymousStruct()
+        val structWithAnonymousStruct =
+          Struct.struct_structWithAnonymousStruct()
         structWithAnonymousStruct.anonymousStruct = anonymousStruct
 
         assert(

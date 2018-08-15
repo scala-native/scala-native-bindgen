@@ -4,47 +4,52 @@ Consider following header file:
 
 @@snip [vector.h] (../test/resources/vector.h)
 
-Bindgen will generate type aliases for the structs, binding for function `add`
-and helper functions that make usage of structs easier.
+Bindgen will output
+ * type aliases for the structs
+ * binding for function `cosine`
+ * helper functions that make usage of structs easier
 
 @@snip [vector.h] (../test/scala/org/example/vector.scala)
 
-Let's write code that creates two vectors, adds them and prints resulting
-vector.
+Let's write code that creates two line segments and prints angel between them.
 
-First we need to create points for vectors. We will use `native.Zone` to
+First we need to create points. We will use `native.Zone` to
 allocate struct (more information on memory management can be found
 here: [Scala Native memory management]).
 
-Helper object `mylibHelpers` contains function for struct allocation.
-To import it use `import mylibHelpers._`
+Generated bindings contain helper functions that make struct allocation easier.
+To import them use `import org.example.vector._`
 
-Let's create points for first vector:
+Let's create two points and the first line segment:
 
 @@snip [step-1] (../test/scala/org/scalanative/bindgen/docs/VectorSpec.scala) { #step-1 }
 
-Now we want to set fields of created points. Scala Native provides access
-to fields by using `_N` methods where `N` is index of a field
-(see [Scala Native memory layout types]).
+There is no need to create points manually, just call `struct_lineSegment`
+constructor and set point coordinates using fields setters.
 
-Bindgen generates implicit helper classes that wrap calls to `_N` in functions
-with meaningful names. We already imported helper class, so we can use the
-functions:
+Scala Native allows us to access a field by using `_N` method where `N` is index of a field
+(see [Scala Native memory layout types]) but it is not convenient because we have to
+match indices with fields names.
+
+Bindgen provides implicit helper classes that wrap calls to `_N` in functions
+with meaningful names. To import these classes add `import org.example.vector.implicits._`
+to your code:
 
 @@snip [step-2] (../test/scala/org/scalanative/bindgen/docs/VectorSpec.scala) { #step-2 }
 
-Lets create first vector. Note that `struct_vector` contains
-fields of type `struct_point` but setters accept variables of type
-`native.Ptr[struct_point]`. It helps to avoid Scala Native limitation that
-does not allow passing structs and arrays by value
-(see @github[scala-native/scala-native#555](scala-native/scala-native#555)).
+@@@ note
 
-@@snip [step-3] (../test/scala/org/scalanative/bindgen/docs/VectorSpec.scala) { #step-3 }
+Note that `struct_lineSegment` contains fields of value type `struct_point`
+but setters accept variables of type `native.Ptr[struct_point]`.
+It helps to avoid Scala Native limitation that does not allow passing structs
+and arrays by value (see @github[scala-native/scala-native#555](scala-native/scala-native#555)).
 
-Repeat these steps to create second vector. Once both vectors are created we can
-call `add` function and print the result:
+@@@
 
-@@snip [step-4] (../test/scala/org/scalanative/bindgen/docs/VectorSpec.scala) { #step-4 }
+Now we can calculate angel between line segments:
+
+@@snip [step-3] (../test/scala/org/scalanative/bindgen/docs/VectorSpec.scala) { #step-2 }
+
 
  [Scala Native memory management]: http://www.scala-native.org/en/latest/user/interop.html#memory-management
  [Scala Native memory layout types]: http://www.scala-native.org/en/latest/user/interop.html#memory-layout-types
