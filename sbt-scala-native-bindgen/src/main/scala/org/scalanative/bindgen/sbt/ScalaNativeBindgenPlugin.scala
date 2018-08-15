@@ -53,7 +53,9 @@ object ScalaNativeBindgenPlugin extends AutoPlugin {
     val NativeBinding      = BindingOptions
     val ScalaNativeBindgen = config("scala-native-bindgen").hide
     val nativeBindgenPath =
-      taskKey[File]("Path to the scala-native-bindgen executable")
+      settingKey[Option[File]]("Path to the scala-native-bindgen executable")
+    val nativeBindgenResolvedPath =
+      taskKey[File]("Resolved path to the scala-native-bindgen executable")
     val nativeBindings =
       settingKey[Seq[NativeBinding]]("Configuration for each bindings")
     val nativeBindgen = taskKey[Seq[File]]("Generate Scala Native bindings")
@@ -69,40 +71,52 @@ object ScalaNativeBindgenPlugin extends AutoPlugin {
       Def.settings(
         ivyConfigurations += ScalaNativeBindgen,
         version in nativeBindgen := BuildInfo.version,
+        nativeBindgenPath := None,
         libraryDependencies ++= {
-          artifactName.map { name =>
-            val bindgenVersion = (version in nativeBindgen).value
-            val url =
-              s"${BuildInfo.projectUrl}/releases/download/v$bindgenVersion/$name"
+          (nativeBindgenPath.value, artifactName) match {
+            case (None, Some(name)) =>
+              val bindgenVersion = (version in nativeBindgen).value
+              val url =
+                s"${BuildInfo.projectUrl}/releases/download/v$bindgenVersion/$name"
 
-            BuildInfo.organization % name % bindgenVersion % ScalaNativeBindgen from (url)
-          }.toSeq
+              Seq(
+                BuildInfo.organization % name % bindgenVersion % ScalaNativeBindgen from (url))
+            case _ =>
+              Seq.empty
+          }
         },
-        nativeBindgenPath := {
-          val scalaNativeBindgenUpdate = (update in ScalaNativeBindgen).value
-
-          val artifactFile = artifactName match {
+        nativeBindgenResolvedPath := Def.taskDyn {
+          nativeBindgenPath.value match {
+            case Some(path) => Def.task { path }
             case None =>
-              sys.error(
-                "No downloadable binaries available for your OS, " +
-                  "please provide path via `nativeBindgenPath`")
-            case Some(name) =>
-              scalaNativeBindgenUpdate
-                .select(artifact = artifactFilter(name = name))
-                .head
-          }
+              Def.task {
+                val scalaNativeBindgenUpdate =
+                  (update in ScalaNativeBindgen).value
 
-          // Set the executable bit on the expected path to fail if it doesn't exist
-          for (view <- Option(
-                 Files.getFileAttributeView(artifactFile.toPath,
-                                            classOf[PosixFileAttributeView]))) {
-            val permissions = view.readAttributes.permissions
-            if (permissions.add(PosixFilePermission.OWNER_EXECUTE))
-              view.setPermissions(permissions)
-          }
+                val artifactFile = artifactName match {
+                  case None =>
+                    sys.error(
+                      "No downloadable binaries available for your OS, " +
+                        "please provide path via `nativeBindgenPath`")
+                  case Some(name) =>
+                    scalaNativeBindgenUpdate
+                      .select(artifact = artifactFilter(name = name))
+                      .head
+                }
 
-          artifactFile
-        }
+                // Set the executable bit on the expected path to fail if it doesn't exist
+                for (view <- Option(Files.getFileAttributeView(
+                       artifactFile.toPath,
+                       classOf[PosixFileAttributeView]))) {
+                  val permissions = view.readAttributes.permissions
+                  if (permissions.add(PosixFilePermission.OWNER_EXECUTE))
+                    view.setPermissions(permissions)
+                }
+
+                artifactFile
+              }
+          }
+        }.value
       )
 
   private val artifactName =
@@ -115,10 +129,19 @@ object ScalaNativeBindgenPlugin extends AutoPlugin {
     inConfig(conf)(
       Def.settings(
         nativeBindings := Seq.empty,
-        sourceGenerators += Def.task { nativeBindgen.value },
         target in nativeBindgen := sourceManaged.value / "sbt-scala-native-bindgen",
+        sourceGenerators += Def.taskDyn {
+          val nativeBindgenTarget = (target in nativeBindgen).value.toPath
+          val managedSource       = sourceManaged.value.toPath
+
+          if (nativeBindgenTarget.startsWith(managedSource)) {
+            Def.task { nativeBindgen.value }
+          } else {
+            Def.task { Seq.empty[File] }
+          }
+        },
         nativeBindgen := {
-          val bindgen         = Bindgen(nativeBindgenPath.value)
+          val bindgen         = Bindgen(nativeBindgenResolvedPath.value)
           val optionsList     = nativeBindings.value
           val outputDirectory = (target in nativeBindgen).value
           val logger          = streams.value.log

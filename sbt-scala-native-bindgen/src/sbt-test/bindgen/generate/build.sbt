@@ -5,15 +5,13 @@ enablePlugins(ScalaNativeBindgenPlugin)
 
 //#example
 scalaVersion := "2.11.12"
+nativeBindgenPath := Some(file(System.getProperty("bindgen.path")))
 
 //#example
 inConfig(Compile)(
   Def.settings(
-    //#example
-    nativeBindgenPath := file(System.getProperty("bindgen.path")),
-    //#example
     nativeBindings += {
-      NativeBinding((resourceDirectory in Compile).value / "stdlib.h")
+      NativeBinding(resourceDirectory.value / "stdlib.h")
         .name("stdlib")
         .packageName("org.example.app.stdlib")
         .excludePrefix("__")

@@ -1,11 +1,24 @@
+# Generate bindings in managed source mode
+> sources
+$ must-mirror target/scala-2.11/src_managed/main/sbt-scala-native-bindgen/stdlib.scala expected/stdlib.scala
+
+# Generate bindings when nativeBindgen is explicitly run
+> clean
 > nativeBindgen
 $ must-mirror target/scala-2.11/src_managed/main/sbt-scala-native-bindgen/stdlib.scala expected/stdlib.scala
 
+# Not generate bindings when not in managed source mode
 > clean
 > set target in (Compile, nativeBindgen) := nativeBindgenCustomTarget.value
+> sources
+$ absent src/main/scala/org/example/stdlib.scala
+
+# Support custom output path
+> clean
 > nativeBindgen
 $ must-mirror src/main/scala/org/example/stdlib.scala expected/stdlib.scala
 
+# Support multiple bindings
 > clean
 > set nativeBindings in Compile += nativeBindgenCoreBinding.value
 > nativeBindgen
