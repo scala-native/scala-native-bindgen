@@ -140,11 +140,18 @@ kornilova-l/scala-native-bindgen
   <li><a href="using-generated-bindings.html" class="page">Using Generated Bindings</a></li>
   <li><a href="integrating-bindings.html" class="page">Integrating Bindings</a></li>
   <li><a href="limitations.html" class="page">Limitations</a></li>
+  <li><a href="bindings/index.html" class="page">Bindings</a>
+  <ul>
+    <li><a href="bindings/posix.html" class="page">POSIX</a></li>
+    <li><a href="bindings/iconv.html" class="page">Iconv - Character set conversion</a></li>
+    <li><a href="bindings/utf8proc.html" class="page">Utf8proc - UTF-8 text processing</a></li>
+  </ul></li>
   <li><a href="contrib/index.html" class="page">Contributor&rsquo;s Guide</a>
   <ul>
     <li><a href="contrib/guidelines.html" class="page">Guide for contributors</a></li>
     <li><a href="contrib/cmake.html" class="page">Building the executable with <code>CMake</code></a></li>
     <li><a href="contrib/docker-compose.html" class="page">Building the executable with <code>docker-compose</code></a></li>
+    <li><a href="contrib/bindings.html" class="page">Contributing Bindings</a></li>
     <li><a href="contrib/releasing.html" class="page">Release Workflow</a></li>
   </ul></li>
 </ul>
@@ -152,7 +159,7 @@ kornilova-l/scala-native-bindgen
 </nav>
 
 <div class="md-nav__title--site md-version" title="Version">
-<i class="md-icon">label_outline</i> 0.3.0-RC1
+<i class="md-icon">label_outline</i> 0.3.0-RC2*
 </div>
 </nav>
 
@@ -168,7 +175,7 @@ kornilova-l/scala-native-bindgen
 
 resolvers += Resolver.bintrayIvyRepo(&quot;scala-native-bindgen&quot;, &quot;sbt-plugins&quot;)
 resolvers += Resolver.bintrayRepo(&quot;scala-native-bindgen&quot;, &quot;maven&quot;)</code></pre>
-<p>Replacing <code>VERSION</code> with 0.3.0-RC1 to use the latest version.</p>
+<p>Replacing <code>VERSION</code> with 0.3.0-RC2-SNAPSHOT to use the latest version.</p>
 <p>Next configure the plugin using the <code>nativeBindings</code> setting scoped to either <code>Compile</code> or <code>Test</code>. The <code>NativeBinding</code> type to configure each binding that should be generated. </p><div class="callout note "><div class="callout-title">Note</div>
 <p>By default the <code>scala-native-bindgen</code> executable is downloaded automatically for supported platforms. Set <code>version in nativeBindgen</code> (unscoped) to configure the version of the <code>scala-native-bindgen</code> to use if you want a version different from the version of the sbt plugin.</p>
 <p>In case your platform is not supported, you must compile <code>scala-native-bindgen</code> yourself and configure the path to the executable using <code>nativeBindgenPath</code>, e.g.:</p>
@@ -180,7 +187,7 @@ resolvers += Resolver.bintrayRepo(&quot;scala-native-bindgen&quot;, &quot;maven&
 inConfig(Compile)(
   Def.settings(
     nativeBindings += {
-      NativeBinding((resourceDirectory in Compile).value / &quot;stdlib.h&quot;)
+      NativeBinding(resourceDirectory.value / &quot;stdlib.h&quot;)
         .name(&quot;stdlib&quot;)
         .packageName(&quot;org.example.app.stdlib&quot;)
         .excludePrefix(&quot;__&quot;)
@@ -211,7 +218,7 @@ Edit this page
 </div>
 <div class="print-only">
 <span class="md-source-file md-version">
-0.3.0-RC1
+0.3.0-RC2*
 </span>
 </div>
 </article>

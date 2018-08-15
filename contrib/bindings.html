@@ -18,7 +18,7 @@
 
 <meta name="description" content="docs">
 <link rel="shortcut icon" href="../assets/images/favicon.png">
-<title>Building the executable with docker-compose · Scala Native Bindgen</title>
+<title>Contributing Bindings · Scala Native Bindgen</title>
 <link rel="stylesheet" href="../assets/stylesheets/application.7a4cdee3.css">
 <link rel="stylesheet" href="../assets/stylesheets/application-palette.792431c1.css">
 <link rel="stylesheet" href="../lib/material__tabs/dist/mdc.tabs.min.css">
@@ -57,7 +57,7 @@ data-md-color-accent="indigo"
 Scala Native Bindgen
 </span>
 <span class="md-header-nav__topic">
-Building the executable with docker-compose
+Contributing Bindings
 </span>
 </div>
 </div>
@@ -150,12 +150,20 @@ kornilova-l/scala-native-bindgen
   <ul>
     <li><a href="../contrib/guidelines.html" class="page">Guide for contributors</a></li>
     <li><a href="../contrib/cmake.html" class="page">Building the executable with <code>CMake</code></a></li>
-    <li><a href="../contrib/docker-compose.html" class="active page">Building the executable with <code>docker-compose</code></a></li>
-    <li><a href="../contrib/bindings.html" class="page">Contributing Bindings</a></li>
+    <li><a href="../contrib/docker-compose.html" class="page">Building the executable with <code>docker-compose</code></a></li>
+    <li><a href="../contrib/bindings.html" class="active page">Contributing Bindings</a></li>
     <li><a href="../contrib/releasing.html" class="page">Release Workflow</a></li>
   </ul></li>
 </ul>
 <nav class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="toc">Table of contents</label>
+<ul>
+  <li><a href="../contrib/bindings.html#contributing-bindings" class="header">Contributing Bindings</a>
+  <ul>
+    <li><a href="../contrib/bindings.html#adding-a-new-bindings" class="header">Adding a new Bindings</a></li>
+    <li><a href="../contrib/bindings.html#update-all-bindings" class="header">Update all Bindings</a></li>
+  </ul></li>
+</ul>
 </nav>
 
 <div class="md-nav__title--site md-version" title="Version">
@@ -166,22 +174,61 @@ kornilova-l/scala-native-bindgen
 </div>
 </div>
 </div>
+<div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="toc">Table of contents</label>
+<ul>
+  <li><a href="../contrib/bindings.html#contributing-bindings" class="header">Contributing Bindings</a>
+  <ul>
+    <li><a href="../contrib/bindings.html#adding-a-new-bindings" class="header">Adding a new Bindings</a></li>
+    <li><a href="../contrib/bindings.html#update-all-bindings" class="header">Update all Bindings</a></li>
+  </ul></li>
+</ul>
+</nav>
+
+</div>
+</div>
+</div>
 <div class="md-content">
 <article class="md-content__inner md-typeset">
 <div class="md-content__searchable">
-<h1><a href="#building-the-executable-with-docker-compose" name="building-the-executable-with-docker-compose" class="anchor"><span class="anchor-link"></span></a>Building the executable with <code>docker-compose</code></h1>
-<p>You can use <a href="https://docs.docker.com/compose/">docker-compose</a> to build and test the program:</p>
-<pre class="prettyprint"><code class="language-sh"># Build the docker image with LLVM version 6.0.
-docker-compose build ubuntu-18.04-llvm-6.0
-# Build the bindgen tool and run the tests.
-docker-compose run --rm ubuntu-18.04-llvm-6.0 ./script/test.sh
-# Run the bindgen tool inside the container.
-docker-compose run --rm ubuntu-18.04-llvm-6.0 \
-    bindgen/target/scala-native-bindgen --name union tests/samples/Union.h --
+<h1><a href="#contributing-bindings" name="contributing-bindings" class="anchor"><span class="anchor-link"></span></a>Contributing Bindings</h1>
+<h2><a href="#adding-a-new-bindings" name="adding-a-new-bindings" class="anchor"><span class="anchor-link"></span></a>Adding a new Bindings</h2>
+<p>To add a new binding add a new project in <code>build.sbt</code> with the name of the artifact as well as a binding configuration for each header file and optionally the library to link with. The following example shows how it is possible to generate multiple bindings per project. For most libraries a single binding should be sufficient.</p>
+<pre class="prettyprint"><code class="language-sbt">lazy val libposix = bindingProject(&quot;posix&quot;)
+  .configure(binding(&quot;fnmatch.h&quot;))
+  .configure(binding(&quot;regex.h&quot;))</code></pre>
+<p>The new sbt project should also be added to the <code>bindings</code> project&rsquo;s list of aggregated projects.</p>
+<p>Optionally update the top-level <code>Dockerfile</code> to install the binding library&rsquo;s <code>-dev</code> package. </p>
+<pre><code># Install binding dependencies
+RUN set -x \
+ &amp;&amp; apt update \
+ &amp;&amp; apt install -y --no-install-recommends \
+	libutf8proc-dev \
+ &amp;&amp; rm -rf /var/lib/apt/lists/*</code></pre>
+<p>Remember to rebuild the development docker image if you change the <code>Dockerfile</code>.</p>
+<pre class="prettyprint"><code class="language-sh">docker-compose build ubuntu-18.04-llvm-6.0
+</code></pre>
+<p>Next, run <code>nativeBindgen</code> to generate the bindings. Note, to ensure consistency the bindings should be generated in the Linux docker environment. This can be done by running:</p>
+<pre class="prettyprint"><code class="language-sh">docker-compose run --rm ubuntu-18.04-llvm-6.0 sbt bindings/$BINDING/nativeBindgen
+</code></pre>
+<p>Then write tests for the generated bindings. The test class should be in the <code>org.scalanative.bindgen.bindings.tests</code> package to make it easier to write examples for the binding documentation. Verify that the tests pass:</p>
+<pre class="prettyprint"><code class="language-sh">docker-compose run --rm ubuntu-18.04-llvm-6.0 sbt bindings/$BINDING/test
+</code></pre>
+<p>Finally, add a page in the <code>bindings</code> folder and document the binding, ideally with an example or two of how to use it.</p>
+<h2><a href="#update-all-bindings" name="update-all-bindings" class="anchor"><span class="anchor-link"></span></a>Update all Bindings</h2>
+<p>To update the bindings, build the Linux docker environment and run <code>bindings/nativeBindgen</code>:</p>
+<pre class="prettyprint"><code class="language-sh">docker-compose build ubuntu-18.04-llvm-6.0
+docker-compose run --rm ubuntu-18.04-llvm-6.0 sbt bindings/nativeBindgen
+</code></pre>
+<p>Run the tests afterwards to verify that everything works:</p>
+<pre class="prettyprint"><code class="language-sh">docker-compose run --rm ubuntu-18.04-llvm-6.0 sbt bindings/test
 </code></pre>
 </div>
 <div>
-<a href="https://github.com/kornilova-l/scala-native-bindgen/tree/master/docs/src/paradox/contrib/docker-compose.md" title="Edit this page" class="md-source-file md-edit">
+<a href="https://github.com/kornilova-l/scala-native-bindgen/tree/master/docs/src/paradox/contrib/bindings.md" title="Edit this page" class="md-source-file md-edit">
 Edit this page
 </a>
 </div>
@@ -197,7 +244,7 @@ Edit this page
 <footer class="md-footer">
 <div class="md-footer-nav">
 <nav class="md-footer-nav__inner md-grid">
-<a href="../contrib/cmake.html" title="Building the executable with CMake" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+<a href="../contrib/docker-compose.html" title="Building the executable with docker-compose" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
 <div class="md-flex__cell md-flex__cell--shrink">
 <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
 </div>
@@ -206,17 +253,17 @@ Edit this page
 <span class="md-footer-nav__direction">
 Previous
 </span>
-Building the executable with CMake
+Building the executable with docker-compose
 </span>
 </div>
 </a>
-<a href="../contrib/bindings.html" title="Contributing Bindings" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+<a href="../contrib/releasing.html" title="Release Workflow" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
 <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
 <span class="md-flex__ellipsis">
 <span class="md-footer-nav__direction">
 Next
 </span>
-Contributing Bindings
+Release Workflow
 </span>
 </div>
 <div class="md-flex__cell md-flex__cell--shrink">

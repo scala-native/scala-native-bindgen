@@ -18,7 +18,7 @@
 
 <meta name="description" content="docs">
 <link rel="shortcut icon" href="../assets/images/favicon.png">
-<title>Building the executable with docker-compose · Scala Native Bindgen</title>
+<title>Iconv - Character set conversion · Scala Native Bindgen</title>
 <link rel="stylesheet" href="../assets/stylesheets/application.7a4cdee3.css">
 <link rel="stylesheet" href="../assets/stylesheets/application-palette.792431c1.css">
 <link rel="stylesheet" href="../lib/material__tabs/dist/mdc.tabs.min.css">
@@ -57,7 +57,7 @@ data-md-color-accent="indigo"
 Scala Native Bindgen
 </span>
 <span class="md-header-nav__topic">
-Building the executable with docker-compose
+Iconv - Character set conversion
 </span>
 </div>
 </div>
@@ -143,19 +143,26 @@ kornilova-l/scala-native-bindgen
   <li><a href="../bindings/index.html" class="page">Bindings</a>
   <ul>
     <li><a href="../bindings/posix.html" class="page">POSIX</a></li>
-    <li><a href="../bindings/iconv.html" class="page">Iconv - Character set conversion</a></li>
+    <li><a href="../bindings/iconv.html" class="active page">Iconv - Character set conversion</a></li>
     <li><a href="../bindings/utf8proc.html" class="page">Utf8proc - UTF-8 text processing</a></li>
   </ul></li>
   <li><a href="../contrib/index.html" class="page">Contributor&rsquo;s Guide</a>
   <ul>
     <li><a href="../contrib/guidelines.html" class="page">Guide for contributors</a></li>
     <li><a href="../contrib/cmake.html" class="page">Building the executable with <code>CMake</code></a></li>
-    <li><a href="../contrib/docker-compose.html" class="active page">Building the executable with <code>docker-compose</code></a></li>
+    <li><a href="../contrib/docker-compose.html" class="page">Building the executable with <code>docker-compose</code></a></li>
     <li><a href="../contrib/bindings.html" class="page">Contributing Bindings</a></li>
     <li><a href="../contrib/releasing.html" class="page">Release Workflow</a></li>
   </ul></li>
 </ul>
 <nav class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="toc">Table of contents</label>
+<ul>
+  <li><a href="../bindings/iconv.html#iconv-character-set-conversion" class="header">Iconv - Character set conversion</a>
+  <ul>
+    <li><a href="../bindings/iconv.html#example" class="header">Example</a></li>
+  </ul></li>
+</ul>
 </nav>
 
 <div class="md-nav__title--site md-version" title="Version">
@@ -166,22 +173,68 @@ kornilova-l/scala-native-bindgen
 </div>
 </div>
 </div>
+<div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="toc">Table of contents</label>
+<ul>
+  <li><a href="../bindings/iconv.html#iconv-character-set-conversion" class="header">Iconv - Character set conversion</a>
+  <ul>
+    <li><a href="../bindings/iconv.html#example" class="header">Example</a></li>
+  </ul></li>
+</ul>
+</nav>
+
+</div>
+</div>
+</div>
 <div class="md-content">
 <article class="md-content__inner md-typeset">
 <div class="md-content__searchable">
-<h1><a href="#building-the-executable-with-docker-compose" name="building-the-executable-with-docker-compose" class="anchor"><span class="anchor-link"></span></a>Building the executable with <code>docker-compose</code></h1>
-<p>You can use <a href="https://docs.docker.com/compose/">docker-compose</a> to build and test the program:</p>
-<pre class="prettyprint"><code class="language-sh"># Build the docker image with LLVM version 6.0.
-docker-compose build ubuntu-18.04-llvm-6.0
-# Build the bindgen tool and run the tests.
-docker-compose run --rm ubuntu-18.04-llvm-6.0 ./script/test.sh
-# Run the bindgen tool inside the container.
-docker-compose run --rm ubuntu-18.04-llvm-6.0 \
-    bindgen/target/scala-native-bindgen --name union tests/samples/Union.h --
-</code></pre>
+<h1><a href="#iconv-character-set-conversion" name="iconv-character-set-conversion" class="anchor"><span class="anchor-link"></span></a>Iconv - Character set conversion</h1>
+<p>To use this binding add the following dependency:</p><dl class="dependency"><dt>sbt</dt><dd><pre class="prettyprint"><code class="language-scala">libraryDependencies += "org.scala-native.bindgen" %% "libposix" % "0.3.0-RC2-SNAPSHOT"</code></pre></dd><dt>Maven</dt><dd><pre class="prettyprint"><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.scala-native.bindgen&lt;/groupId&gt;
+  &lt;artifactId&gt;libposix_2.11&lt;/artifactId&gt;
+  &lt;version&gt;0.3.0-RC2-SNAPSHOT&lt;/version&gt;
+&lt;/dependency&gt;</code></pre></dd><dt>Gradle</dt><dd><pre class="prettyprint"><code class="language-gradle">dependencies {
+  compile group: 'org.scala-native.bindgen', name: 'libposix_2.11', version: '0.3.0-RC2-SNAPSHOT'
+}</code></pre></dd></dl>
+<p>The <a href="http://pubs.opengroup.org/onlinepubs/9699919799/basedefs/iconv.h.html"><code>iconv.h</code></a> header allows to convert text between different character sets, for example UTF-8 to ISO-8859-1.</p>
+<h2><a href="#example" name="example" class="anchor"><span class="anchor-link"></span></a>Example</h2>
+<pre class="prettyprint"><code class="language-scala">import org.scalanative.bindgen.bindings.iconv.iconv._
+import scala.scalanative.native._
+import java.nio.charset.Charset
+
+val UTF8   = Charset.forName(&quot;UTF-8&quot;)
+val encode = iconv_open(c&quot;UTF-8&quot;, c&quot;ISO-8859-1&quot;)
+val decode = iconv_open(c&quot;ISO-8859-1&quot;, c&quot;UTF-8&quot;)
+
+Zone { implicit zone =&gt;
+  val originalBuf    = toCString(&quot;øre&quot;, UTF8) // Ear in Danish
+  val originalBufPtr = alloc[CString]
+  !originalBufPtr = originalBuf
+  val originalBytesLeft = alloc[CSize]
+  !originalBytesLeft = string.strlen(originalBuf)
+
+  val translatedBuf    = alloc[Byte](32)
+  val translatedBufPtr = alloc[CString]
+  !translatedBufPtr = translatedBuf
+  val translatedBytesLeft = alloc[CSize]
+  !translatedBytesLeft = 32
+
+  val translatedCode = iconv(
+    encode,
+    originalBufPtr,
+    originalBytesLeft,
+    translatedBufPtr,
+    translatedBytesLeft
+  )
+}
+iconv_close(encode)</code></pre>
 </div>
 <div>
-<a href="https://github.com/kornilova-l/scala-native-bindgen/tree/master/docs/src/paradox/contrib/docker-compose.md" title="Edit this page" class="md-source-file md-edit">
+<a href="https://github.com/kornilova-l/scala-native-bindgen/tree/master/docs/src/paradox/bindings/iconv.md" title="Edit this page" class="md-source-file md-edit">
 Edit this page
 </a>
 </div>
@@ -197,7 +250,7 @@ Edit this page
 <footer class="md-footer">
 <div class="md-footer-nav">
 <nav class="md-footer-nav__inner md-grid">
-<a href="../contrib/cmake.html" title="Building the executable with CMake" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+<a href="../bindings/posix.html" title="POSIX" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
 <div class="md-flex__cell md-flex__cell--shrink">
 <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
 </div>
@@ -206,17 +259,17 @@ Edit this page
 <span class="md-footer-nav__direction">
 Previous
 </span>
-Building the executable with CMake
+POSIX
 </span>
 </div>
 </a>
-<a href="../contrib/bindings.html" title="Contributing Bindings" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+<a href="../bindings/utf8proc.html" title="Utf8proc - UTF-8 text processing" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
 <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
 <span class="md-flex__ellipsis">
 <span class="md-footer-nav__direction">
 Next
 </span>
-Contributing Bindings
+Utf8proc - UTF-8 text processing
 </span>
 </div>
 <div class="md-flex__cell md-flex__cell--shrink">

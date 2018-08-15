@@ -18,7 +18,7 @@
 
 <meta name="description" content="docs">
 <link rel="shortcut icon" href="../assets/images/favicon.png">
-<title>Building the executable with docker-compose · Scala Native Bindgen</title>
+<title>POSIX · Scala Native Bindgen</title>
 <link rel="stylesheet" href="../assets/stylesheets/application.7a4cdee3.css">
 <link rel="stylesheet" href="../assets/stylesheets/application-palette.792431c1.css">
 <link rel="stylesheet" href="../lib/material__tabs/dist/mdc.tabs.min.css">
@@ -57,7 +57,7 @@ data-md-color-accent="indigo"
 Scala Native Bindgen
 </span>
 <span class="md-header-nav__topic">
-Building the executable with docker-compose
+POSIX
 </span>
 </div>
 </div>
@@ -142,7 +142,7 @@ kornilova-l/scala-native-bindgen
   <li><a href="../limitations.html" class="page">Limitations</a></li>
   <li><a href="../bindings/index.html" class="page">Bindings</a>
   <ul>
-    <li><a href="../bindings/posix.html" class="page">POSIX</a></li>
+    <li><a href="../bindings/posix.html" class="active page">POSIX</a></li>
     <li><a href="../bindings/iconv.html" class="page">Iconv - Character set conversion</a></li>
     <li><a href="../bindings/utf8proc.html" class="page">Utf8proc - UTF-8 text processing</a></li>
   </ul></li>
@@ -150,12 +150,19 @@ kornilova-l/scala-native-bindgen
   <ul>
     <li><a href="../contrib/guidelines.html" class="page">Guide for contributors</a></li>
     <li><a href="../contrib/cmake.html" class="page">Building the executable with <code>CMake</code></a></li>
-    <li><a href="../contrib/docker-compose.html" class="active page">Building the executable with <code>docker-compose</code></a></li>
+    <li><a href="../contrib/docker-compose.html" class="page">Building the executable with <code>docker-compose</code></a></li>
     <li><a href="../contrib/bindings.html" class="page">Contributing Bindings</a></li>
     <li><a href="../contrib/releasing.html" class="page">Release Workflow</a></li>
   </ul></li>
 </ul>
 <nav class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="toc">Table of contents</label>
+<ul>
+  <li><a href="../bindings/posix.html#posix" class="header">POSIX</a>
+  <ul>
+    <li><a href="../bindings/posix.html#examples" class="header">Examples</a></li>
+  </ul></li>
+</ul>
 </nav>
 
 <div class="md-nav__title--site md-version" title="Version">
@@ -166,22 +173,80 @@ kornilova-l/scala-native-bindgen
 </div>
 </div>
 </div>
+<div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="toc">Table of contents</label>
+<ul>
+  <li><a href="../bindings/posix.html#posix" class="header">POSIX</a>
+  <ul>
+    <li><a href="../bindings/posix.html#examples" class="header">Examples</a></li>
+  </ul></li>
+</ul>
+</nav>
+
+</div>
+</div>
+</div>
 <div class="md-content">
 <article class="md-content__inner md-typeset">
 <div class="md-content__searchable">
-<h1><a href="#building-the-executable-with-docker-compose" name="building-the-executable-with-docker-compose" class="anchor"><span class="anchor-link"></span></a>Building the executable with <code>docker-compose</code></h1>
-<p>You can use <a href="https://docs.docker.com/compose/">docker-compose</a> to build and test the program:</p>
-<pre class="prettyprint"><code class="language-sh"># Build the docker image with LLVM version 6.0.
-docker-compose build ubuntu-18.04-llvm-6.0
-# Build the bindgen tool and run the tests.
-docker-compose run --rm ubuntu-18.04-llvm-6.0 ./script/test.sh
-# Run the bindgen tool inside the container.
-docker-compose run --rm ubuntu-18.04-llvm-6.0 \
-    bindgen/target/scala-native-bindgen --name union tests/samples/Union.h --
-</code></pre>
+<h1><a href="#posix" name="posix" class="anchor"><span class="anchor-link"></span></a>POSIX</h1>
+<p>An addition to Scala Native&rsquo;s <a href="http://www.scala-native.org/en/latest/lib/posixlib.html">POSIX</a> bindings. To use one of the POSIX bindings you must add it as a dependency:</p><dl class="dependency"><dt>sbt</dt><dd><pre class="prettyprint"><code class="language-scala">libraryDependencies += "org.scala-native.bindgen" %% "libposix" % "0.3.0-RC2-SNAPSHOT"</code></pre></dd><dt>Maven</dt><dd><pre class="prettyprint"><code class="language-xml">&lt;dependency&gt;
+  &lt;groupId&gt;org.scala-native.bindgen&lt;/groupId&gt;
+  &lt;artifactId&gt;libposix_2.11&lt;/artifactId&gt;
+  &lt;version&gt;0.3.0-RC2-SNAPSHOT&lt;/version&gt;
+&lt;/dependency&gt;</code></pre></dd><dt>Gradle</dt><dd><pre class="prettyprint"><code class="language-gradle">dependencies {
+  compile group: 'org.scala-native.bindgen', name: 'libposix_2.11', version: '0.3.0-RC2-SNAPSHOT'
+}</code></pre></dd></dl>
+<p>Binding objects are available under the package name `</p>
+<table>
+  <thead>
+    <tr>
+      <th>Header </th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><a href="http://pubs.opengroup.org/onlinepubs/9699919799/basedefs/fnmatch.h.html"><code>fnmatch.h</code></a> </td>
+      <td>Check if a file or path name matches a shell pattern</td>
+    </tr>
+    <tr>
+      <td><a href="http://pubs.opengroup.org/onlinepubs/9699919799/basedefs/regex.h.html"><code>regex.h</code></a> </td>
+      <td>Regular expression library</td>
+    </tr>
+  </tbody>
+</table>
+<h2><a href="#examples" name="examples" class="anchor"><span class="anchor-link"></span></a>Examples</h2>
+<p>Using <code>fnmatch.h</code>:</p>
+<pre class="prettyprint"><code class="language-scala">import scala.scalanative.native._
+import org.scalanative.bindgen.bindings.posix.fnmatch._
+
+assert(fnmatch(c&quot;*.md&quot;, c&quot;README.md&quot;, 0) == 0)
+assert(fnmatch(c&quot;*.[ch]&quot;, c&quot;main.h&quot;, 0) == 0)
+assert(fnmatch(c&quot;*.[ch]&quot;, c&quot;main.c&quot;, 0) == 0)
+assert(fnmatch(c&quot;*.md&quot;, c&quot;README_md&quot;, 0) == defines.FNM_NOMATCH)</code></pre>
+<p>Using <code>regex.h</code>:</p>
+<pre class="prettyprint"><code class="language-scala">import scala.scalanative.native._
+import org.scalanative.bindgen.bindings.posix.regex._
+
+val reg = stackalloc[regex_t]
+
+val compResult =
+  regcomp(reg, c&quot;Scala \\(\\(J\\(VM\\|S\\)\\)\\|Native\\)&quot;, 0)
+assert(compResult == 0)
+
+assert(regexec(reg, c&quot;Scala JVM&quot;, 0, null, 0) == 0)
+assert(regexec(reg, c&quot;Scala JS&quot;, 0, null, 0) == 0)
+assert(regexec(reg, c&quot;Scala Native&quot;, 0, null, 0) == 0)
+assert(regexec(reg, c&quot;Scala .NET&quot;, 0, null, 0) != 0)
+
+regfree(reg)</code></pre>
 </div>
 <div>
-<a href="https://github.com/kornilova-l/scala-native-bindgen/tree/master/docs/src/paradox/contrib/docker-compose.md" title="Edit this page" class="md-source-file md-edit">
+<a href="https://github.com/kornilova-l/scala-native-bindgen/tree/master/docs/src/paradox/bindings/posix.md" title="Edit this page" class="md-source-file md-edit">
 Edit this page
 </a>
 </div>
@@ -197,7 +262,7 @@ Edit this page
 <footer class="md-footer">
 <div class="md-footer-nav">
 <nav class="md-footer-nav__inner md-grid">
-<a href="../contrib/cmake.html" title="Building the executable with CMake" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+<a href="../bindings/index.html" title="Bindings" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
 <div class="md-flex__cell md-flex__cell--shrink">
 <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
 </div>
@@ -206,17 +271,17 @@ Edit this page
 <span class="md-footer-nav__direction">
 Previous
 </span>
-Building the executable with CMake
+Bindings
 </span>
 </div>
 </a>
-<a href="../contrib/bindings.html" title="Contributing Bindings" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+<a href="../bindings/iconv.html" title="Iconv - Character set conversion" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
 <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
 <span class="md-flex__ellipsis">
 <span class="md-footer-nav__direction">
 Next
 </span>
-Contributing Bindings
+Iconv - Character set conversion
 </span>
 </div>
 <div class="md-flex__cell md-flex__cell--shrink">

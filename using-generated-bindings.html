@@ -140,11 +140,18 @@ kornilova-l/scala-native-bindgen
   <li><a href="using-generated-bindings.html" class="active page">Using Generated Bindings</a></li>
   <li><a href="integrating-bindings.html" class="page">Integrating Bindings</a></li>
   <li><a href="limitations.html" class="page">Limitations</a></li>
+  <li><a href="bindings/index.html" class="page">Bindings</a>
+  <ul>
+    <li><a href="bindings/posix.html" class="page">POSIX</a></li>
+    <li><a href="bindings/iconv.html" class="page">Iconv - Character set conversion</a></li>
+    <li><a href="bindings/utf8proc.html" class="page">Utf8proc - UTF-8 text processing</a></li>
+  </ul></li>
   <li><a href="contrib/index.html" class="page">Contributor&rsquo;s Guide</a>
   <ul>
     <li><a href="contrib/guidelines.html" class="page">Guide for contributors</a></li>
     <li><a href="contrib/cmake.html" class="page">Building the executable with <code>CMake</code></a></li>
     <li><a href="contrib/docker-compose.html" class="page">Building the executable with <code>docker-compose</code></a></li>
+    <li><a href="contrib/bindings.html" class="page">Contributing Bindings</a></li>
     <li><a href="contrib/releasing.html" class="page">Release Workflow</a></li>
   </ul></li>
 </ul>
@@ -152,7 +159,7 @@ kornilova-l/scala-native-bindgen
 </nav>
 
 <div class="md-nav__title--site md-version" title="Version">
-<i class="md-icon">label_outline</i> 0.3.0-RC1
+<i class="md-icon">label_outline</i> 0.3.0-RC2*
 </div>
 </nav>
 
@@ -187,29 +194,24 @@ object vector {
   type struct_point = native.CStruct2[native.CFloat, native.CFloat]
   type struct_vector = native.CStruct2[struct_point, struct_point]
   def add(v1: native.Ptr[struct_vector], v2: native.Ptr[struct_vector]): native.Ptr[struct_vector] = native.extern
-}
 
-import vector._
+  object implicits {
+    implicit class struct_point_ops(val p: native.Ptr[struct_point]) extends AnyVal {
+      def x: native.CFloat = !p._1
+      def x_=(value: native.CFloat): Unit = !p._1 = value
+      def y: native.CFloat = !p._2
+      def y_=(value: native.CFloat): Unit = !p._2 = value
+    }
+    def struct_point()(implicit z: native.Zone): native.Ptr[struct_point] = native.alloc[struct_point]
 
-object vectorHelpers {
-
-  implicit class struct_point_ops(val p: native.Ptr[struct_point]) extends AnyVal {
-    def x: native.CFloat = !p._1
-    def x_=(value: native.CFloat): Unit = !p._1 = value
-    def y: native.CFloat = !p._2
-    def y_=(value: native.CFloat): Unit = !p._2 = value
+    implicit class struct_vector_ops(val p: native.Ptr[struct_vector]) extends AnyVal {
+      def a: native.Ptr[struct_point] = p._1
+      def a_=(value: native.Ptr[struct_point]): Unit = !p._1 = !value
+      def b: native.Ptr[struct_point] = p._2
+      def b_=(value: native.Ptr[struct_point]): Unit = !p._2 = !value
+    }
+    def struct_vector()(implicit z: native.Zone): native.Ptr[struct_vector] = native.alloc[struct_vector]
   }
-
-  def struct_point()(implicit z: native.Zone): native.Ptr[struct_point] = native.alloc[struct_point]
-
-  implicit class struct_vector_ops(val p: native.Ptr[struct_vector]) extends AnyVal {
-    def a: native.Ptr[struct_point] = p._1
-    def a_=(value: native.Ptr[struct_point]): Unit = !p._1 = !value
-    def b: native.Ptr[struct_point] = p._2
-    def b_=(value: native.Ptr[struct_point]): Unit = !p._2 = !value
-  }
-
-  def struct_vector()(implicit z: native.Zone): native.Ptr[struct_vector] = native.alloc[struct_vector]
 }</code></pre>
 <p>Let&rsquo;s write code that creates two vectors, adds them and prints resulting vector.</p>
 <p>First we need to create points for vectors. We will use <code>native.Zone</code> to allocate struct (more information on memory management can be found here: <a href="http://www.scala-native.org/en/latest/user/interop.html#memory-management">Scala Native memory management</a>).</p>
@@ -217,7 +219,7 @@ object vectorHelpers {
 <p>Let&rsquo;s create points for first vector:</p>
 <pre class="prettyprint"><code class="language-scala">import scala.scalanative.native.Zone
 import org.example.vector
-import org.example.vectorHelpers._
+import org.example.vector.implicits._
 
 Zone { implicit zone =&gt;
   val vec1p1 = struct_point()
@@ -245,7 +247,7 @@ Edit this page
 </div>
 <div class="print-only">
 <span class="md-source-file md-version">
-0.3.0-RC1
+0.3.0-RC2*
 </span>
 </div>
 </article>
