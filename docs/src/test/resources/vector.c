@@ -1,16 +1,13 @@
 #include "vector.h"
+#include <math.h>
 #include <stdlib.h>
 
-struct vector *add(struct vector *v1, struct vector *v2) {
-    struct vector *out = malloc(sizeof(struct vector));
-
-    if (!out)
-        return NULL;
-
-    out->a.x = v1->a.x + v2->a.x;
-    out->a.y = v1->a.y + v2->a.y;
-    out->b.x = v1->b.x + v2->b.x;
-    out->b.y = v1->b.y + v2->b.y;
-
-    return out;
+float cosine(struct lineSegment *v1, struct lineSegment *v2) {
+    float v1x = fabsf(v1->b.x - v1->a.x);
+    float v1y = fabsf(v1->b.y - v1->a.y);
+    float v1Length = sqrtf(v1x * v1x + v1y * v1y);
+    float v2x = fabsf(v2->b.x - v2->a.x);
+    float v2y = fabsf(v2->b.y - v2->a.y);
+    float v2Length = sqrtf(v2x * v2x + v2y * v2y);
+    return (v1x * v2x + v1y * v2y) / (v1Length * v2Length);
 }

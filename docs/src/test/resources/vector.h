@@ -3,9 +3,9 @@ struct point {
     float y;
 };
 
-struct vector {
+struct lineSegment {
     struct point a;
     struct point b;
 };
 
-struct vector *add(struct vector *v1, struct vector *v2);
+float cosine(struct lineSegment *v1, struct lineSegment *v2);

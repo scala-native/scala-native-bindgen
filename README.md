@@ -53,7 +53,6 @@ object vector {
       def y: native.CFloat = !p._2
       def y_=(value: native.CFloat): Unit = !p._2 = value
     }
-    def struct_point()(implicit z: native.Zone): native.Ptr[struct_point] = native.alloc[struct_point]
 
     implicit class struct_vector_ops(val p: native.Ptr[struct_vector]) extends AnyVal {
       def a: native.Ptr[struct_point] = p._1
@@ -61,7 +60,28 @@ object vector {
       def b: native.Ptr[struct_point] = p._2
       def b_=(value: native.Ptr[struct_point]): Unit = !p._2 = !value
     }
-    def struct_vector()(implicit z: native.Zone): native.Ptr[struct_vector] = native.alloc[struct_vector]
+  }
+
+  object struct_point {
+    import implicits._
+    def apply()(implicit z: native.Zone): native.Ptr[struct_point] = native.alloc[struct_point]
+    def apply(x: native.CFloat, y: native.CFloat)(implicit z: native.Zone): native.Ptr[struct_point] = {
+      val ptr = native.alloc[struct_point]
+      ptr.x = x
+      ptr.y = y
+      ptr
+    }
+  }
+
+  object struct_vector {
+    import implicits._
+    def apply()(implicit z: native.Zone): native.Ptr[struct_vector] = native.alloc[struct_vector]
+    def apply(a: native.Ptr[struct_point], b: native.Ptr[struct_point])(implicit z: native.Zone): native.Ptr[struct_vector] = {
+      val ptr = native.alloc[struct_vector]
+      ptr.a = a
+      ptr.b = b
+      ptr
+    }
   }
 }
 ```

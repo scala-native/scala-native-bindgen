@@ -47,7 +47,6 @@ object Struct {
       def y: native.CInt = !p._2
       def y_=(value: native.CInt): Unit = !p._2 = value
     }
-    def struct_point()(implicit z: native.Zone): native.Ptr[struct_point] = native.alloc[struct_point]
 
     implicit class struct_points_ops(val p: native.Ptr[struct_points]) extends AnyVal {
       def p1: native.Ptr[struct_point] = p._1
@@ -55,7 +54,6 @@ object Struct {
       def p2: native.Ptr[point] = p._2
       def p2_=(value: native.Ptr[point]): Unit = !p._2 = !value
     }
-    def struct_points()(implicit z: native.Zone): native.Ptr[struct_points] = native.alloc[struct_points]
 
     implicit class struct_bigStruct_ops(val p: native.Ptr[struct_bigStruct]) extends AnyVal {
       def one: native.CLong = !p._1.cast[native.Ptr[native.CLong]]
@@ -105,7 +103,6 @@ object Struct {
       def twentyThree: native.CInt = !(p._1 + 108).cast[native.Ptr[native.CInt]]
       def twentyThree_=(value: native.CInt): Unit = !(p._1 + 108).cast[native.Ptr[native.CInt]] = value
     }
-    def struct_bigStruct()(implicit z: native.Zone): native.Ptr[struct_bigStruct] = native.alloc[struct_bigStruct]
 
     implicit class struct_anonymous_0_ops(val p: native.Ptr[struct_anonymous_0]) extends AnyVal {
       def c: native.CChar = !p._1
@@ -113,7 +110,6 @@ object Struct {
       def i: native.CInt = !p._2
       def i_=(value: native.CInt): Unit = !p._2 = value
     }
-    def struct_anonymous_0()(implicit z: native.Zone): native.Ptr[struct_anonymous_0] = native.alloc[struct_anonymous_0]
 
     implicit class struct_structWithAnonymousStruct_ops(val p: native.Ptr[struct_structWithAnonymousStruct]) extends AnyVal {
       def a: native.CInt = !p._1
@@ -121,7 +117,81 @@ object Struct {
       def anonymousStruct: native.Ptr[struct_anonymous_0] = p._2
       def anonymousStruct_=(value: native.Ptr[struct_anonymous_0]): Unit = !p._2 = !value
     }
-    def struct_structWithAnonymousStruct()(implicit z: native.Zone): native.Ptr[struct_structWithAnonymousStruct] = native.alloc[struct_structWithAnonymousStruct]
+  }
+
+  object struct_point {
+    import implicits._
+    def apply()(implicit z: native.Zone): native.Ptr[struct_point] = native.alloc[struct_point]
+    def apply(x: native.CInt, y: native.CInt)(implicit z: native.Zone): native.Ptr[struct_point] = {
+      val ptr = native.alloc[struct_point]
+      ptr.x = x
+      ptr.y = y
+      ptr
+    }
+  }
+
+  object struct_points {
+    import implicits._
+    def apply()(implicit z: native.Zone): native.Ptr[struct_points] = native.alloc[struct_points]
+    def apply(p1: native.Ptr[struct_point], p2: native.Ptr[point])(implicit z: native.Zone): native.Ptr[struct_points] = {
+      val ptr = native.alloc[struct_points]
+      ptr.p1 = p1
+      ptr.p2 = p2
+      ptr
+    }
+  }
+
+  object struct_bigStruct {
+    import implicits._
+    def apply()(implicit z: native.Zone): native.Ptr[struct_bigStruct] = native.alloc[struct_bigStruct]
+    def apply(one: native.CLong, two: native.CChar, three: native.CInt, four: native.CFloat, five: native.CDouble, six: native.Ptr[struct_point], seven: native.Ptr[struct_point], eight: native.CInt, nine: native.CInt, ten: native.CInt, eleven: native.CInt, twelve: native.CInt, thirteen: native.CInt, fourteen: native.CInt, fifteen: native.CInt, sixteen: native.CInt, seventeen: native.CInt, eighteen: native.CInt, nineteen: native.CInt, twenty: native.CInt, twentyOne: native.CInt, twentyTwo: native.CInt, twentyThree: native.CInt)(implicit z: native.Zone): native.Ptr[struct_bigStruct] = {
+      val ptr = native.alloc[struct_bigStruct]
+      ptr.one = one
+      ptr.two = two
+      ptr.three = three
+      ptr.four = four
+      ptr.five = five
+      ptr.six = six
+      ptr.seven = seven
+      ptr.eight = eight
+      ptr.nine = nine
+      ptr.ten = ten
+      ptr.eleven = eleven
+      ptr.twelve = twelve
+      ptr.thirteen = thirteen
+      ptr.fourteen = fourteen
+      ptr.fifteen = fifteen
+      ptr.sixteen = sixteen
+      ptr.seventeen = seventeen
+      ptr.eighteen = eighteen
+      ptr.nineteen = nineteen
+      ptr.twenty = twenty
+      ptr.twentyOne = twentyOne
+      ptr.twentyTwo = twentyTwo
+      ptr.twentyThree = twentyThree
+      ptr
+    }
+  }
+
+  object struct_anonymous_0 {
+    import implicits._
+    def apply()(implicit z: native.Zone): native.Ptr[struct_anonymous_0] = native.alloc[struct_anonymous_0]
+    def apply(c: native.CChar, i: native.CInt)(implicit z: native.Zone): native.Ptr[struct_anonymous_0] = {
+      val ptr = native.alloc[struct_anonymous_0]
+      ptr.c = c
+      ptr.i = i
+      ptr
+    }
+  }
+
+  object struct_structWithAnonymousStruct {
+    import implicits._
+    def apply()(implicit z: native.Zone): native.Ptr[struct_structWithAnonymousStruct] = native.alloc[struct_structWithAnonymousStruct]
+    def apply(a: native.CInt, anonymousStruct: native.Ptr[struct_anonymous_0])(implicit z: native.Zone): native.Ptr[struct_structWithAnonymousStruct] = {
+      val ptr = native.alloc[struct_structWithAnonymousStruct]
+      ptr.a = a
+      ptr.anonymousStruct = anonymousStruct
+      ptr
+    }
   }
 }
-

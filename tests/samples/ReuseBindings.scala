@@ -20,7 +20,15 @@ object ReuseBindings {
       def index: org.scalanative.bindgen.samples.Struct.enum_pointIndex = !p._1
       def index_=(value: org.scalanative.bindgen.samples.Struct.enum_pointIndex): Unit = !p._1 = value
     }
-    def struct_usesImportedEnum()(implicit z: native.Zone): native.Ptr[struct_usesImportedEnum] = native.alloc[struct_usesImportedEnum]
+  }
+
+  object struct_usesImportedEnum {
+    import implicits._
+    def apply()(implicit z: native.Zone): native.Ptr[struct_usesImportedEnum] = native.alloc[struct_usesImportedEnum]
+    def apply(index: org.scalanative.bindgen.samples.Struct.enum_pointIndex)(implicit z: native.Zone): native.Ptr[struct_usesImportedEnum] = {
+      val ptr = native.alloc[struct_usesImportedEnum]
+      ptr.index = index
+      ptr
+    }
   }
 }
-
