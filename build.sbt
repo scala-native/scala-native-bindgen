@@ -101,15 +101,12 @@ lazy val tests = project("tests")
   )
   .aggregate(samples)
 
-lazy val samples = project("samples")
+lazy val samples = nativeProject("samples")
   .in(file("tests/samples"))
-  .enablePlugins(ScalaNativePlugin)
   .settings(
     publish / skip := true,
-    scalaVersion := Versions.scala211,
     libraryDependencies += "com.lihaoyi" %%% "utest" % "0.6.3" % Test,
     testFrameworks += new TestFramework("utest.runner.Framework"),
-    nativeLinkStubs := true,
     compileTask("bindgentests", baseDirectory)
   )
 
@@ -141,12 +138,11 @@ lazy val sbtPlugin = project("sbt-scala-native-bindgen", ScriptedPlugin)
     publishLocal := publishLocal.dependsOn(tools / publishLocal).value
   )
 
-lazy val docs = project("docs")
+lazy val docs = nativeProject("docs")
   .enablePlugins(GhpagesPlugin, ParadoxSitePlugin, ParadoxMaterialThemePlugin)
-  .enablePlugins(ScalaNativePlugin, ScalaNativeBindgenPlugin)
+  .enablePlugins(ScalaNativeBindgenPlugin)
   .settings(
     publish / skip := true,
-    scalaVersion := Versions.scala211,
     Test / nativeBindings += {
       NativeBinding((Test / resourceDirectory).value / "vector.h")
         .name("vector")
@@ -158,7 +154,6 @@ lazy val docs = project("docs")
         (ThisBuild / baseDirectory).value / "bindgen/target/scala-native-bindgen")
     },
     Test / nativeBindgen / target := (Test / scalaSource).value / "org/example",
-    nativeLinkStubs := true,
     compileTask("vector", Test / resourceDirectory),
     libraryDependencies += "org.scalatest" %%% "scalatest" % "3.2.0-SNAP10" % Test,
     Paradox / paradoxProperties ++= Map(
@@ -234,6 +229,15 @@ def project(name: String, plugged: AutoPlugin*) = {
     )
 }
 
+def nativeProject(name: String) = {
+  project(name)
+    .enablePlugins(ScalaNativePlugin)
+    .settings(
+      scalaVersion := Versions.scala211,
+      nativeLinkStubs := true
+    )
+}
+
 def compileTask(libname: String, srcDirTask: SettingKey[File]) = Def.settings(
   Test / nativeLinkingOptions += {
     Seq("-L", (Test / target).value.getAbsoluteFile / "bindgen").mkString
@@ -292,12 +296,10 @@ lazy val bindingsExtraArgs = Try {
 }.toOption
 
 def bindingProject(name: String) = {
-  project(s"lib$name")
-    .enablePlugins(ScalaNativePlugin, ScalaNativeBindgenPlugin)
+  nativeProject(s"lib$name")
+    .enablePlugins(ScalaNativeBindgenPlugin)
     .in(file(s"bindings/$name"))
     .settings(
-      scalaVersion := Versions.scala211,
-      nativeLinkStubs := true,
       libraryDependencies += "org.scalatest" %%% "scalatest" % "3.2.0-SNAP10" % Test,
       Compile / nativeBindgen / target :=
         (Compile / scalaSource).value / "org/scalanative/bindgen/bindings" / name
