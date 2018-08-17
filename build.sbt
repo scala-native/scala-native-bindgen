@@ -74,7 +74,9 @@ val root = project("scala-native-bindgen")
         releaseStepCommandAndRemaining("verify"),
         setReleaseVersion,
         tagRelease,
-        releaseStepCommandAndRemaining("^publish"),
+        releaseStepCommandAndRemaining("+bindings/publish"),
+        releaseStepCommandAndRemaining("+tools/publish"),
+        releaseStepCommandAndRemaining("^sbt-scala-native-bindgen/publish"),
         pushChanges,
         releaseStepTask(docs / ghpagesPushSite)
       )
@@ -112,6 +114,11 @@ lazy val samples = project("samples")
   )
 
 lazy val tools = project("tools")
+  .settings(
+    crossScalaVersions := List(Versions.scala210,
+                               Versions.scala211,
+                               Versions.scala212)
+  )
 
 lazy val sbtPlugin = project("sbt-scala-native-bindgen", ScriptedPlugin)
   .dependsOn(tools)
@@ -170,7 +177,8 @@ lazy val docs = project("docs")
 
 lazy val bindings = project("bindings")
   .settings(
-    publish / skip := false
+    publish / skip := true,
+    scalaVersion := Versions.scala211
   )
   .aggregate(
     libiconv,
