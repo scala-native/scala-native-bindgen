@@ -12,7 +12,7 @@ class RegexSpec extends FunSpec {
       val reg = stackalloc[regex_t]
 
       val compResult =
-        regcomp(reg, c"Scala \\(\\(J\\(VM\\|S\\)\\)\\|Native\\)", 0)
+        regcomp(reg, c"Scala \(J\(S\|VM\)\|Native\)", defines.REG_EXTENDED)
       assert(compResult == 0)
 
       assert(regexec(reg, c"Scala JVM", 0, null, 0) == 0)
