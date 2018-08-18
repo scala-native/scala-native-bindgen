@@ -5,16 +5,13 @@ Building `scala-native-bindgen` requires the following tools and libraries:
  - [CMake] version 3.9 or higher
  - [GNU Make]
  - [LLVM] and [Clang] version 5.0 or 6.0.
- - [nlohmann/json] version 3.1.2 or higher
 
 ```sh
 # On apt-based systems
-apt install cmake make clang-6.0 libclang-6.0-dev llvm-6.0-dev \
-            nlohmann-json-dev
+apt install cmake make clang-6.0 libclang-6.0-dev llvm-6.0-dev
 
 # With `brew`
-brew tap nlohmann/json
-brew install cmake llvm@6 nlohmann_json
+brew install cmake llvm@6
 ```
 
 To run the tests you also need the required Scala Native libraries.
@@ -47,4 +44,3 @@ CXXFLAGS=-g cmake ..
  [LLVM]: https://llvm.org/
  [Clang]: https://clang.llvm.org/
  [Scala Native setup guide]: http://www.scala-native.org/en/latest/user/setup.html
- [nlohmann/json]: https://github.com/nlohmann/json

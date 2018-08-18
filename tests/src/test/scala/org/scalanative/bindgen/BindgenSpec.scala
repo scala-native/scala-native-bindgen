@@ -24,7 +24,7 @@ class BindgenSpec extends FunSpec {
       it(s"should generate bindings for ${input.getName}") {
         val testName = input.getName.replace(".h", "")
         val expected = new File(inputDirectory, testName + ".scala")
-        val config   = new File(inputDirectory, testName + ".json")
+        val config   = new File(inputDirectory, testName + ".yml")
         var options = BindingOptions(input)
           .name(testName)
           .link("bindgentests")

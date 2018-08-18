@@ -28,7 +28,7 @@ When the exclude prefix is set to `__`, then the resulting bindings will be:
 
 ## Binding Configuration File
 
-The binding configuration is a JSON file which allows to map the path of
+The binding configuration is a YAML file which allows to map the path of
 a header file to the associated object as well as the names of the C
 types and symbols to their respective Scala types and definitions. The
 configuration file can be used when integrating with third party
@@ -50,7 +50,7 @@ If you need to generate bindings that uses types from bindings that have not bee
 
 To use this binding, create a configuration file with the folllowing content, where `path` is the name of the header file (usually the part of the path inside the `/usr/include` or `/usr/local/include` directory), `object` is the fully qualified name of the Scala object (i.e. package name as well as the Scala object name) and finally `names` for each of the types:
 
-@@snip [vector.h] (../test/resources/3rd-party-bindings/config.json)
+@@snip [vector.h] (../test/resources/3rd-party-bindings/config.yml)
 
 Now in the library you are creating a binding for, any usage of `struct point`:
 
@@ -71,7 +71,7 @@ from `<stdio.h>`:
 
 We can then write a binding configuration that maps the header name to the object defined in Scala Native.
 
-@@snip [vector.h] (../test/resources/scala-native-bindings/config.json)
+@@snip [vector.h] (../test/resources/scala-native-bindings/config.yml)
 
 @@@ note
 
