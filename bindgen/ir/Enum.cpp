@@ -1,4 +1,5 @@
 #include "Enum.h"
+#include <sstream>
 
 Enumerator::Enumerator(std::string name, int64_t value)
     : name(std::move(name)), value(value) {}

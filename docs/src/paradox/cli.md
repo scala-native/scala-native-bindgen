@@ -45,11 +45,11 @@ The generated bindings can be configured using the different options and it is a
 
 | Option               | Description
 |----------------------|---------------------------------------------------------------------------------|
-| `--link`             | Library to link with, e.g. `--link` uv for libuv.
+| `--link`             | Library to link with, e.g. `--link uv` for libuv.
 | `--no-link`          | Library does not require linking.
-| `--name`             | Scala object name that contains bindings. Default value set to library name.
+| `--name`             | Scala object name that contains bindings. Defaults to the library name.
 | `--package`          | Package name of generated Scala file.
-| `--exclude-prefix`   | Functions and unused typedefs will be removed if their names have given prefix.
-| `--binding-config`   | Path to a config file that contains the information about bindings that should be reused. See @ref:[Integrating Bindings](integrating-bindings.md) for more information.
+| `--exclude-prefix`   | Functions and unused typedefs will be removed if their names have the given prefix.
+| `--binding-config`   | Path to a config file that contains the information about bindings that should be reused. See @ref:[Configuration](configuration.md) for more information.
 | `--extra-arg`        | Additional argument to append to the compiler command line.
 | `--extra-arg-before` | Additional argument to prepend to the compiler command line.

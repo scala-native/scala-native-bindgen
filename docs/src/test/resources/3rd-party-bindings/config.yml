@@ -1,0 +1,9 @@
+---
+ - path: vector.h
+   object: com.example.custom.binding.Vector
+   names:
+     # Short-hand name mapping
+     - struct point: Point
+     # Full name mapping
+     - original: struct lineSegment
+       target: LineSegment

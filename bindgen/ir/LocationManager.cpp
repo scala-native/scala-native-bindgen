@@ -1,94 +1,55 @@
 #include "LocationManager.h"
 #include "../Utils.h"
-#include "Enum.h"
-#include "Struct.h"
-#include <fstream>
-#include <stdexcept>
+#include <llvm/Support/MemoryBuffer.h>
+#include <llvm/Support/YAMLTraits.h>
+
+template <> struct llvm::yaml::MappingTraits<HeaderEntry> {
+    static void mapping(llvm::yaml::IO &io, HeaderEntry &headerEntry) {
+        io.mapRequired("path", headerEntry.path);
+        io.mapRequired("object", headerEntry.object);
+        io.mapOptional("names", headerEntry.names);
+    }
+};
+
+template <> struct llvm::yaml::MappingTraits<HeaderEntryName> {
+    static void mapping(llvm::yaml::IO &io, HeaderEntryName &headerEntryName) {
+        // Dynamically look up the available keys when only one key is given.
+        //
+        // ```yaml
+        //  - struct point: Point
+        // ```
+        if (io.keys().size() == 1) {
+            for (auto key : io.keys()) {
+                headerEntryName.original = key;
+                io.mapRequired(headerEntryName.original.c_str(),
+                               headerEntryName.target);
+            }
+        } else {
+            io.mapRequired("original", headerEntryName.original);
+            io.mapRequired("target", headerEntryName.target);
+        }
+    }
+};
+
+LLVM_YAML_IS_SEQUENCE_VECTOR(HeaderEntry)
+LLVM_YAML_IS_SEQUENCE_VECTOR(HeaderEntryName)
 
 LocationManager::LocationManager(std::string mainHeaderPath)
-    : mainHeaderPath(std::move(mainHeaderPath)) {}
+    : headerEntries(), mainHeaderPath(std::move(mainHeaderPath)) {}
 
-void LocationManager::loadConfig(const std::string &path) {
-    std::string realPath = getRealPath(path.c_str());
+bool LocationManager::loadConfig(const std::string &path) {
+    llvm::SmallString<4096> realPath;
+    if (llvm::sys::fs::real_path(path, realPath))
+        return false;
 
-    std::stringstream s;
-    std::ifstream input(realPath);
-    for (std::string line; getline(input, line);) {
-        s << line;
-    }
-    config = json::parse(s.str());
-    validateConfig(config);
-}
+    llvm::ErrorOr<std::unique_ptr<llvm::MemoryBuffer>> mb =
+        llvm::MemoryBuffer::getFile(realPath);
+    if (!mb)
+        return false;
 
-void LocationManager::validateConfig(const json &config) const {
-    if (!config.is_object()) {
-        throw std::invalid_argument(
-            "Invalid configuration. Configuration should be an object.");
-    }
-    for (auto it = config.begin(); it != config.end(); ++it) {
-        std::string headerName = it.key();
-        if (headerName.empty()) {
-            throw std::invalid_argument("Invalid configuration. Header name "
-                                        "should not be an empty string.");
-        }
-        json headerEntry = it.value();
-        validateHeaderEntry(headerEntry);
-    }
-}
-
-void LocationManager::validateHeaderEntry(const json &headerEntry) const {
-    if (headerEntry.is_string()) {
-        std::string object = headerEntry.get<std::string>();
-        if (object.empty()) {
-            throw std::invalid_argument("Invalid configuration. Each header "
-                                        "entry should contain non-empty "
-                                        "value.");
-        }
-    } else if (headerEntry.is_object()) {
-        std::unordered_set<std::string> headerKeys = {"object", "names"};
-        validateKeys(headerEntry, headerKeys);
-        if (headerEntry.find("object") == headerEntry.end()) {
-            throw std::invalid_argument("Invalid configuration. Header entry "
-                                        "that is represented as an object "
-                                        "should contain 'object' property.");
-        }
-        json object = headerEntry["object"];
-        if (!object.is_string() || object.get<std::string>().empty()) {
-            throw std::invalid_argument("Invalid configuration. 'object' "
-                                        "property should be a not empty "
-                                        "string.");
-        }
-        if (headerEntry.find("name") != headerEntry.end()) {
-            validateNames(headerEntry["names"]);
-        }
-    } else {
-        throw std::invalid_argument("Invalid configuration. Header entry "
-                                    "should be a string or an object.");
-    }
-}
-
-void LocationManager::validateKeys(
-    const json &object, const std::unordered_set<std::string> &keys) const {
-    for (auto it = object.begin(); it != object.end(); ++it) {
-        if (keys.find(it.key()) == keys.end()) {
-            throw std::invalid_argument(
-                "Invalid configuration. Unknown key: '" + it.key() + "'.");
-        }
-    }
-}
-
-void LocationManager::validateNames(const json &names) const {
-    if (!names.is_object()) {
-        throw std::invalid_argument("Invalid configuration. Library property "
-                                    "'names' should be an object.");
-    }
-    for (auto it = names.begin(); it != names.end(); ++it) {
-        if (!it.value().is_string()) {
-            throw std::invalid_argument(
-                "Invalid configuration. property 'names'"
-                " should contain only string values.");
-        }
-    }
+    llvm::yaml::Input input(mb->get()->getBuffer());
+    input >> headerEntries;
+    return true;
 }
 
 bool LocationManager::inMainFile(const Location &location) const {
@@ -99,40 +60,36 @@ bool LocationManager::isImported(const Location &location) const {
     if (location.getPath().empty()) {
         return false;
     }
-    json headerEntry = getHeaderEntry(location);
-    return !headerEntry.empty();
+    return getHeaderEntryIndex(location) != headerEntries.size();
 }
 
-json LocationManager::getHeaderEntry(const Location &location) const {
-    for (auto it = config.begin(); it != config.end(); ++it) {
-        std::string pathToHeader = it.key();
-        if (startsWith(pathToHeader, "/")) {
-            /* full path */
-            if (location.getPath() == pathToHeader) {
-                return it.value();
-            }
-        } else if (endsWith(location.getPath(), "/" + pathToHeader)) {
-            return it.value();
-        }
-    }
-    return json::object();
+std::vector<HeaderEntry>::size_type
+LocationManager::getHeaderEntryIndex(const Location &location) const {
+    auto isHeader = [&](const HeaderEntry &headerEntry) {
+        if (startsWith(headerEntry.path, "/") &&
+            location.getPath() == headerEntry.path)
+            return true;
+        return endsWith(location.getPath(), "/" + headerEntry.path);
+    };
+    auto it =
+        std::find_if(headerEntries.begin(), headerEntries.end(), isHeader);
+    return it - headerEntries.begin();
 }
 
 std::string LocationManager::getImportedType(const Location &location,
                                              const std::string &name) const {
-    json headerEntry = getHeaderEntry(location);
-    if (headerEntry.is_string()) {
-        return headerEntry.get<std::string>() + "." +
-               handleReservedWords(replaceChar(name, " ", "_"));
-    }
-    std::string scalaObject = headerEntry["object"];
+    auto index = getHeaderEntryIndex(location);
+    if (index == headerEntries.size())
+        return name;
 
-    if (headerEntry.find("names") != headerEntry.end()) {
-        /* name mapping */
-        json names = headerEntry["names"];
-        if (names.find(name) != names.end()) {
-            return scalaObject + "." + names[name].get<std::string>();
+    auto headerEntry = headerEntries[index];
+
+    for (auto const &headerEntryName : headerEntry.names) {
+        if (headerEntryName.original == name) {
+            return headerEntry.object + "." + headerEntryName.target;
         }
     }
-    return scalaObject + "." + handleReservedWords(replaceChar(name, " ", "_"));
+
+    return headerEntry.object + "." +
+           handleReservedWords(replaceChar(name, " ", "_"));
 }

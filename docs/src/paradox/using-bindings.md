@@ -1,23 +1,30 @@
-# Using Generated Bindings
+# Using Bindings
+
+The following will explain
+
+## A Simple Vector Library
 
 Consider following header file:
 
-@@snip [vector.h] (../test/resources/vector.h)
+@@snip [vector.h] (../test/resources/using-bindings/vector.h)
 
 Bindgen will output
+
  * type aliases for the structs
  * binding for function `cosine`
  * helper functions that make usage of structs easier
 
 @@snip [vector.h] (../test/scala/org/example/vector.scala)
 
-Let's write code that creates two line segments and prints angel between them.
+## Using the Vector Library
+
+Let's write code that creates two line segments and calculates the angel between them.
 
 First we need to create points. We will use `native.Zone` to
 allocate struct (more information on memory management can be found
 here: [Scala Native memory management]).
 
-Generated bindings contain helper functions that make struct allocation easier.
+The generated bindings contain helper functions that make struct allocation easier.
 To import them use `import org.example.vector._`
 
 Let's create two points and the first line segment:
@@ -39,17 +46,13 @@ to your code:
 
 @@@ note
 
-Note that `struct_lineSegment` contains fields of value type `struct_point`
+`struct_lineSegment` contains fields of value type `struct_point`
 but setters accept variables of type `native.Ptr[struct_point]`.
-It helps to avoid Scala Native limitation that does not allow passing structs
+The reason for this is that Scala Native does not allow passing structs
 and arrays by value (see @github[scala-native/scala-native#555](scala-native/scala-native#555)).
 
 @@@
 
-Now we can calculate angel between line segments:
+Now we can calculate the angel between the line segments:
 
-@@snip [step-3] (../test/scala/org/scalanative/bindgen/docs/VectorSpec.scala) { #step-2 }
-
-
- [Scala Native memory management]: http://www.scala-native.org/en/latest/user/interop.html#memory-management
- [Scala Native memory layout types]: http://www.scala-native.org/en/latest/user/interop.html#memory-layout-types
+@@snip [step-3] (../test/scala/org/scalanative/bindgen/docs/VectorSpec.scala) { #step-3 }

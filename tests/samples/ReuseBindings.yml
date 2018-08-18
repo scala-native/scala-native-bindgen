@@ -1,0 +1,12 @@
+---
+ - path: Struct.h
+   object: org.scalanative.bindgen.samples.Struct
+ - path: CustomNames.h
+   object: org.scalanative.bindgen.samples.CustomNames
+   names:
+     - struct book: book
+     - struct page: page
+     - union weight: weight
+     - myInt: MY_INT
+     - original: enumWithTypedef
+       target: EnumWithTypedef
