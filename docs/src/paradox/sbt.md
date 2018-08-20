@@ -28,6 +28,6 @@ Given that the `stdlib.h` header file contains:
 
 @@snip [sbt] (../../../sbt-scala-native-bindgen/src/sbt-test/bindgen/generate/src/main/resources/stdlib.h)
 
-Running `nativeBindgen` will generate a file named `target/scala-2.11/src_managed/main/sbt-scala-native-bindgen/stdlib.scala` containing something along the following lines:
+Running `nativeBindgen` will generate a file named `target/scala-2.11/src_managed/main/sbt-scala-native-bindgen/stdlib.scala` containing the following lines:
 
 @@snip [sbt] (../../../sbt-scala-native-bindgen/src/sbt-test/bindgen/generate/expected/stdlib.scala)

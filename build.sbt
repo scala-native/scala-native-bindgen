@@ -138,23 +138,50 @@ lazy val sbtPlugin = project("sbt-scala-native-bindgen", ScriptedPlugin)
     publishLocal := publishLocal.dependsOn(tools / publishLocal).value
   )
 
+lazy val docsUsingBindingsDirectory       = settingKey[File]("vector source")
+lazy val docs3rdPartyBindingsDirectory    = settingKey[File]("geometry source")
+lazy val docsScalaNativeBindingsDirectory = settingKey[File]("wordcount source")
+
 lazy val docs = nativeProject("docs")
   .enablePlugins(GhpagesPlugin, ParadoxSitePlugin, ParadoxMaterialThemePlugin)
   .enablePlugins(ScalaNativeBindgenPlugin)
   .settings(
     publish / skip := true,
-    Test / nativeBindings += {
-      NativeBinding((Test / resourceDirectory).value / "vector.h")
+    docsUsingBindingsDirectory := (Test / resourceDirectory).value / "using-bindings",
+    docs3rdPartyBindingsDirectory := (Test / resourceDirectory).value / "3rd-party-bindings",
+    docsScalaNativeBindingsDirectory := (Test / resourceDirectory).value / "scala-native-bindings",
+    Test / nativeBindings ++= Seq(
+      NativeBinding(docsUsingBindingsDirectory.value / "vector.h")
         .name("vector")
         .link("vector")
-        .packageName("org.example")
-    },
+        .packageName("org.example"),
+      NativeBinding(docs3rdPartyBindingsDirectory.value / "geometry.h")
+        .name("Geometry")
+        .link("geometry")
+        .packageName("org.example.geometry")
+        .bindingConfig(docs3rdPartyBindingsDirectory.value / "config.yml"), {
+        val pathToHeader = docsScalaNativeBindingsDirectory.value / "wordcount.h"
+        val pathToConfig = docsScalaNativeBindingsDirectory.value / "config.yml"
+        //#sbt-binding-config
+        NativeBinding(pathToHeader)
+        //#sbt-binding-config
+          .name("WordCount")
+          .link("wordcount")
+          .packageName("org.example.wordcount")
+          .excludePrefix("__")
+          //#sbt-binding-config
+          .bindingConfig(pathToConfig)
+        //#sbt-binding-config
+      }
+    ),
     nativeBindgenPath := {
       Some(
         (ThisBuild / baseDirectory).value / "bindgen/target/scala-native-bindgen")
     },
     Test / nativeBindgen / target := (Test / scalaSource).value / "org/example",
-    compileTask("vector", Test / resourceDirectory),
+    compileTask("vector", docsUsingBindingsDirectory),
+    compileTask("geometry", docs3rdPartyBindingsDirectory),
+    compileTask("wordcount", docsScalaNativeBindingsDirectory),
     libraryDependencies += "org.scalatest" %%% "scalatest" % "3.2.0-SNAP10" % Test,
     Paradox / paradoxProperties ++= Map(
       "github.base_url" -> scmInfo.value.get.browseUrl.toString

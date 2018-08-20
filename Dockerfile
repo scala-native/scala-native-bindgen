@@ -14,7 +14,6 @@ RUN set -x \
             g++ openjdk-8-jdk-headless sbt cmake make curl git \
             zlib1g-dev \
             libgc-dev libunwind8-dev libre2-dev \
-            nlohmann-json-dev \
  && rm -rf /var/lib/apt/lists/*
 
 ARG LOCALE=en_US.UTF-8
