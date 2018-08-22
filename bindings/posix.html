@@ -166,7 +166,7 @@ kornilova-l/scala-native-bindgen
 </nav>
 
 <div class="md-nav__title--site md-version" title="Version">
-<i class="md-icon">label_outline</i> 0.3.0-RC2
+<i class="md-icon">label_outline</i> 0.3.0-RC2-8-gfad5595*
 </div>
 </nav>
 
@@ -193,12 +193,12 @@ kornilova-l/scala-native-bindgen
 <article class="md-content__inner md-typeset">
 <div class="md-content__searchable">
 <h1><a href="#posix" name="posix" class="anchor"><span class="anchor-link"></span></a>POSIX</h1>
-<p>An addition to Scala Native&rsquo;s <a href="http://www.scala-native.org/en/latest/lib/posixlib.html">POSIX</a> bindings. To use one of the POSIX bindings you must add it as a dependency:</p><dl class="dependency"><dt>sbt</dt><dd><pre class="prettyprint"><code class="language-scala">libraryDependencies += "org.scala-native.bindgen" %% "libposix" % "0.3.0-RC2"</code></pre></dd><dt>Maven</dt><dd><pre class="prettyprint"><code class="language-xml">&lt;dependency&gt;
+<p>An addition to Scala Native&rsquo;s <a href="http://www.scala-native.org/en/latest/lib/posixlib.html">POSIX</a> bindings. To use one of the POSIX bindings you must add it as a dependency:</p><dl class="dependency"><dt>sbt</dt><dd><pre class="prettyprint"><code class="language-scala">libraryDependencies += "org.scala-native.bindgen" %% "libposix" % "0.3.0-RC2-8-gfad5595-SNAPSHOT"</code></pre></dd><dt>Maven</dt><dd><pre class="prettyprint"><code class="language-xml">&lt;dependency&gt;
   &lt;groupId&gt;org.scala-native.bindgen&lt;/groupId&gt;
   &lt;artifactId&gt;libposix_2.11&lt;/artifactId&gt;
-  &lt;version&gt;0.3.0-RC2&lt;/version&gt;
+  &lt;version&gt;0.3.0-RC2-8-gfad5595-SNAPSHOT&lt;/version&gt;
 &lt;/dependency&gt;</code></pre></dd><dt>Gradle</dt><dd><pre class="prettyprint"><code class="language-gradle">dependencies {
-  compile group: 'org.scala-native.bindgen', name: 'libposix_2.11', version: '0.3.0-RC2'
+  compile group: 'org.scala-native.bindgen', name: 'libposix_2.11', version: '0.3.0-RC2-8-gfad5595-SNAPSHOT'
 }</code></pre></dd></dl>
 <p>Binding objects are available under the package name `</p>
 <table>
@@ -235,7 +235,7 @@ import org.scalanative.bindgen.bindings.posix.regex._
 val reg = stackalloc[regex_t]
 
 val compResult =
-  regcomp(reg, c&quot;Scala \\(\\(J\\(VM\\|S\\)\\)\\|Native\\)&quot;, 0)
+  regcomp(reg, c&quot;Scala \(J\(S\|VM\)\|Native\)&quot;, defines.REG_EXTENDED)
 assert(compResult == 0)
 
 assert(regexec(reg, c&quot;Scala JVM&quot;, 0, null, 0) == 0)
@@ -252,7 +252,7 @@ Edit this page
 </div>
 <div class="print-only">
 <span class="md-source-file md-version">
-0.3.0-RC2
+0.3.0-RC2-8-gfad5595*
 </span>
 </div>
 </article>

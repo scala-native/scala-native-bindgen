@@ -159,7 +159,7 @@ kornilova-l/scala-native-bindgen
 </nav>
 
 <div class="md-nav__title--site md-version" title="Version">
-<i class="md-icon">label_outline</i> 0.3.0-RC2
+<i class="md-icon">label_outline</i> 0.3.0-RC2-8-gfad5595*
 </div>
 </nav>
 
@@ -176,13 +176,13 @@ kornilova-l/scala-native-bindgen
     float y;
 };
 
-struct vector {
+struct lineSegment {
     struct point a;
     struct point b;
 };
 
-struct vector *add(struct vector *v1, struct vector *v2);</code></pre>
-<p>Bindgen will generate type aliases for the structs, binding for function <code>add</code> and helper functions that make usage of structs easier.</p>
+float cosine(struct lineSegment *v1, struct lineSegment *v2);</code></pre>
+<p>Bindgen will output  * type aliases for the structs  * binding for function <code>cosine</code>  * helper functions that make usage of structs easier</p>
 <pre class="prettyprint"><code class="language-scala">package org.example
 
 import scala.scalanative._
@@ -192,8 +192,8 @@ import scala.scalanative.native._
 @native.extern
 object vector {
   type struct_point = native.CStruct2[native.CFloat, native.CFloat]
-  type struct_vector = native.CStruct2[struct_point, struct_point]
-  def add(v1: native.Ptr[struct_vector], v2: native.Ptr[struct_vector]): native.Ptr[struct_vector] = native.extern
+  type struct_lineSegment = native.CStruct2[struct_point, struct_point]
+  def cosine(v1: native.Ptr[struct_lineSegment], v2: native.Ptr[struct_lineSegment]): native.CFloat = native.extern
 
   object implicits {
     implicit class struct_point_ops(val p: native.Ptr[struct_point]) extends AnyVal {
@@ -202,43 +202,69 @@ object vector {
       def y: native.CFloat = !p._2
       def y_=(value: native.CFloat): Unit = !p._2 = value
     }
-    def struct_point()(implicit z: native.Zone): native.Ptr[struct_point] = native.alloc[struct_point]
 
-    implicit class struct_vector_ops(val p: native.Ptr[struct_vector]) extends AnyVal {
+    implicit class struct_lineSegment_ops(val p: native.Ptr[struct_lineSegment]) extends AnyVal {
       def a: native.Ptr[struct_point] = p._1
       def a_=(value: native.Ptr[struct_point]): Unit = !p._1 = !value
       def b: native.Ptr[struct_point] = p._2
       def b_=(value: native.Ptr[struct_point]): Unit = !p._2 = !value
     }
-    def struct_vector()(implicit z: native.Zone): native.Ptr[struct_vector] = native.alloc[struct_vector]
+  }
+
+  object struct_point {
+    import implicits._
+    def apply()(implicit z: native.Zone): native.Ptr[struct_point] = native.alloc[struct_point]
+    def apply(x: native.CFloat, y: native.CFloat)(implicit z: native.Zone): native.Ptr[struct_point] = {
+      val ptr = native.alloc[struct_point]
+      ptr.x = x
+      ptr.y = y
+      ptr
+    }
+  }
+
+  object struct_lineSegment {
+    import implicits._
+    def apply()(implicit z: native.Zone): native.Ptr[struct_lineSegment] = native.alloc[struct_lineSegment]
+    def apply(a: native.Ptr[struct_point], b: native.Ptr[struct_point])(implicit z: native.Zone): native.Ptr[struct_lineSegment] = {
+      val ptr = native.alloc[struct_lineSegment]
+      ptr.a = a
+      ptr.b = b
+      ptr
+    }
   }
 }</code></pre>
-<p>Let&rsquo;s write code that creates two vectors, adds them and prints resulting vector.</p>
-<p>First we need to create points for vectors. We will use <code>native.Zone</code> to allocate struct (more information on memory management can be found here: <a href="http://www.scala-native.org/en/latest/user/interop.html#memory-management">Scala Native memory management</a>).</p>
-<p>Helper object <code>mylibHelpers</code> contains function for struct allocation. To import it use <code>import mylibHelpers._</code></p>
-<p>Let&rsquo;s create points for first vector:</p>
-<pre class="prettyprint"><code class="language-scala">import scala.scalanative.native.Zone
-import org.example.vector
-import org.example.vector.implicits._
+<p>Let&rsquo;s write code that creates two line segments and prints angel between them.</p>
+<p>First we need to create points. We will use <code>native.Zone</code> to allocate struct (more information on memory management can be found here: <a href="http://www.scala-native.org/en/latest/user/interop.html#memory-management">Scala Native memory management</a>).</p>
+<p>Generated bindings contain helper functions that make struct allocation easier. To import them use <code>import org.example.vector._</code></p>
+<p>Let&rsquo;s create two points and the first line segment:</p>
+<pre class="prettyprint"><code class="language-scala">import org.example.vector._
+import scala.scalanative.native.Zone
 
 Zone { implicit zone =&gt;
-  val vec1p1 = struct_point()
-  val vec1p2 = struct_point()
-}</code></pre>
-<p>Now we want to set fields of created points. Scala Native provides access to fields by using <code>_N</code> methods where <code>N</code> is index of a field (see <a href="http://www.scala-native.org/en/latest/user/interop.html#memory-layout-types">Scala Native memory layout types</a>).</p>
-<p>Bindgen generates implicit helper classes that wrap calls to <code>_N</code> in functions with meaningful names. We already imported helper class, so we can use the functions:</p>
-<pre class="prettyprint"><code class="language-scala">vec1p1.x = 0
-vec1p1.y = 1
+  val p1 = struct_point(1, 1)
+  val p2 = struct_point(7, 4)
 
-vec1p2.x = 6
-vec1p2.y = 3</code></pre>
-<p>Lets create first vector. Note that <code>struct_vector</code> contains fields of type <code>struct_point</code> but setters accept variables of type <code>native.Ptr[struct_point]</code>. It helps to avoid Scala Native limitation that does not allow passing structs and arrays by value (see <a href="https://github.com/scala-native/scala-native/issues/555">scala-native/scala-native#555</a>).</p>
-<pre class="prettyprint"><code class="language-scala">val vec1 = struct_vector()
-vec1.a = vec1p1
-vec1.b = vec1p2</code></pre>
-<p>Repeat these steps to create second vector. Once both vectors are created we can call <code>add</code> function and print the result:</p>
-<pre class="prettyprint"><code class="language-scala">val vec3 = vector.add(vec1, vec2)
-println(s&quot;(${vec3.a.x}, ${vec3.a.y}), (${vec3.b.x}, ${vec3.b.y})&quot;)</code></pre>
+  val lineSegment1 = struct_lineSegment(p1, p2)
+}</code></pre>
+<p>There is no need to create points manually, just call <code>struct_lineSegment</code> constructor and set point coordinates using fields setters.</p>
+<p>Scala Native allows us to access a field by using <code>_N</code> method where <code>N</code> is index of a field (see <a href="http://www.scala-native.org/en/latest/user/interop.html#memory-layout-types">Scala Native memory layout types</a>) but it is not convenient because we have to match indices with fields names.</p>
+<p>Bindgen provides implicit helper classes that wrap calls to <code>_N</code> in functions with meaningful names. To import these classes add <code>import org.example.vector.implicits._</code> to your code:</p>
+<pre class="prettyprint"><code class="language-scala">import org.example.vector.implicits._
+
+val lineSegment2 = struct_lineSegment()
+
+lineSegment2.a.x = 3
+lineSegment2.a.y = 4
+lineSegment2.b = struct_point(5, 0)</code></pre><div class="callout note "><div class="callout-title">Note</div>
+<p>Note that <code>struct_lineSegment</code> contains fields of value type <code>struct_point</code> but setters accept variables of type <code>native.Ptr[struct_point]</code>. It helps to avoid Scala Native limitation that does not allow passing structs and arrays by value (see <a href="https://github.com/scala-native/scala-native/issues/555">scala-native/scala-native#555</a>).</p></div>
+<p>Now we can calculate angel between line segments:</p>
+<pre class="prettyprint"><code class="language-scala">import org.example.vector.implicits._
+
+val lineSegment2 = struct_lineSegment()
+
+lineSegment2.a.x = 3
+lineSegment2.a.y = 4
+lineSegment2.b = struct_point(5, 0)</code></pre>
 </div>
 <div>
 <a href="https://github.com/kornilova-l/scala-native-bindgen/tree/master/docs/src/paradox/using-generated-bindings.md" title="Edit this page" class="md-source-file md-edit">
@@ -247,7 +273,7 @@ Edit this page
 </div>
 <div class="print-only">
 <span class="md-source-file md-version">
-0.3.0-RC2
+0.3.0-RC2-8-gfad5595*
 </span>
 </div>
 </article>
