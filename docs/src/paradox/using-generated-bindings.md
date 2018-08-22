@@ -48,7 +48,7 @@ and arrays by value (see @github[scala-native/scala-native#555](scala-native/sca
 
 Now we can calculate angel between line segments:
 
-@@snip [step-3] (../test/scala/org/scalanative/bindgen/docs/VectorSpec.scala) { #step-2 }
+@@snip [step-3] (../test/scala/org/scalanative/bindgen/docs/VectorSpec.scala) { #step-3 }
 
 
  [Scala Native memory management]: http://www.scala-native.org/en/latest/user/interop.html#memory-management
