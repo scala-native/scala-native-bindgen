@@ -258,13 +258,7 @@ lineSegment2.a.y = 4
 lineSegment2.b = struct_point(5, 0)</code></pre><div class="callout note "><div class="callout-title">Note</div>
 <p>Note that <code>struct_lineSegment</code> contains fields of value type <code>struct_point</code> but setters accept variables of type <code>native.Ptr[struct_point]</code>. It helps to avoid Scala Native limitation that does not allow passing structs and arrays by value (see <a href="https://github.com/scala-native/scala-native/issues/555">scala-native/scala-native#555</a>).</p></div>
 <p>Now we can calculate angel between line segments:</p>
-<pre class="prettyprint"><code class="language-scala">import org.example.vector.implicits._
-
-val lineSegment2 = struct_lineSegment()
-
-lineSegment2.a.x = 3
-lineSegment2.a.y = 4
-lineSegment2.b = struct_point(5, 0)</code></pre>
+<pre class="prettyprint"><code class="language-scala">println(cosine(lineSegment1, lineSegment2))</code></pre>
 </div>
 <div>
 <a href="https://github.com/kornilova-l/scala-native-bindgen/tree/master/docs/src/paradox/using-generated-bindings.md" title="Edit this page" class="md-source-file md-edit">
