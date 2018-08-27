@@ -24,7 +24,7 @@
         <dependency>
             <groupId>org.scala-native.bindgen</groupId>
             <artifactId>libiconv_2.11</artifactId>
-            <version>$project.version$</version>
+            <version>@var[project.version]</version>
         </dependency>
         <!-- #libiconv -->
         <!-- #libposix -->
