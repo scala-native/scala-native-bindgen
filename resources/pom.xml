@@ -6,14 +6,14 @@
 
     <artifactId>maven-scala-test</artifactId>
 
+    <!-- #library_resolver -->
     <repositories>
-        <!-- #library_resolver -->
         <repository>
             <id>maven</id>
             <url>http://dl.bintray.com/scala-native-bindgen/maven</url>
         </repository>
-        <!-- #library_resolver -->
     </repositories>
+    <!-- #library_resolver -->
 
     <dependencies>
         <dependency>
