@@ -1,0 +1,7 @@
+// #library_resolver
+repositories {
+    maven {
+        url "https://dl.bintray.com/scala-native-bindgen/maven"
+    }
+}
+// #library_resolver
