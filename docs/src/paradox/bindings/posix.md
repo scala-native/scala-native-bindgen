@@ -3,13 +3,13 @@
 An addition to Scala Native's [POSIX](http://www.scala-native.org/en/latest/lib/posixlib.html) bindings. To use one of the POSIX bindings you must add the resolver and the dependency:
 
 sbt
-:   @@snip [build.sbt](../resources/build.sbt) { #library_resolver }
+:   @@snip [build.sbt](../resources/build.sbt)
 
 Maven
 :   @@snip [pom.xml](../resources/pom.xml) { #library_resolver }
 
 Gradle
-:   @@snip [build.gradle](../resources/build.gradle) { #library_resolver }
+:   @@snip [build.gradle](../resources/build.gradle)
 
 
 @@dependency[sbt,Maven,Gradle] {

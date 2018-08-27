@@ -3,13 +3,13 @@
 To use this binding add the following resolver and the dependency:
 
 sbt
-:   @@snip [build.sbt](../resources/build.sbt) { #library_resolver }
+:   @@snip [build.sbt](../resources/build.sbt)
 
 Maven
 :   @@snip [pom.xml](../resources/pom.xml) { #library_resolver }
 
 Gradle
-:   @@snip [build.gradle](../resources/build.gradle) { #library_resolver }
+:   @@snip [build.gradle](../resources/build.gradle)
 
 @@dependency[sbt,Maven,Gradle] {
   group="org.scala-native.bindgen"
