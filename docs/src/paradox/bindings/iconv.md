@@ -1,6 +1,15 @@
 # Iconv - Character set conversion
 
-To use this binding add the following dependency:
+To use this binding add the following resolver and the dependency:
+
+sbt
+:   @@snip [build.sbt](../resources/build.sbt) { #library_resolver }
+
+Maven
+:   @@snip [pom.xml](../resources/pom.xml) { #library_resolver }
+
+Gradle
+:   @@snip [build.gradle](../resources/build.gradle) { #library_resolver }
 
 @@dependency[sbt,Maven,Gradle] {
   group="org.scala-native.bindgen"

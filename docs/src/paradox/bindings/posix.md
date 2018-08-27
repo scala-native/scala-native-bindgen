@@ -1,6 +1,16 @@
 # POSIX
 
-An addition to Scala Native's [POSIX](http://www.scala-native.org/en/latest/lib/posixlib.html) bindings. To use one of the POSIX bindings you must add it as a dependency:
+An addition to Scala Native's [POSIX](http://www.scala-native.org/en/latest/lib/posixlib.html) bindings. To use one of the POSIX bindings you must add the resolver and the dependency:
+
+sbt
+:   @@snip [build.sbt](../resources/build.sbt) { #library_resolver }
+
+Maven
+:   @@snip [pom.xml](../resources/pom.xml) { #library_resolver }
+
+Gradle
+:   @@snip [build.gradle](../resources/build.gradle) { #library_resolver }
+
 
 @@dependency[sbt,Maven,Gradle] {
   group="org.scala-native.bindgen"
