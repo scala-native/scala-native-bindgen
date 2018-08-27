@@ -173,7 +173,7 @@ kornilova-l/scala-native-bindgen
 <ul style="display: none">
 <li class="md-nav__item md-version" id="project.version">
 <label class="md-nav__link" for="__version">
-<i class="md-icon" title="Version">label_outline</i> 0.3.0
+<i class="md-icon" title="Version">label_outline</i> 0.3.0-2-g63be9a2*
 </label>
 </li>
 </ul>
@@ -212,7 +212,15 @@ kornilova-l/scala-native-bindgen
         &lt;id&gt;maven&lt;/id&gt;
         &lt;url&gt;http://dl.bintray.com/scala-native-bindgen/maven&lt;/url&gt;
     &lt;/repository&gt;
-&lt;/repositories&gt;</code></pre><a href="https://github.com/kornilova-l/scala-native-bindgen/tree/master/docs/src/paradox/resources/pom.xml#L10-L15">Full source at GitHub</a></dd>
+&lt;/repositories&gt;
+
+&lt;dependencies&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.scala-native.bindgen&lt;/groupId&gt;
+    &lt;artifactId&gt;libiconv_2.11&lt;/artifactId&gt;
+    &lt;version&gt;$project.version$&lt;/version&gt;
+&lt;/dependency&gt;
+&lt;/dependencies&gt;</code></pre><a href="https://github.com/kornilova-l/scala-native-bindgen/tree/master/docs/src/paradox/resources/pom.xml#L12-L47">Full source at GitHub</a></dd>
   <dt>Gradle</dt>
   <dd>
   <pre class="prettyprint"><code class="language-gradle">repositories {
@@ -220,12 +228,12 @@ kornilova-l/scala-native-bindgen
         url &quot;https://dl.bintray.com/scala-native-bindgen/maven&quot;
     }
 }</code></pre><a href="https://github.com/kornilova-l/scala-native-bindgen/tree/master/docs/src/paradox/resources/build.gradle#L2-L6">Full source at GitHub</a></dd>
-</dl><dl class="dependency"><dt>sbt</dt><dd><pre class="prettyprint"><code class="language-scala">libraryDependencies += "org.scala-native.bindgen" %% "libposix" % "0.3.0"</code></pre></dd><dt>Maven</dt><dd><pre class="prettyprint"><code class="language-xml">&lt;dependency&gt;
+</dl><dl class="dependency"><dt>sbt</dt><dd><pre class="prettyprint"><code class="language-scala">libraryDependencies += "org.scala-native.bindgen" %% "libposix" % "0.3.0-2-g63be9a2-SNAPSHOT"</code></pre></dd><dt>Maven</dt><dd><pre class="prettyprint"><code class="language-xml">&lt;dependency&gt;
   &lt;groupId&gt;org.scala-native.bindgen&lt;/groupId&gt;
   &lt;artifactId&gt;libposix_2.11&lt;/artifactId&gt;
-  &lt;version&gt;0.3.0&lt;/version&gt;
+  &lt;version&gt;0.3.0-2-g63be9a2-SNAPSHOT&lt;/version&gt;
 &lt;/dependency&gt;</code></pre></dd><dt>Gradle</dt><dd><pre class="prettyprint"><code class="language-gradle">dependencies {
-  compile group: 'org.scala-native.bindgen', name: 'libposix_2.11', version: '0.3.0'
+  compile group: 'org.scala-native.bindgen', name: 'libposix_2.11', version: '0.3.0-2-g63be9a2-SNAPSHOT'
 }</code></pre></dd></dl>
 <p>The <a href="http://pubs.opengroup.org/onlinepubs/9699919799/basedefs/iconv.h.html"><code>iconv.h</code></a> header allows to convert text between different character sets, for example UTF-8 to ISO-8859-1.</p>
 <h2><a href="#example" name="example" class="anchor"><span class="anchor-link"></span></a>Example</h2>
@@ -267,7 +275,7 @@ Edit this page
 </div>
 <div class="print-only">
 <span class="md-source-file md-version">
-0.3.0
+0.3.0-2-g63be9a2*
 </span>
 </div>
 </article>

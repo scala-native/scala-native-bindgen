@@ -6,22 +6,47 @@
 
     <artifactId>maven-scala-test</artifactId>
 
-    <!-- #library_resolver -->
+    <!-- #libiconv -->
+    <!-- #libposix -->
+    <!-- #libutf8proc -->
     <repositories>
         <repository>
             <id>maven</id>
             <url>http://dl.bintray.com/scala-native-bindgen/maven</url>
         </repository>
     </repositories>
-    <!-- #library_resolver -->
 
     <dependencies>
+    <!-- #libutf8proc -->
+    <!-- #libposix -->
+    <!-- #libiconv -->
+        <!-- #libiconv -->
         <dependency>
             <groupId>org.scala-native.bindgen</groupId>
-            <artifactId>libiconv_native0.3_2.11</artifactId>
-            <version>0.3.0</version>
-            <type>pom</type>
+            <artifactId>libiconv_2.11</artifactId>
+            <version>$project.version$</version>
         </dependency>
+        <!-- #libiconv -->
+        <!-- #libposix -->
+        <dependency>
+            <groupId>org.scala-native.bindgen</groupId>
+            <artifactId>libposix_2.11</artifactId>
+            <version>$project.version$</version>
+        </dependency>
+        <!-- #libposix -->
+        <!-- #libutf8proc -->
+        <dependency>
+            <groupId>org.scala-native.bindgen</groupId>
+            <artifactId>libutf8proc_2.11</artifactId>
+            <version>$project.version$</version>
+        </dependency>
+        <!-- #libutf8proc -->
+    <!-- #libiconv -->
+    <!-- #libposix -->
+    <!-- #libutf8proc -->
     </dependencies>
+    <!-- #libutf8proc -->
+    <!-- #libposix -->
+    <!-- #libiconv -->
 
 </project>
