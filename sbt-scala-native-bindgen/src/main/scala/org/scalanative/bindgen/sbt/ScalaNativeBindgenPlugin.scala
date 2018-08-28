@@ -22,7 +22,7 @@ import org.scalanative.bindgen.{Bindgen, BindingOptions}
  * By default, the plugin reads the configured header file and generates
  * a single Scala source file in the managed source directory.
  *
- * See the [[https://github.com/kornilova-l/scala-native-bindgen/tree/master/sbt-scala-native-bindgen/src/sbt-test/bindgen/generate example project]].
+ * See the [[https://github.com/scala-native/scala-native-bindgen/tree/master/sbt-scala-native-bindgen/src/sbt-test/bindgen/generate example project]].
  *
  * == Configuration ==
  *
