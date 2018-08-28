@@ -11,9 +11,11 @@ typedef struct bigStruct aliasForBigStruct;
 
 struct usesImportedEnum {
     enum pointIndex index;
+    union weight weight;
 };
 
 void readBook(struct book *book);
+void getWeight(union weight *weight);
 
 myInt getMyInt();
 enumWithTypedef getEnum();

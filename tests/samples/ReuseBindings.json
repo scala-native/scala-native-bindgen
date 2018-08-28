@@ -5,6 +5,7 @@
     "names": {
       "struct book": "book",
       "struct page": "page",
+      "union weight": "weight",
       "myInt": "MY_INT",
       "enumWithTypedef": "EnumWithTypedef"
     }
