@@ -1,6 +1,6 @@
 # Scala Native Binding Generator
 
-[![Build Status](https://travis-ci.com/scala-native/scala-native-bindgen.svg?branch=master)](https://travis-ci.com/kornilova-l/scala-native-bindgen)
+[![Build Status](https://travis-ci.org/scala-native/scala-native-bindgen.svg?branch=master)](https://travis-ci.org/scala-native/scala-native-bindgen)
 
 The tool generates Scala Native bindings from C headers.
 
