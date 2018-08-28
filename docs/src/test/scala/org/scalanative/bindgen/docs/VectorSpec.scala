@@ -25,12 +25,12 @@ class VectorSpec extends FunSpec {
         lineSegment2.b = struct_point(5, 0)
         //#step-2
         //#step-3
-        println(cosine(lineSegment1, lineSegment2))
+        val angle = cosine(lineSegment1, lineSegment2)
         //#step-3
         import org.scalactic.TolerantNumerics
         val epsilon = 1e-3f
         assert(
-          (0.8.toFloat === cosine(lineSegment1, lineSegment2))(
+          (0.8.toFloat === angle)(
             TolerantNumerics.tolerantFloatEquality(epsilon)))
       //#step-1
       }
