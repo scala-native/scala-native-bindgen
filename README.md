@@ -6,7 +6,7 @@ The tool generates Scala Native bindings from C headers.
 
 ## Documentation
 
-Documentation can be found at [kornilova-l.github.io/scala-native-bindgen](https://kornilova-l.github.io/scala-native-bindgen/).
+Documentation can be found at [scala-native.github.io/scala-native-bindgen](https://scala-native.github.io/scala-native-bindgen/).
 
 ## Bindgen Features
 
