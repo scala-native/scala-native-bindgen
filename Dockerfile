@@ -38,6 +38,7 @@ ENV PATH=$PATH:/usr/lib/llvm-$LLVM_VERSION/bin
 RUN set -x \
  && apt update \
  && apt install -y --no-install-recommends \
+	libsqlite3-dev \
 	libutf8proc-dev \
  && rm -rf /var/lib/apt/lists/*
 ##bindings-dev-package

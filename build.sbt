@@ -209,6 +209,7 @@ lazy val bindings = project("bindings")
   .aggregate(
     libiconv,
     libposix,
+    libsqlite3,
     libutf8proc
   )
 
@@ -234,6 +235,8 @@ lazy val libposix = bindingProject("posix")(
   "regex.h"
 )
 //#sbt-binding-project-multi-header
+
+lazy val libsqlite3 = bindingProject("sqlite3", Some("sqlite3"))("sqlite3.h")
 
 //#sbt-binding-project
 lazy val libutf8proc =
