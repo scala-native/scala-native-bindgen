@@ -1,0 +1,5 @@
+repositories {
+    maven {
+        url "https://dl.bintray.com/scala-native-bindgen/maven"
+    }
+}
