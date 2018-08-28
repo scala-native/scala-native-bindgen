@@ -18,4 +18,4 @@ sbt -Dproject.version=x.y.z release
 
 Finally, upload the `scala-native-bindgen-linux` and
 `scala-native-bindgen-darwin` executables to the release page at:
-<https://github.com/kornilova-l/scala-native-bindgen/releases/tag/vx.y.z>
+<https://github.com/scala-native/scala-native-bindgen/releases/tag/vx.y.z>

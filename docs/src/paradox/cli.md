@@ -2,7 +2,7 @@
 
 Statically linked executables are provided with each release for Linux and macOS. Head over to the [releases page] to download the latest version for your platform.
 
- [releases page]: https://github.com/kornilova-l/scala-native-bindgen/releases
+ [releases page]: https://github.com/scala-native/scala-native-bindgen/releases
 
 @@@ note
 

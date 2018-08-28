@@ -18,7 +18,8 @@ inThisBuild(
     organization := "org.scala-native.bindgen",
     licenses := Seq(
       "BSD 3-Clause" -> url("https://www.scala-lang.org/license/")),
-    homepage := Some(url("https://kornilova-l.github.io/scala-native-bindgen")),
+    homepage := Some(
+      url("https://scala-native.github.io/scala-native-bindgen")),
     scalacOptions ++= Seq(
       "-deprecation",
       "-unchecked",
@@ -28,8 +29,8 @@ inThisBuild(
     ),
     parallelExecution in Global := false,
     scmInfo := Some(
-      ScmInfo(url("https://github.com/kornilova-l/scala-native-bindgen"),
-              "scm:git:git@github.com:kornilova-l/scala-native-bindgen.git")),
+      ScmInfo(url("https://github.com/scala-native/scala-native-bindgen"),
+              "scm:git:git@github.com:scala-native/scala-native-bindgen.git")),
     developers := List(
       Developer(
         id = "kornilova-l",
