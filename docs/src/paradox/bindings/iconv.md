@@ -13,7 +13,7 @@ Gradle
 
 @@dependency[sbt,Maven,Gradle] {
   group="org.scala-native.bindgen"
-  artifact="libposix_$scala.binary.version$"
+  artifact="libiconv_$scala.binary.version$"
   version="$project.version$"
 }
 
