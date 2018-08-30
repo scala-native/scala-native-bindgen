@@ -1,12 +1,13 @@
 package org.scalanative.bindgen.samples
 
-import utest._
-import scala.scalanative.native._
+import org.scalatest.FunSpec
+import scalanative.native._
+
 import org.scalanative.bindgen.samples.Struct.implicits._
 
-object StructTests extends TestSuite {
-  val tests = Tests {
-    'point - {
+class StructSpec extends FunSpec {
+  describe("struct bindings") {
+    it("should provide field getters and setters") {
       val point = Struct.createPoint()
       assert(point.x == 10)
       assert(point.y == 20)
@@ -15,19 +16,19 @@ object StructTests extends TestSuite {
       assert(point.x == 11)
     }
 
-    'constructor - {
+    it("should provide constructors") {
       Zone { implicit Zone =>
+        val pointNoValue = Struct.struct_point()
+        assert(pointNoValue.x == 0)
+        assert(pointNoValue.y == 0)
+
         val point = Struct.struct_point(1, 2)
         assert(point.x == 1)
         assert(point.y == 2)
       }
     }
 
-    'bigStructSize - {
-      assert(Struct.getBigStructSize() == sizeof[Struct.struct_bigStruct])
-    }
-
-    'getFieldsOfInnerStruct - {
+    it("should provided field getters for inner structs") {
       Zone { implicit zone =>
         val points = Struct.struct_points()
         Struct.setPoints(points, 1, 2, 3, 4)
@@ -38,7 +39,7 @@ object StructTests extends TestSuite {
       }
     }
 
-    'setFieldsOfInnerStruct - {
+    it("should provided field setters for inner structs") {
       Zone { implicit zone =>
         val points = Struct.struct_points()
         points.p1.x = 1
@@ -52,7 +53,7 @@ object StructTests extends TestSuite {
       }
     }
 
-    'innerAnonymousStruct - {
+    it("should support anonymous structs") {
       type struct_anonymousStruct = CStruct2[CChar, CInt]
       Zone { implicit zone =>
         val anonymousStruct: Ptr[struct_anonymousStruct] =
@@ -71,7 +72,11 @@ object StructTests extends TestSuite {
       }
     }
 
-    'getFieldOfBigStruct - {
+    it("should match size of C memory layout for big structs") {
+      assert(Struct.getBigStructSize() == sizeof[Struct.struct_bigStruct])
+    }
+
+    it("should provide field getters for big structs") {
       Zone { implicit zone: Zone =>
         val structPtr = alloc[Struct.struct_bigStruct]
         for (value <- Seq(Long.MinValue, -1, 0, 1, Long.MaxValue)) {
@@ -100,7 +105,7 @@ object StructTests extends TestSuite {
       }
     }
 
-    'setFieldOfBigStruct - {
+    it("should provide field setters for big structs") {
       Zone { implicit zone: Zone =>
         val structPtr = alloc[Struct.struct_bigStruct]
         for (value <- Seq(Long.MinValue, -1, 0, 1, Long.MaxValue)) {

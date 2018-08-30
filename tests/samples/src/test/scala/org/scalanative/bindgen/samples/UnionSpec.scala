@@ -1,16 +1,17 @@
 package org.scalanative.bindgen.samples
 
-import utest._
+import org.scalatest.FunSpec
 import scala.scalanative.native._
+
 import org.scalanative.bindgen.samples.Union.implicits._
 
-object UnionTests extends TestSuite {
-  val tests = Tests {
-    'sizeof - {
+class UnionSpec extends FunSpec {
+  describe("union bindings") {
+    it("should match size of C memory layout") {
       assert(Union.union_get_sizeof() == sizeof[Union.union_values])
     }
 
-    'get - {
+    it("should provide field getters") {
       Zone { implicit zone =>
         val unionPtr = alloc[Union.union_values]
 
@@ -56,7 +57,7 @@ object UnionTests extends TestSuite {
       }
     }
 
-    'set - {
+    it("should provide field setters") {
       Zone { implicit zone =>
         val unionPtr = alloc[Union.union_values]
 
