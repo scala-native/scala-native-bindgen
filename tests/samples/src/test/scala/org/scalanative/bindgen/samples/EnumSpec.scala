@@ -1,15 +1,15 @@
 package org.scalanative.bindgen.samples
 
-import utest._
+import org.scalatest.FunSpec
 import scalanative.native._
 
-object EnumTests extends TestSuite {
-  val tests = Tests {
-    'get_WEDNESDAY - {
+class EnumSpec extends FunSpec {
+  describe("enum bindings") {
+    it("should bind to C enum values") {
       assert(Enum.get_WEDNESDAY() == Enum.enum_days.WEDNESDAY)
     }
 
-    'check_BIG_NEG_A - {
+    it("should handle large negative values") {
       assert(
         Enum.check_BIG_NEG_A(Enum.enum_bigNegativeValues.BIG_NEG_A) == c"OK")
     }

@@ -106,8 +106,7 @@ lazy val samples = nativeProject("samples")
   .in(file("tests/samples"))
   .settings(
     publish / skip := true,
-    libraryDependencies += "com.lihaoyi" %%% "utest" % "0.6.3" % Test,
-    testFrameworks += new TestFramework("utest.runner.Framework"),
+    libraryDependencies += "org.scalatest" %%% "scalatest" % "3.2.0-SNAP10" % Test,
     compileTask("bindgentests", baseDirectory)
   )
 
