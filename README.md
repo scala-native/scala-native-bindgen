@@ -21,6 +21,8 @@ Documentation can be found at [scala-native.github.io/scala-native-bindgen](http
 
 ## Example
 
+Given the following C header file:
+
 ```c
 struct point {
     float x;
@@ -34,6 +36,8 @@ struct vector {
 
 struct vector *add(struct vector *v1, struct vector *v2);
 ```
+
+The tool will generate this Scala Native binding:
 
 ```scala
 import scala.scalanative._
