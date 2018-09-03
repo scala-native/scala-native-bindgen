@@ -154,24 +154,26 @@ lazy val docs = nativeProject("docs")
       NativeBinding(docsUsingBindingsDirectory.value / "vector.h")
         .name("vector")
         .link("vector")
-        .packageName("org.example"),
-      NativeBinding(docs3rdPartyBindingsDirectory.value / "geometry.h")
-        .name("Geometry")
-        .link("geometry")
-        .packageName("org.example.geometry")
-        .bindingConfig(docs3rdPartyBindingsDirectory.value / "config.json"), {
-        val pathToHeader = docsScalaNativeBindingsDirectory.value / "wordcount.h"
-        val pathToConfig = docsScalaNativeBindingsDirectory.value / "config.json"
+        .packageName("org.example"), {
+        val pathToHeader = docs3rdPartyBindingsDirectory.value / "geometry.h"
+        val pathToConfig = docs3rdPartyBindingsDirectory.value / "config.json"
         //#sbt-binding-config
         NativeBinding(pathToHeader)
-        //#sbt-binding-config
+          .bindingConfig(pathToConfig)
+          //#sbt-binding-config
+          .name("Geometry")
+          .link("geometry")
+          .packageName("org.example.geometry")
+      }, {
+        val pathToHeader = docsScalaNativeBindingsDirectory.value / "wordcount.h"
+        //#sbt-exclude-prefix
+        NativeBinding(pathToHeader)
+          .excludePrefix("__")
+          //#sbt-exclude-prefix
           .name("WordCount")
           .link("wordcount")
           .packageName("org.example.wordcount")
-          .excludePrefix("__")
-          //#sbt-binding-config
-          .bindingConfig(pathToConfig)
-        //#sbt-binding-config
+          .bindingConfig(docsScalaNativeBindingsDirectory.value / "config.json")
       }
     ),
     nativeBindgenPath := {

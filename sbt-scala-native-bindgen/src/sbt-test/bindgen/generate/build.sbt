@@ -11,14 +11,10 @@ nativeBindgenPath := Some(file(System.getProperty("bindgen.path")))
 inConfig(Compile)(
   Def.settings(
     nativeBindings += {
-      //#sbt-exclude-prefix
       NativeBinding(resourceDirectory.value / "stdlib.h")
-      //#sbt-exclude-prefix
         .name("stdlib")
         .packageName("org.example.app.stdlib")
-        //#sbt-exclude-prefix
         .excludePrefix("__")
-      //#sbt-exclude-prefix
     }
   ))
 //#example

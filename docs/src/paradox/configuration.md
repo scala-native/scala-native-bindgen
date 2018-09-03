@@ -11,7 +11,7 @@ or as part of the sbt bindings declaration.
 Definitions may be excluded by their prefix. This is useful when private definitions should not be part of the generated binding. This is often the case for definitions starting with `__`.
 
 sbt
-:   @@snip [sbt] (../../../sbt-scala-native-bindgen/src/sbt-test/bindgen/generate/build.sbt) { #sbt-exclude-prefix }
+:   @@snip [sbt] (../../../build.sbt) { #sbt-exclude-prefix }
 
 CLI
 :   ```sh
@@ -62,7 +62,7 @@ will reference the `Point` type alias inside the `Vector` object:
 
 ### Using Types From the Scala Native Bindings
 
-Similar to the above, the following this example shows how you can use
+Similar to the above, the following example shows how you can use
 types defined in the [C standard library] and [C POSIX library] bindings
 shipped with Scala Native. Let's assume we have a binding with a method that uses the `FILE` type
 from `<stdio.h>`:
