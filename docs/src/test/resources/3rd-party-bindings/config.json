@@ -1,0 +1,9 @@
+{
+  "vector.h": {
+    "object": "com.example.custom.binding.Vector",
+    "names": {
+      "struct point": "Point",
+      "struct lineSegment": "LineSegment"
+    }
+  }
+}

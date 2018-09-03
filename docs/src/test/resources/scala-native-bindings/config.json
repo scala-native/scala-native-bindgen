@@ -1,0 +1,8 @@
+{
+  "stdio.h": {
+    "object": "scala.scalanative.native.stdio"
+  },
+  "_stdio.h": {
+    "object": "scala.scalanative.native.stdio"
+  }
+}

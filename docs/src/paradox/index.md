@@ -29,8 +29,8 @@ This project is distributed under the Scala license.
 
 * [sbt](sbt.md)
 * [cli](cli.md)
-* [Using Generated Bindings](using-generated-bindings.md)
-* [Integrating Bindings](integrating-bindings.md)
+* [usage](using-bindings.md)
+* [configuration](configuration.md)
 * [Limitations](limitations.md)
 * [bindings](bindings/index.md)
 * [Contributor's Guide](contrib/index.md)
