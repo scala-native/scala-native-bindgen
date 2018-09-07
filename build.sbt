@@ -146,6 +146,8 @@ lazy val docs = nativeProject("docs")
   .enablePlugins(GhpagesPlugin, ParadoxSitePlugin, ParadoxMaterialThemePlugin)
   .enablePlugins(ScalaNativeBindgenPlugin)
   .settings(
+    org.scalanative.bindgen.build.ParadoxSupport.paradoxWithCustomDirectives)
+  .settings(
     publish / skip := true,
     docsUsingBindingsDirectory := (Test / resourceDirectory).value / "using-bindings",
     docs3rdPartyBindingsDirectory := (Test / resourceDirectory).value / "3rd-party-bindings",

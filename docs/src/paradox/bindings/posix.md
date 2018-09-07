@@ -2,21 +2,7 @@
 
 An addition to Scala Native's [POSIX](http://www.scala-native.org/en/latest/lib/posixlib.html) bindings. To use one of the POSIX bindings you must add the resolver and the dependency:
 
-sbt
-:   @@snip [build.sbt](../resources/build.sbt)
-
-Maven
-:   @@snip [pom.xml](../resources/pom.xml) { #library_resolver }
-
-Gradle
-:   @@snip [build.gradle](../resources/build.gradle)
-
-
-@@dependency[sbt,Maven,Gradle] {
-  group="org.scala-native.bindgen"
-  artifact="libposix_$scala.binary.version$"
-  version="$project.version$"
-}
+@@binding[posix]
 
 Binding objects are available under the package name `
 
