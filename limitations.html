@@ -90,7 +90,7 @@ Type to start searching
 </div>
 <div class="md-flex__cell md-flex__cell--shrink">
 <div class="md-header-nav__source">
-<a href="https://github.com/kornilova-l/scala-native-bindgen"
+<a href="https://github.com/scala-native/scala-native-bindgen"
 title="Go to repository"
 class="md-source"
 data-md-source="github">
@@ -98,7 +98,7 @@ data-md-source="github">
 <i class="fa fa-github"></i>
 </div>
 <div class="md-source__repository">
-kornilova-l/scala-native-bindgen
+scala-native/scala-native-bindgen
 </div>
 </a>
 
@@ -125,7 +125,7 @@ Scala Native Bindgen
 </a>
 </label>
 <div class="md-nav__source">
-<a href="https://github.com/kornilova-l/scala-native-bindgen"
+<a href="https://github.com/scala-native/scala-native-bindgen"
 title="Go to repository"
 class="md-source"
 data-md-source="github">
@@ -133,7 +133,7 @@ data-md-source="github">
 <i class="fa fa-github"></i>
 </div>
 <div class="md-source__repository">
-kornilova-l/scala-native-bindgen
+scala-native/scala-native-bindgen
 </div>
 </a>
 
@@ -141,8 +141,8 @@ kornilova-l/scala-native-bindgen
 <ul>
   <li><a href="sbt.html" class="page">Generating Bindings with sbt</a></li>
   <li><a href="cli.html" class="page">Generating Bindings with the CLI</a></li>
-  <li><a href="using-generated-bindings.html" class="page">Using Generated Bindings</a></li>
-  <li><a href="integrating-bindings.html" class="page">Integrating Bindings</a></li>
+  <li><a href="using-bindings.html" class="page">Using Bindings</a></li>
+  <li><a href="configuration.html" class="page">Configuration</a></li>
   <li><a href="limitations.html" class="active page">Limitations</a></li>
   <li><a href="bindings/index.html" class="page">Bindings</a>
   <ul>
@@ -177,7 +177,7 @@ kornilova-l/scala-native-bindgen
 <ul style="display: none">
 <li class="md-nav__item md-version" id="project.version">
 <label class="md-nav__link" for="__version">
-<i class="md-icon" title="Version">label_outline</i> 0.3.0
+<i class="md-icon" title="Version">label_outline</i> 0.3.1
 </label>
 </li>
 </ul>
@@ -241,20 +241,20 @@ extern const int pi_const;
 #define MAX(a, b) (a &gt; b ? a : b)
 </code></pre>
 <h2><a href="#reusing-generated-bindings" name="reusing-generated-bindings" class="anchor"><span class="anchor-link"></span></a>Reusing generated bindings</h2>
-<p>There is no way to reuse already generated bindings.<br/>Bindgen outputs bindings also for headers that were included in a given header. See <a href="https://github.com/kornilova-l/scala-native-bindgen/issues/2">#2</a>.</p>
+<p>There is no way to reuse already generated bindings.<br/>Bindgen outputs bindings also for headers that were included in a given header. See <a href="https://github.com/scala-native/scala-native-bindgen/issues/2">#2</a>.</p>
 <h2><a href="#type-qualifiers" name="type-qualifiers" class="anchor"><span class="anchor-link"></span></a>Type qualifiers</h2>
 <p>Type qualifiers <code>const</code>, <code>volatile</code> and <code>restrict</code> are not supported.</p>
 <h2><a href="#updating-extern-variables" name="updating-extern-variables" class="anchor"><span class="anchor-link"></span></a>Updating extern variables</h2>
 <p>Extern variables are read-only. See <a href="https://github.com/scala-native/scala-native/issues/202">scala-native/scala-native#202</a>.</p>
 </div>
 <div>
-<a href="https://github.com/kornilova-l/scala-native-bindgen/tree/master/docs/src/paradox/limitations.md" title="Edit this page" class="md-source-file md-edit">
+<a href="https://github.com/scala-native/scala-native-bindgen/tree/master/docs/src/paradox/limitations.md" title="Edit this page" class="md-source-file md-edit">
 Edit this page
 </a>
 </div>
 <div class="print-only">
 <span class="md-source-file md-version">
-0.3.0
+0.3.1
 </span>
 </div>
 </article>
@@ -264,7 +264,7 @@ Edit this page
 <footer class="md-footer">
 <div class="md-footer-nav">
 <nav class="md-footer-nav__inner md-grid">
-<a href="integrating-bindings.html" title="Integrating Bindings" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+<a href="configuration.html" title="Configuration" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
 <div class="md-flex__cell md-flex__cell--shrink">
 <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
 </div>
@@ -273,7 +273,7 @@ Edit this page
 <span class="md-footer-nav__direction">
 Previous
 </span>
-Integrating Bindings
+Configuration
 </span>
 </div>
 </a>
@@ -296,7 +296,7 @@ Bindings
 <div class="md-footer-meta__inner md-grid">
 <div class="md-footer-copyright">
 <div class="md-footer-copyright__highlight">
-Copyright © Liudmila Kornilova, distributed under the <a href='https://github.com/kornilova-l/scala-native-bindgenblob/master/LICENSE.txt'>Scala license</a>.
+Copyright © Liudmila Kornilova, distributed under the <a href='https://github.com/scala-native/scala-native-bindgenblob/master/LICENSE.txt'>Scala license</a>.
 </div>
 Powered by
 <a href="https://github.com/lightbend/paradox">Paradox</a>

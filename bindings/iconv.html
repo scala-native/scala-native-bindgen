@@ -90,7 +90,7 @@ Type to start searching
 </div>
 <div class="md-flex__cell md-flex__cell--shrink">
 <div class="md-header-nav__source">
-<a href="https://github.com/kornilova-l/scala-native-bindgen"
+<a href="https://github.com/scala-native/scala-native-bindgen"
 title="Go to repository"
 class="md-source"
 data-md-source="github">
@@ -98,7 +98,7 @@ data-md-source="github">
 <i class="fa fa-github"></i>
 </div>
 <div class="md-source__repository">
-kornilova-l/scala-native-bindgen
+scala-native/scala-native-bindgen
 </div>
 </a>
 
@@ -125,7 +125,7 @@ Scala Native Bindgen
 </a>
 </label>
 <div class="md-nav__source">
-<a href="https://github.com/kornilova-l/scala-native-bindgen"
+<a href="https://github.com/scala-native/scala-native-bindgen"
 title="Go to repository"
 class="md-source"
 data-md-source="github">
@@ -133,7 +133,7 @@ data-md-source="github">
 <i class="fa fa-github"></i>
 </div>
 <div class="md-source__repository">
-kornilova-l/scala-native-bindgen
+scala-native/scala-native-bindgen
 </div>
 </a>
 
@@ -141,8 +141,8 @@ kornilova-l/scala-native-bindgen
 <ul>
   <li><a href="../sbt.html" class="page">Generating Bindings with sbt</a></li>
   <li><a href="../cli.html" class="page">Generating Bindings with the CLI</a></li>
-  <li><a href="../using-generated-bindings.html" class="page">Using Generated Bindings</a></li>
-  <li><a href="../integrating-bindings.html" class="page">Integrating Bindings</a></li>
+  <li><a href="../using-bindings.html" class="page">Using Bindings</a></li>
+  <li><a href="../configuration.html" class="page">Configuration</a></li>
   <li><a href="../limitations.html" class="page">Limitations</a></li>
   <li><a href="../bindings/index.html" class="page">Bindings</a>
   <ul>
@@ -173,7 +173,7 @@ kornilova-l/scala-native-bindgen
 <ul style="display: none">
 <li class="md-nav__item md-version" id="project.version">
 <label class="md-nav__link" for="__version">
-<i class="md-icon" title="Version">label_outline</i> 0.3.0
+<i class="md-icon" title="Version">label_outline</i> 0.3.1
 </label>
 </li>
 </ul>
@@ -202,33 +202,51 @@ kornilova-l/scala-native-bindgen
 <h1><a href="#iconv-character-set-conversion" name="iconv-character-set-conversion" class="anchor"><span class="anchor-link"></span></a>Iconv - Character set conversion</h1>
 <p>To use this binding add the following resolver and the dependency:</p>
 <dl>
-  <dt>sbt</dt>
-  <dd>
-  <pre class="prettyprint"><code class="language-sbt">resolvers += Resolver.bintrayRepo(&quot;scala-native-bindgen&quot;, &quot;maven&quot;)</code></pre><a href="https://github.com/kornilova-l/scala-native-bindgen/tree/master/docs/src/paradox/resources/build.sbt">Full source at GitHub</a></dd>
-  <dt>Maven</dt>
-  <dd>
-  <pre class="prettyprint"><code class="language-xml">&lt;repositories&gt;
-    &lt;repository&gt;
-        &lt;id&gt;maven&lt;/id&gt;
-        &lt;url&gt;http://dl.bintray.com/scala-native-bindgen/maven&lt;/url&gt;
-    &lt;/repository&gt;
-&lt;/repositories&gt;</code></pre><a href="https://github.com/kornilova-l/scala-native-bindgen/tree/master/docs/src/paradox/resources/pom.xml#L10-L15">Full source at GitHub</a></dd>
-  <dt>Gradle</dt>
-  <dd>
-  <pre class="prettyprint"><code class="language-gradle">repositories {
-    maven {
-        url &quot;https://dl.bintray.com/scala-native-bindgen/maven&quot;
-    }
-}</code></pre><a href="https://github.com/kornilova-l/scala-native-bindgen/tree/master/docs/src/paradox/resources/build.gradle">Full source at GitHub</a></dd>
-</dl><dl class="dependency"><dt>sbt</dt><dd><pre class="prettyprint"><code class="language-scala">libraryDependencies += "org.scala-native.bindgen" %% "libposix" % "0.3.0"</code></pre></dd><dt>Maven</dt><dd><pre class="prettyprint"><code class="language-xml">&lt;dependency&gt;
-  &lt;groupId&gt;org.scala-native.bindgen&lt;/groupId&gt;
-  &lt;artifactId&gt;libposix_2.11&lt;/artifactId&gt;
-  &lt;version&gt;0.3.0&lt;/version&gt;
-&lt;/dependency&gt;</code></pre></dd><dt>Gradle</dt><dd><pre class="prettyprint"><code class="language-gradle">dependencies {
-  compile group: 'org.scala-native.bindgen', name: 'libposix_2.11', version: '0.3.0'
-}</code></pre></dd></dl>
+<dt>sbt</dt>
+<dd>
+<pre class="prettyprint"><code class="language-scala">resolvers += Resolver.bintrayRepo("scala-native-bindgen", "maven")
+libraryDependencies += "org.scala-native.bindgen" %%% "libiconv" % "0.3.1"
+</code></pre>
+</dd>
+
+<dt>Maven</dt>
+<dd>
+<pre class="prettyprint"><code class="language-xml">&lt;repositories&gt;
+  &lt;repository&gt;
+    &lt;id&gt;maven&lt;/id&gt;
+    &lt;url&gt;http://dl.bintray.com/scala-native-bindgen/maven&lt;/url&gt;
+  &lt;/repository&gt;
+&lt;/repositories&gt;
+
+&lt;dependencies&gt;
+  &lt;dependency&gt;
+    &lt;groupId&gt;org.scala-native.bindgen&lt;/groupId&gt;
+    &lt;artifactId&gt;libiconv_native0.3_2.11&lt;/artifactId&gt;
+    &lt;version&gt;0.3.1&lt;/version&gt;
+  &lt;/dependency&gt;
+&lt;/dependencies&gt;
+</code></pre>
+</dd>
+
+<dt>Gradle</dt>
+<dd>
+<pre class="prettyprint"><code class="language-gradle">repositories {
+  maven {
+    url "http://dl.bintray.com/scala-native-bindgen/maven"
+  }
+}
+
+dependencies {
+  compile group: 'org.scala-native.bindgen', name: 'libiconv_native0.3_2.11', version: '0.3.1'
+}
+</code></pre>
+</dd>
+</dl>
+
 <p>The <a href="http://pubs.opengroup.org/onlinepubs/9699919799/basedefs/iconv.h.html"><code>iconv.h</code></a> header allows to convert text between different character sets, for example UTF-8 to ISO-8859-1.</p>
+
 <h2><a href="#example" name="example" class="anchor"><span class="anchor-link"></span></a>Example</h2>
+
 <pre class="prettyprint"><code class="language-scala">import org.scalanative.bindgen.bindings.iconv.iconv._
 import scala.scalanative.native._
 import java.nio.charset.Charset
@@ -258,16 +276,16 @@ val translatedCode = iconv(
   translatedBytesLeft
 )
 }
-iconv_close(encode)</code></pre><a href="https://github.com/kornilova-l/scala-native-bindgen/tree/master/bindings/iconv/src/test/scala/org/scalanative/bindgen/bindings/tests/IconvSpec.scala#L9-L67">Full source at GitHub</a>
+iconv_close(encode)</code></pre><a href="https://github.com/scala-native/scala-native-bindgen/tree/master/bindings/iconv/src/test/scala/org/scalanative/bindgen/bindings/tests/IconvSpec.scala#L9-L67">Full source at GitHub</a>
 </div>
 <div>
-<a href="https://github.com/kornilova-l/scala-native-bindgen/tree/master/docs/src/paradox/bindings/iconv.md" title="Edit this page" class="md-source-file md-edit">
+<a href="https://github.com/scala-native/scala-native-bindgen/tree/master/docs/src/paradox/bindings/iconv.md" title="Edit this page" class="md-source-file md-edit">
 Edit this page
 </a>
 </div>
 <div class="print-only">
 <span class="md-source-file md-version">
-0.3.0
+0.3.1
 </span>
 </div>
 </article>
@@ -309,7 +327,7 @@ Utf8proc - UTF-8 text processing
 <div class="md-footer-meta__inner md-grid">
 <div class="md-footer-copyright">
 <div class="md-footer-copyright__highlight">
-Copyright © Liudmila Kornilova, distributed under the <a href='https://github.com/kornilova-l/scala-native-bindgenblob/master/LICENSE.txt'>Scala license</a>.
+Copyright © Liudmila Kornilova, distributed under the <a href='https://github.com/scala-native/scala-native-bindgenblob/master/LICENSE.txt'>Scala license</a>.
 </div>
 Powered by
 <a href="https://github.com/lightbend/paradox">Paradox</a>

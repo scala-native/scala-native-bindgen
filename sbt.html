@@ -90,7 +90,7 @@ Type to start searching
 </div>
 <div class="md-flex__cell md-flex__cell--shrink">
 <div class="md-header-nav__source">
-<a href="https://github.com/kornilova-l/scala-native-bindgen"
+<a href="https://github.com/scala-native/scala-native-bindgen"
 title="Go to repository"
 class="md-source"
 data-md-source="github">
@@ -98,7 +98,7 @@ data-md-source="github">
 <i class="fa fa-github"></i>
 </div>
 <div class="md-source__repository">
-kornilova-l/scala-native-bindgen
+scala-native/scala-native-bindgen
 </div>
 </a>
 
@@ -125,7 +125,7 @@ Scala Native Bindgen
 </a>
 </label>
 <div class="md-nav__source">
-<a href="https://github.com/kornilova-l/scala-native-bindgen"
+<a href="https://github.com/scala-native/scala-native-bindgen"
 title="Go to repository"
 class="md-source"
 data-md-source="github">
@@ -133,7 +133,7 @@ data-md-source="github">
 <i class="fa fa-github"></i>
 </div>
 <div class="md-source__repository">
-kornilova-l/scala-native-bindgen
+scala-native/scala-native-bindgen
 </div>
 </a>
 
@@ -141,8 +141,8 @@ kornilova-l/scala-native-bindgen
 <ul>
   <li><a href="sbt.html" class="active page">Generating Bindings with sbt</a></li>
   <li><a href="cli.html" class="page">Generating Bindings with the CLI</a></li>
-  <li><a href="using-generated-bindings.html" class="page">Using Generated Bindings</a></li>
-  <li><a href="integrating-bindings.html" class="page">Integrating Bindings</a></li>
+  <li><a href="using-bindings.html" class="page">Using Bindings</a></li>
+  <li><a href="configuration.html" class="page">Configuration</a></li>
   <li><a href="limitations.html" class="page">Limitations</a></li>
   <li><a href="bindings/index.html" class="page">Bindings</a>
   <ul>
@@ -166,7 +166,7 @@ kornilova-l/scala-native-bindgen
 <ul style="display: none">
 <li class="md-nav__item md-version" id="project.version">
 <label class="md-nav__link" for="__version">
-<i class="md-icon" title="Version">label_outline</i> 0.3.0
+<i class="md-icon" title="Version">label_outline</i> 0.3.1
 </label>
 </li>
 </ul>
@@ -181,8 +181,8 @@ kornilova-l/scala-native-bindgen
 <pre class="prettyprint"><code class="language-sbt">addSbtPlugin(&quot;org.scala-native.bindgen&quot; % &quot;sbt-scala-native-bindgen&quot; % VERSION)
 
 resolvers += Resolver.bintrayIvyRepo(&quot;scala-native-bindgen&quot;, &quot;sbt-plugins&quot;)
-resolvers += Resolver.bintrayRepo(&quot;scala-native-bindgen&quot;, &quot;maven&quot;)</code></pre><a href="https://github.com/kornilova-l/scala-native-bindgen/tree/master/project/plugins.sbt#L15-L18">Full source at GitHub</a>
-<p>Replacing <code>VERSION</code> with 0.3.0 to use the latest version.</p>
+resolvers += Resolver.bintrayRepo(&quot;scala-native-bindgen&quot;, &quot;maven&quot;)</code></pre><a href="https://github.com/scala-native/scala-native-bindgen/tree/master/project/plugins.sbt#L15-L18">Full source at GitHub</a>
+<p>Replacing <code>VERSION</code> with 0.3.1 to use the latest version.</p>
 <p>Next configure the plugin using the <code>nativeBindings</code> setting scoped to either <code>Compile</code> or <code>Test</code>. The <code>NativeBinding</code> type to configure each binding that should be generated. </p><div class="callout note "><div class="callout-title">Note</div>
 <p>By default the <code>scala-native-bindgen</code> executable is downloaded automatically for supported platforms. Set <code>version in nativeBindgen</code> (unscoped) to configure the version of the <code>scala-native-bindgen</code> to use if you want a version different from the version of the sbt plugin.</p>
 <p>In case your platform is not supported, you must compile <code>scala-native-bindgen</code> yourself and configure the path to the executable using <code>nativeBindgenPath</code>, e.g.:</p>
@@ -199,13 +199,13 @@ inConfig(Compile)(
         .packageName(&quot;org.example.app.stdlib&quot;)
         .excludePrefix(&quot;__&quot;)
     }
-  ))</code></pre><a href="https://github.com/kornilova-l/scala-native-bindgen/tree/master/sbt-scala-native-bindgen/src/sbt-test/bindgen/generate/build.sbt#L4-L19">Full source at GitHub</a>
+  ))</code></pre><a href="https://github.com/scala-native/scala-native-bindgen/tree/master/sbt-scala-native-bindgen/src/sbt-test/bindgen/generate/build.sbt#L4-L19">Full source at GitHub</a>
 <p>Given that the <code>stdlib.h</code> header file contains:</p>
 <pre class="prettyprint"><code class="language-h">int access(const char *path, int mode);
 int read(int fildes, void *buf, int nbyte);
 int printf(const char *restrict format, ...);
-int __excluded(void);</code></pre><a href="https://github.com/kornilova-l/scala-native-bindgen/tree/master/sbt-scala-native-bindgen/src/sbt-test/bindgen/generate/src/main/resources/stdlib.h">Full source at GitHub</a>
-<p>Running <code>nativeBindgen</code> will generate a file named <code>target/scala-2.11/src_managed/main/sbt-scala-native-bindgen/stdlib.scala</code> containing something along the following lines:</p>
+int __excluded(void);</code></pre><a href="https://github.com/scala-native/scala-native-bindgen/tree/master/sbt-scala-native-bindgen/src/sbt-test/bindgen/generate/src/main/resources/stdlib.h">Full source at GitHub</a>
+<p>Running <code>nativeBindgen</code> will generate a file named <code>target/scala-2.11/src_managed/main/sbt-scala-native-bindgen/stdlib.scala</code> containing the following lines:</p>
 <pre class="prettyprint"><code class="language-scala">package org.example.app.stdlib
 
 import scala.scalanative._
@@ -216,16 +216,16 @@ object stdlib {
   def access(path: native.CString, mode: native.CInt): native.CInt = native.extern
   def read(fildes: native.CInt, buf: native.Ptr[Byte], nbyte: native.CInt): native.CInt = native.extern
   def printf(format: native.CString, varArgs: native.CVararg*): native.CInt = native.extern
-}</code></pre><a href="https://github.com/kornilova-l/scala-native-bindgen/tree/master/sbt-scala-native-bindgen/src/sbt-test/bindgen/generate/expected/stdlib.scala">Full source at GitHub</a>
+}</code></pre><a href="https://github.com/scala-native/scala-native-bindgen/tree/master/sbt-scala-native-bindgen/src/sbt-test/bindgen/generate/expected/stdlib.scala">Full source at GitHub</a>
 </div>
 <div>
-<a href="https://github.com/kornilova-l/scala-native-bindgen/tree/master/docs/src/paradox/sbt.md" title="Edit this page" class="md-source-file md-edit">
+<a href="https://github.com/scala-native/scala-native-bindgen/tree/master/docs/src/paradox/sbt.md" title="Edit this page" class="md-source-file md-edit">
 Edit this page
 </a>
 </div>
 <div class="print-only">
 <span class="md-source-file md-version">
-0.3.0
+0.3.1
 </span>
 </div>
 </article>
@@ -267,7 +267,7 @@ Generating Bindings with the CLI
 <div class="md-footer-meta__inner md-grid">
 <div class="md-footer-copyright">
 <div class="md-footer-copyright__highlight">
-Copyright © Liudmila Kornilova, distributed under the <a href='https://github.com/kornilova-l/scala-native-bindgenblob/master/LICENSE.txt'>Scala license</a>.
+Copyright © Liudmila Kornilova, distributed under the <a href='https://github.com/scala-native/scala-native-bindgenblob/master/LICENSE.txt'>Scala license</a>.
 </div>
 Powered by
 <a href="https://github.com/lightbend/paradox">Paradox</a>

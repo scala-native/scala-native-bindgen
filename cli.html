@@ -90,7 +90,7 @@ Type to start searching
 </div>
 <div class="md-flex__cell md-flex__cell--shrink">
 <div class="md-header-nav__source">
-<a href="https://github.com/kornilova-l/scala-native-bindgen"
+<a href="https://github.com/scala-native/scala-native-bindgen"
 title="Go to repository"
 class="md-source"
 data-md-source="github">
@@ -98,7 +98,7 @@ data-md-source="github">
 <i class="fa fa-github"></i>
 </div>
 <div class="md-source__repository">
-kornilova-l/scala-native-bindgen
+scala-native/scala-native-bindgen
 </div>
 </a>
 
@@ -125,7 +125,7 @@ Scala Native Bindgen
 </a>
 </label>
 <div class="md-nav__source">
-<a href="https://github.com/kornilova-l/scala-native-bindgen"
+<a href="https://github.com/scala-native/scala-native-bindgen"
 title="Go to repository"
 class="md-source"
 data-md-source="github">
@@ -133,7 +133,7 @@ data-md-source="github">
 <i class="fa fa-github"></i>
 </div>
 <div class="md-source__repository">
-kornilova-l/scala-native-bindgen
+scala-native/scala-native-bindgen
 </div>
 </a>
 
@@ -141,8 +141,8 @@ kornilova-l/scala-native-bindgen
 <ul>
   <li><a href="sbt.html" class="page">Generating Bindings with sbt</a></li>
   <li><a href="cli.html" class="active page">Generating Bindings with the CLI</a></li>
-  <li><a href="using-generated-bindings.html" class="page">Using Generated Bindings</a></li>
-  <li><a href="integrating-bindings.html" class="page">Integrating Bindings</a></li>
+  <li><a href="using-bindings.html" class="page">Using Bindings</a></li>
+  <li><a href="configuration.html" class="page">Configuration</a></li>
   <li><a href="limitations.html" class="page">Limitations</a></li>
   <li><a href="bindings/index.html" class="page">Bindings</a>
   <ul>
@@ -174,7 +174,7 @@ kornilova-l/scala-native-bindgen
 <ul style="display: none">
 <li class="md-nav__item md-version" id="project.version">
 <label class="md-nav__link" for="__version">
-<i class="md-icon" title="Version">label_outline</i> 0.3.0
+<i class="md-icon" title="Version">label_outline</i> 0.3.1
 </label>
 </li>
 </ul>
@@ -202,7 +202,7 @@ kornilova-l/scala-native-bindgen
 <article class="md-content__inner md-typeset">
 <div class="md-content__searchable">
 <h1><a href="#generating-bindings-with-the-cli" name="generating-bindings-with-the-cli" class="anchor"><span class="anchor-link"></span></a>Generating Bindings with the CLI</h1>
-<p>Statically linked executables are provided with each release for Linux and macOS. Head over to the <a href="https://github.com/kornilova-l/scala-native-bindgen/releases">releases page</a> to download the latest version for your platform.</p><div class="callout note "><div class="callout-title">Note</div>
+<p>Statically linked executables are provided with each release for Linux and macOS. Head over to the <a href="https://github.com/scala-native/scala-native-bindgen/releases">releases page</a> to download the latest version for your platform.</p><div class="callout note "><div class="callout-title">Note</div>
 <p>In the following we assume you have renamed the downloaded <code>scala-native-bindgen-$PLATFORM</code> file to <code>scala-native-bindgen</code>.</p></div>
 <h2><a href="#command-line-usage" name="command-line-usage" class="anchor"><span class="anchor-link"></span></a>Command Line Usage</h2>
 <p>When generating bindings with the CLI, you need to specify the header file and provide the name of the created bindings using the <code>--name</code> option:</p>
@@ -230,7 +230,7 @@ kornilova-l/scala-native-bindgen
   <tbody>
     <tr>
       <td><code>--link</code> </td>
-      <td>Library to link with, e.g. <code>--link</code> uv for libuv.</td>
+      <td>Library to link with, e.g. <code>--link uv</code> for libuv.</td>
     </tr>
     <tr>
       <td><code>--no-link</code> </td>
@@ -238,7 +238,7 @@ kornilova-l/scala-native-bindgen
     </tr>
     <tr>
       <td><code>--name</code> </td>
-      <td>Scala object name that contains bindings. Default value set to library name.</td>
+      <td>Scala object name that contains bindings. Defaults to the library name.</td>
     </tr>
     <tr>
       <td><code>--package</code> </td>
@@ -246,11 +246,11 @@ kornilova-l/scala-native-bindgen
     </tr>
     <tr>
       <td><code>--exclude-prefix</code> </td>
-      <td>Functions and unused typedefs will be removed if their names have given prefix.</td>
+      <td>Functions and unused typedefs will be removed if their names have the given prefix.</td>
     </tr>
     <tr>
       <td><code>--binding-config</code> </td>
-      <td>Path to a config file that contains the information about bindings that should be reused. See <a href="integrating-bindings.html">Integrating Bindings</a> for more information.</td>
+      <td>Path to a config file that contains the information about bindings that should be reused. See <a href="configuration.html">Configuration</a> for more information.</td>
     </tr>
     <tr>
       <td><code>--extra-arg</code> </td>
@@ -264,13 +264,13 @@ kornilova-l/scala-native-bindgen
 </table>
 </div>
 <div>
-<a href="https://github.com/kornilova-l/scala-native-bindgen/tree/master/docs/src/paradox/cli.md" title="Edit this page" class="md-source-file md-edit">
+<a href="https://github.com/scala-native/scala-native-bindgen/tree/master/docs/src/paradox/cli.md" title="Edit this page" class="md-source-file md-edit">
 Edit this page
 </a>
 </div>
 <div class="print-only">
 <span class="md-source-file md-version">
-0.3.0
+0.3.1
 </span>
 </div>
 </article>
@@ -293,13 +293,13 @@ Generating Bindings with sbt
 </span>
 </div>
 </a>
-<a href="using-generated-bindings.html" title="Using Generated Bindings" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+<a href="using-bindings.html" title="Using Bindings" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
 <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
 <span class="md-flex__ellipsis">
 <span class="md-footer-nav__direction">
 Next
 </span>
-Using Generated Bindings
+Using Bindings
 </span>
 </div>
 <div class="md-flex__cell md-flex__cell--shrink">
@@ -312,7 +312,7 @@ Using Generated Bindings
 <div class="md-footer-meta__inner md-grid">
 <div class="md-footer-copyright">
 <div class="md-footer-copyright__highlight">
-Copyright © Liudmila Kornilova, distributed under the <a href='https://github.com/kornilova-l/scala-native-bindgenblob/master/LICENSE.txt'>Scala license</a>.
+Copyright © Liudmila Kornilova, distributed under the <a href='https://github.com/scala-native/scala-native-bindgenblob/master/LICENSE.txt'>Scala license</a>.
 </div>
 Powered by
 <a href="https://github.com/lightbend/paradox">Paradox</a>

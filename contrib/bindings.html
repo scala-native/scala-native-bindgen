@@ -90,7 +90,7 @@ Type to start searching
 </div>
 <div class="md-flex__cell md-flex__cell--shrink">
 <div class="md-header-nav__source">
-<a href="https://github.com/kornilova-l/scala-native-bindgen"
+<a href="https://github.com/scala-native/scala-native-bindgen"
 title="Go to repository"
 class="md-source"
 data-md-source="github">
@@ -98,7 +98,7 @@ data-md-source="github">
 <i class="fa fa-github"></i>
 </div>
 <div class="md-source__repository">
-kornilova-l/scala-native-bindgen
+scala-native/scala-native-bindgen
 </div>
 </a>
 
@@ -125,7 +125,7 @@ Scala Native Bindgen
 </a>
 </label>
 <div class="md-nav__source">
-<a href="https://github.com/kornilova-l/scala-native-bindgen"
+<a href="https://github.com/scala-native/scala-native-bindgen"
 title="Go to repository"
 class="md-source"
 data-md-source="github">
@@ -133,7 +133,7 @@ data-md-source="github">
 <i class="fa fa-github"></i>
 </div>
 <div class="md-source__repository">
-kornilova-l/scala-native-bindgen
+scala-native/scala-native-bindgen
 </div>
 </a>
 
@@ -141,8 +141,8 @@ kornilova-l/scala-native-bindgen
 <ul>
   <li><a href="../sbt.html" class="page">Generating Bindings with sbt</a></li>
   <li><a href="../cli.html" class="page">Generating Bindings with the CLI</a></li>
-  <li><a href="../using-generated-bindings.html" class="page">Using Generated Bindings</a></li>
-  <li><a href="../integrating-bindings.html" class="page">Integrating Bindings</a></li>
+  <li><a href="../using-bindings.html" class="page">Using Bindings</a></li>
+  <li><a href="../configuration.html" class="page">Configuration</a></li>
   <li><a href="../limitations.html" class="page">Limitations</a></li>
   <li><a href="../bindings/index.html" class="page">Bindings</a>
   <ul>
@@ -174,7 +174,7 @@ kornilova-l/scala-native-bindgen
 <ul style="display: none">
 <li class="md-nav__item md-version" id="project.version">
 <label class="md-nav__link" for="__version">
-<i class="md-icon" title="Version">label_outline</i> 0.3.0
+<i class="md-icon" title="Version">label_outline</i> 0.3.1
 </label>
 </li>
 </ul>
@@ -206,7 +206,7 @@ kornilova-l/scala-native-bindgen
 <p>To add a new binding add a new project in <code>build.sbt</code> with the name of the artifact as well as a binding configuration for each header file and optionally the library to link with. The following example shows how it is possible to generate multiple bindings per project. For most libraries a single binding should be sufficient.</p>
 <pre class="prettyprint"><code class="language-sbt">lazy val libposix = bindingProject(&quot;posix&quot;)
   .configure(binding(&quot;fnmatch.h&quot;))
-  .configure(binding(&quot;regex.h&quot;))</code></pre><a href="https://github.com/kornilova-l/scala-native-bindgen/tree/master/build.sbt#L197-L199">Full source at GitHub</a>
+  .configure(binding(&quot;regex.h&quot;))</code></pre><a href="https://github.com/scala-native/scala-native-bindgen/tree/master/build.sbt#L228-L230">Full source at GitHub</a>
 <p>The new sbt project should also be added to the <code>bindings</code> project&rsquo;s list of aggregated projects.</p>
 <p>Optionally update the top-level <code>Dockerfile</code> to install the binding library&rsquo;s <code>-dev</code> package. </p>
 <pre><code># Install binding dependencies
@@ -214,7 +214,7 @@ RUN set -x \
  &amp;&amp; apt update \
  &amp;&amp; apt install -y --no-install-recommends \
 	libutf8proc-dev \
- &amp;&amp; rm -rf /var/lib/apt/lists/*</code></pre><a href="https://github.com/kornilova-l/scala-native-bindgen/tree/master/Dockerfile#L37-L42">Full source at GitHub</a>
+ &amp;&amp; rm -rf /var/lib/apt/lists/*</code></pre><a href="https://github.com/scala-native/scala-native-bindgen/tree/master/Dockerfile#L37-L42">Full source at GitHub</a>
 <p>Remember to rebuild the development docker image if you change the <code>Dockerfile</code>.</p>
 <pre class="prettyprint"><code class="language-sh">docker-compose build ubuntu-18.04-llvm-6.0
 </code></pre>
@@ -235,13 +235,13 @@ docker-compose run --rm ubuntu-18.04-llvm-6.0 sbt bindings/nativeBindgen
 </code></pre>
 </div>
 <div>
-<a href="https://github.com/kornilova-l/scala-native-bindgen/tree/master/docs/src/paradox/contrib/bindings.md" title="Edit this page" class="md-source-file md-edit">
+<a href="https://github.com/scala-native/scala-native-bindgen/tree/master/docs/src/paradox/contrib/bindings.md" title="Edit this page" class="md-source-file md-edit">
 Edit this page
 </a>
 </div>
 <div class="print-only">
 <span class="md-source-file md-version">
-0.3.0
+0.3.1
 </span>
 </div>
 </article>
@@ -283,7 +283,7 @@ Release Workflow
 <div class="md-footer-meta__inner md-grid">
 <div class="md-footer-copyright">
 <div class="md-footer-copyright__highlight">
-Copyright © Liudmila Kornilova, distributed under the <a href='https://github.com/kornilova-l/scala-native-bindgenblob/master/LICENSE.txt'>Scala license</a>.
+Copyright © Liudmila Kornilova, distributed under the <a href='https://github.com/scala-native/scala-native-bindgenblob/master/LICENSE.txt'>Scala license</a>.
 </div>
 Powered by
 <a href="https://github.com/lightbend/paradox">Paradox</a>

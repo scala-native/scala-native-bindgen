@@ -20,7 +20,7 @@
 
 <meta name="description" content="docs">
 <link rel="shortcut icon" href="assets/images/favicon.png">
-<title>Using Generated Bindings · Scala Native Bindgen</title>
+<title>Using Bindings · Scala Native Bindgen</title>
 <link rel="stylesheet" href="assets/stylesheets/application.451f80e5.css">
 <link rel="stylesheet" href="assets/stylesheets/application-palette.22915126.css">
 <meta name="theme-color" content="#3f51b5" />
@@ -60,7 +60,7 @@ data-md-color-accent="indigo"
 Scala Native Bindgen
 </span>
 <span class="md-header-nav__topic">
-Using Generated Bindings
+Using Bindings
 </span>
 </div>
 </div>
@@ -90,7 +90,7 @@ Type to start searching
 </div>
 <div class="md-flex__cell md-flex__cell--shrink">
 <div class="md-header-nav__source">
-<a href="https://github.com/kornilova-l/scala-native-bindgen"
+<a href="https://github.com/scala-native/scala-native-bindgen"
 title="Go to repository"
 class="md-source"
 data-md-source="github">
@@ -98,7 +98,7 @@ data-md-source="github">
 <i class="fa fa-github"></i>
 </div>
 <div class="md-source__repository">
-kornilova-l/scala-native-bindgen
+scala-native/scala-native-bindgen
 </div>
 </a>
 
@@ -125,7 +125,7 @@ Scala Native Bindgen
 </a>
 </label>
 <div class="md-nav__source">
-<a href="https://github.com/kornilova-l/scala-native-bindgen"
+<a href="https://github.com/scala-native/scala-native-bindgen"
 title="Go to repository"
 class="md-source"
 data-md-source="github">
@@ -133,7 +133,7 @@ data-md-source="github">
 <i class="fa fa-github"></i>
 </div>
 <div class="md-source__repository">
-kornilova-l/scala-native-bindgen
+scala-native/scala-native-bindgen
 </div>
 </a>
 
@@ -141,8 +141,8 @@ kornilova-l/scala-native-bindgen
 <ul>
   <li><a href="sbt.html" class="page">Generating Bindings with sbt</a></li>
   <li><a href="cli.html" class="page">Generating Bindings with the CLI</a></li>
-  <li><a href="using-generated-bindings.html" class="active page">Using Generated Bindings</a></li>
-  <li><a href="integrating-bindings.html" class="page">Integrating Bindings</a></li>
+  <li><a href="using-bindings.html" class="active page">Using Bindings</a></li>
+  <li><a href="configuration.html" class="page">Configuration</a></li>
   <li><a href="limitations.html" class="page">Limitations</a></li>
   <li><a href="bindings/index.html" class="page">Bindings</a>
   <ul>
@@ -160,23 +160,50 @@ kornilova-l/scala-native-bindgen
   </ul></li>
 </ul>
 <nav class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">Table of contents</label>
+<ul>
+  <li><a href="using-bindings.html#using-bindings" class="header">Using Bindings</a>
+  <ul>
+    <li><a href="using-bindings.html#a-simple-vector-library" class="header">A Simple Vector Library</a></li>
+    <li><a href="using-bindings.html#using-the-vector-library" class="header">Using the Vector Library</a></li>
+  </ul></li>
+</ul>
 </nav>
 
 </nav>
 <ul style="display: none">
 <li class="md-nav__item md-version" id="project.version">
 <label class="md-nav__link" for="__version">
-<i class="md-icon" title="Version">label_outline</i> 0.3.0
+<i class="md-icon" title="Version">label_outline</i> 0.3.1
 </label>
 </li>
 </ul>
 </div>
 </div>
 </div>
+<div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">Table of contents</label>
+<ul>
+  <li><a href="using-bindings.html#using-bindings" class="header">Using Bindings</a>
+  <ul>
+    <li><a href="using-bindings.html#a-simple-vector-library" class="header">A Simple Vector Library</a></li>
+    <li><a href="using-bindings.html#using-the-vector-library" class="header">Using the Vector Library</a></li>
+  </ul></li>
+</ul>
+</nav>
+
+</div>
+</div>
+</div>
 <div class="md-content">
 <article class="md-content__inner md-typeset">
 <div class="md-content__searchable">
-<h1><a href="#using-generated-bindings" name="using-generated-bindings" class="anchor"><span class="anchor-link"></span></a>Using Generated Bindings</h1>
+<h1><a href="#using-bindings" name="using-bindings" class="anchor"><span class="anchor-link"></span></a>Using Bindings</h1>
+<p>The following explains how to use bindings generated with Scala Native Bindgen through several examples.</p>
+<h2><a href="#a-simple-vector-library" name="a-simple-vector-library" class="anchor"><span class="anchor-link"></span></a>A Simple Vector Library</h2>
 <p>Consider following header file:</p>
 <pre class="prettyprint"><code class="language-h">struct point {
     float x;
@@ -188,8 +215,13 @@ struct lineSegment {
     struct point b;
 };
 
-float cosine(struct lineSegment *v1, struct lineSegment *v2);</code></pre><a href="https://github.com/kornilova-l/scala-native-bindgen/tree/master/docs/src/test/resources/vector.h">Full source at GitHub</a>
-<p>Bindgen will output  * type aliases for the structs  * binding for function <code>cosine</code>  * helper functions that make usage of structs easier</p>
+float cosine(struct lineSegment *v1, struct lineSegment *v2);</code></pre><a href="https://github.com/scala-native/scala-native-bindgen/tree/master/docs/src/test/resources/using-bindings/vector.h">Full source at GitHub</a>
+<p>Bindgen will output</p>
+<ul>
+  <li>type aliases for the structs</li>
+  <li>binding for function <code>cosine</code></li>
+  <li>helper functions that make usage of structs easier</li>
+</ul>
 <pre class="prettyprint"><code class="language-scala">package org.example
 
 import scala.scalanative._
@@ -239,10 +271,11 @@ object vector {
       ptr
     }
   }
-}</code></pre><a href="https://github.com/kornilova-l/scala-native-bindgen/tree/master/docs/src/test/scala/org/example/vector.scala">Full source at GitHub</a>
-<p>Let&rsquo;s write code that creates two line segments and prints angel between them.</p>
+}</code></pre><a href="https://github.com/scala-native/scala-native-bindgen/tree/master/docs/src/test/scala/org/example/vector.scala">Full source at GitHub</a>
+<h2><a href="#using-the-vector-library" name="using-the-vector-library" class="anchor"><span class="anchor-link"></span></a>Using the Vector Library</h2>
+<p>Let&rsquo;s write code that creates two line segments and calculates the angel between them.</p>
 <p>First we need to create points. We will use <code>native.Zone</code> to allocate struct (more information on memory management can be found here: <a href="http://www.scala-native.org/en/latest/user/interop.html#memory-management">Scala Native memory management</a>).</p>
-<p>Generated bindings contain helper functions that make struct allocation easier. To import them use <code>import org.example.vector._</code></p>
+<p>The generated bindings contain helper functions that make struct allocation easier. To import them use <code>import org.example.vector._</code></p>
 <p>Let&rsquo;s create two points and the first line segment:</p>
 <pre class="prettyprint"><code class="language-scala">import org.example.vector._
 import scala.scalanative.native.Zone
@@ -252,7 +285,7 @@ Zone { implicit zone =&gt;
   val p2 = struct_point(7, 4)
 
   val lineSegment1 = struct_lineSegment(p1, p2)
-}</code></pre><a href="https://github.com/kornilova-l/scala-native-bindgen/tree/master/docs/src/test/scala/org/scalanative/bindgen/docs/VectorSpec.scala#L9-L36">Full source at GitHub</a>
+}</code></pre><a href="https://github.com/scala-native/scala-native-bindgen/tree/master/docs/src/test/scala/org/scalanative/bindgen/docs/VectorSpec.scala#L9-L36">Full source at GitHub</a>
 <p>There is no need to create points manually, just call <code>struct_lineSegment</code> constructor and set point coordinates using fields setters.</p>
 <p>Scala Native allows us to access a field by using <code>_N</code> method where <code>N</code> is index of a field (see <a href="http://www.scala-native.org/en/latest/user/interop.html#memory-layout-types">Scala Native memory layout types</a>) but it is not convenient because we have to match indices with fields names.</p>
 <p>Bindgen provides implicit helper classes that wrap calls to <code>_N</code> in functions with meaningful names. To import these classes add <code>import org.example.vector.implicits._</code> to your code:</p>
@@ -262,19 +295,19 @@ val lineSegment2 = struct_lineSegment()
 
 lineSegment2.a.x = 3
 lineSegment2.a.y = 4
-lineSegment2.b = struct_point(5, 0)</code></pre><a href="https://github.com/kornilova-l/scala-native-bindgen/tree/master/docs/src/test/scala/org/scalanative/bindgen/docs/VectorSpec.scala#L19-L25">Full source at GitHub</a><div class="callout note "><div class="callout-title">Note</div>
-<p>Note that <code>struct_lineSegment</code> contains fields of value type <code>struct_point</code> but setters accept variables of type <code>native.Ptr[struct_point]</code>. It helps to avoid Scala Native limitation that does not allow passing structs and arrays by value (see <a href="https://github.com/scala-native/scala-native/issues/555">scala-native/scala-native#555</a>).</p></div>
-<p>Now we can calculate angel between line segments:</p>
-<pre class="prettyprint"><code class="language-scala">println(cosine(lineSegment1, lineSegment2))</code></pre><a href="https://github.com/kornilova-l/scala-native-bindgen/tree/master/docs/src/test/scala/org/scalanative/bindgen/docs/VectorSpec.scala#L28">Full source at GitHub</a>
+lineSegment2.b = struct_point(5, 0)</code></pre><a href="https://github.com/scala-native/scala-native-bindgen/tree/master/docs/src/test/scala/org/scalanative/bindgen/docs/VectorSpec.scala#L19-L25">Full source at GitHub</a><div class="callout note "><div class="callout-title">Note</div>
+<p><code>struct_lineSegment</code> contains fields of value type <code>struct_point</code> but setters accept variables of type <code>native.Ptr[struct_point]</code>. The reason is that Scala Native does not allow passing structs and arrays by value (see <a href="https://github.com/scala-native/scala-native/issues/555">scala-native/scala-native#555</a>).</p></div>
+<p>Now we can calculate the angel between the line segments:</p>
+<pre class="prettyprint"><code class="language-scala">val angle = cosine(lineSegment1, lineSegment2)</code></pre><a href="https://github.com/scala-native/scala-native-bindgen/tree/master/docs/src/test/scala/org/scalanative/bindgen/docs/VectorSpec.scala#L28">Full source at GitHub</a>
 </div>
 <div>
-<a href="https://github.com/kornilova-l/scala-native-bindgen/tree/master/docs/src/paradox/using-generated-bindings.md" title="Edit this page" class="md-source-file md-edit">
+<a href="https://github.com/scala-native/scala-native-bindgen/tree/master/docs/src/paradox/using-bindings.md" title="Edit this page" class="md-source-file md-edit">
 Edit this page
 </a>
 </div>
 <div class="print-only">
 <span class="md-source-file md-version">
-0.3.0
+0.3.1
 </span>
 </div>
 </article>
@@ -297,13 +330,13 @@ Generating Bindings with the CLI
 </span>
 </div>
 </a>
-<a href="integrating-bindings.html" title="Integrating Bindings" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+<a href="configuration.html" title="Configuration" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
 <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
 <span class="md-flex__ellipsis">
 <span class="md-footer-nav__direction">
 Next
 </span>
-Integrating Bindings
+Configuration
 </span>
 </div>
 <div class="md-flex__cell md-flex__cell--shrink">
@@ -316,7 +349,7 @@ Integrating Bindings
 <div class="md-footer-meta__inner md-grid">
 <div class="md-footer-copyright">
 <div class="md-footer-copyright__highlight">
-Copyright © Liudmila Kornilova, distributed under the <a href='https://github.com/kornilova-l/scala-native-bindgenblob/master/LICENSE.txt'>Scala license</a>.
+Copyright © Liudmila Kornilova, distributed under the <a href='https://github.com/scala-native/scala-native-bindgenblob/master/LICENSE.txt'>Scala license</a>.
 </div>
 Powered by
 <a href="https://github.com/lightbend/paradox">Paradox</a>
