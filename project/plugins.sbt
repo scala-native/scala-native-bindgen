@@ -9,7 +9,7 @@ addSbtPlugin("com.eed3si9n"      % "sbt-buildinfo"              % "0.9.0")
 
 libraryDependencies += "org.scala-sbt" %% "scripted-plugin" % sbtVersion.value
 
-val VERSION = "0.3.0"
+val VERSION = "0.3.1"
 
 //#sbt-plugin-example
 addSbtPlugin("org.scala-native.bindgen" % "sbt-scala-native-bindgen" % VERSION)
