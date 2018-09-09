@@ -224,14 +224,16 @@ lazy val libiconv = bindingProject("iconv")
     }
   )
 
-//#sbt-binding-project
+//#sbt-binding-project-multi-header
 lazy val libposix = bindingProject("posix")
   .configure(binding("fnmatch.h"))
   .configure(binding("regex.h"))
-//#sbt-binding-project
+//#sbt-binding-project-multi-header
 
+//#sbt-binding-project
 lazy val libutf8proc = bindingProject("utf8proc")
   .configure(binding("utf8proc.h", Some("utf8proc")))
+//#sbt-binding-project
 
 def project(name: String, plugged: AutoPlugin*) = {
   val unplugged = Seq(ScriptedPlugin).filterNot(plugged.toSet)
