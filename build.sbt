@@ -215,12 +215,17 @@ lazy val bindings = project("bindings")
 lazy val libiconv = bindingProject("iconv")
   .configure(binding("iconv.h"))
   .settings(
-    Test / nativeLinkingOptions ++= {
-      // Link with libiconv on macOS.
+    //#sbt-iconv-linking-options
+    Compile / nativeLinkingOptions ++= {
       Option(System.getProperty("os.name")) match {
         case Some("Mac OS X") => Seq("-liconv")
         case _                => Seq.empty
       }
+    }
+    //#sbt-iconv-linking-options
+    ,
+    Test / nativeLinkingOptions ++= {
+      (Compile / nativeLinkingOptions).value
     }
   )
 
