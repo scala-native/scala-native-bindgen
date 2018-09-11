@@ -1,4 +1,4 @@
-package org.scalanative.bindgen.bindings.posix
+package org.scalanative.bindings.posix
 
 import scala.scalanative._
 import scala.scalanative.native._

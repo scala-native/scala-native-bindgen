@@ -1,4 +1,4 @@
-package org.scalanative.bindgen.bindings.tests
+package org.scalanative.bindings.tests
 
 import org.scalatest.FunSpec
 
@@ -6,7 +6,7 @@ class Utf8procSpec extends FunSpec {
   describe("utf8proc") {
     it("should iterate UTF-8 and count character width") {
       //#usage-example
-      import org.scalanative.bindgen.bindings.utf8proc.utf8proc._
+      import org.scalanative.bindings.utf8proc._
       import scala.scalanative.native._
 
       val text    = c"Spørge"
@@ -32,7 +32,7 @@ class Utf8procSpec extends FunSpec {
     }
 
     it("utf8proc_tolower") {
-      import org.scalanative.bindgen.bindings.utf8proc.utf8proc._
+      import org.scalanative.bindings.utf8proc._
 
       val `Ø`  = 0x00D8
       val `ø`  = 0x00F8

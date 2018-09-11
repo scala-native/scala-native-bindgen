@@ -1,4 +1,4 @@
-package org.scalanative.bindgen.bindings.iconv
+package org.scalanative.bindings
 
 import scala.scalanative._
 import scala.scalanative.native._

@@ -20,8 +20,8 @@ Binding objects are available under the package name `
 
 Using `fnmatch.h`:
 
-@@snip [fnmatch](../../../../bindings/posix/src/test/scala/org/scalanative/bindgen/bindings/tests/FnmatchSpec.scala) { #usage-example }
+@@snip [fnmatch](../../../../bindings/posix/src/test/scala/org/scalanative/bindings/tests/FnmatchSpec.scala) { #usage-example }
 
 Using `regex.h`:
 
-@@snip [regex](../../../../bindings/posix/src/test/scala/org/scalanative/bindgen/bindings/tests/RegexSpec.scala) { #usage-example }
+@@snip [regex](../../../../bindings/posix/src/test/scala/org/scalanative/bindings/tests/RegexSpec.scala) { #usage-example }

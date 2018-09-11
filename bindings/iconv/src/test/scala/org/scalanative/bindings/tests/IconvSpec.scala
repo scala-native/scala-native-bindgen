@@ -1,4 +1,4 @@
-package org.scalanative.bindgen.bindings.iconv.tests
+package org.scalanative.bindings.tests
 
 import org.scalatest.FunSpec
 
@@ -6,7 +6,7 @@ class IconvSpec extends FunSpec {
   describe("iconv") {
     it("should convert back and forth between UTF-8 and ISO-8859-1") {
       //#usage-example
-      import org.scalanative.bindgen.bindings.iconv.iconv._
+      import org.scalanative.bindings.iconv._
       import scala.scalanative.native._
       import java.nio.charset.Charset
 

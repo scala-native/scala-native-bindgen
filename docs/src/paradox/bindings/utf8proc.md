@@ -8,6 +8,6 @@ To use this binding add the following resolver and dependency:
 
 ## Example
 
-@@snip [iconv](../../../../bindings/utf8proc/src/test/scala/org/scalanative/bindgen/bindings/tests/Utf8procSpec.scala) { #usage-example }
+@@snip [utf8proc](../../../../bindings/utf8proc/src/test/scala/org/scalanative/bindings/tests/Utf8procSpec.scala) { #usage-example }
 
  [utf8proc]: https://juliastrings.github.io/utf8proc/doc/

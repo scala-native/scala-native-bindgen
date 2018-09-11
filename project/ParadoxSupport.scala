@@ -34,8 +34,8 @@ object ParadoxSupport {
     }
 
     def renderBindingDependency(binding: String, printer: Printer): Unit = {
-      val group        = "org.scala-native.bindgen"
-      val artifactName = s"lib$binding"
+      val group        = "org.scala-native.bindings"
+      val artifactName = binding
       val artifactId   = s"${artifactName}_native0.3_${scalaBinaryVersion}"
       val bintrayRepo  = "http://dl.bintray.com/scala-native-bindgen/maven"
 

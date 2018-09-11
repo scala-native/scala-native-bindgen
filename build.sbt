@@ -212,8 +212,7 @@ lazy val bindings = project("bindings")
     libutf8proc
   )
 
-lazy val libiconv = bindingProject("iconv")
-  .configure(binding("iconv.h"))
+lazy val libiconv = bindingProject("iconv")("iconv.h")
   .settings(
     //#sbt-iconv-linking-options
     Compile / nativeLinkingOptions ++= {
@@ -230,14 +229,15 @@ lazy val libiconv = bindingProject("iconv")
   )
 
 //#sbt-binding-project-multi-header
-lazy val libposix = bindingProject("posix")
-  .configure(binding("fnmatch.h"))
-  .configure(binding("regex.h"))
+lazy val libposix = bindingProject("posix")(
+  "fnmatch.h",
+  "regex.h"
+)
 //#sbt-binding-project-multi-header
 
 //#sbt-binding-project
-lazy val libutf8proc = bindingProject("utf8proc")
-  .configure(binding("utf8proc.h", Some("utf8proc")))
+lazy val libutf8proc =
+  bindingProject("utf8proc", Some("utf8proc"))("utf8proc.h")
 //#sbt-binding-project
 
 def project(name: String, plugged: AutoPlugin*) = {
@@ -333,45 +333,51 @@ lazy val bindingsExtraArgs = Try {
   s"-I$libDir/clang/$version/include"
 }.toOption
 
-def bindingProject(name: String) = {
+def bindingProject(name: String, link: Option[String] = None)(
+    headers: String*) = {
+  val packagePath = Seq("org", "scalanative", "bindings") ++
+    (if (headers.length > 1) Seq(name) else Seq.empty)
+
   nativeProject(s"lib$name")
     .enablePlugins(ScalaNativeBindgenPlugin)
     .in(file(s"bindings/$name"))
     .settings(
+      Keys.name := name,
       libraryDependencies += "org.scalatest" %%% "scalatest" % "3.2.0-SNAP10" % Test,
-      Compile / nativeBindgen / target :=
-        (Compile / scalaSource).value / "org/scalanative/bindgen/bindings" / name
+      Compile / nativeBindgen / target := {
+        packagePath.foldLeft((Compile / scalaSource).value)(_ / _)
+      }
     )
+    .settings(
+      headers.flatMap(binding(name, packagePath.mkString("."), link)): _*)
 }
 
-def binding(header: String, link: Option[String] = None)(
-    project: Project): Project = {
-  val headerFile = file("/usr/include") / header
-  val libname    = project.base.getName
-  project.settings(
-    inConfig(Compile)(
+def binding(name: String, packageName: String, link: Option[String])(
+    header: String): Seq[Setting[_]] = {
+  val includeDirs = Seq("/usr/include", "/usr/local/include")
+  val headerFiles = includeDirs.map(dir => file(dir) / header).filter(_.exists)
+
+  headerFiles.headOption match {
+    case Some(headerFile) =>
       Def.settings(
-        nativeBindings ++= {
-          if (headerFile.exists) Seq {
-            NativeBinding(headerFile)
-              .name(header.replace(".h", ""))
-              .packageName(s"org.scalanative.bindgen.bindings.$libname")
-              .maybe(link, _.link)
-              .excludePrefix("__")
-              .extraArgs(bindingsExtraArgs.toSeq: _*)
-              .extraArgs("-D_POSIX_C_SOURCE")
-          } else {
-            Seq.empty
-          }
+        organization := "org.scala-native.binding",
+        Compile / nativeBindings += {
+          NativeBinding(headerFile)
+            .name(link.map(_ => name).getOrElse(header.replace(".h", "")))
+            .packageName(packageName)
+            .maybe(link, _.link)
+            .excludePrefix("__")
+            .extraArgs(bindingsExtraArgs.toSeq: _*)
+            .extraArgs("-D_POSIX_C_SOURCE")
         }
-      )),
-    test := (Def.taskDyn {
-      if (headerFile.exists)
-        Def.task { (Test / test).value } else
-        Def.task {
-          streams.value.log.warn(
-            s"Skipping $libname tests due to missing header file $headerFile")
+      )
+
+    case None =>
+      Def.settings(
+        test := {
+          streams.value.log
+            .warn(s"Skipping $name tests due to missing header file <$header>")
         }
-    }).value
-  )
+      )
+  }
 }
