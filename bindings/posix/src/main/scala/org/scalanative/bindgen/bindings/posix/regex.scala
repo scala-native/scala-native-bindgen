@@ -54,6 +54,16 @@ object regex {
       def rm_eo: regoff_t = !p._2
       def rm_eo_=(value: regoff_t): Unit = !p._2 = value
     }
-    def struct_regmatch_t()(implicit z: native.Zone): native.Ptr[struct_regmatch_t] = native.alloc[struct_regmatch_t]
+  }
+
+  object struct_regmatch_t {
+    import implicits._
+    def apply()(implicit z: native.Zone): native.Ptr[struct_regmatch_t] = native.alloc[struct_regmatch_t]
+    def apply(rm_so: regoff_t, rm_eo: regoff_t)(implicit z: native.Zone): native.Ptr[struct_regmatch_t] = {
+      val ptr = native.alloc[struct_regmatch_t]
+      ptr.rm_so = rm_so
+      ptr.rm_eo = rm_eo
+      ptr
+    }
   }
 }

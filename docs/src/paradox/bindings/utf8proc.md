@@ -1,8 +1,8 @@
-# Utf8proc - UTF-8 text processing
+# utf8proc
 
-This binding for [`utf8proc.h`] provides Unicode normalization, case-folding, and other operations for strings in the UTF-8 encoding.
+The [utf8proc] binding provides Unicode normalization, case-folding, and other operations for strings in the UTF-8 encoding.
 
-To use it add the following resolver and the dependency:
+To use this binding add the following resolver and dependency:
 
 @@binding[utf8proc]
 
@@ -10,4 +10,4 @@ To use it add the following resolver and the dependency:
 
 @@snip [iconv](../../../../bindings/utf8proc/src/test/scala/org/scalanative/bindgen/bindings/tests/Utf8procSpec.scala) { #usage-example }
 
- [`utf8proc.h`]: https://juliastrings.github.io/utf8proc/doc/
+ [utf8proc]: https://juliastrings.github.io/utf8proc/doc/

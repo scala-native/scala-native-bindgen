@@ -1,6 +1,8 @@
 # POSIX
 
-An addition to Scala Native's [POSIX](http://www.scala-native.org/en/latest/lib/posixlib.html) bindings. To use one of the POSIX bindings you must add the resolver and the dependency:
+An addition to Scala Native's [POSIX](http://www.scala-native.org/en/latest/lib/posixlib.html) bindings.
+
+To use this binding add the following resolver and dependency:
 
 @@binding[posix]
 
