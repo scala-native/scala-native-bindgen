@@ -13,6 +13,6 @@ For sbt, you can use the following code:
 
 ## Example
 
-@@snip [iconv](../../../../bindings/iconv/src/test/scala/org/scalanative/bindgen/bindings/tests/IconvSpec.scala) { #usage-example }
+@@snip [iconv](../../../../bindings/iconv/src/test/scala/org/scalanative/bindings/tests/IconvSpec.scala) { #usage-example }
 
  [`iconv.h`]: http://pubs.opengroup.org/onlinepubs/9699919799/basedefs/iconv.h.html
