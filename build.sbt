@@ -117,9 +117,9 @@ lazy val tools = project("tools")
                                Versions.scala212)
   )
 
-lazy val sbtPlugin = project("sbt-scala-native-bindgen", ScriptedPlugin)
+lazy val sbtPlugin = project("sbt-scala-native-bindgen")
   .dependsOn(tools)
-  .enablePlugins(BuildInfoPlugin)
+  .enablePlugins(SbtPlugin, BuildInfoPlugin)
   .settings(
     Keys.sbtPlugin := true,
     scriptedLaunchOpts += s"-Dplugin.version=${version.value}",
@@ -240,11 +240,8 @@ lazy val libutf8proc =
   bindingProject("utf8proc", Some("utf8proc"))("utf8proc.h")
 //#sbt-binding-project
 
-def project(name: String, plugged: AutoPlugin*) = {
-  val unplugged = Seq(ScriptedPlugin).filterNot(plugged.toSet)
-
+def project(name: String) = {
   Project(id = name, base = file(name))
-    .disablePlugins(unplugged: _*)
     .enablePlugins(GitPlugin, GitVersioning)
     .settings(
       versionWithGit,
