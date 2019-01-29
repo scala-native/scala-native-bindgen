@@ -72,6 +72,21 @@ class StructSpec extends FunSpec {
       }
     }
 
+    it("should support unnamed structs") {
+      type struct_unnamedStruct = CStruct1[CInt]
+      Zone { implicit zone =>
+        val unnamedStruct: Ptr[struct_unnamedStruct] =
+          alloc[struct_unnamedStruct]
+        !unnamedStruct._1 = 42
+
+        val structWithAnonymousStruct =
+          Struct.struct_structWithAnonymousStruct()
+        structWithAnonymousStruct.unnamed_0 = unnamedStruct
+
+        assert(42 == Struct.getFieldOfUnnamedStruct(structWithAnonymousStruct))
+      }
+    }
+
     it("should match size of C memory layout for big structs") {
       assert(Struct.getBigStructSize() == sizeof[Struct.struct_bigStruct])
     }

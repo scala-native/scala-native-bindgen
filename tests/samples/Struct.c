@@ -34,8 +34,12 @@ char getCharFromAnonymousStruct(struct structWithAnonymousStruct *s) {
     return s->anonymousStruct.c;
 }
 
-char getIntFromAnonymousStruct(struct structWithAnonymousStruct *s) {
+int getIntFromAnonymousStruct(struct structWithAnonymousStruct *s) {
     return s->anonymousStruct.i;
+}
+
+int getFieldOfUnnamedStruct(struct structWithAnonymousStruct *s) {
+    return s->b;
 }
 
 int struct_test_long(struct bigStruct *s, enum struct_op op, long value) {

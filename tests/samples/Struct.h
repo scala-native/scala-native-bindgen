@@ -54,6 +54,10 @@ struct structWithAnonymousStruct {
         char c;
         int i;
     } anonymousStruct;
+
+    struct {
+        int b;
+    };
 };
 
 struct __attribute__((__packed__)) packedStruct { // no helper methods
@@ -75,7 +79,9 @@ struct bitFieldOffsetDivByEight { // no helper methods
 
 char getCharFromAnonymousStruct(struct structWithAnonymousStruct *s);
 
-char getIntFromAnonymousStruct(struct structWithAnonymousStruct *s);
+int getIntFromAnonymousStruct(struct structWithAnonymousStruct *s);
+
+int getFieldOfUnnamedStruct(struct structWithAnonymousStruct *s);
 
 enum struct_op { STRUCT_SET, STRUCT_TEST };
 
