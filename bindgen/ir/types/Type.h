@@ -22,7 +22,6 @@ struct CycleNode {
  */
 class Type : public std::enable_shared_from_this<Type> {
   public:
-
     virtual ~Type() = default;
 
     virtual std::string str(const LocationManager &locationManager) const = 0;
