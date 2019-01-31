@@ -26,7 +26,8 @@ object Struct {
   type point_s = native.Ptr[struct_point]
   type struct_bigStruct = native.CArray[Byte, native.Nat.Digit[native.Nat._1, native.Nat.Digit[native.Nat._1, native.Nat._2]]]
   type struct_anonymous_0 = native.CStruct2[native.CChar, native.CInt]
-  type struct_structWithAnonymousStruct = native.CStruct2[native.CInt, struct_anonymous_0]
+  type struct_anonymous_1 = native.CStruct1[native.CInt]
+  type struct_structWithAnonymousStruct = native.CStruct3[native.CInt, struct_anonymous_0, struct_anonymous_1]
   type struct_packedStruct = native.CStruct1[native.CChar]
   type struct_bitFieldStruct = native.CArray[Byte, native.Nat._2]
   type struct_bitFieldOffsetDivByEight = native.CArray[Byte, native.Nat._4]
@@ -35,7 +36,8 @@ object Struct {
   def createPoint(): native.Ptr[struct_point] = native.extern
   def getBigStructSize(): native.CInt = native.extern
   def getCharFromAnonymousStruct(s: native.Ptr[struct_structWithAnonymousStruct]): native.CChar = native.extern
-  def getIntFromAnonymousStruct(s: native.Ptr[struct_structWithAnonymousStruct]): native.CChar = native.extern
+  def getIntFromAnonymousStruct(s: native.Ptr[struct_structWithAnonymousStruct]): native.CInt = native.extern
+  def getFieldOfUnnamedStruct(s: native.Ptr[struct_structWithAnonymousStruct]): native.CInt = native.extern
   def struct_test_long(s: native.Ptr[struct_bigStruct], op: enum_struct_op, value: native.CLong): native.CInt = native.extern
   def struct_test_double(s: native.Ptr[struct_bigStruct], op: enum_struct_op, value: native.CDouble): native.CInt = native.extern
   def struct_test_point(s: native.Ptr[struct_bigStruct], op: enum_struct_op, value: native.Ptr[struct_point]): native.CInt = native.extern
@@ -111,11 +113,18 @@ object Struct {
       def i_=(value: native.CInt): Unit = !p._2 = value
     }
 
+    implicit class struct_anonymous_1_ops(val p: native.Ptr[struct_anonymous_1]) extends AnyVal {
+      def b: native.CInt = !p._1
+      def b_=(value: native.CInt): Unit = !p._1 = value
+    }
+
     implicit class struct_structWithAnonymousStruct_ops(val p: native.Ptr[struct_structWithAnonymousStruct]) extends AnyVal {
       def a: native.CInt = !p._1
       def a_=(value: native.CInt): Unit = !p._1 = value
       def anonymousStruct: native.Ptr[struct_anonymous_0] = p._2
       def anonymousStruct_=(value: native.Ptr[struct_anonymous_0]): Unit = !p._2 = !value
+      def unnamed_0: native.Ptr[struct_anonymous_1] = p._3
+      def unnamed_0_=(value: native.Ptr[struct_anonymous_1]): Unit = !p._3 = !value
     }
   }
 
@@ -184,13 +193,24 @@ object Struct {
     }
   }
 
+  object struct_anonymous_1 {
+    import implicits._
+    def apply()(implicit z: native.Zone): native.Ptr[struct_anonymous_1] = native.alloc[struct_anonymous_1]
+    def apply(b: native.CInt)(implicit z: native.Zone): native.Ptr[struct_anonymous_1] = {
+      val ptr = native.alloc[struct_anonymous_1]
+      ptr.b = b
+      ptr
+    }
+  }
+
   object struct_structWithAnonymousStruct {
     import implicits._
     def apply()(implicit z: native.Zone): native.Ptr[struct_structWithAnonymousStruct] = native.alloc[struct_structWithAnonymousStruct]
-    def apply(a: native.CInt, anonymousStruct: native.Ptr[struct_anonymous_0])(implicit z: native.Zone): native.Ptr[struct_structWithAnonymousStruct] = {
+    def apply(a: native.CInt, anonymousStruct: native.Ptr[struct_anonymous_0], unnamed_0: native.Ptr[struct_anonymous_1])(implicit z: native.Zone): native.Ptr[struct_structWithAnonymousStruct] = {
       val ptr = native.alloc[struct_structWithAnonymousStruct]
       ptr.a = a
       ptr.anonymousStruct = anonymousStruct
+      ptr.unnamed_0 = unnamed_0
       ptr
     }
   }

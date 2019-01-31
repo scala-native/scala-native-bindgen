@@ -193,17 +193,21 @@ TypeTranslator::addUnionDefinition(clang::RecordDecl *record,
                                    std::string name) {
     std::vector<std::shared_ptr<Field>> fields;
 
+    int anonIdField = 0;
     for (const clang::FieldDecl *field : record->fields()) {
-        std::string fname = field->getNameAsString();
         std::shared_ptr<Type> ftype = translate(field->getType());
 
+        std::string fname = field->getNameAsString();
+        if (fname.empty()) {
+            fname = "unnamed_" + std::to_string(anonIdField++);
+        }
         fields.push_back(std::make_shared<Field>(fname, ftype));
     }
 
     uint64_t sizeInBits = ctx->getTypeSize(record->getTypeForDecl());
     assert(sizeInBits % 8 == 0);
 
-    return ir.addUnion(name, std::move(fields), sizeInBits / 8,
+    return ir.addUnion(std::move(name), std::move(fields), sizeInBits / 8,
                        getLocation(record));
 }
 
@@ -222,6 +226,7 @@ TypeTranslator::addStructDefinition(clang::RecordDecl *record,
         ctx->getASTRecordLayout(record);
 
     bool isBitFieldStruct = false;
+    int anonIdField = 0;
     for (const clang::FieldDecl *field : record->fields()) {
         if (field->isBitField()) {
             isBitFieldStruct = true;
@@ -229,8 +234,12 @@ TypeTranslator::addStructDefinition(clang::RecordDecl *record,
         std::shared_ptr<Type> ftype = translate(field->getType());
         uint64_t recordOffsetInBits =
             recordLayout.getFieldOffset(field->getFieldIndex());
-        fields.push_back(std::make_shared<Field>(field->getNameAsString(),
-                                                 ftype, recordOffsetInBits));
+        std::string fname = field->getNameAsString();
+        if (fname.empty()) {
+            fname = "unnamed_" + std::to_string(anonIdField++);
+        }
+        fields.push_back(
+            std::make_shared<Field>(fname, ftype, recordOffsetInBits));
     }
 
     uint64_t sizeInBits = ctx->getTypeSize(record->getTypeForDecl());
