@@ -1,0 +1,5 @@
+---
+ - path: stdio.h
+   object: scala.scalanative.native.stdio
+ - path: _stdio.h
+   object: scala.scalanative.native.stdio

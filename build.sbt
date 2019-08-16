@@ -158,7 +158,7 @@ lazy val docs = nativeProject("docs")
         .link("vector")
         .packageName("org.example"), {
         val pathToHeader = docs3rdPartyBindingsDirectory.value / "geometry.h"
-        val pathToConfig = docs3rdPartyBindingsDirectory.value / "config.json"
+        val pathToConfig = docs3rdPartyBindingsDirectory.value / "config.yml"
         //#sbt-binding-config
         NativeBinding(pathToHeader)
           .bindingConfig(pathToConfig)
@@ -175,7 +175,7 @@ lazy val docs = nativeProject("docs")
           .name("WordCount")
           .link("wordcount")
           .packageName("org.example.wordcount")
-          .bindingConfig(docsScalaNativeBindingsDirectory.value / "config.json")
+          .bindingConfig(docsScalaNativeBindingsDirectory.value / "config.yml")
       }
     ),
     nativeBindgenPath := {
