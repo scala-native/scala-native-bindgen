@@ -1,5 +1,6 @@
 #include "IR.h"
 #include "../Utils.h"
+#include <sstream>
 
 IR::IR(std::string libName, std::string linkName, std::string objectName,
        std::string packageName, const LocationManager &locationManager)
