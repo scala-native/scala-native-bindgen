@@ -6,10 +6,8 @@ import BindingHelpers._
 addCommandAlias("verify", "; test ; ^scripted ; docs/makeSite")
 
 val Versions = new {
-  val scala210 = "2.10.6"
   val scala211 = "2.11.12"
   val scala212 = "2.12.12"
-  val sbt013   = "0.13.17"
   val sbt1     = "1.3.13"
 }
 
@@ -112,8 +110,7 @@ lazy val samples = nativeProject("samples")
 
 lazy val tools = project("tools")
   .settings(
-    crossScalaVersions := List(Versions.scala210,
-                               Versions.scala211,
+    crossScalaVersions := List(Versions.scala211,
                                Versions.scala212)
   )
 
@@ -247,10 +244,9 @@ def project(name: String) = {
       versionWithGit,
       git.useGitDescribe := true,
       git.remoteRepo := scmInfo.value.get.connection.replace("scm:git:", ""),
-      crossSbtVersions := List(Versions.sbt013, Versions.sbt1),
+      crossSbtVersions := List(Versions.sbt1),
       scalaVersion := {
         (pluginCrossBuild / sbtBinaryVersion).value match {
-          case "0.13" => Versions.scala210
           case _      => Versions.scala212
         }
       },
