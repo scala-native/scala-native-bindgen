@@ -8,9 +8,9 @@ addCommandAlias("verify", "; test ; ^scripted ; docs/makeSite")
 val Versions = new {
   val scala210 = "2.10.6"
   val scala211 = "2.11.12"
-  val scala212 = "2.12.6"
+  val scala212 = "2.12.12"
   val sbt013   = "0.13.17"
-  val sbt1     = "1.1.6"
+  val sbt1     = "1.3.13"
 }
 
 inThisBuild(
