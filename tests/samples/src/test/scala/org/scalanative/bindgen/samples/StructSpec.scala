@@ -1,11 +1,11 @@
 package org.scalanative.bindgen.samples
 
-import org.scalatest.FunSpec
-import scalanative.native._
+import org.scalatest.funspec.AnyFunSpec
+import scala.scalanative.unsafe._
 
 import org.scalanative.bindgen.samples.Struct.implicits._
 
-class StructSpec extends FunSpec {
+class StructSpec extends AnyFunSpec {
   describe("struct bindings") {
     it("should provide field getters and setters") {
       val point = Struct.createPoint()
@@ -58,8 +58,8 @@ class StructSpec extends FunSpec {
       Zone { implicit zone =>
         val anonymousStruct: Ptr[struct_anonymousStruct] =
           alloc[struct_anonymousStruct]
-        !anonymousStruct._1 = 'a'
-        !anonymousStruct._2 = 42
+        anonymousStruct._1 = 'a'
+        anonymousStruct._2 = 42
 
         val structWithAnonymousStruct =
           Struct.struct_structWithAnonymousStruct()

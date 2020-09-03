@@ -1,12 +1,12 @@
 package org.scalanative.bindings.tests
 
-import org.scalatest.FunSpec
+import org.scalatest.funspec.AnyFunSpec
 
-class RegexSpec extends FunSpec {
+class RegexSpec extends AnyFunSpec {
   describe("regex") {
     it("should match regular expressions") {
       //#usage-example
-      import scala.scalanative.native._
+      import scala.scalanative.unsafe._
       import org.scalanative.bindings.posix.regex._
 
       val reg = stackalloc[regex_t]

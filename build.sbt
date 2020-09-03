@@ -96,7 +96,7 @@ lazy val tests = project("tests")
       "*.h" || "*.scala",
       NothingFilter
     ),
-    libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % Test
+    libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.2" % Test
   )
   .aggregate(samples)
 
@@ -104,7 +104,7 @@ lazy val samples = nativeProject("samples")
   .in(file("tests/samples"))
   .settings(
     publish / skip := true,
-    libraryDependencies += "org.scalatest" %%% "scalatest" % "3.2.0-SNAP10" % Test,
+    libraryDependencies += "org.scalatest" %%% "scalatest" % "3.2.2" % Test,
     compileTask("bindgentests", baseDirectory)
   )
 
@@ -183,7 +183,7 @@ lazy val docs = nativeProject("docs")
     compileTask("vector", docsUsingBindingsDirectory),
     compileTask("geometry", docs3rdPartyBindingsDirectory),
     compileTask("wordcount", docsScalaNativeBindingsDirectory),
-    libraryDependencies += "org.scalatest" %%% "scalatest" % "3.2.0-SNAP10" % Test,
+    libraryDependencies += "org.scalatest" %%% "scalatest" % "3.2.2" % Test,
     Paradox / paradoxProperties ++= Map(
       "github.base_url" -> scmInfo.value.get.browseUrl.toString
     ),
@@ -336,7 +336,7 @@ def bindingProject(name: String, link: Option[String] = None)(
     .in(file(s"bindings/$name"))
     .settings(
       Keys.name := name,
-      libraryDependencies += "org.scalatest" %%% "scalatest" % "3.2.0-SNAP10" % Test,
+      libraryDependencies += "org.scalatest" %%% "scalatest" % "3.2.2" % Test,
       Compile / nativeBindgen / target := {
         packagePath.foldLeft((Compile / scalaSource).value)(_ / _)
       }
