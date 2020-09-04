@@ -1,5 +1,6 @@
 package org.example.wordcount
 
+import scala.scalanative.unsigned._
 import scala.scalanative.unsafe._
 
 @link("wordcount")

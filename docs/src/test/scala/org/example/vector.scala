@@ -1,6 +1,6 @@
 package org.example
 
-
+import scala.scalanative.unsigned._
 import scala.scalanative.unsafe._
 
 @link("vector")
