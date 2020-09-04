@@ -14,7 +14,7 @@ object Function {
   def one_arg(a: CInt): CChar = extern
   def two_args(a: CFloat, b: CInt): Ptr[Byte] = extern
   def anonymous_args(p0: CFloat, p1: CInt): CDouble = extern
-  //FIXME def variadic_args(a: CDouble, varArgs: CString, varArgs0: CVararg*): CDouble = extern
+  def variadic_args(a: CDouble, varArgs: CString, varArgs0: CVarArg*): CDouble = extern
   def acceptsArray(p0: Ptr[CInt]): Unit = extern
 
   object implicits {

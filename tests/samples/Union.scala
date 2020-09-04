@@ -40,7 +40,7 @@ object Union {
       def s: Ptr[CString] = p.asInstanceOf[Ptr[CString]]
       def s_=(value: CString): Unit = !p.asInstanceOf[Ptr[CString]] = value
       def structInUnion: Ptr[struct_s] = p.asInstanceOf[Ptr[struct_s]]
-      def structInUnion_=(value: Ptr[struct_s]): Unit = !p.asInstanceOf[Ptr[struct_s]] = !value
+      def structInUnion_=(value: Ptr[struct_s]): Unit = !p.asInstanceOf[Ptr[struct_s]] = value
     }
   }
 

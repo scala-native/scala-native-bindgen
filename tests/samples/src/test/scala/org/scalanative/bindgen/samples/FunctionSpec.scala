@@ -29,9 +29,7 @@ class FunctionSpec extends AnyFunSpec {
 
     it("should bind to function with variadic args") {
       Zone { implicit z =>
-        // FIXME
-        val result = 3210.2
-          //Function.variadic_args(0.2, toCString("0123"), 1, 10, 100, 1000)
+        val result = Function.variadic_args(0.2, toCString("0123"), 1, 10, 100, 1000)
         assert(result == 3210.2)
       }
     }

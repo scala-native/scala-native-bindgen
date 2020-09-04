@@ -67,7 +67,7 @@ object Struct {
       def five: CDouble = !(p + 24).asInstanceOf[Ptr[CDouble]]
       def five_=(value: CDouble): Unit = !(p + 24).asInstanceOf[Ptr[CDouble]] = value
       def six: Ptr[struct_point] = (p + 32).asInstanceOf[Ptr[struct_point]]
-      def six_=(value: Ptr[struct_point]): Unit = !(p + 32).asInstanceOf[Ptr[struct_point]] = !value
+      def six_=(value: Ptr[struct_point]): Unit = !(p + 32).asInstanceOf[Ptr[struct_point]] = value
       def seven: Ptr[struct_point] = !(p + 40).asInstanceOf[Ptr[Ptr[struct_point]]]
       def seven_=(value: Ptr[struct_point]): Unit = !(p + 40).asInstanceOf[Ptr[Ptr[struct_point]]] = value
       def eight: CInt = !(p + 48).asInstanceOf[Ptr[CInt]]

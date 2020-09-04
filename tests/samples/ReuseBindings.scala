@@ -21,7 +21,7 @@ object ReuseBindings {
       def index: org.scalanative.bindgen.samples.Struct.enum_pointIndex = p._1
       def index_=(value: org.scalanative.bindgen.samples.Struct.enum_pointIndex): Unit = p._1 = value
       def weight: Ptr[org.scalanative.bindgen.samples.CustomNames.weight] = p._2.asInstanceOf[Ptr[org.scalanative.bindgen.samples.CustomNames.weight]]
-      def weight_=(value: Ptr[org.scalanative.bindgen.samples.CustomNames.weight]): Unit = p._2 = !value
+      def weight_=(value: Ptr[org.scalanative.bindgen.samples.CustomNames.weight]): Unit = p._2 = value
     }
   }
 

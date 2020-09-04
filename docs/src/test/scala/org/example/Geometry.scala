@@ -14,7 +14,7 @@ object Geometry {
   object implicits {
     implicit class struct_circle_ops(val p: Ptr[struct_circle]) extends AnyVal {
       def point: Ptr[com.example.custom.binding.Vector.Point] = p._1.asInstanceOf[Ptr[com.example.custom.binding.Vector.Point]]
-      def point_=(value: Ptr[com.example.custom.binding.Vector.Point]): Unit = p._1 = !value
+      def point_=(value: Ptr[com.example.custom.binding.Vector.Point]): Unit = p._1 = value
       def radius: CDouble = p._2
       def radius_=(value: CDouble): Unit = p._2 = value
     }
