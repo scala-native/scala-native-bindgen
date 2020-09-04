@@ -1,5 +1,6 @@
 package org.scalanative.bindgen.samples
 
+import scala.scalanative.unsigned._
 import scala.scalanative.unsafe._
 
 object NativeTypes {

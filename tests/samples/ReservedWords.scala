@@ -1,17 +1,18 @@
 package org.scalanative.bindgen.samples
 
-import scala.scalanative.unsafe._, Nat._
+import scala.scalanative.unsigned._
+import scala.scalanative.unsafe._
 
 @link("bindgentests")
 @extern
 object ReservedWords {
   type `match` = CInt
-  type `var` = CArray[`match`, _5]
+  type `var` = CArray[`match`, Nat._5]
   type struct_object = CStruct2[`match`, CInt]
   type `object` = struct_object
   type `type` = struct_object
   type struct_anonymous_0 = CStruct2[CChar, Ptr[`type`]]
-  type union_lazy = CArray[Byte, _8]
+  type union_lazy = CArray[Byte, Nat._8]
   type `lazy` = union_lazy
   type `def` = `match`
   type struct_finally = CStruct2[`def`, `lazy`]

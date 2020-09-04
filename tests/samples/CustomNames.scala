@@ -1,7 +1,7 @@
 package org.scalanative.bindgen.samples
 
 import scala.scalanative.unsigned._
-import scala.scalanative.unsafe._, Nat._
+import scala.scalanative.unsafe._
 
 @link("bindgentests")
 @extern
@@ -14,6 +14,6 @@ object CustomNames {
   type EnumWithTypedef = enum_enumWithTypedef
   type page = CStruct2[CString, Ptr[Byte]]
   type book = CStruct1[Ptr[page]]
-  type weight = CArray[Byte, _4]
+  type weight = CArray[Byte, Nat._4]
   type MY_INT = CInt
 }

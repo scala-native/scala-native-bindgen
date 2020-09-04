@@ -1,7 +1,7 @@
 package org.scalanative.bindgen.samples
 
-import scala.scalanative._
-import scala.scalanative.unsafe._, Nat._
+import scala.scalanative.unsigned._
+import scala.scalanative.unsafe._
 
 @link("bindgentests")
 @extern

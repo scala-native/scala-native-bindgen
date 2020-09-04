@@ -1,7 +1,7 @@
 package org.scalanative.bindgen.samples
 
 import scala.scalanative.unsigned._
-import scala.scalanative.unsafe._, Nat._
+import scala.scalanative.unsafe._
 
 @link("bindgentests")
 @extern
@@ -24,7 +24,7 @@ object Struct {
   type point = struct_point
   type struct_points = CStruct2[struct_point, point]
   type point_s = Ptr[struct_point]
-  type struct_bigStruct = CArray[Byte, Digit3[_1, _1, _2]]
+  type struct_bigStruct = CArray[Byte, Nat.Digit3[Nat._1, Nat._1, Nat._2]]
   type struct_anonymous_0 = CStruct2[CChar, CInt]
   type struct_structWithAnonymousStruct = CStruct2[CInt, struct_anonymous_0]
   type struct_packedStruct = CStruct1[CChar]

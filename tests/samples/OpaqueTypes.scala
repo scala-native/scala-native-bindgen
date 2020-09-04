@@ -1,6 +1,7 @@
 package org.scalanative.bindgen.samples
 
-import scala.scalanative.unsafe._, Nat._
+import scala.scalanative.unsigned._
+import scala.scalanative.unsafe._
 
 @link("bindgentests")
 @extern
@@ -10,11 +11,11 @@ object OpaqueTypes {
   type struct_points = CStruct2[Ptr[struct_point], Ptr[struct_point]]
   type points = struct_points
   type struct_point = CStruct2[CInt, CInt]
-  type union_u = CArray[Byte, _4]
+  type union_u = CArray[Byte, Nat._4]
   type u = union_u
   type struct_undefinedStruct = CStruct0 // incomplete type
   type struct_structWithPointerToUndefinedStruct = CStruct1[Ptr[struct_undefinedStruct]]
-  type union_unionWithPointerToUndefinedStruct = CArray[Byte, _8]
+  type union_unionWithPointerToUndefinedStruct = CArray[Byte, Nat._8]
   type union_undefinedUnion = CStruct0 // incomplete type
   type undefinedUnion = union_undefinedUnion
   type aliasToPointerOfUndefinedUnion = Ptr[undefinedUnion]

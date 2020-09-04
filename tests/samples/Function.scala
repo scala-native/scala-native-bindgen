@@ -1,13 +1,14 @@
 package org.scalanative.bindgen.samples
 
-import scala.scalanative.unsafe._, Nat._
+import scala.scalanative.unsigned._
+import scala.scalanative.unsafe._
 
 @link("bindgentests")
 @extern
 object Function {
   type struct_s = CStruct1[CInt]
   type s = struct_s
-  type union_u = CArray[Byte, _4]
+  type union_u = CArray[Byte, Nat._4]
   def no_args(): CInt = extern
   def void_arg(): CFloat = extern
   def one_arg(a: CInt): CChar = extern

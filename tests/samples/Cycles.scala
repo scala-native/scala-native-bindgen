@@ -1,6 +1,7 @@
 package org.scalanative.bindgen.samples
 
-import scala.scalanative.unsafe._, Nat._
+import scala.scalanative.unsigned._
+import scala.scalanative.unsafe._
 
 object Cycles {
   type struct_node = CStruct2[CInt, Ptr[Byte]]
@@ -15,7 +16,7 @@ object Cycles {
   type struct_TwoTypesReplaced1 = CStruct1[Ptr[struct_TwoTypesReplaced2]]
   type struct_TwoTypesReplaced2 = CStruct1[Ptr[struct_TwoTypesReplaced3]]
   type struct_TwoTypesReplaced3 = CStruct1[CFuncPtr1[Ptr[Byte], Ptr[Byte]]]
-  type union_cycleWithUnionU = CArray[Byte, _8]
+  type union_cycleWithUnionU = CArray[Byte, Nat._8]
   type struct_cycleWithUnionS = CStruct1[Ptr[union_cycleWithUnionU]]
   type struct_FuncPointerWithValueType2 = CStruct1[CFuncPtr0[CStruct0]]
   type struct_FuncPointerWithValueType1 = CStruct1[Ptr[struct_FuncPointerWithValueType2]]
