@@ -25,9 +25,9 @@ object Vector {
     implicit class LineSegmentOps(val p: Ptr[LineSegment])
         extends AnyVal {
       def a: Ptr[Point]                = p._1.asInstanceOf[Ptr[Point]]
-      def a_=(value: Ptr[Point]): Unit = p._1 = !value
+      def a_=(value: Ptr[Point]): Unit = p._1 = value
       def b: Ptr[Point]                = p._2.asInstanceOf[Ptr[Point]]
-      def b_=(value: Ptr[Point]): Unit = p._2 = !value
+      def b_=(value: Ptr[Point]): Unit = p._2 = value
     }
   }
 

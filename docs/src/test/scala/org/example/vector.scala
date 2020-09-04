@@ -20,9 +20,9 @@ object vector {
 
     implicit class struct_lineSegment_ops(val p: Ptr[struct_lineSegment]) extends AnyVal {
       def a: Ptr[struct_point] = p._1.asInstanceOf[Ptr[struct_point]]
-      def a_=(value: Ptr[struct_point]): Unit = p._1 = !value
+      def a_=(value: Ptr[struct_point]): Unit = p._1 = value
       def b: Ptr[struct_point] = p._2.asInstanceOf[Ptr[struct_point]]
-      def b_=(value: Ptr[struct_point]): Unit = p._2 = !value
+      def b_=(value: Ptr[struct_point]): Unit = p._2 = value
     }
   }
 
