@@ -1,7 +1,7 @@
 package org.scalanative.bindings.posix
 
 import scala.scalanative.unsigned._
-import scala.scalanative.unsafe._, Nat._
+import scala.scalanative.unsafe._,
 
 @extern
 object regex {
@@ -30,7 +30,7 @@ object regex {
   type active_reg_t = CUnsignedLong
   type reg_syntax_t = CUnsignedLong
   type reg_errcode_t = enum_reg_errcode_t
-  type struct_re_pattern_buffer = CArray[Byte, Digit2[_6, _4]]
+  type struct_re_pattern_buffer = CArray[Byte, Nat.Digit2[Nat._6, Nat._4]]
   type regex_t = struct_re_pattern_buffer
   type regoff_t = CInt
   type struct_regmatch_t = CStruct2[regoff_t, regoff_t]

@@ -1,5 +1,6 @@
 package org.scalanative.bindings.posix
 
+import scala.scalanative.unsigned._
 import scala.scalanative.unsafe._
 
 @extern
