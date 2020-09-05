@@ -49,9 +49,9 @@ object Struct {
     }
 
     implicit class struct_points_ops(val p: Ptr[struct_points]) extends AnyVal {
-      def p1: Ptr[struct_point] = p._1.asInstanceOf[Ptr[struct_point]]
+      def p1: Ptr[struct_point] = p.at1
       def p1_=(value: Ptr[struct_point]): Unit = p._1 = value
-      def p2: Ptr[point] = p._2.asInstanceOf[Ptr[point]]
+      def p2: Ptr[point] = p.at2
       def p2_=(value: Ptr[point]): Unit = p._2 = value
     }
 
@@ -114,7 +114,7 @@ object Struct {
     implicit class struct_structWithAnonymousStruct_ops(val p: Ptr[struct_structWithAnonymousStruct]) extends AnyVal {
       def a: CInt = p._1
       def a_=(value: CInt): Unit = p._1 = value
-      def anonymousStruct: Ptr[struct_anonymous_0] = p._2.asInstanceOf[Ptr[struct_anonymous_0]]
+      def anonymousStruct: Ptr[struct_anonymous_0] = p.at2
       def anonymousStruct_=(value: Ptr[struct_anonymous_0]): Unit = p._2 = value
     }
   }
