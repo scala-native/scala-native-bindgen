@@ -5,13 +5,11 @@ import BindingHelpers._
 
 addCommandAlias("verify", "; test ; ^scripted ; docs/makeSite")
 
-val Versions = new {
-  val scala211  = "2.11.12"
-  val scala212  = "2.12.12"
-  val sbt1      = "1.3.13"
-  val scalaTest = "3.2.2"
-}
-import Versions._
+val scala211  = "2.11.12"
+val scala212  = "2.12.12"
+val sbt1      = "1.3.13"
+val scalaTest = "3.2.2"
+
 
 inThisBuild(
   Def.settings(
@@ -112,8 +110,8 @@ lazy val samples = nativeProject("samples")
 
 lazy val tools = project("tools")
   .settings(
-    crossScalaVersions := List(Versions.scala211,
-                               Versions.scala212)
+    crossScalaVersions := List(scala211,
+                               scala212)
   )
 
 lazy val sbtPlugin = project("sbt-scala-native-bindgen")
@@ -203,7 +201,7 @@ lazy val docs = nativeProject("docs")
 lazy val bindings = project("bindings")
   .settings(
     publish / skip := true,
-    scalaVersion := Versions.scala211
+    scalaVersion := scala211
   )
   .aggregate(
     libiconv,
@@ -246,10 +244,10 @@ def project(name: String) = {
       versionWithGit,
       git.useGitDescribe := true,
       git.remoteRepo := scmInfo.value.get.connection.replace("scm:git:", ""),
-      crossSbtVersions := List(Versions.sbt1),
+      crossSbtVersions := List(sbt1),
       scalaVersion := {
         (pluginCrossBuild / sbtBinaryVersion).value match {
-          case _      => Versions.scala212
+          case _      => scala212
         }
       },
       bintrayOrganization := Some("scala-native-bindgen"),
@@ -266,7 +264,7 @@ def nativeProject(name: String) = {
   project(name)
     .enablePlugins(ScalaNativePlugin)
     .settings(
-      scalaVersion := Versions.scala211,
+      scalaVersion := scala211,
       nativeLinkStubs := true
     )
 }
