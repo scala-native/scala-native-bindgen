@@ -7,5 +7,8 @@ import scala.scalanative.native._
 object stdlib {
   def access(path: CString, mode: CInt): CInt = extern
   def read(fildes: CInt, buf: Ptr[Byte], nbyte: CInt): CInt = extern
-  def printf(format: CString, varArgs: CVararg*): CInt = extern
+  //def printf(format: CString, varArgs: CVararg*): CInt = extern
+  def printf(format: CString, args: CVarArg*): CInt = Zone {
+    implicit z => stdio.vprintf(format, toCVarArgList(args.toSeq))
+  }
 }
