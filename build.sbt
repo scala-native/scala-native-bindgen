@@ -25,7 +25,7 @@ inThisBuild(
       "-encoding",
       "utf8"
     ),
-    parallelExecution in Global := false,
+    Global / parallelExecution := false,
     scmInfo := Some(
       ScmInfo(url("https://github.com/scala-native/scala-native-bindgen"),
               "scm:git:git@github.com:scala-native/scala-native-bindgen.git")),

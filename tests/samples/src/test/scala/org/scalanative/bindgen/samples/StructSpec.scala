@@ -2,6 +2,7 @@ package org.scalanative.bindgen.samples
 
 import org.scalatest.funspec.AnyFunSpec
 import scala.scalanative.unsafe._
+import scala.scalanative.unsigned._
 
 import org.scalanative.bindgen.samples.Struct.implicits._
 
@@ -73,7 +74,7 @@ class StructSpec extends AnyFunSpec {
     }
 
     it("should match size of C memory layout for big structs") {
-      assert(Struct.getBigStructSize() == sizeof[Struct.struct_bigStruct])
+      assert(Struct.getBigStructSize().toULong == sizeof[Struct.struct_bigStruct])
     }
 
     it("should provide field getters for big structs") {
