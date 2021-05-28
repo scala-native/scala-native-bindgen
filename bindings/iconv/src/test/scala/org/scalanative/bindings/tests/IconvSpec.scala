@@ -8,6 +8,7 @@ class IconvSpec extends AnyFunSpec {
       //#usage-example
       import org.scalanative.bindings.iconv._
       import scala.scalanative.unsafe._
+      import scala.scalanative.unsigned._
       import scala.scalanative.libc._
       import java.nio.charset.Charset
 
@@ -29,7 +30,7 @@ class IconvSpec extends AnyFunSpec {
         val translatedBufPtr = alloc[CString]
         !translatedBufPtr = translatedBuf
         val translatedBytesLeft = alloc[CSize]
-        !translatedBytesLeft = 32
+        !translatedBytesLeft = 32.toULong
 
         val translatedCode = iconv(
           encode,
@@ -49,7 +50,7 @@ class IconvSpec extends AnyFunSpec {
         val roundtripBufPtr = alloc[CString]
         !roundtripBufPtr = roundtripBuf
         val roundtripBytesLeft = alloc[CSize]
-        !roundtripBytesLeft = 32
+        !roundtripBytesLeft = 32.toULong
 
         val roundtripCode = iconv(
           decode,

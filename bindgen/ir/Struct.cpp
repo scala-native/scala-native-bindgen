@@ -138,10 +138,10 @@ std::string Struct::generateSetterForStructRepresentation(
             field->getType(), structTypesThatShouldBeReplaced);
         value = value + ".asInstanceOf[" + typeReplacement->str(locationManager) + "]";
     } else if (isArrayOrRecord(field->getType())) {
-        //FIXME remove value = "!" + value;
+        //value = "!" + value;
     }
     std::stringstream s;
-    s << "      def " << setter << "(value: " + parameterType + "): Unit = !p._"
+    s << "      def " << setter << "(value: " + parameterType + "): Unit = p._"
       << std::to_string(fieldIndex + 1) << " = " << value << "\n";
     return s.str();
 }
@@ -154,7 +154,7 @@ std::string Struct::generateGetterForStructRepresentation(
         wrapArrayOrRecordInPointer(field->getType())->str(locationManager);
     std::string methodBody = "p._" + std::to_string(fieldIndex + 1);
     if (!isArrayOrRecord(field->getType())) {
-        // FIXME remove methodBody = "!" + methodBody;
+        // methodBody = "!" + methodBody;
         if (!shouldFieldBreakCycle(field).empty()) {
             /* field type is changed to avoid cyclic types in generated code */
             methodBody = methodBody + ".asInstanceOf[" +
@@ -196,7 +196,7 @@ std::string Struct::generateSetterForArrayRepresentation(
             field->getType(), structTypesThatShouldBeReplaced);
         value = value + ".asInstanceOf[" + typeReplacement->str(locationManager) + "]";
     } else if (isArrayOrRecord(field->getType())) {
-        //FIXME remove value = "!" + value;
+        //value = "!" + value;
     }
     std::stringstream s;
     s << "      def " << setter
@@ -224,7 +224,7 @@ std::string Struct::generateGetterForArrayRepresentation(
         methodBody + ".asInstanceOf[" + pointerToFieldType.str(locationManager) + "]";
 
     if (!isArrayOrRecord(field->getType())) {
-        //FIXME remove methodBody = "!" + methodBody;
+        //methodBody = "!" + methodBody;
         if (!shouldFieldBreakCycle(field).empty()) {
             /* field type is changed to avoid cyclic types in generated code */
             methodBody = "(" + methodBody + ").asInstanceOf[" +

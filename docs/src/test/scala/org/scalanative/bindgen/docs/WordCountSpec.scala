@@ -14,7 +14,7 @@ class WordCountSpec extends AnyFunSpec {
       val pathToFile =
         c"docs/src/test/resources/scala-native-bindings/wordcount.h"
 
-      import scala.scalanative.posix._, unistd.access, fcntl.R_OK
+      import scala.scalanative.posix._, unistd.access, unistd.R_OK
       assert(access(pathToFile, R_OK) == 0, "Header file does not exist")
 
       //#example

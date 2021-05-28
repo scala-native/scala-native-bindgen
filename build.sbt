@@ -6,7 +6,7 @@ import BindingHelpers._
 addCommandAlias("verify", "; test ; ^scripted ; docs/makeSite")
 
 val scala211  = "2.11.12"
-val scala212  = "2.12.12"
+val scala212  = "2.12.13"
 val sbt1      = "1.3.13"
 val scalaTest = "3.2.4-M1"
 
