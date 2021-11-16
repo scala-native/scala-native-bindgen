@@ -3,6 +3,8 @@ project(scala-native-bindgen)
 
 option(STATIC_LINKING "Statically link the executable" OFF)
 
+find_package(nlohmann_json REQUIRED)
+
 # Locate LLVMConfig.cmake
 find_package(LLVM REQUIRED CONFIG)
 message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
@@ -106,6 +108,7 @@ set_target_properties(bindgen
 
 target_link_libraries(bindgen
   PRIVATE
+  nlohmann_json
   clangFrontend
   clangTooling
   clangSerialization
