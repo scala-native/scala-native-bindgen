@@ -12,11 +12,11 @@ class Utf8procSpec extends AnyFunSpec {
       import scala.scalanative.libc._
 
       val text    = c"Spørge"
-      val textlen = string.strlen(text)
+      val textlen = string.strlen(text).toInt
 
-      val codepoint        = stackalloc[utf8proc_int32_t]
-      var textpos: CSize   = 0
-      var textwidth: CSize = 0
+      val codepoint = stackalloc[utf8proc_int32_t]
+      var textpos   = 0
+      var textwidth = 0
 
       while (textpos < textlen) {
         val bytes = utf8proc_iterate(
@@ -25,7 +25,7 @@ class Utf8procSpec extends AnyFunSpec {
           codepoint
         )
         textwidth += utf8proc_charwidth(!codepoint)
-        textpos += bytes
+        textpos += bytes.toInt
       }
 
       assert(textlen == 7)

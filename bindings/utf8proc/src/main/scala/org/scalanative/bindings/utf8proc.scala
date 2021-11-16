@@ -142,7 +142,7 @@ object utf8proc {
   type utf8proc_int32_t = int32_t
   type utf8proc_uint32_t = uint32_t
   type utf8proc_size_t = CSize
-  type utf8proc_ssize_t = CPtrDiff
+  type utf8proc_ssize_t = CSSize
   type utf8proc_bool = CBool
   type utf8proc_option_t = enum_utf8proc_option_t
   type utf8proc_propval_t = utf8proc_int16_t

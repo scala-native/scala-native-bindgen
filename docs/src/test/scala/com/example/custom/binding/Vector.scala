@@ -11,8 +11,7 @@ object Vector {
   type LineSegment = CStruct2[Point, Point]
   // ...
   //#example
-  def cosine(v1: Ptr[LineSegment],
-             v2: Ptr[LineSegment]): CFloat = extern
+  def cosine(v1: Ptr[LineSegment], v2: Ptr[LineSegment]): CFloat = extern
 
   object implicits {
     implicit class PointOps(val p: Ptr[Point]) extends AnyVal {
@@ -22,8 +21,7 @@ object Vector {
       def y_=(value: CFloat): Unit = p._2 = value
     }
 
-    implicit class LineSegmentOps(val p: Ptr[LineSegment])
-        extends AnyVal {
+    implicit class LineSegmentOps(val p: Ptr[LineSegment]) extends AnyVal {
       def a: Ptr[Point]                = p._1.asInstanceOf[Ptr[Point]]
       def a_=(value: Ptr[Point]): Unit = p._1 = value
       def b: Ptr[Point]                = p._2.asInstanceOf[Ptr[Point]]
@@ -35,8 +33,7 @@ object Vector {
     import implicits._
     def apply()(implicit z: Zone): Ptr[Point] =
       alloc[Point]
-    def apply(x: CFloat, y: CFloat)(
-        implicit z: Zone): Ptr[Point] = {
+    def apply(x: CFloat, y: CFloat)(implicit z: Zone): Ptr[Point] = {
       val ptr = alloc[Point]
       ptr.x = x
       ptr.y = y

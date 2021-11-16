@@ -11,7 +11,6 @@ val scala213  = "2.13.7"
 val sbt1      = "1.3.13"
 val scalaTest = "3.2.4-M1"
 
-
 inThisBuild(
   Def.settings(
     organization := "org.scala-native.bindgen",
@@ -111,8 +110,7 @@ lazy val samples = nativeProject("samples")
 
 lazy val tools = project("tools")
   .settings(
-    crossScalaVersions := List(scala211,
-                               scala212, scala213)
+    crossScalaVersions := List(scala211, scala212, scala213)
   )
 
 lazy val sbtPlugin = project("sbt-scala-native-bindgen")
@@ -248,7 +246,7 @@ def project(name: String) = {
       crossSbtVersions := List(sbt1),
       scalaVersion := {
         (pluginCrossBuild / sbtBinaryVersion).value match {
-          case _      => scala212
+          case _ => scala212
         }
       },
       bintrayOrganization := Some("scala-native-bindgen"),

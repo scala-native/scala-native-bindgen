@@ -74,7 +74,8 @@ class StructSpec extends AnyFunSpec {
     }
 
     it("should match size of C memory layout for big structs") {
-      assert(Struct.getBigStructSize().toULong == sizeof[Struct.struct_bigStruct])
+      assert(
+        Struct.getBigStructSize().toULong == sizeof[Struct.struct_bigStruct])
     }
 
     it("should provide field getters for big structs") {
