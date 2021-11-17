@@ -344,9 +344,20 @@ def bindingProject(name: String, link: Option[String] = None)(
       headers.flatMap(binding(name, packagePath.mkString("."), link)): _*)
 }
 
+/* /usr/include is not standard on macOS anymore
+ * The command below returns the path to the usr/include dir
+ * Example: /Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk
+ * Ref: https://apple.stackexchange.com/questions/337940/why-is-usr-include-missing-i-have-xcode-and-command-line-tools-installed-moja
+ */
+lazy val usrInclude = {
+  val isMac = scala.util.Properties.isMac
+  (if (isMac) "xcrun --show-sdk-path".!!.trim else "") + "/usr/include"
+}
+
 def binding(name: String, packageName: String, link: Option[String])(
     header: String): Seq[Setting[_]] = {
-  val includeDirs = Seq("/usr/include", "/usr/local/include")
+
+  val includeDirs = Seq(usrInclude, "/usr/local/include")
   val headerFiles = includeDirs.map(dir => file(dir) / header).filter(_.exists)
 
   headerFiles.headOption match {
