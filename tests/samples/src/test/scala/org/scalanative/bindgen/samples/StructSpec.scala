@@ -88,6 +88,20 @@ class StructSpec extends AnyFunSpec {
           assert(structPtr.one == value)
         }
 
+        for (value <- Seq[Byte](Byte.MinValue, -1, 0, 1, Byte.MaxValue)) {
+          Struct.struct_test_char(structPtr,
+                                  Struct.enum_struct_op.STRUCT_SET,
+                                  value)
+          assert(structPtr.two == value)
+        }
+
+        for (value <- Seq(Int.MinValue, -1, 0, 1, Int.MaxValue)) {
+          Struct.struct_test_int(structPtr,
+                                 Struct.enum_struct_op.STRUCT_SET,
+                                 value)
+          assert(structPtr.three == value)
+        }
+
         for (value <- Seq(Double.MinValue, -1, 0, 1, Double.MaxValue)) {
           Struct.struct_test_double(structPtr,
                                     Struct.enum_struct_op.STRUCT_SET,
@@ -116,6 +130,22 @@ class StructSpec extends AnyFunSpec {
             Struct.struct_test_long(structPtr,
                                     Struct.enum_struct_op.STRUCT_TEST,
                                     value) == 1)
+        }
+
+        for (value <- Seq[Byte](Byte.MinValue, -1, 0, 1, Byte.MaxValue)) {
+          structPtr.two = value
+          assert(
+            Struct.struct_test_char(structPtr,
+                                    Struct.enum_struct_op.STRUCT_TEST,
+                                    value) == 1)
+        }
+
+        for (value <- Seq(Int.MinValue, -1, 0, 1, Int.MaxValue)) {
+          structPtr.three = value
+          assert(
+            Struct.struct_test_int(structPtr,
+                                   Struct.enum_struct_op.STRUCT_TEST,
+                                   value) == 1)
         }
 
         for (value <- Seq(Double.MinValue, -1, 0, 1, Double.MaxValue)) {

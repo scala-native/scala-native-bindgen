@@ -36,6 +36,8 @@ object Struct {
   def getBigStructSize(): CInt = extern
   def getCharFromAnonymousStruct(s: Ptr[struct_structWithAnonymousStruct]): CChar = extern
   def getIntFromAnonymousStruct(s: Ptr[struct_structWithAnonymousStruct]): CChar = extern
+  def struct_test_char(s: Ptr[struct_bigStruct], op: enum_struct_op, value: CChar): CInt = extern
+  def struct_test_int(s: Ptr[struct_bigStruct], op: enum_struct_op, value: CInt): CInt = extern
   def struct_test_long(s: Ptr[struct_bigStruct], op: enum_struct_op, value: CLong): CInt = extern
   def struct_test_double(s: Ptr[struct_bigStruct], op: enum_struct_op, value: CDouble): CInt = extern
   def struct_test_point(s: Ptr[struct_bigStruct], op: enum_struct_op, value: Ptr[struct_point]): CInt = extern
@@ -50,58 +52,58 @@ object Struct {
 
     implicit class struct_points_ops(val p: Ptr[struct_points]) extends AnyVal {
       def p1: Ptr[struct_point] = p.at1
-      def p1_=(value: Ptr[struct_point]): Unit = p._1 = value
+      def p1_=(value: Ptr[struct_point]): Unit = !p.at1 = value
       def p2: Ptr[point] = p.at2
-      def p2_=(value: Ptr[point]): Unit = p._2 = value
+      def p2_=(value: Ptr[point]): Unit = !p.at2 = value
     }
 
     implicit class struct_bigStruct_ops(val p: Ptr[struct_bigStruct]) extends AnyVal {
       def one: CLong = !p.asInstanceOf[Ptr[CLong]]
       def one_=(value: CLong): Unit = !p.asInstanceOf[Ptr[CLong]] = value
-      def two: CChar = !(p + 8).asInstanceOf[Ptr[CChar]]
-      def two_=(value: CChar): Unit = !(p + 8).asInstanceOf[Ptr[CChar]] = value
-      def three: CInt = !(p + 12).asInstanceOf[Ptr[CInt]]
-      def three_=(value: CInt): Unit = !(p + 12).asInstanceOf[Ptr[CInt]] = value
-      def four: CFloat = !(p + 16).asInstanceOf[Ptr[CFloat]]
-      def four_=(value: CFloat): Unit = !(p + 16).asInstanceOf[Ptr[CFloat]] = value
-      def five: CDouble = !(p + 24).asInstanceOf[Ptr[CDouble]]
-      def five_=(value: CDouble): Unit = !(p + 24).asInstanceOf[Ptr[CDouble]] = value
-      def six: Ptr[struct_point] = (p + 32).asInstanceOf[Ptr[struct_point]]
-      def six_=(value: Ptr[struct_point]): Unit = !(p + 32).asInstanceOf[Ptr[struct_point]] = value
-      def seven: Ptr[struct_point] = !(p + 40).asInstanceOf[Ptr[Ptr[struct_point]]]
-      def seven_=(value: Ptr[struct_point]): Unit = !(p + 40).asInstanceOf[Ptr[Ptr[struct_point]]] = value
-      def eight: CInt = !(p + 48).asInstanceOf[Ptr[CInt]]
-      def eight_=(value: CInt): Unit = !(p + 48).asInstanceOf[Ptr[CInt]] = value
-      def nine: CInt = !(p + 52).asInstanceOf[Ptr[CInt]]
-      def nine_=(value: CInt): Unit = !(p + 52).asInstanceOf[Ptr[CInt]] = value
-      def ten: CInt = !(p + 56).asInstanceOf[Ptr[CInt]]
-      def ten_=(value: CInt): Unit = !(p + 56).asInstanceOf[Ptr[CInt]] = value
-      def eleven: CInt = !(p + 60).asInstanceOf[Ptr[CInt]]
-      def eleven_=(value: CInt): Unit = !(p + 60).asInstanceOf[Ptr[CInt]] = value
-      def twelve: CInt = !(p + 64).asInstanceOf[Ptr[CInt]]
-      def twelve_=(value: CInt): Unit = !(p + 64).asInstanceOf[Ptr[CInt]] = value
-      def thirteen: CInt = !(p + 68).asInstanceOf[Ptr[CInt]]
-      def thirteen_=(value: CInt): Unit = !(p + 68).asInstanceOf[Ptr[CInt]] = value
-      def fourteen: CInt = !(p + 72).asInstanceOf[Ptr[CInt]]
-      def fourteen_=(value: CInt): Unit = !(p + 72).asInstanceOf[Ptr[CInt]] = value
-      def fifteen: CInt = !(p + 76).asInstanceOf[Ptr[CInt]]
-      def fifteen_=(value: CInt): Unit = !(p + 76).asInstanceOf[Ptr[CInt]] = value
-      def sixteen: CInt = !(p + 80).asInstanceOf[Ptr[CInt]]
-      def sixteen_=(value: CInt): Unit = !(p + 80).asInstanceOf[Ptr[CInt]] = value
-      def seventeen: CInt = !(p + 84).asInstanceOf[Ptr[CInt]]
-      def seventeen_=(value: CInt): Unit = !(p + 84).asInstanceOf[Ptr[CInt]] = value
-      def eighteen: CInt = !(p + 88).asInstanceOf[Ptr[CInt]]
-      def eighteen_=(value: CInt): Unit = !(p + 88).asInstanceOf[Ptr[CInt]] = value
-      def nineteen: CInt = !(p + 92).asInstanceOf[Ptr[CInt]]
-      def nineteen_=(value: CInt): Unit = !(p + 92).asInstanceOf[Ptr[CInt]] = value
-      def twenty: CInt = !(p + 96).asInstanceOf[Ptr[CInt]]
-      def twenty_=(value: CInt): Unit = !(p + 96).asInstanceOf[Ptr[CInt]] = value
-      def twentyOne: CInt = !(p + 100).asInstanceOf[Ptr[CInt]]
-      def twentyOne_=(value: CInt): Unit = !(p + 100).asInstanceOf[Ptr[CInt]] = value
-      def twentyTwo: CInt = !(p + 104).asInstanceOf[Ptr[CInt]]
-      def twentyTwo_=(value: CInt): Unit = !(p + 104).asInstanceOf[Ptr[CInt]] = value
-      def twentyThree: CInt = !(p + 108).asInstanceOf[Ptr[CInt]]
-      def twentyThree_=(value: CInt): Unit = !(p + 108).asInstanceOf[Ptr[CInt]] = value
+      def two: CChar = !p.at(8).asInstanceOf[Ptr[CChar]]
+      def two_=(value: CChar): Unit = !p.at(8).asInstanceOf[Ptr[CChar]] = value
+      def three: CInt = !p.at(12).asInstanceOf[Ptr[CInt]]
+      def three_=(value: CInt): Unit = !p.at(12).asInstanceOf[Ptr[CInt]] = value
+      def four: CFloat = !p.at(16).asInstanceOf[Ptr[CFloat]]
+      def four_=(value: CFloat): Unit = !p.at(16).asInstanceOf[Ptr[CFloat]] = value
+      def five: CDouble = !p.at(24).asInstanceOf[Ptr[CDouble]]
+      def five_=(value: CDouble): Unit = !p.at(24).asInstanceOf[Ptr[CDouble]] = value
+      def six: Ptr[struct_point] = p.at(32).asInstanceOf[Ptr[struct_point]]
+      def six_=(value: Ptr[struct_point]): Unit = !p.at(32).asInstanceOf[Ptr[Ptr[struct_point]]] = value
+      def seven: Ptr[struct_point] = p.at(40).asInstanceOf[Ptr[struct_point]]
+      def seven_=(value: Ptr[struct_point]): Unit = !p.at(40).asInstanceOf[Ptr[Ptr[struct_point]]] = value
+      def eight: CInt = !p.at(48).asInstanceOf[Ptr[CInt]]
+      def eight_=(value: CInt): Unit = !p.at(48).asInstanceOf[Ptr[CInt]] = value
+      def nine: CInt = !p.at(52).asInstanceOf[Ptr[CInt]]
+      def nine_=(value: CInt): Unit = !p.at(52).asInstanceOf[Ptr[CInt]] = value
+      def ten: CInt = !p.at(56).asInstanceOf[Ptr[CInt]]
+      def ten_=(value: CInt): Unit = !p.at(56).asInstanceOf[Ptr[CInt]] = value
+      def eleven: CInt = !p.at(60).asInstanceOf[Ptr[CInt]]
+      def eleven_=(value: CInt): Unit = !p.at(60).asInstanceOf[Ptr[CInt]] = value
+      def twelve: CInt = !p.at(64).asInstanceOf[Ptr[CInt]]
+      def twelve_=(value: CInt): Unit = !p.at(64).asInstanceOf[Ptr[CInt]] = value
+      def thirteen: CInt = !p.at(68).asInstanceOf[Ptr[CInt]]
+      def thirteen_=(value: CInt): Unit = !p.at(68).asInstanceOf[Ptr[CInt]] = value
+      def fourteen: CInt = !p.at(72).asInstanceOf[Ptr[CInt]]
+      def fourteen_=(value: CInt): Unit = !p.at(72).asInstanceOf[Ptr[CInt]] = value
+      def fifteen: CInt = !p.at(76).asInstanceOf[Ptr[CInt]]
+      def fifteen_=(value: CInt): Unit = !p.at(76).asInstanceOf[Ptr[CInt]] = value
+      def sixteen: CInt = !p.at(80).asInstanceOf[Ptr[CInt]]
+      def sixteen_=(value: CInt): Unit = !p.at(80).asInstanceOf[Ptr[CInt]] = value
+      def seventeen: CInt = !p.at(84).asInstanceOf[Ptr[CInt]]
+      def seventeen_=(value: CInt): Unit = !p.at(84).asInstanceOf[Ptr[CInt]] = value
+      def eighteen: CInt = !p.at(88).asInstanceOf[Ptr[CInt]]
+      def eighteen_=(value: CInt): Unit = !p.at(88).asInstanceOf[Ptr[CInt]] = value
+      def nineteen: CInt = !p.at(92).asInstanceOf[Ptr[CInt]]
+      def nineteen_=(value: CInt): Unit = !p.at(92).asInstanceOf[Ptr[CInt]] = value
+      def twenty: CInt = !p.at(96).asInstanceOf[Ptr[CInt]]
+      def twenty_=(value: CInt): Unit = !p.at(96).asInstanceOf[Ptr[CInt]] = value
+      def twentyOne: CInt = !p.at(100).asInstanceOf[Ptr[CInt]]
+      def twentyOne_=(value: CInt): Unit = !p.at(100).asInstanceOf[Ptr[CInt]] = value
+      def twentyTwo: CInt = !p.at(104).asInstanceOf[Ptr[CInt]]
+      def twentyTwo_=(value: CInt): Unit = !p.at(104).asInstanceOf[Ptr[CInt]] = value
+      def twentyThree: CInt = !p.at(108).asInstanceOf[Ptr[CInt]]
+      def twentyThree_=(value: CInt): Unit = !p.at(108).asInstanceOf[Ptr[CInt]] = value
     }
 
     implicit class struct_anonymous_0_ops(val p: Ptr[struct_anonymous_0]) extends AnyVal {

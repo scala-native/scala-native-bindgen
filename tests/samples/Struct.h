@@ -79,6 +79,8 @@ char getIntFromAnonymousStruct(struct structWithAnonymousStruct *s);
 
 enum struct_op { STRUCT_SET, STRUCT_TEST };
 
+int struct_test_char(struct bigStruct *s, enum struct_op op, char value);
+int struct_test_int(struct bigStruct *s, enum struct_op op, int value);
 int struct_test_long(struct bigStruct *s, enum struct_op op, long value);
 int struct_test_double(struct bigStruct *s, enum struct_op op, double value);
 int struct_test_point(struct bigStruct *s, enum struct_op op,

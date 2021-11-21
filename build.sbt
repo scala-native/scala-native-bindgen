@@ -9,7 +9,7 @@ val scala211  = "2.11.12"
 val scala212  = "2.12.15"
 val scala213  = "2.13.7"
 val sbt1      = "1.3.13"
-val scalaTest = "3.2.4-M1"
+val scalaTest = "3.2.10"
 
 inThisBuild(
   Def.settings(
