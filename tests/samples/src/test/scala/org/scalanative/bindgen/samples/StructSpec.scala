@@ -1,11 +1,12 @@
 package org.scalanative.bindgen.samples
 
-import org.scalatest.FunSpec
-import scalanative.native._
+import org.scalatest.funspec.AnyFunSpec
+import scala.scalanative.unsafe._
+import scala.scalanative.unsigned._
 
 import org.scalanative.bindgen.samples.Struct.implicits._
 
-class StructSpec extends FunSpec {
+class StructSpec extends AnyFunSpec {
   describe("struct bindings") {
     it("should provide field getters and setters") {
       val point = Struct.createPoint()
@@ -58,8 +59,8 @@ class StructSpec extends FunSpec {
       Zone { implicit zone =>
         val anonymousStruct: Ptr[struct_anonymousStruct] =
           alloc[struct_anonymousStruct]
-        !anonymousStruct._1 = 'a'
-        !anonymousStruct._2 = 42
+        anonymousStruct._1 = 'a'
+        anonymousStruct._2 = 42
 
         val structWithAnonymousStruct =
           Struct.struct_structWithAnonymousStruct()
@@ -73,7 +74,8 @@ class StructSpec extends FunSpec {
     }
 
     it("should match size of C memory layout for big structs") {
-      assert(Struct.getBigStructSize() == sizeof[Struct.struct_bigStruct])
+      assert(
+        Struct.getBigStructSize().toULong == sizeof[Struct.struct_bigStruct])
     }
 
     it("should provide field getters for big structs") {
@@ -84,6 +86,20 @@ class StructSpec extends FunSpec {
                                   Struct.enum_struct_op.STRUCT_SET,
                                   value)
           assert(structPtr.one == value)
+        }
+
+        for (value <- Seq[Byte](Byte.MinValue, -1, 0, 1, Byte.MaxValue)) {
+          Struct.struct_test_char(structPtr,
+                                  Struct.enum_struct_op.STRUCT_SET,
+                                  value)
+          assert(structPtr.two == value)
+        }
+
+        for (value <- Seq(Int.MinValue, -1, 0, 1, Int.MaxValue)) {
+          Struct.struct_test_int(structPtr,
+                                 Struct.enum_struct_op.STRUCT_SET,
+                                 value)
+          assert(structPtr.three == value)
         }
 
         for (value <- Seq(Double.MinValue, -1, 0, 1, Double.MaxValue)) {
@@ -114,6 +130,22 @@ class StructSpec extends FunSpec {
             Struct.struct_test_long(structPtr,
                                     Struct.enum_struct_op.STRUCT_TEST,
                                     value) == 1)
+        }
+
+        for (value <- Seq[Byte](Byte.MinValue, -1, 0, 1, Byte.MaxValue)) {
+          structPtr.two = value
+          assert(
+            Struct.struct_test_char(structPtr,
+                                    Struct.enum_struct_op.STRUCT_TEST,
+                                    value) == 1)
+        }
+
+        for (value <- Seq(Int.MinValue, -1, 0, 1, Int.MaxValue)) {
+          structPtr.three = value
+          assert(
+            Struct.struct_test_int(structPtr,
+                                   Struct.enum_struct_op.STRUCT_TEST,
+                                   value) == 1)
         }
 
         for (value <- Seq(Double.MinValue, -1, 0, 1, Double.MaxValue)) {

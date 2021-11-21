@@ -1,5 +1,6 @@
 #include "Struct.h"
 #include <stdlib.h>
+#include <stdio.h>
 
 void setPoints(struct points *points, int x1, int y1, int x2, int y2) {
     points->p1.x = x1;
@@ -48,6 +49,26 @@ int struct_test_long(struct bigStruct *s, enum struct_op op, long value) {
     }
 }
 
+int struct_test_char(struct bigStruct *s, enum struct_op op, char value) {
+    switch (op) {
+    case STRUCT_SET:
+        s->two = value;
+        return 1;
+    case STRUCT_TEST:
+        return s->two == value;
+    }
+}
+
+int struct_test_int(struct bigStruct *s, enum struct_op op, int value) {
+    switch (op) {
+    case STRUCT_SET:
+        s->three = value;
+        return 1;
+    case STRUCT_TEST:
+        return s->three == value;
+    }
+}
+
 int struct_test_double(struct bigStruct *s, enum struct_op op, double value) {
     switch (op) {
     case STRUCT_SET:
@@ -65,6 +86,7 @@ int struct_test_point(struct bigStruct *s, enum struct_op op,
         s->six = *value;
         return 1;
     case STRUCT_TEST:
+        printf("s->six.x %d, value->x %d, s->six.y %d , value->y %d\n", s->six.x, value->x, s->six.y, value->y);
         return (s->six.x == value->x) && (s->six.y == value->y);
     }
 }

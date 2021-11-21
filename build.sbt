@@ -5,13 +5,11 @@ import BindingHelpers._
 
 addCommandAlias("verify", "; test ; ^scripted ; docs/makeSite")
 
-val Versions = new {
-  val scala210 = "2.10.6"
-  val scala211 = "2.11.12"
-  val scala212 = "2.12.6"
-  val sbt013   = "0.13.17"
-  val sbt1     = "1.1.6"
-}
+val scala211  = "2.11.12"
+val scala212  = "2.12.15"
+val scala213  = "2.13.7"
+val sbt1      = "1.3.13"
+val scalaTest = "3.2.10"
 
 inThisBuild(
   Def.settings(
@@ -27,7 +25,7 @@ inThisBuild(
       "-encoding",
       "utf8"
     ),
-    parallelExecution in Global := false,
+    Global / parallelExecution := false,
     scmInfo := Some(
       ScmInfo(url("https://github.com/scala-native/scala-native-bindgen"),
               "scm:git:git@github.com:scala-native/scala-native-bindgen.git")),
@@ -98,7 +96,7 @@ lazy val tests = project("tests")
       "*.h" || "*.scala",
       NothingFilter
     ),
-    libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % Test
+    libraryDependencies += "org.scalatest" %% "scalatest" % scalaTest % Test
   )
   .aggregate(samples)
 
@@ -106,15 +104,13 @@ lazy val samples = nativeProject("samples")
   .in(file("tests/samples"))
   .settings(
     publish / skip := true,
-    libraryDependencies += "org.scalatest" %%% "scalatest" % "3.2.0-SNAP10" % Test,
+    libraryDependencies += "org.scalatest" %%% "scalatest" % scalaTest % Test,
     compileTask("bindgentests", baseDirectory)
   )
 
 lazy val tools = project("tools")
   .settings(
-    crossScalaVersions := List(Versions.scala210,
-                               Versions.scala211,
-                               Versions.scala212)
+    crossScalaVersions := List(scala211, scala212, scala213)
   )
 
 lazy val sbtPlugin = project("sbt-scala-native-bindgen")
@@ -186,7 +182,7 @@ lazy val docs = nativeProject("docs")
     compileTask("vector", docsUsingBindingsDirectory),
     compileTask("geometry", docs3rdPartyBindingsDirectory),
     compileTask("wordcount", docsScalaNativeBindingsDirectory),
-    libraryDependencies += "org.scalatest" %%% "scalatest" % "3.2.0-SNAP10" % Test,
+    libraryDependencies += "org.scalatest" %%% "scalatest" % scalaTest % Test,
     Paradox / paradoxProperties ++= Map(
       "github.base_url" -> scmInfo.value.get.browseUrl.toString
     ),
@@ -204,7 +200,7 @@ lazy val docs = nativeProject("docs")
 lazy val bindings = project("bindings")
   .settings(
     publish / skip := true,
-    scalaVersion := Versions.scala211
+    scalaVersion := scala211
   )
   .aggregate(
     libiconv,
@@ -247,11 +243,10 @@ def project(name: String) = {
       versionWithGit,
       git.useGitDescribe := true,
       git.remoteRepo := scmInfo.value.get.connection.replace("scm:git:", ""),
-      crossSbtVersions := List(Versions.sbt013, Versions.sbt1),
+      crossSbtVersions := List(sbt1),
       scalaVersion := {
         (pluginCrossBuild / sbtBinaryVersion).value match {
-          case "0.13" => Versions.scala210
-          case _      => Versions.scala212
+          case _ => scala212
         }
       },
       bintrayOrganization := Some("scala-native-bindgen"),
@@ -268,7 +263,7 @@ def nativeProject(name: String) = {
   project(name)
     .enablePlugins(ScalaNativePlugin)
     .settings(
-      scalaVersion := Versions.scala211,
+      scalaVersion := scala211,
       nativeLinkStubs := true
     )
 }
@@ -340,7 +335,7 @@ def bindingProject(name: String, link: Option[String] = None)(
     .in(file(s"bindings/$name"))
     .settings(
       Keys.name := name,
-      libraryDependencies += "org.scalatest" %%% "scalatest" % "3.2.0-SNAP10" % Test,
+      libraryDependencies += "org.scalatest" %%% "scalatest" % scalaTest % Test,
       Compile / nativeBindgen / target := {
         packagePath.foldLeft((Compile / scalaSource).value)(_ / _)
       }
@@ -349,9 +344,20 @@ def bindingProject(name: String, link: Option[String] = None)(
       headers.flatMap(binding(name, packagePath.mkString("."), link)): _*)
 }
 
+/* /usr/include is not standard on macOS anymore
+ * The command below returns the path to the usr/include dir
+ * Example: /Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk
+ * Ref: https://apple.stackexchange.com/questions/337940/why-is-usr-include-missing-i-have-xcode-and-command-line-tools-installed-moja
+ */
+lazy val usrInclude = {
+  val isMac = scala.util.Properties.isMac
+  (if (isMac) "xcrun --show-sdk-path".!!.trim else "") + "/usr/include"
+}
+
 def binding(name: String, packageName: String, link: Option[String])(
     header: String): Seq[Setting[_]] = {
-  val includeDirs = Seq("/usr/include", "/usr/local/include")
+
+  val includeDirs = Seq(usrInclude, "/usr/local/include")
   val headerFiles = includeDirs.map(dir => file(dir) / header).filter(_.exists)
 
   headerFiles.headOption match {
