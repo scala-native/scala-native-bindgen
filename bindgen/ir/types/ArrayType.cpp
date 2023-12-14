@@ -6,8 +6,8 @@ ArrayType::ArrayType(std::shared_ptr<const Type> elementsType, uint64_t size)
     : size(size), elementsType(std::move(elementsType)) {}
 
 std::string ArrayType::str(const LocationManager &locationManager) const {
-    return "native.CArray[" + elementsType->str(locationManager) + ", " +
-           uint64ToScalaNat(size) + "]";
+    return "unsafe.CArray[" + elementsType->str(locationManager) + ", " +
+           std::to_string(size) + "]";
 }
 
 bool ArrayType::usesType(

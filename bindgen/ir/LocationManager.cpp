@@ -3,6 +3,7 @@
 #include "Enum.h"
 #include "Struct.h"
 #include <fstream>
+#include <sstream>
 #include <stdexcept>
 
 LocationManager::LocationManager(std::string mainHeaderPath)

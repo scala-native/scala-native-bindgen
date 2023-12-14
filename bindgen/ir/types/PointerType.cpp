@@ -5,7 +5,7 @@ PointerType::PointerType(std::shared_ptr<const Type> type)
     : type(std::move(type)) {}
 
 std::string PointerType::str(const LocationManager &locationManager) const {
-    return "native.Ptr[" + type->str(locationManager) + "]";
+    return "unsafe.Ptr[" + type->str(locationManager) + "]";
 }
 
 bool PointerType::usesType(

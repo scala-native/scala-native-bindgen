@@ -8,29 +8,29 @@ TypeTranslator::TypeTranslator(clang::ASTContext *ctx_, IR &ir)
 
     // Native Types
     typeMap["void"] = "Unit";
-    typeMap["bool"] = "native.CBool";
-    typeMap["_Bool"] = "native.CBool";
-    typeMap["char"] = "native.CChar";
-    typeMap["signed char"] = "native.CSignedChar";
-    typeMap["unsigned char"] = "native.CUnsignedChar";
-    typeMap["short"] = "native.CShort";
-    typeMap["unsigned short"] = "native.CUnsignedShort";
-    typeMap["int"] = "native.CInt";
-    typeMap["long int"] = "native.CLongInt";
-    typeMap["unsigned int"] = "native.CUnsignedInt";
-    typeMap["unsigned long int"] = "native.CUnsignedLongInt";
-    typeMap["long"] = "native.CLong";
-    typeMap["unsigned long"] = "native.CUnsignedLong";
-    typeMap["long long"] = "native.CLongLong";
-    typeMap["unsigned long long"] = "native.CUnsignedLongLong";
-    typeMap["size_t"] = "native.CSize";
-    typeMap["ptrdiff_t"] = "native.CPtrDiff";
-    typeMap["wchar_t"] = "native.CWideChar";
-    typeMap["char16_t"] = "native.CChar16";
-    typeMap["char32_t"] = "native.CChar32";
-    typeMap["float"] = "native.CFloat";
-    typeMap["double"] = "native.CDouble";
-    typeMap["long double"] = "native.CDouble";
+    typeMap["bool"] = "unsafe.CBool";
+    typeMap["_Bool"] = "unsafe.CBool";
+    typeMap["char"] = "unsafe.CChar";
+    typeMap["signed char"] = "unsafe.CSignedChar";
+    typeMap["unsigned char"] = "unsafe.CUnsignedChar";
+    typeMap["short"] = "unsafe.CShort";
+    typeMap["unsigned short"] = "unsafe.CUnsignedShort";
+    typeMap["int"] = "unsafe.CInt";
+    typeMap["long int"] = "unsafe.CLongInt";
+    typeMap["unsigned int"] = "unsafe.CUnsignedInt";
+    typeMap["unsigned long int"] = "unsafe.CUnsignedLongInt";
+    typeMap["long"] = "unsafe.CLong";
+    typeMap["unsigned long"] = "unsafe.CUnsignedLong";
+    typeMap["long long"] = "unsafe.CLongLong";
+    typeMap["unsigned long long"] = "unsafe.CUnsignedLongLong";
+    typeMap["size_t"] = "unsafe.CSize";
+    typeMap["ptrdiff_t"] = "unsafe.CPtrDiff";
+    typeMap["wchar_t"] = "unsafe.CWideChar";
+    typeMap["char16_t"] = "unsafe.CChar16";
+    typeMap["char32_t"] = "unsafe.CChar32";
+    typeMap["float"] = "unsafe.CFloat";
+    typeMap["double"] = "unsafe.CDouble";
+    typeMap["long double"] = "unsafe.CDouble";
 }
 
 std::shared_ptr<Type>
@@ -73,8 +73,8 @@ TypeTranslator::translatePointer(const clang::QualType &pte) {
         // Take care of char*
         if (as->getKind() == clang::BuiltinType::Char_S ||
             as->getKind() == clang::BuiltinType::SChar) {
-            // TODO: new PointerType(new PrimitiveType("native.CChar"))
-            return std::make_shared<PrimitiveType>("native.CString");
+            // TODO: new PointerType(new PrimitiveType("unsafe.CChar"))
+            return std::make_shared<PrimitiveType>("unsafe.CString");
         }
     }
 
@@ -188,13 +188,21 @@ std::shared_ptr<Location> TypeTranslator::getLocation(clang::Decl *decl) {
     return std::make_shared<Location>(path, lineNumber);
 }
 
+std::string getFieldName(const clang::FieldDecl *field) {
+    std::string name = field->getNameAsString();
+    if (name.empty()) {
+        name = "field" + std::to_string(field->getFieldIndex());
+    }
+    return name;
+}
+
 std::shared_ptr<TypeDef>
 TypeTranslator::addUnionDefinition(clang::RecordDecl *record,
                                    std::string name) {
     std::vector<std::shared_ptr<Field>> fields;
 
     for (const clang::FieldDecl *field : record->fields()) {
-        std::string fname = field->getNameAsString();
+        std::string fname = getFieldName(field);
         std::shared_ptr<Type> ftype = translate(field->getType());
 
         fields.push_back(std::make_shared<Field>(fname, ftype));
@@ -229,8 +237,8 @@ TypeTranslator::addStructDefinition(clang::RecordDecl *record,
         std::shared_ptr<Type> ftype = translate(field->getType());
         uint64_t recordOffsetInBits =
             recordLayout.getFieldOffset(field->getFieldIndex());
-        fields.push_back(std::make_shared<Field>(field->getNameAsString(),
-                                                 ftype, recordOffsetInBits));
+        fields.push_back(std::make_shared<Field>(getFieldName(field), ftype,
+                                                 recordOffsetInBits));
     }
 
     uint64_t sizeInBits = ctx->getTypeSize(record->getTypeForDecl());

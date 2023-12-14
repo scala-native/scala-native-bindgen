@@ -34,7 +34,7 @@ Struct::generateHelperClass(const LocationManager &locationManager) const {
     assert(hasHelperMethods());
     std::stringstream s;
     std::string type = replaceChar(getTypeName(), " ", "_");
-    s << "    implicit class " << type << "_ops(val p: native.Ptr[" << type
+    s << "    implicit class " << type << "_ops(val p: unsafe.Ptr[" << type
       << "])"
       << " extends AnyVal {\n";
     if (isRepresentedAsStruct()) {
@@ -89,7 +89,7 @@ std::string Struct::getTypeName() const { return "struct " + name; }
 
 std::string Struct::str(const LocationManager &locationManager) const {
     std::stringstream ss;
-    ss << "native.CStruct" << std::to_string(fields.size()) << "[";
+    ss << "unsafe.CStruct" << std::to_string(fields.size()) << "[";
 
     std::string sep = "";
     for (const auto &field : fields) {
@@ -136,12 +136,11 @@ std::string Struct::generateSetterForStructRepresentation(
         /* field type is changed to avoid cyclic types in generated code */
         std::shared_ptr<const Type> typeReplacement = getTypeReplacement(
             field->getType(), structTypesThatShouldBeReplaced);
-        value = value + ".cast[" + typeReplacement->str(locationManager) + "]";
-    } else if (isArrayOrRecord(field->getType())) {
-        value = "!" + value;
+        value = value + ".asInstanceOf[" +
+                typeReplacement->str(locationManager) + "]";
     }
     std::stringstream s;
-    s << "      def " << setter << "(value: " + parameterType + "): Unit = !p._"
+    s << "      def " << setter << "(value: " + parameterType + "): Unit = p._"
       << std::to_string(fieldIndex + 1) << " = " << value << "\n";
     return s.str();
 }
@@ -154,12 +153,13 @@ std::string Struct::generateGetterForStructRepresentation(
         wrapArrayOrRecordInPointer(field->getType())->str(locationManager);
     std::string methodBody = "p._" + std::to_string(fieldIndex + 1);
     if (!isArrayOrRecord(field->getType())) {
-        methodBody = "!" + methodBody;
         if (!shouldFieldBreakCycle(field).empty()) {
             /* field type is changed to avoid cyclic types in generated code */
-            methodBody = "(" + methodBody + ").cast[" +
+            methodBody = "(" + methodBody + ").asInstanceOf[" +
                          field->getType()->str(locationManager) + "]";
         }
+    } else {
+        methodBody = "p.at" + std::to_string(fieldIndex + 1);
     }
     std::stringstream s;
     s << "      def " << getter << ": " << returnType << " = " << methodBody
@@ -186,7 +186,7 @@ std::string Struct::generateSetterForArrayRepresentation(
         castedField =
             "(" + castedField + " + " + std::to_string(offsetInBytes) + ")";
     }
-    castedField = "!" + castedField + ".cast[" +
+    castedField = "!" + castedField + ".asInstanceOf[" +
                   pointerToFieldType.str(locationManager) + "]";
     std::vector<std::shared_ptr<const Struct>> structTypesThatShouldBeReplaced =
         shouldFieldBreakCycle(field);
@@ -194,7 +194,8 @@ std::string Struct::generateSetterForArrayRepresentation(
         /* field type is changed to avoid cyclic types in generated code */
         std::shared_ptr<const Type> typeReplacement = getTypeReplacement(
             field->getType(), structTypesThatShouldBeReplaced);
-        value = value + ".cast[" + typeReplacement->str(locationManager) + "]";
+        value = value + ".asInstanceOf[" +
+                typeReplacement->str(locationManager) + "]";
     } else if (isArrayOrRecord(field->getType())) {
         value = "!" + value;
     }
@@ -220,14 +221,14 @@ std::string Struct::generateGetterForArrayRepresentation(
     } else {
         methodBody = "p._1";
     }
-    methodBody =
-        methodBody + ".cast[" + pointerToFieldType.str(locationManager) + "]";
+    methodBody = methodBody + ".asInstanceOf[" +
+                 pointerToFieldType.str(locationManager) + "]";
 
     if (!isArrayOrRecord(field->getType())) {
         methodBody = "!" + methodBody;
         if (!shouldFieldBreakCycle(field).empty()) {
             /* field type is changed to avoid cyclic types in generated code */
-            methodBody = "(" + methodBody + ").cast[" +
+            methodBody = "(" + methodBody + ").asInstanceOf[" +
                          field->getType()->str(locationManager) + "]";
         }
     }
@@ -262,7 +263,7 @@ Struct::getTypeReplacement(std::shared_ptr<const Type> type,
              * value type */
             replacementType = replacementType->replaceType(
                 recordTypeDef,
-                std::make_shared<PrimitiveType>("native.CStruct0"));
+                std::make_shared<PrimitiveType>("unsafe.CStruct0"));
         }
     }
     return replacementType;
@@ -350,8 +351,8 @@ Struct::getConstructorHelper(const LocationManager &locationManager) const {
       << "    import implicits._\n";
 
     /* constructor with no parameters */
-    s << "    def apply()(implicit z: native.Zone): native.Ptr[" + type + "]"
-      << " = native.alloc[" + type + "]\n";
+    s << "    def apply()(implicit z: unsafe.Zone): unsafe.Ptr[" + type + "]"
+      << " = unsafe.alloc[" + type + "]()\n";
 
     /* constructor that initializes all fields */
     s << "    def apply(";
@@ -361,8 +362,8 @@ Struct::getConstructorHelper(const LocationManager &locationManager) const {
           << wrapArrayOrRecordInPointer(field->getType())->str(locationManager);
         sep = ", ";
     }
-    s << ")(implicit z: native.Zone): native.Ptr[" << type << "] = {\n"
-      << "      val ptr = native.alloc[" << type << "]\n";
+    s << ")(implicit z: unsafe.Zone): unsafe.Ptr[" << type << "] = {\n"
+      << "      val ptr = unsafe.alloc[" << type << "]()\n";
     for (const auto &field : fields) {
         std::string name = handleReservedWords(field->getName());
         s << "      ptr." << name << " = " << name << "\n";
