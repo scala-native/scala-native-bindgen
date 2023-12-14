@@ -34,7 +34,7 @@ Struct::generateHelperClass(const LocationManager &locationManager) const {
     assert(hasHelperMethods());
     std::stringstream s;
     std::string type = replaceChar(getTypeName(), " ", "_");
-    s << "    implicit class " << type << "_ops(val p: native.Ptr[" << type
+    s << "    implicit class " << type << "_ops(val p: unsafe.Ptr[" << type
       << "])"
       << " extends AnyVal {\n";
     if (isRepresentedAsStruct()) {
@@ -89,7 +89,7 @@ std::string Struct::getTypeName() const { return "struct " + name; }
 
 std::string Struct::str(const LocationManager &locationManager) const {
     std::stringstream ss;
-    ss << "native.CStruct" << std::to_string(fields.size()) << "[";
+    ss << "unsafe.CStruct" << std::to_string(fields.size()) << "[";
 
     std::string sep = "";
     for (const auto &field : fields) {
@@ -262,7 +262,7 @@ Struct::getTypeReplacement(std::shared_ptr<const Type> type,
              * value type */
             replacementType = replacementType->replaceType(
                 recordTypeDef,
-                std::make_shared<PrimitiveType>("native.CStruct0"));
+                std::make_shared<PrimitiveType>("unsafe.CStruct0"));
         }
     }
     return replacementType;
@@ -350,8 +350,8 @@ Struct::getConstructorHelper(const LocationManager &locationManager) const {
       << "    import implicits._\n";
 
     /* constructor with no parameters */
-    s << "    def apply()(implicit z: native.Zone): native.Ptr[" + type + "]"
-      << " = native.alloc[" + type + "]\n";
+    s << "    def apply()(implicit z: unsafe.Zone): unsafe.Ptr[" + type + "]"
+      << " = unsafe.alloc[" + type + "]\n";
 
     /* constructor that initializes all fields */
     s << "    def apply(";
@@ -361,8 +361,8 @@ Struct::getConstructorHelper(const LocationManager &locationManager) const {
           << wrapArrayOrRecordInPointer(field->getType())->str(locationManager);
         sep = ", ";
     }
-    s << ")(implicit z: native.Zone): native.Ptr[" << type << "] = {\n"
-      << "      val ptr = native.alloc[" << type << "]\n";
+    s << ")(implicit z: unsafe.Zone): unsafe.Ptr[" << type << "] = {\n"
+      << "      val ptr = unsafe.alloc[" << type << "]\n";
     for (const auto &field : fields) {
         std::string name = handleReservedWords(field->getName());
         s << "      ptr." << name << " = " << name << "\n";

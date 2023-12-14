@@ -30,11 +30,11 @@ std::string Enum::getEnumerators() const {
 
 std::string Enum::getTypeCastSuffix() const {
     std::string primitiveType = PrimitiveType::getType();
-    if (primitiveType == "native.CLong") {
+    if (primitiveType == "unsafe.CLong") {
         return "L";
-    } else if (primitiveType == "native.CUnsignedInt") {
+    } else if (primitiveType == "unsafe.CUnsignedInt") {
         return ".toUInt";
-    } else if (primitiveType == "native.CUnsignedLong") {
+    } else if (primitiveType == "unsafe.CUnsignedLong") {
         return "L.toULong";
     }
     return "";

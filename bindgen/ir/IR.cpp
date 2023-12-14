@@ -104,14 +104,14 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &s, const IR &ir) {
     }
 
     s << "import scala.scalanative._\n"
-      << "import scala.scalanative.native._\n\n";
+      << "import scala.scalanative.unsafe._\n\n";
 
     if (!ir.functions.empty() || !ir.varDefines.empty() ||
         !ir.variables.empty()) {
         if (!ir.linkName.empty()) {
-            s << "@native.link(\"" << ir.linkName << "\")\n";
+            s << "@unsafe.link(\"" << ir.linkName << "\")\n";
         }
-        s << "@native.extern\n";
+        s << "@unsafe.extern\n";
     }
     s << "object " << handleReservedWords(ir.objectName) << " {\n";
 
