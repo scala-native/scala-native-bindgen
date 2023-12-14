@@ -5,23 +5,6 @@
 #include "ir/types/Type.h"
 #include <clang/AST/AST.h>
 
-inline std::string uint64ToScalaNat(uint64_t v, std::string accumulator = "") {
-    if (v == 0)
-        return accumulator;
-
-    auto last_digit = v % 10;
-    auto rest = v / 10;
-
-    if (accumulator.empty()) {
-        return uint64ToScalaNat(rest,
-                                "native.Nat._" + std::to_string(last_digit));
-    } else {
-        return uint64ToScalaNat(rest, "native.Nat.Digit[native.Nat._" +
-                                          std::to_string(last_digit) + ", " +
-                                          accumulator + "]");
-    }
-}
-
 static std::array<std::string, 39> reserved_words = {
     {"abstract",  "case",    "catch",    "class",    "def",     "do",
      "else",      "extends", "false",    "final",    "finally", "for",

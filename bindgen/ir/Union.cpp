@@ -72,7 +72,7 @@ Union::generateGetter(const std::shared_ptr<Field> &field,
     std::string getter = handleReservedWords(field->getName());
     std::string ftype = field->getType()->str(locationManager);
     return "      def " + getter + ": unsafe.Ptr[" + ftype +
-           "] = p.cast[unsafe.Ptr[" + ftype + "]]\n";
+           "] = p.asInstanceOf[unsafe.Ptr[" + ftype + "]]\n";
 }
 
 std::string
@@ -83,8 +83,8 @@ Union::generateSetter(const std::shared_ptr<Field> &field,
     if (isAliasForType<ArrayType>(field->getType().get()) ||
         isAliasForType<Struct>(field->getType().get())) {
         return "      def " + setter + "(value: unsafe.Ptr[" + ftype +
-               "]): Unit = !p.cast[unsafe.Ptr[" + ftype + "]] = !value\n";
+               "]): Unit = !p.asInstanceOf[unsafe.Ptr[" + ftype + "]] = !value\n";
     }
     return "      def " + setter + "(value: " + ftype +
-           "): Unit = !p.cast[unsafe.Ptr[" + ftype + "]] = value\n";
+           "): Unit = !p.asInstanceOf[unsafe.Ptr[" + ftype + "]] = value\n";
 }

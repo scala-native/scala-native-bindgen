@@ -136,12 +136,10 @@ std::string Struct::generateSetterForStructRepresentation(
         /* field type is changed to avoid cyclic types in generated code */
         std::shared_ptr<const Type> typeReplacement = getTypeReplacement(
             field->getType(), structTypesThatShouldBeReplaced);
-        value = value + ".cast[" + typeReplacement->str(locationManager) + "]";
-    } else if (isArrayOrRecord(field->getType())) {
-        value = "!" + value;
+        value = value + ".asInstanceOf[" + typeReplacement->str(locationManager) + "]";
     }
     std::stringstream s;
-    s << "      def " << setter << "(value: " + parameterType + "): Unit = !p._"
+    s << "      def " << setter << "(value: " + parameterType + "): Unit = p._"
       << std::to_string(fieldIndex + 1) << " = " << value << "\n";
     return s.str();
 }
@@ -154,12 +152,13 @@ std::string Struct::generateGetterForStructRepresentation(
         wrapArrayOrRecordInPointer(field->getType())->str(locationManager);
     std::string methodBody = "p._" + std::to_string(fieldIndex + 1);
     if (!isArrayOrRecord(field->getType())) {
-        methodBody = "!" + methodBody;
         if (!shouldFieldBreakCycle(field).empty()) {
             /* field type is changed to avoid cyclic types in generated code */
-            methodBody = "(" + methodBody + ").cast[" +
+            methodBody = "(" + methodBody + ").asInstanceOf[" +
                          field->getType()->str(locationManager) + "]";
         }
+    } else {
+        methodBody = "p.at" + std::to_string(fieldIndex + 1);
     }
     std::stringstream s;
     s << "      def " << getter << ": " << returnType << " = " << methodBody
@@ -186,7 +185,7 @@ std::string Struct::generateSetterForArrayRepresentation(
         castedField =
             "(" + castedField + " + " + std::to_string(offsetInBytes) + ")";
     }
-    castedField = "!" + castedField + ".cast[" +
+    castedField = "!" + castedField + ".asInstanceOf[" +
                   pointerToFieldType.str(locationManager) + "]";
     std::vector<std::shared_ptr<const Struct>> structTypesThatShouldBeReplaced =
         shouldFieldBreakCycle(field);
@@ -194,7 +193,7 @@ std::string Struct::generateSetterForArrayRepresentation(
         /* field type is changed to avoid cyclic types in generated code */
         std::shared_ptr<const Type> typeReplacement = getTypeReplacement(
             field->getType(), structTypesThatShouldBeReplaced);
-        value = value + ".cast[" + typeReplacement->str(locationManager) + "]";
+        value = value + ".asInstanceOf[" + typeReplacement->str(locationManager) + "]";
     } else if (isArrayOrRecord(field->getType())) {
         value = "!" + value;
     }
@@ -221,13 +220,13 @@ std::string Struct::generateGetterForArrayRepresentation(
         methodBody = "p._1";
     }
     methodBody =
-        methodBody + ".cast[" + pointerToFieldType.str(locationManager) + "]";
+        methodBody + ".asInstanceOf[" + pointerToFieldType.str(locationManager) + "]";
 
     if (!isArrayOrRecord(field->getType())) {
         methodBody = "!" + methodBody;
         if (!shouldFieldBreakCycle(field).empty()) {
             /* field type is changed to avoid cyclic types in generated code */
-            methodBody = "(" + methodBody + ").cast[" +
+            methodBody = "(" + methodBody + ").asInstanceOf[" +
                          field->getType()->str(locationManager) + "]";
         }
     }
