@@ -237,8 +237,8 @@ TypeTranslator::addStructDefinition(clang::RecordDecl *record,
         std::shared_ptr<Type> ftype = translate(field->getType());
         uint64_t recordOffsetInBits =
             recordLayout.getFieldOffset(field->getFieldIndex());
-        fields.push_back(std::make_shared<Field>(getFieldName(field),
-                                                 ftype, recordOffsetInBits));
+        fields.push_back(std::make_shared<Field>(getFieldName(field), ftype,
+                                                 recordOffsetInBits));
     }
 
     uint64_t sizeInBits = ctx->getTypeSize(record->getTypeForDecl());

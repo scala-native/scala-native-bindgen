@@ -3,8 +3,8 @@
 #include "Enum.h"
 #include "Struct.h"
 #include <fstream>
-#include <stdexcept>
 #include <sstream>
+#include <stdexcept>
 
 LocationManager::LocationManager(std::string mainHeaderPath)
     : mainHeaderPath(std::move(mainHeaderPath)) {}

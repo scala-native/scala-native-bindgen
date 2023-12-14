@@ -27,8 +27,9 @@ bool Record::usesType(
     visitedTypes.push_back(shared_from_this());
 
     for (const auto &field : fields) {
-        if (field->getType() && (*field->getType() == *type ||
-            field->getType()->usesType(type, stopOnTypeDefs, visitedTypes))) {
+        if (field->getType() &&
+            (*field->getType() == *type ||
+             field->getType()->usesType(type, stopOnTypeDefs, visitedTypes))) {
             visitedTypes.pop_back();
             return true;
         }

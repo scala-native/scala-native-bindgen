@@ -136,7 +136,8 @@ std::string Struct::generateSetterForStructRepresentation(
         /* field type is changed to avoid cyclic types in generated code */
         std::shared_ptr<const Type> typeReplacement = getTypeReplacement(
             field->getType(), structTypesThatShouldBeReplaced);
-        value = value + ".asInstanceOf[" + typeReplacement->str(locationManager) + "]";
+        value = value + ".asInstanceOf[" +
+                typeReplacement->str(locationManager) + "]";
     }
     std::stringstream s;
     s << "      def " << setter << "(value: " + parameterType + "): Unit = p._"
@@ -193,7 +194,8 @@ std::string Struct::generateSetterForArrayRepresentation(
         /* field type is changed to avoid cyclic types in generated code */
         std::shared_ptr<const Type> typeReplacement = getTypeReplacement(
             field->getType(), structTypesThatShouldBeReplaced);
-        value = value + ".asInstanceOf[" + typeReplacement->str(locationManager) + "]";
+        value = value + ".asInstanceOf[" +
+                typeReplacement->str(locationManager) + "]";
     } else if (isArrayOrRecord(field->getType())) {
         value = "!" + value;
     }
@@ -219,8 +221,8 @@ std::string Struct::generateGetterForArrayRepresentation(
     } else {
         methodBody = "p._1";
     }
-    methodBody =
-        methodBody + ".asInstanceOf[" + pointerToFieldType.str(locationManager) + "]";
+    methodBody = methodBody + ".asInstanceOf[" +
+                 pointerToFieldType.str(locationManager) + "]";
 
     if (!isArrayOrRecord(field->getType())) {
         methodBody = "!" + methodBody;

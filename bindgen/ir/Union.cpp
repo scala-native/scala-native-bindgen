@@ -83,7 +83,8 @@ Union::generateSetter(const std::shared_ptr<Field> &field,
     if (isAliasForType<ArrayType>(field->getType().get()) ||
         isAliasForType<Struct>(field->getType().get())) {
         return "      def " + setter + "(value: unsafe.Ptr[" + ftype +
-               "]): Unit = !p.asInstanceOf[unsafe.Ptr[" + ftype + "]] = !value\n";
+               "]): Unit = !p.asInstanceOf[unsafe.Ptr[" + ftype +
+               "]] = !value\n";
     }
     return "      def " + setter + "(value: " + ftype +
            "): Unit = !p.asInstanceOf[unsafe.Ptr[" + ftype + "]] = value\n";
