@@ -350,7 +350,7 @@ Struct::getConstructorHelper(const LocationManager &locationManager) const {
 
     /* constructor with no parameters */
     s << "    def apply()(implicit z: unsafe.Zone): unsafe.Ptr[" + type + "]"
-      << " = unsafe.alloc[" + type + "]\n";
+      << " = unsafe.alloc[" + type + "]()\n";
 
     /* constructor that initializes all fields */
     s << "    def apply(";
@@ -361,7 +361,7 @@ Struct::getConstructorHelper(const LocationManager &locationManager) const {
         sep = ", ";
     }
     s << ")(implicit z: unsafe.Zone): unsafe.Ptr[" << type << "] = {\n"
-      << "      val ptr = unsafe.alloc[" << type << "]\n";
+      << "      val ptr = unsafe.alloc[" << type << "]()\n";
     for (const auto &field : fields) {
         std::string name = handleReservedWords(field->getName());
         s << "      ptr." << name << " = " << name << "\n";
