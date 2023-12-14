@@ -188,13 +188,21 @@ std::shared_ptr<Location> TypeTranslator::getLocation(clang::Decl *decl) {
     return std::make_shared<Location>(path, lineNumber);
 }
 
+std::string getFieldName(const clang::FieldDecl *field) {
+    std::string name = field->getNameAsString();
+    if (name.empty()) {
+        name = "field" + std::to_string(field->getFieldIndex());
+    }
+    return name;
+}
+
 std::shared_ptr<TypeDef>
 TypeTranslator::addUnionDefinition(clang::RecordDecl *record,
                                    std::string name) {
     std::vector<std::shared_ptr<Field>> fields;
 
     for (const clang::FieldDecl *field : record->fields()) {
-        std::string fname = field->getNameAsString();
+        std::string fname = getFieldName(field);
         std::shared_ptr<Type> ftype = translate(field->getType());
 
         fields.push_back(std::make_shared<Field>(fname, ftype));
@@ -229,7 +237,7 @@ TypeTranslator::addStructDefinition(clang::RecordDecl *record,
         std::shared_ptr<Type> ftype = translate(field->getType());
         uint64_t recordOffsetInBits =
             recordLayout.getFieldOffset(field->getFieldIndex());
-        fields.push_back(std::make_shared<Field>(field->getNameAsString(),
+        fields.push_back(std::make_shared<Field>(getFieldName(field),
                                                  ftype, recordOffsetInBits));
     }
 
