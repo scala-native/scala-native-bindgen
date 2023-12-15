@@ -3,13 +3,24 @@ on:
   pull_request:
 
 jobs:
-  build:
+  lint-check:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Check formatting
+      run: |
+        clang-format --version
+        scripts/scalafmt --test
+        scripts/clangfmt --test
+
+  bindgen-tests:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        TEST_ENV: [ubuntu-18.04-llvm-5.0, ubuntu-18.04-llvm-6.0, formatting]       
-  
+        TEST_ENV: [ubuntu-18.04-llvm-5.0, ubuntu-18.04-llvm-6.0]       
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
@@ -29,10 +40,3 @@ jobs:
           find . -name target | xargs sudo rm -rf;
           scripts/docker-test.sh;
         fi
-
-    - name: Check formatting
-      if: matrix.TEST_ENV == 'formatting'
-      run: |
-        clang-format --version
-        scripts/scalafmt --test
-        scripts/clangfmt --test
