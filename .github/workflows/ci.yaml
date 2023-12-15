@@ -1,0 +1,42 @@
+name: Run tests
+on:
+  pull_request:
+
+jobs:
+  lint-check:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Check formatting
+      run: |
+        clang-format --version
+        scripts/scalafmt --test
+        scripts/clangfmt --test
+
+  bindgen-tests:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        TEST_ENV: [ubuntu-18.04-llvm-5.0, ubuntu-18.04-llvm-6.0]       
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Docker Compose
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y docker-compose
+
+    - name: Build and run tests
+      run: |
+        docker-compose build ${{ matrix.TEST_ENV }}
+        docker-compose run ${{ matrix.TEST_ENV }}
+        if [[ "${{ matrix.TEST_ENV }}" = *llvm-6.0 ]]; then
+          export VERSION="${{ github.sha }}";
+          docker-compose build bindgen;
+          find . -name target | xargs sudo rm -rf;
+          scripts/docker-test.sh;
+        fi
