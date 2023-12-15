@@ -8,7 +8,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        TEST_ENV: [ubuntu-18.04-llvm-5.0, ubuntu-18.04-llvm-6.0. formatting]       
+        TEST_ENV: [ubuntu-18.04-llvm-5.0, ubuntu-18.04-llvm-6.0, formatting]       
   
     steps:
     - name: Checkout code
